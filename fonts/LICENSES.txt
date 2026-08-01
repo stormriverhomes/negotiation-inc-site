@@ -1,0 +1,4 @@
+Fraunces — SIL Open Font License 1.1 — https://github.com/undercasetype/Fraunces
+JetBrains Mono — SIL Open Font License 1.1 — https://github.com/JetBrains/JetBrainsMono
+Self-hosted on purpose: same-origin means no third-party round trip before
+first paint and no visitor IP handed to a font CDN.
