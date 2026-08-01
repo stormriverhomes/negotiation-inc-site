@@ -1,0 +1,257 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>See how it works · Negotiation Inc</title>
+<meta name="description" content="Five properties that do not exist, each with a different right answer. Open one and the real software prices every exit against it. No account.">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE DEMO FLOOR.
+
+   The old front door offered the tool for free and hoped a stranger would type
+   an address into an empty sheet. Almost nobody does: the first screen of an
+   underwriting tool asks for the two hardest numbers in the job, and a person
+   who has neither yet leaves.
+
+   So the invitation changed. Five houses that do not exist, each already
+   carrying comps, a condition read and a seller — and each with a DIFFERENT
+   right answer, because the thesis of the whole product is that the exit moves
+   the price more than the haggling does. Click one and the real software opens
+   on it. Nothing is mocked; the only fiction is the property.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --page:#f7f8fa; --card:#fff; --ink:#101725; --mid:#4a5162; --soft:#677187;
+  --line:#e8ebf1; --line-ink:#d3d9e3; --wash:#f7f8fa;
+  --blue:#1f5fd0; --blue-deep:#173f8a; --blue-soft:#e9effb;
+  --green:#177a4d; --est:#5f6b82;
+  --r-btn:9px; --r-card:14px; --r-pill:999px;
+  --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--sans);background:var(--page);color:var(--ink);font-size:15px;
+ line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--blue)}
+.wrap{max-width:1080px;margin:0 auto;padding:26px 20px 80px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+ padding-bottom:14px;border-bottom:3px solid var(--ink)}
+.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:inherit}
+.mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.11em}
+.mark .inc{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--soft)}
+.marksub{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-top:4px}
+nav{display:flex;gap:16px;font-size:13px;flex-wrap:wrap}
+nav a{text-decoration:none;color:var(--mid)}
+nav a:hover{color:var(--ink)}
+nav a.acct{border:1.5px solid var(--line-ink);border-radius:var(--r-btn);padding:5px 12px;
+ color:var(--ink);font-weight:650}
+
+h1{font-family:var(--serif);font-size:38px;font-weight:700;letter-spacing:-.018em;
+ margin-top:30px;line-height:1.1}
+.lede{font-size:16.5px;color:var(--mid);margin-top:11px;max-width:62ch}
+.lede b{color:var(--ink);font-weight:650}
+.trust{display:flex;gap:22px;flex-wrap:wrap;font-size:11.5px;color:var(--soft);margin-top:14px}
+.trust b{color:var(--ink);font-weight:700}
+
+.floor{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:28px}
+.deal{display:flex;flex-direction:column;text-align:left;background:var(--card);
+ border:1px solid var(--line-ink);border-radius:var(--r-card);overflow:hidden;cursor:pointer;
+ text-decoration:none;color:inherit;font-family:inherit;padding:0;
+ transition:border-color .14s,box-shadow .14s,transform .14s}
+.deal:hover{border-color:var(--blue);box-shadow:0 6px 22px rgba(16,23,37,.10);transform:translateY(-2px)}
+.deal:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.deal canvas{display:block;width:100%;height:158px;image-rendering:pixelated;background:#101725}
+.deal .b{padding:15px 17px 17px;flex:1;display:flex;flex-direction:column}
+.deal .tag{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)}
+.deal h2{font-family:var(--serif);font-size:21px;font-weight:700;margin-top:3px}
+.deal .ad{font-size:12.5px;color:var(--soft);margin-top:1px}
+.deal p{font-size:13.5px;color:var(--mid);margin-top:9px;line-height:1.5;flex:1}
+.deal .fig{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
+.deal .fig div{font-size:11px;color:var(--soft)}
+.deal .fig b{display:block;font-family:var(--serif);font-size:16px;font-weight:700;color:var(--ink);
+ font-variant-numeric:tabular-nums}
+.deal .go{margin-top:12px;font-size:13.5px;font-weight:650;color:var(--blue)}
+
+.note{margin-top:30px;border:1px solid var(--line);border-radius:var(--r-card);background:#fff;
+ padding:18px 20px}
+.note .t{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.note p{font-size:14px;color:var(--mid);margin-top:7px;max-width:76ch;line-height:1.6}
+.note b{color:var(--ink);font-weight:650}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{display:inline-flex;align-items:center;font-family:inherit;font-size:14.5px;font-weight:650;
+ padding:11px 18px;border:1px solid var(--line-ink);border-radius:var(--r-btn);background:#fff;
+ color:var(--ink);text-decoration:none;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+.btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.p:hover{background:var(--blue-deep);border-color:var(--blue-deep)}
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);display:flex;gap:18px;
+ flex-wrap:wrap;font-size:12.5px;color:var(--soft)}
+footer a{color:var(--mid);text-decoration:none}
+@media (max-width:640px){ h1{font-size:29px} }
+</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Fraunces ships its "wonk" letterforms on by default — the single-storey f
+   and its friends. They read as a novelty at body sizes and Elijah clipped
+   them immediately. WONK 0 keeps the face and drops the party trick. */
+@font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
+ font-weight:100 900;font-style:normal;font-display:swap;
+ font-variation-settings:'WONK' 0}
+:root{
+ --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
+ /* NO MONOSPACE ANYWHERE IN THE SOFTWARE. Small letterspaced caps set in a
+    monospace face is the single most recognisable "an AI made this" tell on
+    the internet right now, and it was on every label we shipped. The eyebrows
+    keep their letterspacing; they lose the typewriter. Tabular figures come
+    from font-feature-settings instead, which is what they were always for.
+    (The arcade keeps its own type. It is a different world on purpose.) */
+ --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif !important;
+}
+.mono,.num,[class*="fig"],[class*="num"]{font-variant-numeric:tabular-nums}
+h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:title" content="See how it works · Negotiation Inc">
+<meta property="og:description" content="Five properties that do not exist, each with a different right answer. Open one and the real software prices every exit against it.">
+<meta name="twitter:card" content="summary">
+</head><body>
+<div class="wrap">
+<header>
+ <div>
+  <a class="mark" href="index.html" title="Negotiation Inc"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+  <div class="marksub">See how it works</div>
+ </div>
+ <nav>
+  <a href="desk.html">The desk</a>
+  <a href="arcade.html">Arcade</a>
+  <a href="plans.html">Plans</a>
+  <a class="acct" href="office.html">Sign in</a>
+ </nav>
+</header>
+
+<h1>Five houses. Five different right answers.</h1>
+<p class="lede">Each one opens the real software with the work already done — comparable sales
+ scored, condition read, seller placed. <b>Nothing here is a mock-up.</b> Move any slider and it
+ re-prices, because it is the same arithmetic a paying customer runs. The only fiction is the
+ property.</p>
+<div class="trust">
+ <div><b>No account</b> to look</div>
+ <div><b>Nothing</b> leaves your browser</div>
+ <div><b>Every number</b> shows its working</div>
+</div>
+
+<div class="floor" id="floor"></div>
+
+<div class="note">
+ <div class="t">Why five</div>
+ <p>Because the whole argument of this product is in the difference between them. The same
+  house is worth a different maximum under every exit, and the gap between the best exit and
+  the obvious one is usually the entire margin. A calculator that answers <b>one</b> of these
+  questions will confidently give you the wrong number on four of these five properties —
+  not because its arithmetic is wrong, but because it was answering a question you had not
+  established was the right one.</p>
+ <div class="cta">
+  <a class="btn p" href="desk.html">Price your own property →</a>
+  <a class="btn" href="plans.html">What a workspace adds</a>
+ </div>
+</div>
+
+<footer>
+ <a href="index.html">Home</a><a href="desk.html">The desk</a><a href="arcade.html">The arcade</a>
+ <span style="margin-left:auto">Negotiation Inc · the sheet shows its working</span>
+</footer>
+</div>
+
+<script>
+'use strict';
+/* ── the houses, drawn ───────────────────────────────────────────────────────
+   Same approach as the arcade's cabinets: the art is generated from the deal
+   rather than fetched, so a scenario's condition is literally visible. Heavy
+   repairs board the windows and tarp the roof; a rental gets a second door; the
+   walk-away gets weeds and a sign that has been up too long. */
+const DEALS = [
+ { key:'flip', tag:'A flip', name:'The tired ranch', addr:'1104 Elm Street',
+   ask:168000, arv:296000, wear:0.82, doors:1, sky:['#1b2b45','#223760'],
+   p:'Everything is original and the kitchen is two owners old. The seller has already made an offer on the next place, so the clock is theirs, not yours.' },
+ { key:'hold', tag:'A rental', name:'The paying duplex', addr:'77 Ostend Street',
+   ask:188000, arv:236000, wear:0.28, doors:2, tall:true, sky:['#1c3130','#264441'],
+   p:'Tenants in place and paying on the first. A retiring landlord thinning the portfolio, in no hurry at all — which changes what your terms are worth.' },
+ { key:'subto', tag:'A subject-to', name:'Behind on a 2021 loan', addr:'318 Sells Avenue',
+   ask:268000, arv:279000, wear:0.30, doors:1, sky:['#25203c','#332a52'],
+   p:'Three months of arrears against a loan at a rate nobody is getting back. The asking price is nearly retail — and the terms are the asset, not the discount.' },
+ { key:'novation', tag:'A novation', name:'The estate, nearly retail', addr:'2210 Ashby Street',
+   ask:259000, arv:316000, wear:0.16, doors:1, tall:true, sky:['#2a2338','#3a3050'],
+   p:'An executor two states away who wants a date and a clean wire. The house barely needs anything, which closes some exits and opens the one most people never run.' },
+ { key:'walk', tag:'A walk-away', name:'The one to leave', addr:'14 Hopkins Street',
+   ask:329000, arv:300500, wear:0.95, doors:1, sky:['#2b2118','#3d2f22'],
+   p:'Priced above what the comps support, needing more work than any of them. Every exit refuses. Knowing that in ninety seconds is the feature.' },
+];
+const money = v => '$' + Math.round(v).toLocaleString('en-US');
+
+function draw(cv, d){
+ const g = cv.getContext('2d'), W = cv.width, H = cv.height;
+ let sd = 0; for (const c of d.key) sd = (sd*31 + c.charCodeAt(0)) >>> 0;
+ const rnd = () => { sd = Math.imul(sd^sd>>>16,0x45d9f3b); sd = Math.imul(sd^sd>>>16,0x45d9f3b); sd^=sd>>>16; return (sd>>>0)/4294967296; };
+ const w = d.wear;
+ const px = (x,y,ww,hh,c) => { g.fillStyle=c; g.fillRect(Math.round(x),Math.round(y),Math.round(ww),Math.round(hh)); };
+
+ px(0,0,W,H,d.sky[0]);
+ for (let i=0;i<44;i++) px(Math.floor(rnd()*W), Math.floor(rnd()*(H-26)), 1, 1, d.sky[1]);
+ // a moon, so the skies differ by more than hue
+ px(W-34, 12, 7, 7, 'rgba(255,255,255,.20)'); px(W-33, 13, 5, 5, 'rgba(255,255,255,.34)');
+
+ px(0,H-16,W,16,'#2a2620');                                    // ground
+ px(0,H-16,W,1,'#3a352c');
+
+ // ── the building: width, height and roof shape vary by scenario ──
+ const bw = d.doors === 2 ? Math.round(W*0.72) : Math.round(W*0.52);
+ const bh = d.tall ? 30 : 24;
+ const bx = Math.round((W-bw)/2), by = H-16-bh;
+ const wall = w>0.6 ? '#584f43' : w>0.3 ? '#6d6252' : '#7d7260';
+ px(bx,by,bw,bh,wall);
+ px(bx,by,bw,1,'rgba(255,255,255,.10)');
+
+ // gable roof — a real triangle rather than a flat slab
+ const rc = w>0.5 ? '#463c34' : '#6b4a3a', peak = d.doors===2 ? 9 : 13;
+ for (let i=0;i<peak;i++){
+   const inset = Math.round(i*(bw/2)/peak);
+   px(bx-5+inset, by-i-1, bw+10-inset*2, 1, rc);
+ }
+ if (w>0.55){ px(bx+Math.round(bw*0.52), by-7, 13, 4, '#3a6ea5'); }        // the tarp
+ px(bx+bw-14, by-14, 5, 9, rc);                                            // chimney
+
+ // doors and windows
+ const gap = Math.round(bw/(d.doors+1));
+ for (let k=1;k<=d.doors;k++) px(bx+gap*k-4, by+bh-13, 9, 13, '#2b2721');
+ const lit = w>0.6 ? '#39342c' : '#e2cf72';
+ const wy = by + 6;
+ px(bx+6, wy, 10, 8, lit); px(bx+bw-16, wy, 10, 8, lit);
+ if (d.doors===2){ px(bx+Math.round(bw*0.40), wy, 10, 8, lit); px(bx+Math.round(bw*0.56), wy, 10, 8, lit); }
+ if (w>0.6){ px(bx+5, wy+2, 12, 2, '#8a7a58'); px(bx+bw-17, wy+4, 12, 2, '#8a7a58'); }   // boards
+
+ if (w>0.35){ const n = Math.round(w*18);
+   for (let i=0;i<n;i++){ const x = 3+Math.floor(rnd()*(W-6)); px(x, H-18, 1, 3+Math.floor(rnd()*3), '#4a5a34'); } }
+ // the sign: crisp when it just went up, leaning and faded when it has not moved
+ const sx = 12, lean = d.key==='walk' ? 2 : 0;
+ px(sx+lean, H-30, 2, 14, '#8b98ac');
+ px(sx-4+lean, H-35, 13, 6, d.key==='walk' ? '#b9a98e' : '#e8e2d4');
+ px(sx-2+lean, H-33, 9, 1, '#6b6153'); px(sx-2+lean, H-31, 6, 1, '#6b6153');
+}
+
+document.getElementById('floor').innerHTML = DEALS.map((d,i) => `
+ <a class="deal" href="desk.html#demo=${d.key}">
+  <canvas width="240" height="112" aria-label="A pixel drawing of ${d.name}"></canvas>
+  <div class="b">
+   <div class="tag">${d.tag}</div>
+   <h2>${d.name}</h2>
+   <div class="ad">${d.addr}</div>
+   <p>${d.p}</p>
+   <div class="fig">
+    <div>They ask<b>${money(d.ask)}</b></div>
+    <div>Comps say<b>${money(d.arv)}</b></div>
+   </div>
+   <div class="go">Open this deal →</div>
+  </div>
+ </a>`).join('');
+document.querySelectorAll('.deal canvas').forEach((cv,i) => draw(cv, DEALS[i]));
+</script>
+</body></html>
