@@ -30,7 +30,9 @@
   --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --faint:#9aa3b2;
   --line:#e4e8ef; --line-2:#c9d0dc; --wash:#f6f8fb; --card:#fff;
   --blue:#1f5fd0; --blue-deep:#153872; --blue-soft:#eaf0fc; --blue-line:#c3d4f5;
-  --green:#177a4d; --green-soft:#eaf6f0; --amber:#a6610d; --amber-soft:#fdf8ee;
+  --green:#177a4d; --green-soft:#eaf6f0;
+  /* an estimate is a worked-out number, not a warning — see desk.html */
+  --est:#5f6b82; --est-soft:#f4f6f9; --est-line:#dde3ec;
   --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
   --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
   --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;   /* no typewriter in the software */
@@ -91,7 +93,7 @@ h1 em{font-style:italic;color:var(--blue)}
 .given .v{font-size:19px;font-weight:650;font-variant-numeric:tabular-nums;margin-top:2px}
 .tag{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.12em;padding:2px 5px;border:1px solid;margin-left:7px;vertical-align:2px}
 .t-e{color:var(--green);border-color:#bfe0cd;background:var(--green-soft)}
-.t-s{color:var(--amber);border-color:#ecd9b0;background:var(--amber-soft)}
+.t-s{color:var(--est);border-color:var(--est-line);background:var(--est-soft)}
 .t-n{color:var(--soft);border-color:var(--line-2);background:var(--wash)}
 .exits{padding:4px 0}
 .ex{display:grid;grid-template-columns:26px 1fr auto;gap:12px;align-items:center;
@@ -146,8 +148,22 @@ h2{font-size:34px;margin-top:8px}
 /* the eight exits, as a table of contents */
 .eight{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
  border:1px solid var(--line);margin-top:30px}
-.eight a{background:#fff;padding:14px 16px;text-decoration:none;color:inherit;display:block}
-.eight a:hover{background:var(--blue-soft)}
+
+/* who it is for — four jobs, four answers */
+.who{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;
+ background:var(--line);border:1px solid var(--line);margin-top:26px}
+.who>div{background:#fff;padding:18px 20px 20px}
+.who h3{font-family:var(--serif);font-size:19px;font-weight:650}
+.who p{font-size:13.5px;color:var(--mid);margin-top:6px;line-height:1.5}
+/* what it replaces — three columns, the third one ours */
+.repl{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:26px}
+.rc{background:#fff;border:1px solid var(--line);padding:18px 20px 20px}
+.rc .rl{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.rc p{font-size:13.5px;color:var(--mid);margin-top:8px;line-height:1.55}
+.rc.on{border-color:var(--ink);box-shadow:0 1px 0 var(--ink)}
+.rc.on .rl{color:var(--blue)}
+.rc.on p{color:var(--ink)}
+.eight .ex8{background:#fff;padding:14px 16px;color:inherit;display:block}
 .eight .r{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--blue)}
 .eight .t{font-family:var(--serif);font-size:18px;font-weight:600;margin-top:3px}
 .eight .d{font-size:13px;color:var(--soft);margin-top:3px;line-height:1.4}
@@ -231,7 +247,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 </style>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Negotiation Inc">
-<meta property="og:description" content="A course that teaches the eight exits, a desk that prices them, and an arcade that trains the instinct. No account, no email.">
+<meta property="og:description" content="Price every exit on one property, ranked against the seller, with the arithmetic shown. No account, nothing leaves your browser.">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -240,8 +256,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  <div class="wrap mast">
   <a class="mark" href="index.html" title="Negotiation Inc"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
   <nav class="masknav">
-   <a href="exits.html">Course</a>
-   <a href="desk.html">The desk</a>
+      <a href="desk.html">The desk</a>
    <a href="arcade.html">Arcade</a>
    <a href="plans.html">Plans</a>
    <a class="btn sm" href="office.html">Sign in</a>
@@ -260,7 +275,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    including the parts it is only estimating.</p>
   <div class="cta">
    <a class="btn p" href="desk.html">Price a property →</a>
-   <a class="btn" href="exits.html">Learn the eight exits</a>
+   <a class="btn" href="desk.html#example">See a worked sheet</a>
   </div>
   <div class="trust">
    <div><b>No account</b> to start</div>
@@ -382,24 +397,85 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 <section class="band wash">
  <div class="wrap">
   <div class="bandhead">
-   <div class="eyebrow">Free forever · no email</div>
-   <h2>New to this? The whole beginner problem, in fifteen minutes.</h2>
-   <p>Eight exits, one number each, with a worked example you can drag. Finish a lesson and
-      you can send its figures straight to the desk to watch all eight argue over the same house.</p>
+   <div class="eyebrow">The eight exits</div>
+   <h2>There are only eight ways out of a property deal.</h2>
+   <p>Every one of them has a different maximum price on the same house — often tens of thousands
+      apart. Picking the wrong one is not a rounding error, it is the whole deal. The desk prices
+      all eight and tells you which fits the person you are actually talking to.</p>
   </div>
   <div class="eight">
-   <a href="exits.html#wholesale"><div class="r">I</div><div class="t">The wholesale</div><div class="d">Sell the contract, never the house.</div></a>
-   <a href="exits.html#flip"><div class="r">II</div><div class="t">The fix and flip</div><div class="d">The subtraction, taken seriously.</div></a>
-   <a href="exits.html#wholetail"><div class="r">III</div><div class="t">The wholetail</div><div class="d">The shortcut between the first two.</div></a>
-   <a href="exits.html#hold"><div class="r">IV</div><div class="t">The buy and hold</div><div class="d">The number the lender underlines.</div></a>
-   <a href="exits.html#brrrr"><div class="r">V</div><div class="t">The BRRRR</div><div class="d">The flip that refuses to sell.</div></a>
-   <a href="exits.html#subto"><div class="r">VI</div><div class="t">The subject-to</div><div class="d">You bought the payment, not the price.</div></a>
-   <a href="exits.html#novation"><div class="r">VII</div><div class="t">The novation</div><div class="d">The retail exit you never own.</div></a>
-   <a href="exits.html#land"><div class="r">VIII</div><div class="t">The land play</div><div class="d">The number nobody publishes.</div></a>
+   <div class="ex8"><div class="r">I</div><div class="t">The wholesale</div><div class="d">Sell the contract, never the house.</div></div>
+   <div class="ex8"><div class="r">II</div><div class="t">The fix and flip</div><div class="d">The subtraction, taken seriously.</div></div>
+   <div class="ex8"><div class="r">III</div><div class="t">The wholetail</div><div class="d">The shortcut between the first two.</div></div>
+   <div class="ex8"><div class="r">IV</div><div class="t">The buy and hold</div><div class="d">The number the lender underlines.</div></div>
+   <div class="ex8"><div class="r">V</div><div class="t">The BRRRR</div><div class="d">The flip that refuses to sell.</div></div>
+   <div class="ex8"><div class="r">VI</div><div class="t">The subject-to</div><div class="d">You bought the payment, not the price.</div></div>
+   <div class="ex8"><div class="r">VII</div><div class="t">The novation</div><div class="d">The retail exit you never own.</div></div>
+   <div class="ex8"><div class="r">VIII</div><div class="t">The land play</div><div class="d">The number nobody publishes.</div></div>
   </div>
   <div class="cta" style="margin-top:26px">
-   <a class="btn p" href="exits.html">Start the course →</a>
+   <a class="btn p" href="desk.html">Price your first property →</a>
    <a class="btn" href="desk.html#example">See a worked sheet</a>
+  </div>
+ </div>
+</section>
+
+
+<!-- ═══ 4b · WHO IT IS FOR ══════════════════════════════════════════════ -->
+<section class="band">
+ <div class="wrap">
+  <div class="bandhead">
+   <div class="eyebrow">Who it is for</div>
+   <h2>Four jobs, one sheet, four different answers.</h2>
+   <p>The exit you are already committed to is usually the one costing you the deal. The
+      same inputs answer all four questions at once.</p>
+  </div>
+  <div class="who">
+   <div><h3>Wholesaling</h3>
+    <p>Often there is no asking price at all — the seller wants your number first. Say so, and
+       the sheet ranks by what each exit lets you pay, then hands you an opening figure and
+       what your terms are worth against it.</p></div>
+   <div><h3>Flipping</h3>
+    <p>Your max buy, the 70% rule beside it, and a grid showing what happens to the profit when
+       the ARV is 10% light and the repairs run 40% over. The gap is your margin for being wrong.</p></div>
+   <div><h3>Holding</h3>
+    <p>The price a 1.25 DSCR actually allows at today's rate and LTV — the number the lender
+       underlines — with every assumption on a slider you can move.</p></div>
+   <div><h3>Creative</h3>
+    <p>Subject-to and novation priced properly, including the ones the sheet refuses: a retail
+       listing on a house that is not retail yet gets declined, with the reason.</p></div>
+  </div>
+ </div>
+</section>
+
+<!-- ═══ 4c · WHAT IT REPLACES ═══════════════════════════════════════════ -->
+<section class="band wash">
+ <div class="wrap">
+  <div class="bandhead">
+   <div class="eyebrow">What it replaces</div>
+   <h2>The spreadsheet you rebuilt three times and still do not trust.</h2>
+  </div>
+  <div class="repl">
+   <div class="rc">
+    <div class="rl">A calculator</div>
+    <p>One exit, one number, no working. You cannot check it, so you re-derive it by hand
+       anyway — and you still do not know what it assumed about your rate.</p>
+   </div>
+   <div class="rc">
+    <div class="rl">Your own spreadsheet</div>
+    <p>Correct, until the day you copy the tab and forget which cell was hard-coded. No
+       provenance, no bands, and it never once told you which exit fits this seller.</p>
+   </div>
+   <div class="rc on">
+    <div class="rl">This</div>
+    <p>Every exit priced, ranked against the person selling, every constant printed and
+       sourced, every estimate marked and widening the range it feeds. Free to price, and
+       nothing leaves your browser.</p>
+   </div>
+  </div>
+  <div class="cta" style="margin-top:26px">
+   <a class="btn p" href="desk.html">Price a property →</a>
+   <a class="btn" href="plans.html">See what a workspace adds</a>
   </div>
  </div>
 </section>
@@ -413,8 +489,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      eight eras of ground, a phone that rings. <b style="color:#e6ecf6">The Daily Street</b> is
      ninety seconds: five properties, one bid, the same street everybody gets today. Same read
      the desk performs, with the clock and the money turned into a game.</p>
-  <div class="cta"><a class="btn p" href="arcade.html">Enter the arcade →</a>
-   <a class="btn" href="exits.html">I'd rather learn first</a></div>
+  <div class="cta"><a class="btn p" href="arcade.html">Enter the arcade →</a></div>
   <div class="doors">
    <figure><img src="art/door-now.png" alt="A pixel-art suburban front door, present day" width="540" height="450" loading="lazy">
     <figcaption>Now · a door that opens</figcaption></figure>
@@ -424,10 +499,6 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
     <figcaption>Later · the rates are worse</figcaption></figure>
   </div>
  </div>
- <div class="horizon">
-  <img class="art" src="art/world-now.png" alt="A pixel-art street of houses in the arcade" width="960" height="540" loading="lazy">
-  <div class="cap">Ground, now · one of eight eras</div>
- </div>
 </section>
 
 <footer>
@@ -435,7 +506,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   <div style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap">
    <div>
     <a href="index.html">Home</a><a href="desk.html">The desk</a>
-    <a href="exits.html">The course</a><a href="arcade.html">The arcade</a>
+    <a href="arcade.html">The arcade</a>
     <a href="office.html">Your desk</a>
    </div>
    <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase">
