@@ -1,137 +1,194 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Negotiation Inc — every exit priced, the working shown</title>
-<meta name="description" content="A course that teaches the eight ways out of a property deal, a desk that prices them, and an arcade that trains the instinct. No account, no email.">
+<meta name="description" content="Six ways to buy the same house, priced against one seller's situation, with the arithmetic shown. Free course, free desk, no account.">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
-   LANDING — REVISION 2
+   THE FRONT DOOR — revision 3.
 
-   One change, and it is structural rather than cosmetic:
+   Revision 2 put the arcade's paper world on the landing page, crossed a seam
+   into the software, and floated the whole thing on a dark desk. Three things
+   were wrong with that, and a visitor found all three in under a minute:
 
-     THE PAGE CROSSES THE SEAM ONCE, AND STAYS CROSSED.
+   01  THE PAPER MADE NO SENSE HERE. A stranger arriving cold does not know
+       there are two worlds, so the tan half read as a different, older, less
+       finished website — not as a specimen. The page now has ONE world: the
+       software's. The arcade is a door at the bottom, and it is only when you
+       walk through it that anything changes.
+   02  THE SPECIMEN LOOKED PLAYABLE AND WAS NOT. A static mock-up of a game,
+       on a page selling a game, is the single most confusing thing we could
+       have shipped. Every interactive-looking thing here is now either really
+       interactive or clearly a picture.
+   03  IT WAS SPARSE. Enormous type, three sentences, a lot of air. That reads
+       as a placeholder, not as a company. Density, in the parts that carry
+       the argument, IS the argument.
 
-   Revision 1 put the app on the page as a specimen — a framed figure inside
-   the paper world — and then returned to paper for movements 3, 4 and 5. That
-   is a page ABOUT the software.
-
-   Here, the seam is the last thing that happens in the paper world. Everything
-   after it is the app: white, blue, system sans, the real tokens. The visitor
-   does not read about crossing over. They cross.
-
-   Which also answers the note that prompted this revision — "the professional
-   half should be cohesive with the blue and white" — without recolouring the
-   arcade, which would have cost the seam its meaning. Both worlds are intact
-   and the page is the funnel instead of a description of it.
+   And the typeface: Georgia is on every machine, which is why a page set in
+   it looks like a page nobody chose a typeface for. Fraunces is chosen.
    ═══════════════════════════════════════════════════════════════════════════ */
-
-:root {
-  /* ── ARCADE (movements 1–2) — from ni-paper-world ─────────────────────── */
-  --manila:#d9c8a4; --cream:#f4efe2; --carbon-pink:#f0d9d5; --newsprint:#e8e2d4;
-  --ink:#23201c; --ink-mid:#47423b; --ink-soft:#5a544b;
-  --rule:#b9ae95; --rule-hi:#cdc3ac;
-  --stamp-red:#a8271f;
-
-  /* ── APP (movements 3–5) — from 02 Product/UI System §1, verbatim ──────
-     Four meanings, one accent. Colour is never decorative here. */
-  --a-accent:#1f5fd0;   /* recommended, primary action, focus */
-  --a-good:#177a4d;     /* confirmed, verified */
-  --a-warn:#a6610d;     /* caveat, ceiling, not-suitable */
-  --a-bad:#b3372c;      /* refused */
-  --a-ink:#101725;      /* 17.9:1 */
-  --a-ink-2:#5a6478;    /*  5.9:1 */
-  --a-ink-3:#677187;    /*  4.9:1 — the floor. NOT #8d96a8, which is 2.97:1
-                            and is the exact failure UI System §1 records as
-                            already fixed. Revision 1 used the old value for
-                            every piece of secondary text in the app section. */
-  --a-line:#e3e7ee; --a-wash:#f7f8fa;
+:root{
+  --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --faint:#9aa3b2;
+  --line:#e4e8ef; --line-2:#c9d0dc; --wash:#f6f8fb; --card:#fff;
+  --blue:#1f5fd0; --blue-deep:#153872; --blue-soft:#eaf0fc; --blue-line:#c3d4f5;
+  --green:#177a4d; --green-soft:#eaf6f0; --amber:#a6610d; --amber-soft:#fdf8ee;
+  --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:'JB Mono',ui-monospace,Menlo,Consolas,monospace;
 }
+*{box-sizing:border-box;margin:0}
+html,body{background:#fff}
+body{font-family:var(--sans);color:var(--ink);font-size:16px;line-height:1.55;
+ -webkit-font-smoothing:antialiased}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.02em;line-height:1.1}
+a{color:var(--blue)}
+.wrap{max-width:1140px;margin:0 auto;padding:0 28px}
+.eyebrow{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.18em;
+ text-transform:uppercase;color:var(--soft)}
 
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:#fff}
-body{-webkit-font-smoothing:antialiased}
+/* ── masthead ── */
+header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(255,255,255,.94);
+ backdrop-filter:blur(8px);z-index:20}
+.mast{display:flex;justify-content:space-between;align-items:center;gap:20px;
+ padding:14px 0;flex-wrap:wrap}
+.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:inherit}
+.mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
+.mark .inc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--blue)}
+.mark:hover .nm{color:var(--blue)}
+.masknav{display:flex;align-items:center;gap:20px;font-size:14px;flex-wrap:wrap}
+.masknav a{color:var(--mid);text-decoration:none}
+.masknav a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--sans);font-size:14.5px;
+ font-weight:650;padding:10px 18px;border:1.5px solid var(--ink);background:#fff;color:var(--ink);
+ text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--blue);color:var(--blue)}
+.btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.p:hover{background:var(--blue-deep);border-color:var(--blue-deep);color:#fff}
+.btn.sm{font-size:13px;padding:7px 13px}
 
-/* The desk. Only surface that goes edge to edge. */
-.desk{
-  background:var(--manila);
-  background-image:
-    repeating-linear-gradient(0deg,rgba(35,32,28,.014) 0 2px,transparent 2px 4px),
-    radial-gradient(120% 80% at 50% -10%,rgba(255,255,255,.20),transparent 60%);
-  font-family:'Iowan Old Style',Georgia,serif;
-  color:var(--ink); line-height:1.55;
+/* ── hero ── */
+.hero{display:grid;grid-template-columns:1.02fr .98fr;gap:52px;align-items:start;
+ padding:52px 0 44px}
+h1{font-size:56px;max-width:15ch}
+h1 em{font-style:italic;color:var(--blue)}
+.lede{font-size:19px;line-height:1.5;color:var(--mid);margin-top:18px;max-width:46ch}
+.lede b{color:var(--ink);font-weight:650}
+.cta{display:flex;gap:11px;margin-top:24px;flex-wrap:wrap}
+.trust{display:flex;gap:18px;flex-wrap:wrap;margin-top:20px;padding-top:16px;
+ border-top:1px solid var(--line)}
+.trust div{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.trust b{color:var(--ink);font-weight:700}
+
+/* the readout: the actual product surface, shown rather than described */
+.readout{border:1px solid var(--line-2);background:var(--card);box-shadow:0 1px 0 rgba(13,20,32,.04)}
+.readout .rh{display:flex;justify-content:space-between;align-items:center;gap:10px;
+ padding:9px 14px;border-bottom:1px solid var(--line);background:var(--wash)}
+.readout .rh span{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.givens{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
+.given{background:#fff;padding:10px 14px}
+.given .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft)}
+.given .v{font-size:19px;font-weight:650;font-variant-numeric:tabular-nums;margin-top:2px}
+.tag{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.12em;padding:2px 5px;border:1px solid;margin-left:7px;vertical-align:2px}
+.t-e{color:var(--green);border-color:#bfe0cd;background:var(--green-soft)}
+.t-s{color:var(--amber);border-color:#ecd9b0;background:var(--amber-soft)}
+.t-n{color:var(--soft);border-color:var(--line-2);background:var(--wash)}
+.exits{padding:4px 0}
+.ex{display:grid;grid-template-columns:26px 1fr auto;gap:12px;align-items:center;
+ padding:9px 14px;border-bottom:1px solid var(--line);font-size:14.5px}
+.ex:last-child{border-bottom:0}
+.ex .r{font-family:var(--mono);font-size:11px;color:var(--faint);font-weight:700}
+.ex .f{font-variant-numeric:tabular-nums;font-weight:650}
+.ex.best{background:var(--blue-soft)}
+.ex.best .r{color:var(--blue)}
+.ex.na .f{color:var(--soft);font-weight:400;font-size:12.5px;font-family:var(--mono)}
+.rfoot{padding:10px 14px;border-top:1px solid var(--line);background:var(--wash);
+ font-size:12.5px;color:var(--mid)}
+.rfoot b{color:var(--ink)}
+
+/* ── bands ── */
+.band{border-top:1px solid var(--line);padding:52px 0}
+.band.wash{background:var(--wash)}
+.bandhead{max-width:60ch}
+h2{font-size:34px;margin-top:8px}
+.bandhead p{font-size:17px;color:var(--mid);margin-top:12px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:34px}
+.three h3{font-size:20px;letter-spacing:-.01em}
+.three p{font-size:15px;color:var(--mid);margin-top:9px}
+.three .n{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--blue);
+ padding-bottom:9px;border-bottom:2px solid var(--blue);display:inline-block;margin-bottom:12px}
+
+/* the eight exits, as a table of contents */
+.eight{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+ border:1px solid var(--line);margin-top:30px}
+.eight a{background:#fff;padding:14px 16px;text-decoration:none;color:inherit;display:block}
+.eight a:hover{background:var(--blue-soft)}
+.eight .r{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--blue)}
+.eight .t{font-family:var(--serif);font-size:18px;font-weight:600;margin-top:3px}
+.eight .d{font-size:13px;color:var(--soft);margin-top:3px;line-height:1.4}
+
+/* honesty grammar */
+.states{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:28px}
+.state{border:1px solid var(--line);padding:16px 18px;background:#fff}
+.state p{font-size:14.5px;color:var(--mid);margin-top:9px}
+
+/* ── the arcade door ── */
+.arcade{border-top:1px solid var(--line);background:#0d1420;color:#fff;overflow:hidden}
+.arcade .wrap{padding-top:48px;padding-bottom:0}
+.arcade h2{color:#fff;font-size:34px}
+.arcade p{color:#aeb8c8;font-size:17px;margin-top:12px;max-width:52ch}
+.arcade .eyebrow{color:#6f7d94}
+.arcade .cta{margin-top:22px;margin-bottom:36px}
+.arcade .btn{background:transparent;border-color:#39435a;color:#cdd6e4}
+.arcade .btn:hover{border-color:#fff;color:#fff}
+.arcade .btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+.arcade .btn.p:hover{background:#3a78e8;border-color:#3a78e8}
+/* the street runs as a BAND, not as a poster: cropped to a strip so it closes
+   the page instead of becoming the tallest thing on it */
+.art{display:block;width:100%;height:200px;object-fit:cover;object-position:50% 72%;
+ image-rendering:pixelated;border-top:1px solid #223047}
+@media (max-width:700px){ .art{height:130px} }
+.doors{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:26px 0 0}
+.doors figure{margin:0}
+.doors img{width:100%;height:auto;display:block;image-rendering:pixelated;border:1px solid #223047}
+.doors figcaption{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+ color:#6f7d94;margin-top:7px}
+
+footer{border-top:1px solid var(--line);padding:30px 0 44px;font-size:13.5px;color:var(--soft)}
+footer a{color:var(--mid);text-decoration:none;margin-right:18px}
+footer a:hover{color:var(--ink)}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;gap:34px;padding:36px 0}
+  h1{font-size:40px} h2{font-size:28px}
+  .three,.states{grid-template-columns:1fr;gap:20px}
+  .eight{grid-template-columns:repeat(2,1fr)}
 }
-.app{
-  background:#fff; color:var(--a-ink);
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
-  line-height:1.5; letter-spacing:-.005em;
-}
-/* Display type is serif everywhere in this product — the desk and the course
-   both set it, and it is the single thing that keeps a page of system sans
-   from reading as a template. Body and money stay sans. */
-.app h1,.app h2{font-family:Georgia,'Iowan Old Style','Times New Roman',serif;
-  font-weight:700;letter-spacing:-.02em}
-/* FULL BLEED. The mock floated an 1180px sheet on a near-black desk, which is
-   how a designer presents a page and not how a product should meet a visitor:
-   on any monitor wider than the sheet it reads as a screenshot of a website
-   rather than the website, and the arcade section — the immersive one — loses
-   to two black gutters. The COLOUR now runs edge to edge and only the TEXT is
-   measured: sections span the viewport, their contents stay at a readable
-   1180px. Nothing about the seam or the two worlds changes; both worlds simply
-   fill the screen they are given. */
-.page{max-width:none;margin:0;box-shadow:none}
-.pad{max-width:1180px;margin:0 auto;padding:0 34px}
-.mono{font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
-/* app-side money: sans, tabular, weighted. Mono money is the PAPER world's
-   grammar — using it in the app makes the two mistakable from a screenshot,
-   which costs the seam its meaning. Design flagged this; it was true here too. */
-.anum{font-variant-numeric:tabular-nums;font-weight:600}
-.eyebrow{font-family:monospace;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
-.stencil{font-family:monospace}
-
-h1,h2,h3{margin:0;font-weight:600;line-height:1.18;letter-spacing:-.01em}
-p{margin:.6rem 0}
-
-/* ── Arcade furniture ─────────────────────────────────────────────────── */
-.sheet{position:relative;border:1px solid var(--rule);box-shadow:0 1px 0 rgba(35,32,28,.10),0 6px 18px -10px rgba(35,32,28,.45)}
-.staple::before{content:'';position:absolute;left:13px;top:11px;width:15px;height:3px;background:#8d8577;transform:rotate(-38deg);box-shadow:0 3px 4px -2px rgba(35,32,28,.5)}
-.stamp{
-  display:inline-block;font-family:monospace;font-size:15px;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--stamp-red);border:2.5px solid var(--stamp-red);
-  padding:5px 11px 4px;transform:rotate(-6deg);opacity:.92;mix-blend-mode:multiply;
-}
-.ledger{width:100%;border-collapse:collapse;font-size:15px}
-.ledger th{text-align:left;font-family:monospace;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--ink);padding:0 8px 4px 0}
-.ledger td{padding:5px 8px 5px 0;border-bottom:1px solid var(--rule-hi)}
-.ledger td:last-child,.ledger th:last-child{text-align:right;padding-right:0;font-family:monospace;font-variant-numeric:tabular-nums}
-.ledger tr.tot td{border-top:2px solid var(--ink);border-bottom:none;font-weight:700;padding-top:8px}
-
-/* ── App furniture ────────────────────────────────────────────────────── */
-.card{border:1px solid var(--a-line);border-radius:10px;background:#fff}
-.kpi{background:var(--a-wash);border:1px solid #eef1f6;border-radius:8px;padding:11px 13px}
-.row{display:grid;grid-template-columns:22px 1fr 116px 62px;gap:12px;align-items:center;padding:11px 12px;border:1px solid var(--a-line);border-radius:8px;margin-bottom:6px;background:#fff}
-.row.top{border-color:rgba(31,95,208,.42);background:rgba(31,95,208,.045)}
-.tag{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:999px}
-.btn{display:inline-block;border-radius:8px;padding:11px 18px;font-size:14px;font-weight:600;text-decoration:none;border:1px solid transparent}
-.btn-p{background:var(--a-accent);color:#fff}
-.btn-s{border-color:#ccd4e2;color:var(--a-ink)}
-
-/* The seam, drawn as a static diagram — the real one is a 620ms wipe. */
-.seam{position:relative;overflow:hidden}
-.seamline{position:absolute;left:-10px;right:-10px;height:2px;background:var(--ink);box-shadow:0 0 0 1px rgba(244,239,226,.55)}
-
-.note{font-size:13px;color:var(--ink-soft);line-height:1.55}
-.hair{border:0;border-top:1px solid var(--rule);margin:0}
-
-@media (max-width:640px){
-  .pad{padding:0 18px}
-  h1{font-size:32px!important}
-  .row{grid-template-columns:20px 1fr 92px;}
-  .row .score{display:none}
+@media (max-width:560px){
+  .wrap{padding:0 18px}
+  h1{font-size:33px} .lede{font-size:17px}
+  .eight{grid-template-columns:1fr}
+  .doors{grid-template-columns:1fr}
+  .givens{grid-template-columns:1fr}
 }
 </style>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/mono-400.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
+ font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:'JB Mono';src:url('fonts/mono-400.woff2') format('woff2');
+ font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'JB Mono';src:url('fonts/mono-700.woff2') format('woff2');
+ font-weight:700;font-style:normal;font-display:swap}
+:root{
+ --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
+ --mono:'JB Mono',ui-monospace,Menlo,Consolas,monospace !important;
+}
+/* the pages that set the family literally rather than through the token */
+.app h1,.app h2,h1,h2,h3{font-family:var(--serif)}
+</style>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Negotiation Inc">
 <meta property="og:description" content="A course that teaches the eight exits, a desk that prices them, and an arcade that trains the instinct. No account, no email.">
@@ -139,468 +196,176 @@ p{margin:.6rem 0}
 </head>
 <body>
 
-<div class="page">
+<header>
+ <div class="wrap mast">
+  <a class="mark" href="index.html" title="Negotiation Inc"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+  <nav class="masknav">
+   <a href="exits.html">The course</a>
+   <a href="desk.html">The desk</a>
+   <a href="arcade.html">The arcade</a>
+   <a class="btn sm" href="office.html">Your desk</a>
+   <a class="btn sm p" href="desk.html">Price a property</a>
+  </nav>
+ </div>
+</header>
 
-<!-- ══════════════════════════════════════════════════════════════════════
-     THE FRONT DOOR — the company, in the software's world.
-
-     The masthead, the claim and the course ribbon used to sit inside the paper
-     world, which meant the first impression of the COMPANY was the game's
-     stock. Paper is the arcade's costume; it begins where the arcade demo
-     begins, one section down, clearly framed as a specimen. Design's rule —
-     cross once and stay crossed — is intact: the page still crosses exactly
-     once, at the seam, out of the specimen and into the product.
-     ══════════════════════════════════════════════════════════════════════ -->
-<div class="app">
-  <!-- Masthead -->
-  <div class="pad" style="display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;padding-top:20px;padding-bottom:20px;border-bottom:1px solid var(--a-line)">
-    <div>
-      <div style="display:flex;align-items:baseline;gap:9px;border-bottom:2px solid var(--a-ink);padding-bottom:3px">
-        <span style="font-size:20px;font-weight:600;letter-spacing:.14em;text-transform:uppercase">Negotiation</span>
-        <span class="mono" style="font-size:11px;font-weight:700;letter-spacing:.2em;padding-bottom:2px">INC</span>
-      </div>
-      <div class="mono" style="font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--a-ink-3);margin-top:4px">Underwriting · est. of record</div>
-    </div>
-    <span style="display:flex;gap:16px;align-items:baseline">
-     <a href="desk.html" data-desk class="mono" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--a-ink);text-decoration:none;border-bottom:2px solid var(--a-ink);padding-bottom:2px;font-weight:700">Open the desk</a>
-     <a href="#in" class="mono" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--a-ink-2);text-decoration:none;border-bottom:1px solid var(--a-line);padding-bottom:2px">Sign in</a></span>
+<!-- ═══ 1 · WHAT THIS IS ════════════════════════════════════════════════ -->
+<div class="wrap hero">
+ <div>
+  <div class="eyebrow">Underwriting · est. of record</div>
+  <h1>Know what to pay <em>before</em> you call.</h1>
+  <p class="lede">There are only eight ways out of a property deal. This prices
+   <b>all of them against one house</b> — and shows the arithmetic, every time,
+   including the parts it is only estimating.</p>
+  <div class="cta">
+   <a class="btn p" href="desk.html">Price a property →</a>
+   <a class="btn" href="exits.html">Learn the eight exits</a>
   </div>
+  <div class="trust">
+   <div><b>No account</b> to start</div>
+   <div><b>Nothing</b> leaves your browser</div>
+   <div><b>Every number</b> shows its working</div>
+  </div>
+ </div>
 
-
-  <section class="pad" style="padding-top:44px;padding-bottom:34px">
-    <div class="eyebrow" style="color:var(--a-ink-3)">Movement 1 · the claim</div>
-    <h1 style="font-size:48px;margin-top:12px;max-width:24ch;text-wrap:pretty">Know what to pay before you call.</h1>
-    <p style="font-size:18px;color:var(--a-ink-2);margin-top:14px;max-width:52ch;text-wrap:pretty">
-      Six ways to buy the same house, priced against one seller’s situation. Play a street below and find out how close you get.
-    </p>
-
-    <!-- The course ribbon. The position made visible: the tool that assumes
-         you have never done this before, teaching first and selling never.
-         NEEDS CLAUDE DESIGN: composition is provisional; tokens are theirs. -->
-    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;border:2px solid var(--a-ink);
-         background:#fff;margin-top:22px;padding:13px 18px">
-      <div style="flex:1 1 320px;min-width:260px">
-        <span class="eyebrow" style="color:var(--a-ink-3)">Free forever · no email · the arithmetic shown</span>
-        <div style="font-size:18px;font-weight:600;margin-top:2px">New to this? Start with The Eight Exits.</div>
-        <div style="font-size:13.5px;color:var(--a-ink-2);margin-top:2px">Every way out of a property deal, one number each, fifteen minutes. It is the whole beginner problem in this business, and it is free because it should be.</div>
-      </div>
-      <a href="exits.html" class="mono" data-course
-         style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#fff;
-         background:var(--a-ink);text-decoration:none;padding:12px 18px;white-space:nowrap">Take the course →</a>
-    </div>
-    <div style="flex-basis:100%;width:100%;display:flex;flex-wrap:wrap;gap:4px 16px;border-top:1px solid var(--a-line);padding-top:9px;margin-top:9px">
-     <a href="exits.html#wholesale" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">I</b> Wholesale</a>
-     <a href="exits.html#flip" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">II</b> Flip</a>
-     <a href="exits.html#wholetail" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">III</b> Wholetail</a>
-     <a href="exits.html#hold" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">IV</b> Hold</a>
-     <a href="exits.html#brrrr" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">V</b> BRRRR</a>
-     <a href="exits.html#subto" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">VI</b> Subject-to</a>
-     <a href="exits.html#novation" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">VII</b> Novation</a>
-     <a href="exits.html#land" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">VIII</b> Land</a>
-    </div>
-
-  </section>
+ <!-- not a mock: this is the desk's own layout and the desk's own arithmetic,
+      run on one house, so the first thing a visitor sees is the product -->
+ <div class="readout">
+  <div class="rh"><span>Form D-1 · 1128 Marrow Lane</span><span>Ranked by fit</span></div>
+  <div class="givens">
+   <div class="given"><div class="k">Asking price</div><div class="v">$249,500<span class="tag t-e">Entered</span></div></div>
+   <div class="given"><div class="k">ARV — fixed value</div><div class="v">$291,000<span class="tag t-e">Entered</span></div></div>
+   <div class="given"><div class="k">Repairs</div><div class="v">$41,300<span class="tag t-s">Estimate</span></div></div>
+   <div class="given"><div class="k">Monthly rent</div><div class="v">—<span class="tag t-n">Needed</span></div></div>
+  </div>
+  <div class="exits">
+   <div class="ex best"><span class="r">01</span><span>The novation</span><span class="f">$26,220</span></div>
+   <div class="ex"><span class="r">02</span><span>The fix and flip</span><span class="f">$21,400</span></div>
+   <div class="ex"><span class="r">03</span><span>The wholesale</span><span class="f">$12,400</span></div>
+   <div class="ex"><span class="r">04</span><span>The wholetail</span><span class="f">refuses · repairs &gt; 8% of ARV</span></div>
+   <div class="ex na"><span class="r">05</span><span>The buy and hold</span><span class="f">needs monthly rent</span></div>
+  </div>
+  <div class="rfoot"><b>Confidence: medium.</b> Two figures entered, one estimated —
+   every band below widens by 12% until the repair bid comes back.</div>
+ </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════════════
-     THE ARCADE, AS A SPECIMEN — movements 1 and 2
-     ══════════════════════════════════════════════════════════════════════ -->
-<div class="desk">
-  <section class="pad" style="padding-top:30px;padding-bottom:38px">
-    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;
-         border-bottom:1px solid var(--rule);padding-bottom:9px;margin-bottom:22px">
-      <div>
-        <span class="eyebrow" style="color:var(--ink-soft)">Movement 2 &middot; the claim, played</span>
-        <div style="font-size:20px;font-weight:600;margin-top:3px">The arcade &mdash; where the instinct is trained</div>
-      </div>
-      <span class="mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);text-align:right;line-height:1.6">A specimen of the game<br>No account required</span>
-    </div>
-    <div class="sheet" style="background:var(--newsprint);margin-top:26px">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding:16px 20px 8px">
-        <div>
-          <span class="eyebrow" style="color:var(--ink-soft)">Classified listings · street 3382 · five properties</span>
-          <div style="font-size:19px;font-weight:600;margin-top:3px">Buy one for less than it is worth</div>
-        </div>
-        <div class="mono" style="font-size:11px;color:var(--ink-mid);text-align:right;line-height:1.6">FOUR QUESTIONS EACH<br>NO ACCOUNT REQUIRED</div>
-      </div>
+<!-- ═══ 2 · WHY IT IS DIFFERENT ═════════════════════════════════════════ -->
+<section class="band wash">
+ <div class="wrap">
+  <div class="bandhead">
+   <div class="eyebrow">The difference</div>
+   <h2>Most calculators give you one number and hide how they got it.</h2>
+   <p>A single "max offer" is a guess wearing a suit. The exit you choose changes the price
+      by tens of thousands on the same house — so the sheet prices every exit, ranks them
+      against the seller's situation, and never rounds a hole in the data into a number.</p>
+  </div>
+  <div class="three">
+   <div>
+    <div class="n">01</div>
+    <h3>Six prices, not one</h3>
+    <p>Wholesale, flip, wholetail, buy-and-hold, BRRRR, subject-to, novation. The same house
+       is worth a different maximum under each, and the gap between the best and the worst
+       is usually the whole margin.</p>
+   </div>
+   <div>
+    <div class="n">02</div>
+    <h3>The seller is an input</h3>
+    <p>An estate wants certainty and a date. Somebody behind on payments wants the loan to
+       stop. The sheet re-ranks on what you know about the person, not just the property —
+       because that is what actually decides which exit closes.</p>
+   </div>
+   <div>
+    <div class="n">03</div>
+    <h3>It refuses to guess</h3>
+    <p>Every figure is marked <b>entered</b>, <b>estimated</b>, or <b>needed</b>. Estimates
+       visibly widen the range they feed. Exits missing a number refuse to price and say
+       which number they want.</p>
+   </div>
+  </div>
+ </div>
+</section>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;background:var(--rule)">
-        <div style="background:var(--newsprint);padding:14px 16px 15px">
-          <div class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Lot 01 · Single-family</div>
-          <div style="font-size:16px;font-weight:600;margin-top:5px;line-height:1.25">1128 Marrow Lane</div>
-          <div style="font-size:13.5px;color:var(--ink-mid);margin-top:5px;line-height:1.45;min-height:5.6em">Fair throughout. Roof noted as “recent” by a party with no roofing qualification. Vacant since March, mail held.</div>
-          <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--rule-hi);margin-top:9px;padding-top:8px">
-            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)">Asking</span>
-            <span class="mono" style="font-size:16px">$249,500</span>
-          </div>
-          <div style="display:flex;align-items:baseline;gap:8px;border-bottom:1px dotted var(--rule);margin-top:11px;padding-bottom:4px">
-            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap">Your bid</span>
-            <span class="mono" style="font-size:15px;color:var(--rule)">$</span>
-          </div>
-        </div>
-        <div style="background:var(--newsprint);padding:14px 16px 15px">
-          <div class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Lot 02 · Duplex</div>
-          <div style="font-size:16px;font-weight:600;margin-top:5px;line-height:1.25">4 Pellet Row</div>
-          <div style="font-size:13.5px;color:var(--ink-mid);margin-top:5px;line-height:1.45;min-height:5.6em">Both units occupied. Upstairs tenant has not been formally notified of anything since 2019.</div>
-          <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--rule-hi);margin-top:9px;padding-top:8px">
-            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)">Asking</span>
-            <span class="mono" style="font-size:16px">$196,000</span>
-          </div>
-          <div style="display:flex;align-items:baseline;gap:8px;border-bottom:1px dotted var(--rule);margin-top:11px;padding-bottom:4px">
-            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap">Your bid</span>
-            <span class="mono" style="font-size:15px;color:var(--rule)">$</span>
-          </div>
-        </div>
-        <div style="background:var(--newsprint);padding:14px 16px 15px">
-          <div class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Lot 03 · Single-family</div>
-          <div style="font-size:16px;font-weight:600;margin-top:5px;line-height:1.25">15 Corliss Way</div>
-          <div style="font-size:13.5px;color:var(--ink-mid);margin-top:5px;line-height:1.45;min-height:5.6em">Structural note on file regarding the sill plate. Seller has stated a number and has not moved off it in ninety-four days.</div>
-          <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--rule-hi);margin-top:9px;padding-top:8px">
-            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)">Asking</span>
-            <span class="mono" style="font-size:16px">$214,000</span>
-          </div>
-          <div style="display:flex;align-items:baseline;gap:8px;border-bottom:1px dotted var(--rule);margin-top:11px;padding-bottom:4px">
-            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap">Your bid</span>
-            <span class="mono" style="font-size:15px;color:var(--rule)">$</span>
-          </div>
-        </div>
-        <div style="background:var(--newsprint);padding:14px 16px 15px">
-          <div class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Lot 04 · Bungalow</div>
-          <div style="font-size:16px;font-weight:600;margin-top:5px;line-height:1.25">82 Ostend Street</div>
-          <div style="font-size:13.5px;color:var(--ink-mid);margin-top:5px;line-height:1.45;min-height:5.6em">Estate sale. Two heirs, one of whom is contactable. Waterfront, obviously.</div>
-          <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--rule-hi);margin-top:9px;padding-top:8px">
-            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)">Asking</span>
-            <span class="mono" style="font-size:16px">$168,000</span>
-          </div>
-          <div style="display:flex;align-items:baseline;gap:8px;border-bottom:1px dotted var(--rule);margin-top:11px;padding-bottom:4px">
-            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap">Your bid</span>
-            <span class="mono" style="font-size:15px;color:var(--rule)">$</span>
-          </div>
-        </div>
-        <div style="background:var(--newsprint);padding:14px 16px 15px">
-          <div class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Lot 05 · Fourplex</div>
-          <div style="font-size:16px;font-weight:600;margin-top:5px;line-height:1.25">990 Tannery Hill</div>
-          <div style="font-size:13.5px;color:var(--ink-mid);margin-top:5px;line-height:1.45;min-height:5.6em">Cash-flowing. Priced accordingly, by someone who knows what it cash-flows.</div>
-          <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--rule-hi);margin-top:9px;padding-top:8px">
-            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)">Asking</span>
-            <span class="mono" style="font-size:16px">$418,000</span>
-          </div>
-          <div style="display:flex;align-items:baseline;gap:8px;border-bottom:1px dotted var(--rule);margin-top:11px;padding-bottom:4px">
-            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap">Your bid</span>
-            <span class="mono" style="font-size:15px;color:var(--rule)">$</span>
-          </div>
-        </div>
-      </div>
+<!-- ═══ 3 · THE HONESTY GRAMMAR ═════════════════════════════════════════ -->
+<section class="band">
+ <div class="wrap">
+  <div class="bandhead">
+   <div class="eyebrow">How it stays honest</div>
+   <h2>Three states, and the sheet never mixes them up.</h2>
+  </div>
+  <div class="states">
+   <div class="state"><span class="tag t-e" style="margin:0">Entered</span>
+    <p>A fact you typed. The sheet prices it as given and takes responsibility for nothing else.</p></div>
+   <div class="state"><span class="tag t-s" style="margin:0">Estimate</span>
+    <p>Counted in full — and it widens every range it touches, by an amount that depends on
+       where it came from. A rule of thumb widens less than a ZIP-level median.</p></div>
+   <div class="state"><span class="tag t-n" style="margin:0">Needed</span>
+    <p>Missing. Exits that depend on it refuse to price rather than invent it, and name the
+       figure they are waiting for.</p></div>
+  </div>
+ </div>
+</section>
 
-      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;border-top:1px solid var(--rule);padding:11px 20px">
-        <span class="mono" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)">Round 1 of 4 · sealed bids · one buyer per lot</span>
-        <span class="mono" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)">Seed 3382 · deterministic</span>
-      </div>
-    </div>
-    <p class="note" style="margin-top:10px;max-width:60ch">Everyone gets this street. Bid on any lot, or all five. Nothing is saved until you ask for it to be.</p>
-  </section>
+<!-- ═══ 4 · THE COURSE ══════════════════════════════════════════════════ -->
+<section class="band wash">
+ <div class="wrap">
+  <div class="bandhead">
+   <div class="eyebrow">Free forever · no email</div>
+   <h2>New to this? The whole beginner problem, in fifteen minutes.</h2>
+   <p>Eight exits, one number each, with a worked example you can drag. Finish a lesson and
+      you can send its figures straight to the desk to watch all eight argue over the same house.</p>
+  </div>
+  <div class="eight">
+   <a href="exits.html#wholesale"><div class="r">I</div><div class="t">The wholesale</div><div class="d">Sell the contract, never the house.</div></a>
+   <a href="exits.html#flip"><div class="r">II</div><div class="t">The fix and flip</div><div class="d">The subtraction, taken seriously.</div></a>
+   <a href="exits.html#wholetail"><div class="r">III</div><div class="t">The wholetail</div><div class="d">The shortcut between the first two.</div></a>
+   <a href="exits.html#hold"><div class="r">IV</div><div class="t">The buy and hold</div><div class="d">The number the lender underlines.</div></a>
+   <a href="exits.html#brrrr"><div class="r">V</div><div class="t">The BRRRR</div><div class="d">The flip that refuses to sell.</div></a>
+   <a href="exits.html#subto"><div class="r">VI</div><div class="t">The subject-to</div><div class="d">You bought the payment, not the price.</div></a>
+   <a href="exits.html#novation"><div class="r">VII</div><div class="t">The novation</div><div class="d">The retail exit you never own.</div></a>
+   <a href="exits.html#land"><div class="r">VIII</div><div class="t">The land play</div><div class="d">The number nobody publishes.</div></a>
+  </div>
+  <div class="cta" style="margin-top:26px">
+   <a class="btn p" href="exits.html">Start the course →</a>
+   <a class="btn" href="desk.html#example">See a worked sheet</a>
+  </div>
+ </div>
+</section>
 
-  <!-- ── M2 · the result, and the ache ────────────────────────────────── -->
-  <section class="pad" style="padding-bottom:8px">
-    <hr class="hair">
-    <div style="padding-top:34px">
-      <div class="eyebrow" style="color:var(--ink-soft)">Movement 3 · the result</div>
-      <h2 style="font-size:26px;margin-top:10px">Four months later, the street settles</h2>
-    </div>
+<!-- ═══ 5 · THE ARCADE — the only door into the other world ═════════════ -->
+<section class="arcade">
+ <div class="wrap">
+  <div class="eyebrow">The arcade · free, no account</div>
+  <h2>Or train the instinct the fun way.</h2>
+  <p>An idle game about buying ground across eight eras — a street of five properties every
+     day, four questions each, and a phone that rings. It is the same read the desk performs,
+     with the clock and the money turned into a game.</p>
+  <div class="cta"><a class="btn p" href="arcade.html">Play the arcade →</a>
+   <a class="btn" href="exits.html">I'd rather learn first</a></div>
+  <div class="doors">
+   <figure><img src="art/door-now.png" alt="A pixel-art suburban front door, present day" width="540" height="450" loading="lazy">
+    <figcaption>Now · a door that opens</figcaption></figure>
+   <figure><img src="art/door-old.png" alt="A pixel-art industrial-era door" width="540" height="450" loading="lazy">
+    <figcaption>1890 · the same question</figcaption></figure>
+   <figure><img src="art/door-future.png" alt="A pixel-art door from a later era" width="540" height="450" loading="lazy">
+    <figcaption>Later · the rates are worse</figcaption></figure>
+  </div>
+ </div>
+ <img class="art" src="art/world-now.png" alt="A pixel-art street of houses" width="960" height="540" loading="lazy">
+</section>
 
-    <div class="sheet" style="background:var(--carbon-pink);margin-top:18px;padding:18px 22px 20px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:7px">
-        <div>
-          <span class="eyebrow" style="color:var(--ink-soft)">Settlement · round 4 · file copy</span>
-          <div style="font-size:22px;font-weight:600;margin-top:3px">1128 Marrow Lane</div>
-        </div>
-        <span class="stamp">Overpaid</span>
-      </div>
-      <table class="ledger" style="margin-top:12px">
-        <thead><tr><th>Line</th><th>Amount</th></tr></thead>
-        <tbody>
-          <tr><td>What you paid the seller</td><td>$252,000</td></tr>
-          <tr><td>What the work cost</td><td>$41,300</td></tr>
-          <tr><td>Holding it for four months</td><td>$6,800</td></tr>
-          <tr><td>What it sold for</td><td>$291,000</td></tr>
-          <tr class="tot"><td>You lost</td><td style="font-size:17px">$9,100</td></tr>
-        </tbody>
-      </table>
-      <p style="font-size:15px;color:var(--ink-mid);margin-top:14px;max-width:56ch">Two other buyers walked away from this one. The roof was not recent.</p>
-      <p style="font-size:19px;margin-top:16px;max-width:48ch;text-wrap:pretty">The real version asks the same four questions. The houses are just real.</p>
-    </div>
-  </section>
+<footer>
+ <div class="wrap">
+  <div style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap">
+   <div>
+    <a href="index.html">Home</a><a href="desk.html">The desk</a>
+    <a href="exits.html">The course</a><a href="arcade.html">The arcade</a>
+    <a href="office.html">Your desk</a>
+   </div>
+   <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase">
+    Negotiation Inc · the sheet shows its working</div>
+  </div>
+ </div>
+</footer>
 
-  <!-- ── THE SEAM ─────────────────────────────────────────────────────────
-       Design pass 3, ported from the mock to vanilla JS. The address never
-       moves — only its typeface converts. Click-staged so the visitor asks
-       for the crossing; autoplays once if the trigger is ignored; a cut, not
-       a slower sweep, under reduced motion.                                -->
-  <section class="pad" style="padding-top:26px;padding-bottom:0">
-    <div id="seam" style="position:relative;height:216px;overflow:hidden;background:#fff;
-         border-left:1px solid var(--rule);border-right:1px solid var(--rule)">
-      <!-- the far side: the app, already there, waiting to be uncovered -->
-      <div style="position:absolute;inset:0;background:#fff;display:flex;flex-direction:column;
-           align-items:center;justify-content:center;gap:6px;
-           font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif">
-        <div style="font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--a-ink-3)">The same address</div>
-        <div style="font-size:31px;font-weight:650;letter-spacing:-.015em;color:var(--a-ink)">1128 Marrow Lane</div>
-        <div style="font-size:12.5px;color:var(--a-ink-3)">looked at through a different instrument</div>
-        <div style="display:flex;align-items:center;gap:18px;margin-top:8px">
-          <a href="desk.html" data-desk style="font-size:13.5px;font-weight:600;color:var(--a-accent);text-decoration:none">The desk is on the other side &rarr;</a>
-          <button id="seam-back" style="font-family:ui-monospace,Menlo,monospace;font-size:9px;letter-spacing:.12em;
-            text-transform:uppercase;color:#8a93a6;background:none;border:0;cursor:pointer;padding:0">run it back</button>
-        </div>
-      </div>
-      <!-- the near side: paper, clipped away by the wipe -->
-      <div id="seam-paper" style="position:absolute;inset:0;background:var(--carbon-pink);
-           background-image:repeating-linear-gradient(0deg,rgba(35,32,28,.014) 0 2px,transparent 2px 4px);
-           display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
-           clip-path:inset(0 0 0 0);transition:clip-path 620ms cubic-bezier(.2,.7,.3,1)">
-        <div class="mono" style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft)">The same address</div>
-        <div style="font-size:31px;font-weight:600;letter-spacing:.01em">1128 Marrow Lane</div>
-        <div class="mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">as the arcade&rsquo;s file holds it</div>
-        <button id="seam-go" class="mono" style="margin-top:8px;font-size:10.5px;letter-spacing:.14em;
-          text-transform:uppercase;border:1.5px solid var(--ink);background:transparent;color:var(--ink);
-          padding:9px 15px;cursor:pointer">Run it through the software &rarr;</button>
-      </div>
-      <!-- one scan line, riding the wipe -->
-      <div id="seam-scan" style="position:absolute;left:0;right:0;top:-3px;height:2.5px;background:var(--ink);
-           box-shadow:0 0 14px rgba(31,95,208,.85),0 0 3px rgba(31,95,208,.9);opacity:0;
-           transform:translateY(0);transition:transform 620ms cubic-bezier(.2,.7,.3,1)"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:8px 2px 0">
-      <span class="mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Sweep · 620ms · click-driven · autoplays once if ignored</span>
-      <span class="mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Reduced motion → a cut, not a slower sweep</span>
-    </div>
-<script>
-/* The seam. Ported from Design's pass-3 mock. Three rules it must keep:
-   the visitor ASKS for the crossing (a seam that fires unasked is decoration);
-   it autoplays once if the trigger is ignored, because a landing cannot rely
-   on a click; and reduced motion gets a cut, never a slower sweep. */
-(function(){
-  var seam = document.getElementById('seam');
-  if (!seam) return;
-  var paper = document.getElementById('seam-paper'),
-      scan  = document.getElementById('seam-scan'),
-      go    = document.getElementById('seam-go'),
-      back  = document.getElementById('seam-back');
-  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var MS = reduce ? 1 : 620, crossed = false, autoUsed = false, t;
-  if (reduce) { paper.style.transitionDuration = '1ms'; scan.style.transitionDuration = '1ms'; }
-
-  function cross(){
-    if (crossed) return;
-    crossed = true; autoUsed = true;
-    paper.style.clipPath = 'inset(100% 0 0 0)';
-    // clip-path hides pixels, NOT hit-testing. Without this the clipped paper
-    // layer keeps swallowing clicks and the desk link on the far side — the
-    // page's primary CTA — is invisible AND unclickable.
-    paper.style.pointerEvents = 'none';
-    if (!reduce) {
-      scan.style.opacity = '1';
-      scan.style.transform = 'translateY(' + (seam.offsetHeight + 6) + 'px)';
-      clearTimeout(t); t = setTimeout(function(){ scan.style.opacity = '0'; }, MS + 60);
-    }
-  }
-  function runBack(){
-    crossed = false; autoUsed = true;
-    clearTimeout(t);
-    scan.style.opacity = '0';
-    scan.style.transition = 'none'; scan.style.transform = 'translateY(0)';
-    requestAnimationFrame(function(){ scan.style.transition = 'transform ' + MS + 'ms cubic-bezier(.2,.7,.3,1)'; });
-    paper.style.clipPath = 'inset(0 0 0 0)';
-    paper.style.pointerEvents = '';
-  }
-  go.addEventListener('click', cross);
-  back.addEventListener('click', runBack);
-
-  if ('IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function(es){
-      es.forEach(function(e){
-        if (e.isIntersecting && !crossed && !autoUsed) {
-          autoUsed = true;
-          setTimeout(function(){ if (!crossed) cross(); }, 700);
-        }
-      });
-    }, { threshold: 0.7 });
-    io.observe(seam);
-  }
-})();
-</script>
-
-  </section>
-
-  <div style="height:30px"></div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════════════════
-     THE APP — movements 3, 4 and 5. Nothing returns to paper.
-     ══════════════════════════════════════════════════════════════════════ -->
-<div class="app">
-
-  <!-- ── M3 · what it actually is ─────────────────────────────────────── -->
-  <section class="pad" style="padding-top:44px;padding-bottom:8px">
-    <div style="font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--a-ink-3)">Movement 4 · what it actually is</div>
-    <h2 style="font-size:34px;margin-top:12px;max-width:26ch;text-wrap:pretty">The offer you can make is not one number. It is six.</h2>
-    <p style="font-size:17px;color:var(--a-ink-2);margin-top:12px;max-width:60ch;text-wrap:pretty">
-      You paid <span class="anum">$252,000</span> in cash for this house and lost <span class="anum">$9,100</span>.
-      The structure that scored highest pays this seller <span class="anum">$258,000</span> and asks
-      <span class="anum">$26,000</span> of your money at the table. Two of the six do not work here — and the
-      software says which two, and why.
-    </p>
-
-    <div class="card" style="margin-top:22px;overflow:hidden">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:13px 17px;border-bottom:1px solid var(--a-line)">
-        <div style="display:flex;align-items:center;gap:13px">
-          <span style="font-size:13px;font-weight:650">Negotiation Inc</span>
-          <span style="font-size:12px;color:var(--a-ink-3)">Underwrite</span>
-        </div>
-        <span class="mono" style="font-size:11px;color:var(--a-ink-3)">strategy_fit.v1 · confidence high</span>
-      </div>
-
-      <div style="padding:15px 17px 4px">
-        <div style="font-size:20px;font-weight:650">1128 Marrow Lane</div>
-        <div style="font-size:13px;color:var(--a-ink-2);margin-top:3px">Single-family · 1,610 sqft · vacant since March · listed at $249,500</div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;padding:13px 17px 4px">
-        <div class="kpi">
-          <div style="font-size:11px;color:var(--a-ink-3)">ARV</div>
-          <div class="anum" style="font-size:20px;font-weight:650;margin-top:2px">$291,000</div>
-          <div class="anum" style="font-size:11px;color:var(--a-ink-3);margin-top:1px">$268k–$308k</div>
-        </div>
-        <div class="kpi">
-          <div style="font-size:11px;color:var(--a-ink-3)">Repairs</div>
-          <div class="anum" style="font-size:20px;font-weight:650;margin-top:2px">$41,300</div>
-          <div style="font-size:11px;color:var(--a-ink-3);margin-top:1px">12 systems priced</div>
-        </div>
-        <div class="kpi">
-          <div style="font-size:11px;color:var(--a-ink-3)">Smart MAO</div>
-          <div class="anum" style="font-size:20px;font-weight:650;margin-top:2px">$163,000</div>
-          <div style="font-size:11px;color:var(--a-ink-3);margin-top:1px">35% under ask</div>
-        </div>
-      </div>
-
-      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding:14px 17px 8px">
-        <span style="font-size:12px;font-weight:650;color:var(--a-ink-2)">Six structures, scored against this seller’s situation</span>
-        <span style="font-size:11px;color:var(--a-ink-3)">Fit is not profit</span>
-      </div>
-
-      <div style="padding:0 17px 6px">
-        <div class="row top">
-          <span class="mono" style="font-size:12px;color:var(--a-ink-3)">1</span>
-          <div>
-            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:14px;font-weight:600">Seller finance</div>
-            <div style="font-size:12.5px;color:var(--a-ink-2);margin-top:2px;line-height:1.45">Owned free and clear, vacant since March. Nobody here needs the lump sum this month.</div>
-          </div>
-          <span class="anum" style="font-size:14px;font-weight:650;text-align:right">$258,000</span>
-          <span class="mono score" style="font-size:12px;color:var(--a-ink-3);text-align:right">84</span>
-        </div>
-        <div class="row">
-          <span class="mono" style="font-size:12px;color:var(--a-ink-3)">2</span>
-          <div>
-            <div style="font-size:14px;font-weight:600">Novation</div>
-            <div style="font-size:12.5px;color:var(--a-ink-2);margin-top:2px;line-height:1.45">Listed with an agent whose commission has to be handled somewhere. This is where.</div>
-          </div>
-          <span class="anum" style="font-size:14px;font-weight:650;text-align:right">$221,000</span>
-          <span class="mono score" style="font-size:12px;color:var(--a-ink-3);text-align:right">71</span>
-        </div>
-        <div class="row">
-          <span class="mono" style="font-size:12px;color:var(--a-ink-3)">3</span>
-          <div>
-            <div style="font-size:14px;font-weight:600">Cash</div>
-            <div style="font-size:12.5px;color:var(--a-ink-2);margin-top:2px;line-height:1.45">Closes in eleven days and is $86,500 under what they asked for.</div>
-          </div>
-          <span class="anum" style="font-size:14px;font-weight:650;text-align:right">$163,000</span>
-          <span class="mono score" style="font-size:12px;color:var(--a-ink-3);text-align:right">66</span>
-        </div>
-        <div class="row">
-          <span class="mono" style="font-size:12px;color:var(--a-ink-3)">4</span>
-          <div>
-            <div style="font-size:14px;font-weight:600">Wrap</div>
-            <div style="font-size:12.5px;color:var(--a-ink-2);margin-top:2px;line-height:1.45">Works on paper and adds a moving part to a file that has an estate in it.</div>
-          </div>
-          <span class="anum" style="font-size:14px;font-weight:650;text-align:right">$187,000</span>
-          <span class="mono score" style="font-size:12px;color:var(--a-ink-3);text-align:right">41</span>
-        </div>
-        <div class="row">
-          <span class="mono" style="font-size:12px;color:var(--a-ink-3)">5</span>
-          <div>
-            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:14px;font-weight:600">
-              Hybrid <span class="tag" style="background:rgba(166,97,13,.12);color:var(--a-warn)">Does not pencil</span>
-            </div>
-            <div style="font-size:12.5px;color:var(--a-ink-2);margin-top:2px;line-height:1.45">The repair number is too large for any part of it to be deferred safely.</div>
-          </div>
-          <span class="anum" style="font-size:14px;font-weight:650;text-align:right">$191,000</span>
-          <span class="mono score" style="font-size:12px;color:var(--a-ink-3);text-align:right">22</span>
-        </div>
-        <div class="row">
-          <span class="mono" style="font-size:12px;color:var(--a-ink-3)">6</span>
-          <div>
-            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:14px;font-weight:600">
-              Subject-to <span class="tag" style="background:#eef1f6;color:var(--a-ink-2)">Not suitable</span>
-            </div>
-            <div style="font-size:12.5px;color:var(--a-ink-2);margin-top:2px;line-height:1.45">No loan on record. This structure needs one to exist.</div>
-          </div>
-          <span class="anum" style="font-size:14px;font-weight:650;text-align:right">—</span>
-          <span class="mono score" style="font-size:12px;color:var(--a-ink-3);text-align:right">—</span>
-        </div>
-      </div>
-
-      <div style="margin:8px 17px 17px;padding:11px 13px;background:rgba(166,97,13,.07);border:1px solid rgba(166,97,13,.22);border-radius:8px;font-size:12.5px;color:#6f4409;line-height:1.5">
-        Of the exits priced here, renting it is the tightest at $198,000 — that is the real ceiling under any of these structures.
-      </div>
-    </div>
-  </section>
-
-  <!-- ── M4 · who it is for ───────────────────────────────────────────── -->
-  <section class="pad" style="padding-top:40px;padding-bottom:8px">
-    <div style="border-top:1px solid var(--a-line);padding-top:34px">
-      <div style="font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--a-ink-3)">Movement 5 · who it is for</div>
-      <h2 style="font-size:28px;margin:12px 0 18px">Three desks, one file format</h2>
-      <dl style="margin:0">
-        <div style="display:grid;grid-template-columns:11rem 1fr;gap:20px;border-bottom:1px solid var(--a-line);padding:13px 0">
-          <dt style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--a-ink-3);padding-top:4px">Wholesalers</dt>
-          <dd style="margin:0;font-size:16px;line-height:1.55;max-width:62ch;color:var(--a-ink)">You already know six ways to buy a house. This prices all six against one seller while you are still reading the notes.</dd>
-        </div>
-        <div style="display:grid;grid-template-columns:11rem 1fr;gap:20px;border-bottom:1px solid var(--a-line);padding:13px 0">
-          <dt style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--a-ink-3);padding-top:4px">Lenders</dt>
-          <dd style="margin:0;font-size:16px;line-height:1.55;max-width:62ch;color:var(--a-ink)">The file shows whether the borrower’s exit is the only exit available on that address. It usually is not.</dd>
-        </div>
-        <div style="display:grid;grid-template-columns:11rem 1fr;gap:20px;border-bottom:1px solid var(--a-line);padding:13px 0">
-          <dt style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--a-ink-3);padding-top:4px">Funds</dt>
-          <dd style="margin:0;font-size:16px;line-height:1.55;max-width:62ch;color:var(--a-ink)">The same underwriting on every address, run by whoever is at the desk. The model is in the file, not in someone’s head.</dd>
-        </div>
-      </dl>
-    </div>
-  </section>
-
-  <!-- ── M5 · the way in ──────────────────────────────────────────────── -->
-  <section id="in" class="pad" style="padding-top:40px;padding-bottom:44px">
-    <div style="border-top:1px solid var(--a-line);padding-top:34px">
-      <div style="font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--a-ink-3)">Movement 6 · the way in</div>
-      <div style="background:var(--a-wash);border:1px solid var(--a-line);border-radius:12px;padding:26px 28px;margin-top:14px;max-width:44rem">
-        <h2 style="font-size:26px;line-height:1.25;max-width:26ch">Play. When you want to run a real address, make an account.</h2>
-        <p style="font-size:16px;color:var(--a-ink-2);margin-top:12px;max-width:52ch">
-          Saving your board is free and does not ask for a card. The street above needs nothing from you at all.
-        </p>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px">
-          <a href="arcade.html" class="btn btn-p" data-arcade>Play the arcade</a>
-          <a href="exits.html" class="btn btn-s" data-course>Take the course</a>
-        </div>
-        <p style="font-size:12.5px;color:var(--a-ink-3);margin-top:12px;max-width:52ch">
-          The account arrives with the desk. Until then, everything above is the product being itself.</p>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;border-top:1px solid var(--a-line);margin-top:34px;padding-top:14px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--a-ink-3)">
-        <span>Negotiation Inc · underwriting of record</span>
-        <span>No pricing on this page. The trial fires on usage, never on a timer.</span>
-      </div>
-    </div>
-  </section>
-</div>
-
-</div>
-
-</body>
-</html>
+</body></html>

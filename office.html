@@ -1,0 +1,226 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your desk · Negotiation Inc</title>
+<meta name="description" content="Everything you have open at Negotiation Inc: the sheet in progress, how far through the course you are, and what the arcade owes you.">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   YOUR DESK — the dashboard.
+
+   The honest version of "sign in". There is no account system yet, and
+   pretending otherwise with a form that emails nobody would be the exact
+   dishonesty this product is built against. What a dashboard is actually FOR
+   is answering "where was I?" — and all three surfaces already save that, on
+   this device, with no server involved.
+
+   So this page reads those saves and shows the state of play. When accounts
+   arrive, this page is the thing that gets a login in front of it; nothing
+   here has to be rebuilt, it just starts syncing.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --faint:#9aa3b2;
+  --line:#e4e8ef; --line-2:#c9d0dc; --wash:#f6f8fb; --card:#fff;
+  --blue:#1f5fd0; --blue-deep:#153872; --blue-soft:#eaf0fc;
+  --green:#177a4d; --green-soft:#eaf6f0; --amber:#a6610d; --amber-soft:#fdf8ee;
+  --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:'JB Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--wash)}
+body{font-family:var(--sans);color:var(--ink);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.02em;line-height:1.12}
+a{color:var(--blue)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1040px;margin:0 auto;padding:0 26px}
+.eyebrow{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
+header{background:#fff;border-bottom:1px solid var(--line)}
+.mast{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:14px 0;flex-wrap:wrap}
+.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:inherit}
+.mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
+.mark .inc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--blue)}
+.mark:hover .nm{color:var(--blue)}
+.masknav{display:flex;gap:18px;font-size:14px;flex-wrap:wrap}
+.masknav a{color:var(--mid);text-decoration:none}
+.masknav a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:650;padding:9px 15px;
+ border:1.5px solid var(--ink);background:#fff;color:var(--ink);text-decoration:none;cursor:pointer}
+.btn:hover{border-color:var(--blue);color:var(--blue)}
+.btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.p:hover{background:var(--blue-deep);border-color:var(--blue-deep)}
+.btn.sm{font-size:12.5px;padding:6px 11px}
+h1{font-size:38px;margin-top:26px}
+.sub{font-size:17px;color:var(--mid);margin-top:8px;max-width:58ch}
+.note{border:1px solid var(--line-2);border-left:4px solid var(--blue);background:var(--blue-soft);
+ padding:13px 16px;margin-top:20px;font-size:14.5px;color:var(--mid);max-width:74ch}
+.note b{color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:26px 0 46px}
+.card{background:#fff;border:1px solid var(--line);display:flex;flex-direction:column}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line)}
+.cb{padding:16px;flex:1}
+.cf{padding:12px 16px;border-top:1px solid var(--line);background:var(--wash);display:flex;gap:9px;flex-wrap:wrap}
+.big{font-family:var(--serif);font-size:31px;font-weight:700;letter-spacing:-.02em}
+.k{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.rows{margin-top:12px}
+.row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
+.row:last-child{border-bottom:0}
+.row .v{font-variant-numeric:tabular-nums;font-weight:650}
+.empty{color:var(--soft);font-size:14.5px}
+.bar{height:6px;background:var(--line);margin-top:12px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--blue)}
+.pips{display:flex;gap:4px;flex-wrap:wrap;margin-top:12px}
+.pips span{width:20px;height:20px;border:1px solid var(--line-2);font-family:var(--mono);font-size:9px;
+ display:flex;align-items:center;justify-content:center;color:var(--faint)}
+.pips span.on{background:var(--green-soft);border-color:#bfe0cd;color:var(--green);font-weight:700}
+footer{border-top:1px solid var(--line);background:#fff;padding:24px 0 40px;font-size:13.5px;color:var(--soft)}
+footer a{color:var(--mid);text-decoration:none;margin-right:16px}
+@media (max-width:860px){ .grid{grid-template-columns:1fr} h1{font-size:30px} }
+</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/mono-400.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
+ font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:'JB Mono';src:url('fonts/mono-400.woff2') format('woff2');
+ font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'JB Mono';src:url('fonts/mono-700.woff2') format('woff2');
+ font-weight:700;font-style:normal;font-display:swap}
+:root{
+ --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
+ --mono:'JB Mono',ui-monospace,Menlo,Consolas,monospace !important;
+}
+/* the pages that set the family literally rather than through the token */
+.app h1,.app h2,h1,h2,h3{font-family:var(--serif)}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="wrap mast">
+  <a class="mark" href="index.html" title="Negotiation Inc"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+  <nav class="masknav">
+   <a href="index.html">Home</a>
+   <a href="exits.html">The course</a>
+   <a href="desk.html">The desk</a>
+   <a href="arcade.html">The arcade</a>
+  </nav>
+ </div>
+</header>
+
+<div class="wrap">
+ <div class="eyebrow" style="margin-top:28px">Your desk</div>
+ <h1>Where you left off.</h1>
+ <p class="sub">Everything you have open across the course, the desk and the arcade.</p>
+ <div class="note"><b>No account, on purpose — for now.</b> All of this is saved in this
+  browser, on this device, and none of it has ever been sent anywhere. That is why there is
+  nothing to sign into yet. When accounts arrive they go in front of this page, so what you
+  see here is what will sync — it will not be rebuilt.</div>
+
+ <div class="grid">
+  <!-- ── the desk ── -->
+  <div class="card">
+   <div class="ch"><span class="k">The desk</span><span class="k" id="d-state">—</span></div>
+   <div class="cb" id="d-body"></div>
+   <div class="cf" id="d-foot"></div>
+  </div>
+  <!-- ── the course ── -->
+  <div class="card">
+   <div class="ch"><span class="k">The eight exits</span><span class="k" id="c-state">—</span></div>
+   <div class="cb" id="c-body"></div>
+   <div class="cf" id="c-foot"></div>
+  </div>
+  <!-- ── the arcade ── -->
+  <div class="card">
+   <div class="ch"><span class="k">The arcade</span><span class="k" id="a-state">—</span></div>
+   <div class="cb" id="a-body"></div>
+   <div class="cf" id="a-foot"></div>
+  </div>
+ </div>
+</div>
+
+<footer><div class="wrap">
+ <a href="index.html">Home</a><a href="desk.html">The desk</a>
+ <a href="exits.html">The course</a><a href="arcade.html">The arcade</a>
+</div></footer>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = v => '$' + Math.round(v).toLocaleString('en-US');
+const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } };
+
+/* ── the desk ─────────────────────────────────────────────────────────── */
+(() => {
+  const d = read('ni-desk-v2'), f = (d && typeof d === 'object' && d.f) || {};
+  const num = id => { const r = String((f[id]||{}).v || '').replace(/[^0-9.]/g,'');
+    return r === '' ? null : parseFloat(r); };
+  const filled = ['asking','arv','repairs','rent','balance','piti','arrears'].filter(k => num(k) !== null);
+  const est = filled.filter(k => f[k] && f[k].e);
+  const addr = (d && typeof d.addr === 'string' && d.addr.trim()) ? d.addr.trim() : '';
+  let teaching = null; try { teaching = localStorage.getItem('ni-desk-case'); } catch(e){}
+  if (!filled.length) {
+    $('d-state').textContent = 'empty';
+    $('d-body').innerHTML = `<div class="big">No sheet yet</div>
+      <p class="empty" style="margin-top:8px">One number — an asking price — is enough to open the first exits.</p>`;
+    $('d-foot').innerHTML = `<a class="btn p sm" href="desk.html">Start a sheet</a>
+      <a class="btn sm" href="desk.html#example">Load a worked example</a>`;
+    return;
+  }
+  const conf = est.length === 0 ? 'high' : est.length < filled.length/2 ? 'medium' : 'low';
+  $('d-state').textContent = teaching ? (teaching === 'demo' ? 'sample' : 'teaching example') : 'in progress';
+  $('d-body').innerHTML = `<div class="big">${esc(addr || 'Unnamed sheet')}</div>
+    <div class="rows">
+      <div class="row"><span>Figures entered</span><span class="v">${filled.length - est.length}</span></div>
+      <div class="row"><span>Marked estimate</span><span class="v">${est.length}</span></div>
+      <div class="row"><span>Confidence</span><span class="v">${conf}</span></div>
+      ${num('asking') !== null ? `<div class="row"><span>Asking</span><span class="v">${money(num('asking'))}</span></div>` : ''}
+    </div>`;
+  $('d-foot').innerHTML = `<a class="btn p sm" href="desk.html">Open the sheet</a>`;
+})();
+
+/* ── the course ───────────────────────────────────────────────────────── */
+(() => {
+  const NAMES = ['Wholesale','Fix and flip','Wholetail','Buy and hold','BRRRR','Subject-to','Novation','Land play'];
+  const R = ['I','II','III','IV','V','VI','VII','VIII'];
+  const m = read('ni-exits-v1');
+  const seen = (m && Array.isArray(m.seen) ? m.seen : []).filter(i => i >= 0 && i < 8);
+  const at = m && Number.isInteger(m.ex) ? Math.min(m.ex, 8) : 0;
+  const pct = Math.round(seen.length / 8 * 100);
+  $('c-state').textContent = seen.length === 8 ? 'finished' : seen.length ? pct + '%' : 'not started';
+  $('c-body').innerHTML = seen.length
+    ? `<div class="big">${seen.length} of 8</div>
+       <p class="empty" style="margin-top:6px">${at < 8 ? 'You were on ' + R[at] + ' · ' + NAMES[at] : 'You reached the end.'}</p>
+       <div class="bar"><i style="width:${pct}%"></i></div>
+       <div class="pips">${R.map((r,i)=>`<span class="${seen.includes(i)?'on':''}">${r}</span>`).join('')}</div>`
+    : `<div class="big">Fifteen minutes</div>
+       <p class="empty" style="margin-top:8px">Eight exits, one number each, with a worked example you can drag.</p>`;
+  $('c-foot').innerHTML = seen.length && at < 8
+    ? `<a class="btn p sm" href="exits.html">Resume at ${R[at]}</a>`
+    : `<a class="btn p sm" href="exits.html">${seen.length ? 'Run it again' : 'Start the course'}</a>`;
+})();
+
+/* ── the arcade ───────────────────────────────────────────────────────── */
+(() => {
+  const w = read('ni-portfolio-v2'), S = (w && typeof w === 'object' && w.S) || null;
+  if (!S) {
+    $('a-state').textContent = 'not played';
+    $('a-body').innerHTML = `<div class="big">Eight eras</div>
+      <p class="empty" style="margin-top:8px">A street of five properties a day, four questions each, and a phone that rings.</p>`;
+    $('a-foot').innerHTML = `<a class="btn p sm" href="arcade.html">Play the arcade</a>`;
+    return;
+  }
+  const deeds = Array.isArray(S.deeds) ? S.deeds.length : 0;
+  const streets = +S.streets || 0, best = +S.bestPct || 0;
+  $('a-state').textContent = 'saved';
+  $('a-body').innerHTML = `<div class="big">${money(+S.cash || 0)}</div>
+    <div class="rows">
+      <div class="row"><span>Streets settled</span><span class="v">${streets}</span></div>
+      <div class="row"><span>Best read</span><span class="v">${best}% of the board</span></div>
+      <div class="row"><span>Ground held</span><span class="v">${deeds} of 40</span></div>
+    </div>`;
+  $('a-foot').innerHTML = `<a class="btn p sm" href="arcade.html">Back to the arcade</a>
+    ${streets ? '<a class="btn sm" href="desk.html">Price one for real</a>' : ''}`;
+})();
+</script>
+</body></html>

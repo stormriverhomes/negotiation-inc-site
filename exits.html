@@ -207,7 +207,25 @@ footer{margin-top:30px;padding-top:13px;border-top:3px solid var(--ink);
  .pane{animation:in .2s ease-out}
  @keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 }
+.marklink{text-decoration:none;color:inherit;display:inline-block}
+.marklink:hover .nm{color:var(--blue)}
 </style><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/mono-400.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
+ font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:'JB Mono';src:url('fonts/mono-400.woff2') format('woff2');
+ font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'JB Mono';src:url('fonts/mono-700.woff2') format('woff2');
+ font-weight:700;font-style:normal;font-display:swap}
+:root{
+ --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
+ --mono:'JB Mono',ui-monospace,Menlo,Consolas,monospace !important;
+}
+/* the pages that set the family literally rather than through the token */
+.app h1,.app h2,h1,h2,h3{font-family:var(--serif)}
+</style>
 <meta property="og:type" content="website">
 <meta property="og:title" content="The Eight Exits · Negotiation Inc">
 <meta property="og:description" content="Every way out of a property deal, with the arithmetic shown. Fifteen minutes. No email, nothing to buy.">
@@ -217,10 +235,11 @@ footer{margin-top:30px;padding-top:13px;border-top:3px solid var(--ink);
 <header>
  <div class="top">
   <div>
-   <div class="mark"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></div>
+   <a href="index.html" class="marklink" title="Negotiation Inc — home"><div class="mark"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></div></a>
    <div class="marksub">The eight exits &middot; a reference course</div>
   </div>
   <nav>
+   <a href="index.html">Home</a>
    <a href="desk.html">The desk</a>
    <a href="arcade.html">The arcade</a>
   </nav>

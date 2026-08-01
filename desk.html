@@ -210,11 +210,29 @@ footer{margin-top:12px;padding-top:12px;display:flex;
  @page{margin:18mm 16mm}
 }
 #printdoc{display:none;max-width:720px;margin:0 auto;color:var(--ink);font-family:var(--sans)}
+.marklink{text-decoration:none;color:inherit;display:inline-block}
+.marklink:hover .nm{color:var(--blue)}
 </style>
 <!-- publish.mjs writes window.NI_PRIORS_URL here, and only when priors.js
      actually exists. The desk then fetches that file the first time an address
      yields a ZIP: no 404 when it is absent, no 570 KB when it is unused. -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/mono-400.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
+ font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:'JB Mono';src:url('fonts/mono-400.woff2') format('woff2');
+ font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'JB Mono';src:url('fonts/mono-700.woff2') format('woff2');
+ font-weight:700;font-style:normal;font-display:swap}
+:root{
+ --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
+ --mono:'JB Mono',ui-monospace,Menlo,Consolas,monospace !important;
+}
+/* the pages that set the family literally rather than through the token */
+.app h1,.app h2,h1,h2,h3{font-family:var(--serif)}
+</style>
 <meta property="og:type" content="website">
 <meta property="og:title" content="The Desk · Negotiation Inc">
 <meta property="og:description" content="Type what you know about a property. The sheet runs every exit, shows its working, and says what it is estimating.">
@@ -225,10 +243,11 @@ footer{margin-top:12px;padding-top:12px;display:flex;
 <div class="wrap no-print">
 <header>
  <div>
-  <div class="mark"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></div>
+  <a href="index.html" class="marklink" title="Negotiation Inc — home"><div class="mark"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></div></a>
   <div class="marksub">The desk · underwriting worksheet</div>
  </div>
  <nav>
+  <a href="index.html">Home</a>
   <a href="exits.html">The course</a>
   <a href="arcade.html">The arcade</a>
  </nav>
