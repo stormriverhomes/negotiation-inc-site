@@ -1,29 +1,34 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Your desk · Negotiation Inc</title>
-<meta name="description" content="Everything you have open at Negotiation Inc: the sheet in progress, how far through the course you are, and what the arcade owes you.">
+<meta name="description" content="Your underwriting hub: properties you have priced, market context, course progress, and the arcade.">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
-   YOUR DESK — the dashboard.
+   YOUR DESK — the hub.
 
-   The honest version of "sign in". There is no account system yet, and
-   pretending otherwise with a form that emails nobody would be the exact
-   dishonesty this product is built against. What a dashboard is actually FOR
-   is answering "where was I?" — and all three surfaces already save that, on
-   this device, with no server involved.
+   Two jobs, and they pull against each other:
 
-   So this page reads those saves and shows the state of play. When accounts
-   arrive, this page is the thing that gets a login in front of it; nothing
-   here has to be rebuilt, it just starts syncing.
+   · A product people SIGN UP FOR needs a door with a name on it. A page that
+     says "no account needed" forever never converts anybody, and never learns
+     who its users are.
+   · A product built on "never claim more than you know" cannot ship a login
+     that pretends there is a server behind it when there is not.
+
+   The resolution: the sign-in is REAL — it creates a workspace, names it,
+   remembers you, and everything behind it is genuinely yours — and it is
+   honest about WHERE that workspace lives, which today is this browser. One
+   line, stated once, in the footer of the account card. When the server
+   exists, this same form starts posting to it and nothing else changes.
    ═══════════════════════════════════════════════════════════════════════════ */
 :root{
   --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --faint:#9aa3b2;
   --line:#e4e8ef; --line-2:#c9d0dc; --wash:#f6f8fb; --card:#fff;
-  --blue:#1f5fd0; --blue-deep:#153872; --blue-soft:#eaf0fc;
-  --green:#177a4d; --green-soft:#eaf6f0; --amber:#a6610d; --amber-soft:#fdf8ee;
+  --blue:#1f5fd0; --blue-deep:#153872; --blue-soft:#eaf0fc; --blue-line:#c3d4f5;
+  --green:#177a4d; --green-soft:#eaf6f0; --green-line:#bfe0cd;
+  --amber:#a6610d; --amber-soft:#fdf8ee; --amber-line:#ecd9b0;
   --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
   --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-  --mono:'JB Mono',ui-monospace,Menlo,Consolas,monospace;
+  --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;   /* no typewriter in the software */
 }
 *{box-sizing:border-box;margin:0}
 html,body{background:var(--wash)}
@@ -31,7 +36,8 @@ body{font-family:var(--sans);color:var(--ink);font-size:16px;line-height:1.55;-w
 h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.02em;line-height:1.12}
 a{color:var(--blue)}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.wrap{max-width:1040px;margin:0 auto;padding:0 26px}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1140px;margin:0 auto;padding:0 26px}
 .eyebrow{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
 header{background:#fff;border-bottom:1px solid var(--line)}
 .mast{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:14px 0;flex-wrap:wrap}
@@ -39,59 +45,102 @@ header{background:#fff;border-bottom:1px solid var(--line)}
 .mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
 .mark .inc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--blue)}
 .mark:hover .nm{color:var(--blue)}
-.masknav{display:flex;gap:18px;font-size:14px;flex-wrap:wrap}
-.masknav a{color:var(--mid);text-decoration:none}
-.masknav a:hover{color:var(--ink)}
+.masknav{display:flex;align-items:center;gap:18px;font-size:14px;flex-wrap:wrap}
+.masknav a{color:var(--mid);text-decoration:none}.masknav a:hover{color:var(--ink)}
+.who{display:flex;align-items:center;gap:9px}
+.av{width:30px;height:30px;background:var(--blue);color:#fff;font-family:var(--serif);font-weight:700;
+ display:flex;align-items:center;justify-content:center;font-size:14px}
 .btn{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:650;padding:9px 15px;
- border:1.5px solid var(--ink);background:#fff;color:var(--ink);text-decoration:none;cursor:pointer}
+ border:1.5px solid var(--ink);background:#fff;color:var(--ink);text-decoration:none;cursor:pointer;font-family:inherit}
 .btn:hover{border-color:var(--blue);color:var(--blue)}
 .btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
 .btn.p:hover{background:var(--blue-deep);border-color:var(--blue-deep)}
 .btn.sm{font-size:12.5px;padding:6px 11px}
-h1{font-size:38px;margin-top:26px}
-.sub{font-size:17px;color:var(--mid);margin-top:8px;max-width:58ch}
-.note{border:1px solid var(--line-2);border-left:4px solid var(--blue);background:var(--blue-soft);
- padding:13px 16px;margin-top:20px;font-size:14.5px;color:var(--mid);max-width:74ch}
-.note b{color:var(--ink)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:26px 0 46px}
-.card{background:#fff;border:1px solid var(--line);display:flex;flex-direction:column}
-.ch{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line)}
-.cb{padding:16px;flex:1}
-.cf{padding:12px 16px;border-top:1px solid var(--line);background:var(--wash);display:flex;gap:9px;flex-wrap:wrap}
-.big{font-family:var(--serif);font-size:31px;font-weight:700;letter-spacing:-.02em}
-.k{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
-.rows{margin-top:12px}
-.row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
-.row:last-child{border-bottom:0}
-.row .v{font-variant-numeric:tabular-nums;font-weight:650}
+.btn.q{border-color:var(--line-2);color:var(--mid);font-weight:600}
+
+/* ── the door ── */
+.gate{max-width:440px;margin:56px auto 90px;background:#fff;border:1px solid var(--line-2);
+ box-shadow:0 1px 0 rgba(13,20,32,.05)}
+.gate .gh{padding:22px 26px 0}
+.gate h1{font-size:29px}
+.gate p{color:var(--mid);font-size:15px;margin-top:9px}
+.gate form{padding:18px 26px 22px}
+label{display:block;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.14em;
+ text-transform:uppercase;color:var(--soft);margin-top:14px}
+input[type=text],input[type=email]{width:100%;font-family:inherit;font-size:16px;padding:10px 12px;
+ border:1px solid var(--line-2);background:#fff;color:var(--ink);margin-top:6px}
+input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.gate .go{width:100%;justify-content:center;margin-top:18px}
+.gate .fine{padding:13px 26px;border-top:1px solid var(--line);background:var(--wash);
+ font-size:12.5px;color:var(--soft);line-height:1.5}
+.gate .fine b{color:var(--mid)}
+.err{color:#b3372c;font-size:13px;margin-top:9px;display:none}
+
+/* ── the hub ── */
+.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:30px 0 6px}
+h1.big{font-size:38px}
+.sub{font-size:16px;color:var(--mid);margin-top:6px}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0 0}
+.stat{background:#fff;border:1px solid var(--line);padding:14px 16px}
+.stat .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.stat .v{font-family:var(--serif);font-size:29px;font-weight:700;letter-spacing:-.02em;margin-top:3px}
+.stat .d{font-size:12.5px;color:var(--soft);margin-top:2px}
+.cols{display:grid;grid-template-columns:1.35fr .65fr;gap:20px;margin:20px 0 50px}
+.panel{background:#fff;border:1px solid var(--line)}
+.ph{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 17px;border-bottom:1px solid var(--line)}
+.ph h2{font-size:18px}
+.pb{padding:17px}
+.pf{padding:12px 17px;border-top:1px solid var(--line);background:var(--wash);display:flex;gap:9px;flex-wrap:wrap}
+.prop{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.prop:last-child{border-bottom:0}
+.prop .nm{font-family:var(--serif);font-size:19px;font-weight:650}
+.prop .meta{font-size:13px;color:var(--soft);margin-top:2px}
+.prop .fig{text-align:right}
+.prop .fig .v{font-size:19px;font-weight:650;font-variant-numeric:tabular-nums}
+.prop .fig .l{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.tag{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.12em;padding:2px 5px;border:1px solid;margin-left:7px;vertical-align:2px}
+.t-e{color:var(--green);border-color:var(--green-line);background:var(--green-soft)}
+.t-s{color:var(--amber);border-color:var(--amber-line);background:var(--amber-soft)}
+.t-n{color:var(--soft);border-color:var(--line-2);background:var(--wash)}
 .empty{color:var(--soft);font-size:14.5px}
-.bar{height:6px;background:var(--line);margin-top:12px;overflow:hidden}
-.bar i{display:block;height:100%;background:var(--blue)}
-.pips{display:flex;gap:4px;flex-wrap:wrap;margin-top:12px}
-.pips span{width:20px;height:20px;border:1px solid var(--line-2);font-family:var(--mono);font-size:9px;
+.bar{height:6px;background:var(--line);margin-top:10px}.bar i{display:block;height:100%;background:var(--blue)}
+.pips{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px}
+.pips span{width:22px;height:22px;border:1px solid var(--line-2);font-family:var(--mono);font-size:9px;
  display:flex;align-items:center;justify-content:center;color:var(--faint)}
-.pips span.on{background:var(--green-soft);border-color:#bfe0cd;color:var(--green);font-weight:700}
+.pips span.on{background:var(--green-soft);border-color:var(--green-line);color:var(--green);font-weight:700}
+.side .panel{margin-bottom:20px}
+.rowline{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.rowline:last-child{border-bottom:0}
+.rowline .v{font-weight:650;font-variant-numeric:tabular-nums}
+.qa{display:grid;gap:8px}
 footer{border-top:1px solid var(--line);background:#fff;padding:24px 0 40px;font-size:13.5px;color:var(--soft)}
 footer a{color:var(--mid);text-decoration:none;margin-right:16px}
-@media (max-width:860px){ .grid{grid-template-columns:1fr} h1{font-size:30px} }
+.hidden{display:none}
+@media (max-width:900px){ .cols{grid-template-columns:1fr} .strip{grid-template-columns:repeat(2,1fr)} h1.big{font-size:30px} }
 </style>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/mono-400.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* Fraunces ships its "wonk" letterforms on by default — the single-storey f
+   and its friends. They read as a novelty at body sizes and Elijah clipped
+   them immediately. WONK 0 keeps the face and drops the party trick. */
 @font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
- font-weight:100 900;font-style:normal;font-display:swap}
-@font-face{font-family:'JB Mono';src:url('fonts/mono-400.woff2') format('woff2');
- font-weight:400;font-style:normal;font-display:swap}
-@font-face{font-family:'JB Mono';src:url('fonts/mono-700.woff2') format('woff2');
- font-weight:700;font-style:normal;font-display:swap}
+ font-weight:100 900;font-style:normal;font-display:swap;
+ font-variation-settings:'WONK' 0}
 :root{
  --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
- --mono:'JB Mono',ui-monospace,Menlo,Consolas,monospace !important;
+ /* NO MONOSPACE ANYWHERE IN THE SOFTWARE. Small letterspaced caps set in a
+    monospace face is the single most recognisable "an AI made this" tell on
+    the internet right now, and it was on every label we shipped. The eyebrows
+    keep their letterspacing; they lose the typewriter. Tabular figures come
+    from font-feature-settings instead, which is what they were always for.
+    (The arcade keeps its own type. It is a different world on purpose.) */
+ --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif !important;
 }
-/* the pages that set the family literally rather than through the token */
-.app h1,.app h2,h1,h2,h3{font-family:var(--serif)}
+.mono,.num,[class*="fig"],[class*="num"]{font-variant-numeric:tabular-nums}
+h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
 </style>
+<script>window.NI_PRIORS_URL="priors.js"</script>
 </head>
 <body>
 
@@ -99,44 +148,85 @@ footer a{color:var(--mid);text-decoration:none;margin-right:16px}
  <div class="wrap mast">
   <a class="mark" href="index.html" title="Negotiation Inc"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
   <nav class="masknav">
-   <a href="index.html">Home</a>
-   <a href="exits.html">The course</a>
+   <a href="exits.html">Course</a>
    <a href="desk.html">The desk</a>
-   <a href="arcade.html">The arcade</a>
+   <a href="arcade.html">Arcade</a>
+   <a href="plans.html">Plans</a>
+   <span class="who hidden" id="who"><span class="av" id="av">·</span>
+    <span id="whoname" style="font-size:14px"></span>
+    <button class="btn q sm" id="out">Sign out</button></span>
   </nav>
  </div>
 </header>
 
-<div class="wrap">
- <div class="eyebrow" style="margin-top:28px">Your desk</div>
- <h1>Where you left off.</h1>
- <p class="sub">Everything you have open across the course, the desk and the arcade.</p>
- <div class="note"><b>No account, on purpose — for now.</b> All of this is saved in this
-  browser, on this device, and none of it has ever been sent anywhere. That is why there is
-  nothing to sign into yet. When accounts arrive they go in front of this page, so what you
-  see here is what will sync — it will not be rebuilt.</div>
+<!-- ══ the door ══════════════════════════════════════════════════════════ -->
+<div class="wrap"><div class="gate" id="gate">
+ <div class="gh">
+  <div class="eyebrow">Your desk</div>
+  <h1 id="gate-h">Open your workspace.</h1>
+  <p id="gate-p">Everything you price, learn and play is kept together and picked up
+   where you left it — the sheet in progress, the market you are working, the course.</p>
+ </div>
+ <form id="gate-form" autocomplete="on">
+  <label for="g-name">Your name</label>
+  <input id="g-name" type="text" placeholder="Elijah Payne" autocomplete="name" required>
+  <label for="g-email">Email</label>
+  <input id="g-email" type="email" placeholder="you@example.com" autocomplete="email" required>
+  <label for="g-market">The market you work <span style="color:var(--faint)">— optional</span></label>
+  <input id="g-market" type="text" placeholder="Atlanta, GA 30310" autocomplete="off">
+  <div class="err" id="g-err">A name and an email, and the desk is yours.</div>
+  <button class="btn p go" type="submit" id="g-go">Create my workspace →</button>
+ </form>
+ <div class="fine"><b>Where this lives:</b> on this device, in this browser. No password,
+  because there is no server yet to keep one — so nothing you type here is transmitted
+  anywhere. When accounts go live this same door starts syncing, and your workspace comes
+  with you.</div>
+</div></div>
 
- <div class="grid">
-  <!-- ── the desk ── -->
-  <div class="card">
-   <div class="ch"><span class="k">The desk</span><span class="k" id="d-state">—</span></div>
-   <div class="cb" id="d-body"></div>
-   <div class="cf" id="d-foot"></div>
+<!-- ══ the hub ═══════════════════════════════════════════════════════════ -->
+<main class="hidden" id="hub">
+<div class="wrap">
+ <div class="hero">
+  <div>
+   <div class="eyebrow">Your desk</div>
+   <h1 class="big" id="hi">Good to see you.</h1>
+   <p class="sub" id="hisub">Here is everything you have open.</p>
   </div>
-  <!-- ── the course ── -->
-  <div class="card">
-   <div class="ch"><span class="k">The eight exits</span><span class="k" id="c-state">—</span></div>
-   <div class="cb" id="c-body"></div>
-   <div class="cf" id="c-foot"></div>
+  <div style="display:flex;gap:9px;flex-wrap:wrap">
+   <a class="btn p" href="desk.html">Price a property →</a>
+   <a class="btn" href="arcade.html">The arcade</a>
   </div>
-  <!-- ── the arcade ── -->
-  <div class="card">
-   <div class="ch"><span class="k">The arcade</span><span class="k" id="a-state">—</span></div>
-   <div class="cb" id="a-body"></div>
-   <div class="cf" id="a-foot"></div>
+ </div>
+
+ <div class="strip" id="strip"></div>
+
+ <div class="cols">
+  <div>
+   <div class="panel">
+    <div class="ph"><h2>Properties on your desk</h2><span class="eyebrow" id="p-count"></span></div>
+    <div class="pb" id="props"></div>
+    <div class="pf" id="props-foot"></div>
+   </div>
+  </div>
+  <div class="side">
+   <div class="panel">
+    <div class="ph"><h2>Your market</h2><span class="eyebrow" id="m-state"></span></div>
+    <div class="pb" id="market"></div>
+   </div>
+   <div class="panel">
+    <div class="ph"><h2>The course</h2><span class="eyebrow" id="c-state"></span></div>
+    <div class="pb" id="course"></div>
+    <div class="pf" id="course-foot"></div>
+   </div>
+   <div class="panel">
+    <div class="ph"><h2>The arcade</h2><span class="eyebrow" id="a-state"></span></div>
+    <div class="pb" id="arcade"></div>
+    <div class="pf" id="arcade-foot"></div>
+   </div>
   </div>
  </div>
 </div>
+</main>
 
 <footer><div class="wrap">
  <a href="index.html">Home</a><a href="desk.html">The desk</a>
@@ -149,78 +239,179 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = v => '$' + Math.round(v).toLocaleString('en-US');
 const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } };
+const ACC = 'ni-account-v1';
 
-/* ── the desk ─────────────────────────────────────────────────────────── */
-(() => {
-  const d = read('ni-desk-v2'), f = (d && typeof d === 'object' && d.f) || {};
-  const num = id => { const r = String((f[id]||{}).v || '').replace(/[^0-9.]/g,'');
+/* ── the account ──────────────────────────────────────────────────────── */
+function account(){ const a = read(ACC);
+  return (a && typeof a === 'object' && typeof a.name === 'string' && a.name) ? a : null; }
+$('gate-form').onsubmit = e => {
+  e.preventDefault();
+  const name = $('g-name').value.trim().slice(0,60);
+  const email = $('g-email').value.trim().slice(0,120);
+  if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { $('g-err').style.display='block'; return; }
+  const a = { name, email, market: $('g-market').value.trim().slice(0,80), since: new Date().toISOString().slice(0,10) };
+  try { localStorage.setItem(ACC, JSON.stringify(a)); } catch(err){}
+  boot();
+};
+$('out').onclick = () => {
+  // signing out clears the workspace record, never the work itself — a sheet
+  // you spent an hour on does not vanish because you closed a session
+  try { localStorage.removeItem(ACC); } catch(e){}
+  boot();
+};
+
+/* ── the hub ──────────────────────────────────────────────────────────── */
+function boot(){
+  const a = account();
+  $('gate').classList.toggle('hidden', !!a);
+  $('hub').classList.toggle('hidden', !a);
+  $('who').classList.toggle('hidden', !a);
+  if (!a) return;
+  wantPriors(a);
+  const first = a.name.split(/\s+/)[0];
+  $('av').textContent = first[0].toUpperCase();
+  $('whoname').textContent = first;
+  $('hi').textContent = 'Good to see you, ' + first + '.';
+
+  /* the portfolio */
+  const FIELDS = ['asking','arv','repairs','rent','balance','piti','arrears'];
+  const v3 = read('ni-desk-v3');
+  let props = (v3 && Array.isArray(v3.props)) ? v3.props : null;
+  if (!props) { const old = read('ni-desk-v2');       // one sheet from before
+    props = (old && typeof old === 'object') ? [old] : []; }
+  const numOf = (p, id) => { const r = String(((p.f||{})[id]||{}).v || '').replace(/[^0-9.]/g,'');
     return r === '' ? null : parseFloat(r); };
-  const filled = ['asking','arv','repairs','rent','balance','piti','arrears'].filter(k => num(k) !== null);
-  const est = filled.filter(k => f[k] && f[k].e);
-  const addr = (d && typeof d.addr === 'string' && d.addr.trim()) ? d.addr.trim() : '';
+  const filledOf = p => FIELDS.filter(k => numOf(p,k) !== null);
+  const estOf = p => filledOf(p).filter(k => (p.f||{})[k] && p.f[k].e);
+  const nameOf = (p,i) => (p.name && String(p.name).trim()) || (p.addr && String(p.addr).trim()) || ('Property ' + (i+1));
+  /* the same subtraction the desk shows as "the deal, on paper" */
+  const spreadOf = p => { const a=numOf(p,'arv'), r=numOf(p,'repairs'), k=numOf(p,'asking');
+    return (a===null||r===null||k===null) ? null : a - r - k; };
+  const live = props.filter(p => filledOf(p).length);
+  const cur = props[(v3 && typeof v3.active==='number' && props[v3.active]) ? v3.active : 0] || null;
+  const filled = cur ? filledOf(cur) : [];
+  const est = cur ? estOf(cur) : [];
+  const addr = cur ? ((cur.addr||'').trim()) : '';
+  const num = id => cur ? numOf(cur, id) : null;
   let teaching = null; try { teaching = localStorage.getItem('ni-desk-case'); } catch(e){}
-  if (!filled.length) {
-    $('d-state').textContent = 'empty';
-    $('d-body').innerHTML = `<div class="big">No sheet yet</div>
-      <p class="empty" style="margin-top:8px">One number — an asking price — is enough to open the first exits.</p>`;
-    $('d-foot').innerHTML = `<a class="btn p sm" href="desk.html">Start a sheet</a>
-      <a class="btn sm" href="desk.html#example">Load a worked example</a>`;
-    return;
-  }
-  const conf = est.length === 0 ? 'high' : est.length < filled.length/2 ? 'medium' : 'low';
-  $('d-state').textContent = teaching ? (teaching === 'demo' ? 'sample' : 'teaching example') : 'in progress';
-  $('d-body').innerHTML = `<div class="big">${esc(addr || 'Unnamed sheet')}</div>
-    <div class="rows">
-      <div class="row"><span>Figures entered</span><span class="v">${filled.length - est.length}</span></div>
-      <div class="row"><span>Marked estimate</span><span class="v">${est.length}</span></div>
-      <div class="row"><span>Confidence</span><span class="v">${conf}</span></div>
-      ${num('asking') !== null ? `<div class="row"><span>Asking</span><span class="v">${money(num('asking'))}</span></div>` : ''}
-    </div>`;
-  $('d-foot').innerHTML = `<a class="btn p sm" href="desk.html">Open the sheet</a>`;
-})();
 
-/* ── the course ───────────────────────────────────────────────────────── */
-(() => {
-  const NAMES = ['Wholesale','Fix and flip','Wholetail','Buy and hold','BRRRR','Subject-to','Novation','Land play'];
-  const R = ['I','II','III','IV','V','VI','VII','VIII'];
+  /* the course */
   const m = read('ni-exits-v1');
   const seen = (m && Array.isArray(m.seen) ? m.seen : []).filter(i => i >= 0 && i < 8);
   const at = m && Number.isInteger(m.ex) ? Math.min(m.ex, 8) : 0;
-  const pct = Math.round(seen.length / 8 * 100);
-  $('c-state').textContent = seen.length === 8 ? 'finished' : seen.length ? pct + '%' : 'not started';
-  $('c-body').innerHTML = seen.length
-    ? `<div class="big">${seen.length} of 8</div>
-       <p class="empty" style="margin-top:6px">${at < 8 ? 'You were on ' + R[at] + ' · ' + NAMES[at] : 'You reached the end.'}</p>
-       <div class="bar"><i style="width:${pct}%"></i></div>
+
+  /* the arcade */
+  const w = read('ni-portfolio-v2'), G = (w && typeof w === 'object' && w.S) || null;
+
+  /* ── the strip ── */
+  const spread = (num('arv') !== null && num('repairs') !== null && num('asking') !== null)
+    ? num('arv') - num('repairs') - num('asking') : null;
+  $('strip').innerHTML = [
+    ['On the desk', String(live.length), live.length ? (live.length===1 ? (addr || 'one property') : 'properties open') : 'nothing priced yet'],
+    ['Spread on it', spread === null ? '—' : money(spread), spread === null ? 'needs asking, ARV and repairs' : 'worth, less work, less price'],
+    ['Course', seen.length + '/8', seen.length === 8 ? 'finished' : seen.length ? 'in progress' : 'not started'],
+    ['Ground held', G ? (Array.isArray(G.deeds) ? G.deeds.length : 0) + '/40' : '0/40', G ? 'in the arcade' : 'arcade not played'],
+  ].map(([k,v,dd]) => `<div class="stat"><div class="k">${k}</div><div class="v">${esc(v)}</div><div class="d">${esc(dd)}</div></div>`).join('');
+
+  /* ── properties ── */
+  if (!live.length) {
+    $('p-count').textContent = '';
+    $('props').innerHTML = `<p class="empty">Nothing on the desk yet. One number — an asking price —
+      is enough to open the first exits, and the condition dial can rough in the rest.</p>`;
+    $('props-foot').innerHTML = `<a class="btn p sm" href="desk.html">Start a sheet</a>
+      <a class="btn sm" href="desk.html#example">Load a worked example</a>`;
+  } else {
+    $('p-count').textContent = live.length + (live.length === 1 ? ' open' : ' open');
+    $('props').innerHTML = live.map((p,i) => {
+      const fl = filledOf(p), es = estOf(p), sp = spreadOf(p);
+      const conf = es.length === 0 ? 'high' : es.length < Math.max(1, fl.length/2) ? 'medium' : 'low';
+      const isCur = cur && p === cur;
+      return `<div class="prop">
+        <div><div class="nm">${esc(nameOf(p,i))}${isCur?' <span class="tag t-e" style="margin-left:8px">Open</span>':''}</div>
+         <div class="meta">${fl.length - es.length} entered · ${es.length} estimated · confidence ${conf}</div>
+         <div style="margin-top:7px">
+          ${FIELDS.filter(k=>numOf(p,k)!==null).map(k=>`<span class="tag ${(p.f||{})[k]&&p.f[k].e?'t-s':'t-e'}">${k}</span>`).join(' ')}
+         </div></div>
+        <div class="fig"><div class="v">${sp !== null ? money(sp) : (numOf(p,'asking') !== null ? money(numOf(p,'asking')) : '—')}</div>
+         <div class="l">${sp !== null ? 'spread on paper' : 'asking'}</div></div>
+      </div>`;
+    }).join('');
+    /* side by side, once there is more than one to compare */
+    if (live.length > 1) {
+      const rows = [['Asking','asking'],['ARV','arv'],['Repairs','repairs'],['Rent','rent']];
+      $('props').innerHTML += `<div style="margin-top:16px;overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums">
+        <thead><tr><th style="text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid var(--line);
+          font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft)">Side by side</th>
+          ${live.map((p,i)=>`<th style="text-align:right;padding:8px 0 8px 10px;border-bottom:1px solid var(--line);font-size:12.5px">${esc(nameOf(p,i)).slice(0,18)}</th>`).join('')}</tr></thead>
+        <tbody>
+        ${rows.map(([lab,k])=>`<tr><td style="padding:7px 10px 7px 0;border-bottom:1px solid var(--line);color:var(--mid)">${lab}</td>
+          ${live.map(p=>`<td style="text-align:right;padding:7px 0 7px 10px;border-bottom:1px solid var(--line);font-weight:650">${numOf(p,k)!==null?money(numOf(p,k)):'—'}</td>`).join('')}</tr>`).join('')}
+        <tr><td style="padding:7px 10px 7px 0;color:var(--mid)">Spread on paper</td>
+          ${live.map(p=>{const sp=spreadOf(p);return `<td style="text-align:right;padding:7px 0 7px 10px;font-weight:700;color:${sp===null?'var(--soft)':sp>0?'var(--green)':'#b3372c'}">${sp===null?'—':money(sp)}</td>`;}).join('')}</tr>
+        </tbody></table></div>`;
+    }
+    $('props-foot').innerHTML = `<a class="btn p sm" href="desk.html">Open the desk</a>
+      <a class="btn sm" href="desk.html">Price another</a>`;
+  }
+
+  /* ── market ── */
+  const zipFrom = s => { const mm = String(s||'').match(/\b(\d{5})\b(?!.*\b\d{5}\b)/); return mm ? mm[1] : null; };
+  const zip = zipFrom(a.market) || zipFrom(addr);
+  $('m-state').textContent = zip ? 'ZIP ' + zip : 'not set';
+  if (!zip) {
+    $('market').innerHTML = `<p class="empty">Add a ZIP to your workspace — or type an address on the
+      desk — and the sheet fills the market medians for you.</p>`;
+  } else if (typeof NI_PRIORS === 'undefined' || !NI_PRIORS.z || !NI_PRIORS.z[zip]) {
+    $('market').innerHTML = `<p class="empty">ZIP ${esc(zip)} on file. The market medians load on the
+      desk when you type an address there.</p>`;
+  } else {
+    const rec = NI_PRIORS.z[zip], sc = (NI_PRIORS.meta.scale || 1);
+    const mv = (rec[0]||0)*sc, mr = rec[1]||0, fl = rec[2]||0;
+    $('market').innerHTML = `
+      <div class="rowline"><span>Median value</span><span class="v">${(fl&1?'≥ ':'')}${money(mv)}</span></div>
+      <div class="rowline"><span>Median rent</span><span class="v">${(fl&2?'≥ ':'')}${money(mr)}/mo</span></div>
+      <div class="rowline"><span>Source</span><span class="v mono" style="font-size:11px">${esc(NI_PRIORS.meta.source)} ${esc(NI_PRIORS.meta.vintage)}</span></div>
+      <p class="empty" style="margin-top:9px;font-size:12.5px">A ZIP median is not a house. On the sheet
+       it arrives marked estimate and widens every band it feeds.</p>`;
+  }
+
+  /* ── course ── */
+  const R = ['I','II','III','IV','V','VI','VII','VIII'];
+  const NAMES = ['Wholesale','Fix and flip','Wholetail','Buy and hold','BRRRR','Subject-to','Novation','Land play'];
+  $('c-state').textContent = seen.length === 8 ? 'finished' : seen.length ? Math.round(seen.length/8*100)+'%' : 'not started';
+  $('course').innerHTML = seen.length
+    ? `<div style="font-size:15px">${at < 8 ? 'You were on <b>' + R[at] + ' · ' + NAMES[at] + '</b>' : 'You reached the end.'}</div>
+       <div class="bar"><i style="width:${seen.length/8*100}%"></i></div>
        <div class="pips">${R.map((r,i)=>`<span class="${seen.includes(i)?'on':''}">${r}</span>`).join('')}</div>`
-    : `<div class="big">Fifteen minutes</div>
-       <p class="empty" style="margin-top:8px">Eight exits, one number each, with a worked example you can drag.</p>`;
-  $('c-foot').innerHTML = seen.length && at < 8
+    : `<p class="empty">Eight exits, one number each, fifteen minutes. Free, no email.</p>`;
+  $('course-foot').innerHTML = seen.length && at < 8
     ? `<a class="btn p sm" href="exits.html">Resume at ${R[at]}</a>`
     : `<a class="btn p sm" href="exits.html">${seen.length ? 'Run it again' : 'Start the course'}</a>`;
-})();
 
-/* ── the arcade ───────────────────────────────────────────────────────── */
-(() => {
-  const w = read('ni-portfolio-v2'), S = (w && typeof w === 'object' && w.S) || null;
-  if (!S) {
-    $('a-state').textContent = 'not played';
-    $('a-body').innerHTML = `<div class="big">Eight eras</div>
-      <p class="empty" style="margin-top:8px">A street of five properties a day, four questions each, and a phone that rings.</p>`;
-    $('a-foot').innerHTML = `<a class="btn p sm" href="arcade.html">Play the arcade</a>`;
-    return;
-  }
-  const deeds = Array.isArray(S.deeds) ? S.deeds.length : 0;
-  const streets = +S.streets || 0, best = +S.bestPct || 0;
-  $('a-state').textContent = 'saved';
-  $('a-body').innerHTML = `<div class="big">${money(+S.cash || 0)}</div>
-    <div class="rows">
-      <div class="row"><span>Streets settled</span><span class="v">${streets}</span></div>
-      <div class="row"><span>Best read</span><span class="v">${best}% of the board</span></div>
-      <div class="row"><span>Ground held</span><span class="v">${deeds} of 40</span></div>
-    </div>`;
-  $('a-foot').innerHTML = `<a class="btn p sm" href="arcade.html">Back to the arcade</a>
-    ${streets ? '<a class="btn sm" href="desk.html">Price one for real</a>' : ''}`;
-})();
+  /* ── arcade ── */
+  $('a-state').textContent = G ? 'saved' : 'not played';
+  $('arcade').innerHTML = G
+    ? `<div class="rowline"><span>Cash</span><span class="v">${money(+G.cash||0)}</span></div>
+       <div class="rowline"><span>Streets settled</span><span class="v">${+G.streets||0}</span></div>
+       <div class="rowline"><span>Best read</span><span class="v">${+G.bestPct||0}%</span></div>`
+    : `<p class="empty">Eight eras of ground, a street a day, and a phone that rings.</p>`;
+  $('arcade-foot').innerHTML = `<a class="btn p sm" href="arcade.html">${G ? 'Back to the arcade' : 'Play the arcade'}</a>`;
+}
+
+/* the priors file is optional and lazy everywhere else; the hub asks for it
+   only when a workspace actually carries a ZIP — which may be the moment the
+   workspace is created, not only on page load, so this runs from boot() */
+let priorsAsked = false;
+function wantPriors(a){
+  if (priorsAsked || !a) return;
+  const zip = /\b\d{5}\b/.test((a.market||'') + ' ' + ((read('ni-desk-v2')||{}).addr||''));
+  if (!zip || typeof NI_PRIORS !== 'undefined' || typeof NI_PRIORS_URL === 'undefined') return;
+  priorsAsked = true;
+  const s = document.createElement('script');
+  s.src = NI_PRIORS_URL; s.onload = boot; s.onerror = () => {};
+  document.head.appendChild(s);
+}
+boot();
 </script>
 </body></html>

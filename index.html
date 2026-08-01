@@ -33,7 +33,7 @@
   --green:#177a4d; --green-soft:#eaf6f0; --amber:#a6610d; --amber-soft:#fdf8ee;
   --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
   --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-  --mono:'JB Mono',ui-monospace,Menlo,Consolas,monospace;
+  --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;   /* no typewriter in the software */
 }
 *{box-sizing:border-box;margin:0}
 html,body{background:#fff}
@@ -106,6 +106,31 @@ h1 em{font-style:italic;color:var(--blue)}
  font-size:12.5px;color:var(--mid)}
 .rfoot b{color:var(--ink)}
 
+/* ── the slideshow ──────────────────────────────────────────────────────────
+   Every frame is a real screenshot of the shipped product, captured by the
+   build from the running pages. It cannot drift from what it advertises, and
+   it never shows a feature that does not exist — the two ways a product
+   slideshow normally lies. Autoplay pauses on hover and stops for good the
+   moment somebody takes control, because a carousel that keeps moving while
+   you are reading it is a hostile object. */
+.show{margin-top:34px;border:1px solid var(--line-2);background:#fff}
+.showstage{position:relative;background:var(--wash);overflow:hidden}
+.showstage img{display:block;width:100%;height:auto;opacity:0;position:absolute;inset:0;
+ transition:opacity .5s ease}
+.showstage img.on{opacity:1;position:relative}
+.showbar{display:flex;justify-content:space-between;align-items:center;gap:18px;
+ padding:13px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.showcap{max-width:60ch}
+.showcap .t{font-family:var(--serif);font-size:17px;font-weight:700}
+.showcap .d{font-size:13.5px;color:var(--mid);margin-top:2px}
+.showtabs{display:flex;gap:6px;flex-wrap:wrap}
+.showtabs button{font-family:var(--sans);font-size:12.5px;font-weight:600;padding:6px 11px;
+ border:1px solid var(--line-2);background:#fff;color:var(--soft);cursor:pointer;white-space:nowrap}
+.showtabs button:hover{border-color:var(--ink);color:var(--ink)}
+.showtabs button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.showtabs .live{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);
+ margin-right:6px;vertical-align:1px}
+
 /* ── bands ── */
 .band{border-top:1px solid var(--line);padding:52px 0}
 .band.wash{background:var(--wash)}
@@ -143,11 +168,21 @@ h2{font-size:34px;margin-top:8px}
 .arcade .btn:hover{border-color:#fff;color:#fff}
 .arcade .btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
 .arcade .btn.p:hover{background:#3a78e8;border-color:#3a78e8}
-/* the street runs as a BAND, not as a poster: cropped to a strip so it closes
-   the page instead of becoming the tallest thing on it */
-.art{display:block;width:100%;height:200px;object-fit:cover;object-position:50% 72%;
- image-rendering:pixelated;border-top:1px solid #223047}
-@media (max-width:700px){ .art{height:130px} }
+/* The street closes the page. A raw cropped photo butted against the footer
+   read as a mistake — a picture that ran out of room — so it is now framed
+   like the horizon it is: the sky dissolves into the section above it, the
+   ground darkens into the footer below, and a caption tells you what you are
+   looking at instead of leaving you to wonder whether it loaded wrong. */
+.horizon{position:relative;margin-top:34px;border-top:1px solid #223047}
+.art{display:block;width:100%;height:210px;object-fit:cover;object-position:50% 78%;
+ image-rendering:pixelated}
+.horizon::before,.horizon::after{content:'';position:absolute;left:0;right:0;pointer-events:none}
+.horizon::before{top:0;height:64px;background:linear-gradient(#0d1420,rgba(13,20,32,0))}
+.horizon::after{bottom:0;height:96px;background:linear-gradient(rgba(13,20,32,0),#0d1420)}
+.horizon .cap{position:absolute;left:0;right:0;bottom:14px;text-align:center;
+ font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+ color:#7e8ba0}
+@media (max-width:700px){ .art{height:150px} }
 .doors{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:26px 0 0}
 .doors figure{margin:0}
 .doors img{width:100%;height:auto;display:block;image-rendering:pixelated;border:1px solid #223047}
@@ -174,20 +209,25 @@ footer a:hover{color:var(--ink)}
 </style>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/mono-400.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* Fraunces ships its "wonk" letterforms on by default — the single-storey f
+   and its friends. They read as a novelty at body sizes and Elijah clipped
+   them immediately. WONK 0 keeps the face and drops the party trick. */
 @font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
- font-weight:100 900;font-style:normal;font-display:swap}
-@font-face{font-family:'JB Mono';src:url('fonts/mono-400.woff2') format('woff2');
- font-weight:400;font-style:normal;font-display:swap}
-@font-face{font-family:'JB Mono';src:url('fonts/mono-700.woff2') format('woff2');
- font-weight:700;font-style:normal;font-display:swap}
+ font-weight:100 900;font-style:normal;font-display:swap;
+ font-variation-settings:'WONK' 0}
 :root{
  --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
- --mono:'JB Mono',ui-monospace,Menlo,Consolas,monospace !important;
+ /* NO MONOSPACE ANYWHERE IN THE SOFTWARE. Small letterspaced caps set in a
+    monospace face is the single most recognisable "an AI made this" tell on
+    the internet right now, and it was on every label we shipped. The eyebrows
+    keep their letterspacing; they lose the typewriter. Tabular figures come
+    from font-feature-settings instead, which is what they were always for.
+    (The arcade keeps its own type. It is a different world on purpose.) */
+ --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif !important;
 }
-/* the pages that set the family literally rather than through the token */
-.app h1,.app h2,h1,h2,h3{font-family:var(--serif)}
+.mono,.num,[class*="fig"],[class*="num"]{font-variant-numeric:tabular-nums}
+h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
 </style>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Negotiation Inc">
@@ -200,10 +240,11 @@ footer a:hover{color:var(--ink)}
  <div class="wrap mast">
   <a class="mark" href="index.html" title="Negotiation Inc"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
   <nav class="masknav">
-   <a href="exits.html">The course</a>
+   <a href="exits.html">Course</a>
    <a href="desk.html">The desk</a>
-   <a href="arcade.html">The arcade</a>
-   <a class="btn sm" href="office.html">Your desk</a>
+   <a href="arcade.html">Arcade</a>
+   <a href="plans.html">Plans</a>
+   <a class="btn sm" href="office.html">Sign in</a>
    <a class="btn sm p" href="desk.html">Price a property</a>
   </nav>
  </div>
@@ -306,6 +347,32 @@ footer a:hover{color:var(--ink)}
  </div>
 </section>
 
+<!-- ═══ 3b · THE PRODUCT, MOVING ═══════════════════════════════════════ -->
+<section class="band">
+ <div class="wrap">
+  <div class="bandhead">
+   <div class="eyebrow">The product, actually running</div>
+   <h2>Six screens, and every one of them is live.</h2>
+   <p>These are screenshots taken from the running product by the build itself — not mock-ups.
+      Anything not built yet is on the <a href="plans.html">plans page</a>, marked as such.</p>
+  </div>
+  <div class="show" id="show">
+   <div class="showstage" id="stage">
+    <img class="on" src="art/demo-condition.jpg" alt="The condition panel: five system sliders pricing a repair estimate" width="1400" height="736">
+    <img src="art/demo-exits.jpg" alt="Seven exits ranked by fit with the arithmetic shown" width="1400" height="831" loading="lazy">
+    <img src="art/demo-advanced.jpg" alt="Advanced mode: the assumptions the arithmetic runs on" width="1400" height="664" loading="lazy">
+    <img src="art/demo-sensitivity.jpg" alt="The sensitivity grid: profit when ARV and repairs are wrong" width="1400" height="546" loading="lazy">
+    <img src="art/demo-offer.jpg" alt="The offer view: six levers, your cost and how it reads to the seller" width="1400" height="780" loading="lazy">
+    <img src="art/demo-hub.jpg" alt="The workspace hub: properties, market, course and arcade" width="1400" height="831" loading="lazy">
+   </div>
+   <div class="showbar">
+    <div class="showcap" id="showcap"></div>
+    <div class="showtabs" id="showtabs"></div>
+   </div>
+  </div>
+ </div>
+</section>
+
 <!-- ═══ 4 · THE COURSE ══════════════════════════════════════════════════ -->
 <section class="band wash">
  <div class="wrap">
@@ -337,10 +404,11 @@ footer a:hover{color:var(--ink)}
  <div class="wrap">
   <div class="eyebrow">The arcade · free, no account</div>
   <h2>Or train the instinct the fun way.</h2>
-  <p>An idle game about buying ground across eight eras — a street of five properties every
-     day, four questions each, and a phone that rings. It is the same read the desk performs,
-     with the clock and the money turned into a game.</p>
-  <div class="cta"><a class="btn p" href="arcade.html">Play the arcade →</a>
+  <p>Three cabinets and counting. <b style="color:#e6ecf6">Comp Run</b> is the long game —
+     eight eras of ground, a phone that rings. <b style="color:#e6ecf6">The Daily Street</b> is
+     ninety seconds: five properties, one bid, the same street everybody gets today. Same read
+     the desk performs, with the clock and the money turned into a game.</p>
+  <div class="cta"><a class="btn p" href="arcade.html">Enter the arcade →</a>
    <a class="btn" href="exits.html">I'd rather learn first</a></div>
   <div class="doors">
    <figure><img src="art/door-now.png" alt="A pixel-art suburban front door, present day" width="540" height="450" loading="lazy">
@@ -351,7 +419,10 @@ footer a:hover{color:var(--ink)}
     <figcaption>Later · the rates are worse</figcaption></figure>
   </div>
  </div>
- <img class="art" src="art/world-now.png" alt="A pixel-art street of houses" width="960" height="540" loading="lazy">
+ <div class="horizon">
+  <img class="art" src="art/world-now.png" alt="A pixel-art street of houses in the arcade" width="960" height="540" loading="lazy">
+  <div class="cap">Ground, now · one of eight eras</div>
+ </div>
 </section>
 
 <footer>
@@ -368,4 +439,39 @@ footer a:hover{color:var(--ink)}
  </div>
 </footer>
 
+<script>
+(function(){
+ var FRAMES = [
+  ['Condition, by system',  'Drag roof, mechanicals, kitchen, finishes and exterior. The repair estimate builds itself and says which line is driving it.'],
+  ['Every exit, ranked',    'Seven ways to buy the same house, ordered by how well each fits this seller \u2014 with the arithmetic under each one.'],
+  ['Your assumptions',      'Rate, LTV, DSCR floor, selling and holding costs, target profit. Most calculators hide these. Move one and everything re-prices.'],
+  ['If you are wrong',      'Flip profit across a 10% ARV swing and a 40% repair overrun, because being wrong is the normal case.'],
+  ['What to actually say',  'Six levers \u2014 price, speed, earnest, inspection, credits, possession. Watch what each costs you and how it reads to this particular seller.'],
+  ['Your desk',             'Properties, the market you work, how far through the course you are, and what the arcade owes you.']
+ ];
+ var stage = document.getElementById('stage'), imgs = stage.querySelectorAll('img');
+ var tabs = document.getElementById('showtabs'), cap = document.getElementById('showcap');
+ var i = 0, timer = null, stopped = false;
+ tabs.innerHTML = FRAMES.map(function(f, n){
+   return '<button type="button" data-i="' + n + '"><span class="live"></span>' + f[0] + '</button>';
+ }).join('');
+ var btns = tabs.querySelectorAll('button');
+ function go(n){
+   i = (n + FRAMES.length) % FRAMES.length;
+   for (var k = 0; k < imgs.length; k++) imgs[k].className = (k === i ? 'on' : '');
+   for (var j = 0; j < btns.length; j++) btns[j].className = (j === i ? 'on' : '');
+   cap.innerHTML = '<div class="t">' + FRAMES[i][0] + '</div><div class="d">' + FRAMES[i][1] + '</div>';
+ }
+ function tick(){ if (!stopped) go(i + 1); }
+ function start(){ if (!stopped && !timer) timer = setInterval(tick, 4200); }
+ function pause(){ clearInterval(timer); timer = null; }
+ for (var j = 0; j < btns.length; j++) btns[j].onclick = function(e){
+   stopped = true; pause(); go(+e.currentTarget.dataset.i);
+ };
+ document.getElementById('show').addEventListener('mouseenter', pause);
+ document.getElementById('show').addEventListener('mouseleave', start);
+ go(0);
+ if (!window.matchMedia || !matchMedia('(prefers-reduced-motion: reduce)').matches) start();
+})();
+</script>
 </body></html>

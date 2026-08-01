@@ -1,0 +1,406 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Exit Drill · The Arcade · Negotiation Inc</title>
+<meta name="description" content="Sixty seconds, one house at a time: flip it, hold it, take the payments, run the listing, or walk. The desk's own arithmetic, played as a reflex.">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   EXIT DRILL — cabinet 03.
+
+   The drill asks the desk's question at the desk's speed limit removed: which
+   exit fits THIS house and THIS seller. It runs the desk's arithmetic with
+   every dial at its default, and it quizzes the FIRST CUT — flip, hold,
+   subto, novation, walk — because that is what the ranking actually decides.
+   The wholesale is the flip's read assigned to someone else's money; the
+   BRRRR is the hold's read with a refinance; the wholetail is a flip that
+   stops early. Variants are role choices inside a read, and the verdicts say
+   so. drill-verify.mjs holds this file's answers equal to desk.html's own
+   ranking, so the game cannot drift from the tool it advertises.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --ink:#23201c; --deep:#0d1420; --panel:#141c2b; --edge:#223047; --well:#101825;
+  --txt:#e8e2d4; --dim:#aeb8c8; --faint:#8b98ac; --gold:#a8873a; --blue:#3a78e8;
+  --green:#3fa06a; --red:#d96a5a;
+  --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; /* no typewriter in the software */
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--deep)}
+body{font-family:var(--sans);color:var(--txt);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.02em;line-height:1.1}
+a{color:#8fb4ff}
+.wrap{max-width:1020px;margin:0 auto;padding:0 26px}
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#6f7d94}
+header{border-bottom:1px solid var(--edge);background:rgba(13,20,32,.9)}
+.mast{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:14px 0;flex-wrap:wrap}
+.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:var(--txt)}
+.mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
+.mark .inc{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--gold)}
+.mark:hover .nm{color:#fff}
+.masknav{display:flex;gap:18px;font-size:14px;flex-wrap:wrap}
+.masknav a{color:var(--dim);text-decoration:none}.masknav a:hover{color:#fff}
+
+.top{padding:34px 0 6px;display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}
+h1{font-size:40px}
+.lede{font-size:15.5px;color:var(--dim);margin-top:8px;max-width:52ch}
+.tally{display:flex;gap:22px;text-align:right}
+.tally .t{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#6f7d94}
+.tally .v{font-family:var(--serif);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+
+.stage{margin:22px 0 60px;background:var(--panel);border:1px solid var(--edge)}
+.clockrail{height:10px;background:var(--well);position:relative;overflow:hidden}
+.clockrail i{position:absolute;inset:0;transform-origin:left;background:var(--gold);transition:none}
+.clockrail.low i{background:var(--red)}
+.deck{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);min-height:430px}
+@media (max-width:840px){ .deck{grid-template-columns:1fr} h1{font-size:32px} }
+
+.house{border-right:1px solid var(--edge);padding:22px;display:flex;flex-direction:column;gap:14px;background:var(--well)}
+@media (max-width:840px){ .house{border-right:0;border-bottom:1px solid var(--edge)} }
+.house canvas{width:100%;max-width:340px;margin:0 auto;image-rendering:pixelated;border:1px solid var(--edge);background:#0f1622}
+.sellerline{font-size:14.5px;color:var(--dim);line-height:1.5;min-height:3.2em}
+.sellerline b{color:var(--txt);font-weight:650}
+.figs{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}
+.fig .fl{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#6f7d94}
+.fig .fv{font-family:var(--serif);font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.fig .fv small{font-size:12px;color:var(--faint);font-weight:400}
+
+.play{padding:22px;display:flex;flex-direction:column;gap:12px}
+.prompt{font-size:13px;color:var(--faint)}
+.prompt b{color:var(--txt)}
+.answers{display:grid;gap:9px}
+.ans{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:12px;text-align:left;
+ font-family:inherit;font-size:15.5px;font-weight:650;color:var(--txt);cursor:pointer;
+ background:#182234;border:1.5px solid #2b3850;padding:11px 14px}
+.ans:hover{border-color:#5a92ff;background:#1b2740}
+.ans:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.ans .key{display:inline-grid;place-items:center;width:24px;height:24px;border:1px solid #39435a;
+ font-size:12px;color:var(--faint)}
+.ans .hint{font-size:12px;font-weight:400;color:var(--faint)}
+.ans[disabled]{opacity:.55;cursor:default}
+.ans.right{border-color:var(--green);background:rgba(63,160,106,.12)}
+.ans.wrong{border-color:var(--red);background:rgba(217,106,90,.12)}
+
+.verdict{border:1px solid var(--edge);background:var(--well);padding:13px 15px;font-size:14px;color:var(--dim);line-height:1.55}
+.verdict .vh{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px}
+.verdict.right .vh{color:var(--green)} .verdict.wrong .vh{color:var(--red)}
+.verdict b{color:var(--txt);font-weight:650}
+.verdict .go{margin-top:8px;font-size:12.5px;color:var(--faint)}
+
+.card{padding:34px 26px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+.card h2{font-size:34px}
+.card .big{font-family:var(--serif);font-size:64px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.card .grade{font-size:14px;color:var(--dim);max-width:46ch}
+.card .grade b{color:var(--txt)}
+.statrow{display:flex;gap:26px;justify-content:center;flex-wrap:wrap}
+.statrow .s .t{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#6f7d94}
+.statrow .s .v{font-family:var(--serif);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:14.5px;font-weight:650;
+ padding:10px 16px;border:1.5px solid #39435a;background:transparent;color:#cdd6e4;text-decoration:none;cursor:pointer}
+.btn:hover{border-color:#fff;color:#fff}
+.btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.p:hover{background:#5a92ff;border-color:#5a92ff}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.finefoot{border-top:1px solid var(--edge);padding:16px 22px;font-size:12.5px;color:#6f7d94;line-height:1.5}
+.finefoot b{color:var(--faint)}
+.hidden{display:none !important}
+</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Fraunces ships its "wonk" letterforms on by default — the single-storey f
+   and its friends. They read as a novelty at body sizes and Elijah clipped
+   them immediately. WONK 0 keeps the face and drops the party trick. */
+@font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
+ font-weight:100 900;font-style:normal;font-display:swap;
+ font-variation-settings:'WONK' 0}
+:root{
+ --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
+ /* NO MONOSPACE ANYWHERE IN THE SOFTWARE. Small letterspaced caps set in a
+    monospace face is the single most recognisable "an AI made this" tell on
+    the internet right now, and it was on every label we shipped. The eyebrows
+    keep their letterspacing; they lose the typewriter. Tabular figures come
+    from font-feature-settings instead, which is what they were always for.
+    (The arcade keeps its own type. It is a different world on purpose.) */
+ --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif !important;
+}
+.mono,.num,[class*="fig"],[class*="num"]{font-variant-numeric:tabular-nums}
+h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Exit Drill · Negotiation Inc">
+<meta property="og:description" content="Sixty seconds, one house at a time: flip it, hold it, take the payments, run the listing, or walk.">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+
+<header>
+ <div class="wrap mast">
+  <a class="mark" href="index.html" title="Negotiation Inc"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+  <nav class="masknav">
+   <a href="arcade.html">The floor</a>
+   <a href="exits.html">Course</a>
+   <a href="desk.html">The desk</a>
+   <a href="office.html">Your desk</a>
+  </nav>
+ </div>
+</header>
+
+<div class="wrap top">
+ <div>
+  <div class="eyebrow">Cabinet 03 · sixty seconds</div>
+  <h1>Exit Drill</h1>
+  <p class="lede">One house at a time. Five answers: flip it, hold it, take the payments,
+   run the listing, or walk. The desk's own arithmetic decides who was right.</p>
+ </div>
+ <div class="tally">
+  <div><div class="t">Score</div><div class="v" id="score">0</div></div>
+  <div><div class="t">Streak</div><div class="v" id="streak">0</div></div>
+  <div><div class="t">Best</div><div class="v" id="best">—</div></div>
+ </div>
+</div>
+
+<div class="wrap">
+ <div class="stage">
+  <div class="clockrail" id="rail"><i id="clock"></i></div>
+
+  <div class="deck" id="deck">
+   <div class="house">
+    <canvas id="px" width="96" height="64" aria-label="A pixel drawing of the property"></canvas>
+    <div class="sellerline" id="seller"></div>
+    <div class="figs" id="figs"></div>
+   </div>
+   <div class="play">
+    <div class="prompt" id="prompt"><b>Which exit fits?</b> Keys 1–5 answer. Wrong costs five seconds.</div>
+    <div class="answers" id="answers"></div>
+    <div class="verdict hidden" id="verdict"></div>
+   </div>
+  </div>
+
+  <div class="card hidden" id="card"></div>
+
+  <div class="finefoot">Same arithmetic as the desk, dials at their defaults — a 7.1% rate, 75% LTV,
+   a 1.25 DSCR floor, 8% selling costs. <b>Where are the other three exits?</b> Inside these: the
+   wholesale is the flip's read assigned to another buyer's money, the BRRRR is the hold's read with
+   a refinance, and the wholetail is a flip that stops early. The drill trains the read; the desk
+   prices whichever role you take in it.</div>
+ </div>
+</div>
+
+<script>
+/* ── the desk's arithmetic, dials at defaults ────────────────────────────────
+   Lifted from desk.html with DEFAULTS applied (rate 7.1, ltv 75, dscr 1.25,
+   sell 8, hold 6mo, profit 8%, opex 40%). drill-verify.mjs feeds identical
+   deals to the real desk and to this file and fails the build if the two ever
+   rank differently — that is the enforcement behind "same arithmetic". */
+const MPD = (r => { const m=r/12, k=Math.pow(1+m,360); return m*k/(k-1); })(0.071);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const SIT_MOD = { flip:{motivated:4}, novation:{nohurry:6,estate:8,urgent:-6}, subto:{behind:14,estate:-4} };
+function rank(d){
+  const out=[];
+  const gapFit=(id,ceil)=>{ const base=clamp(50+220*(ceil-d.ask)/d.ask,4,96);
+    return { id, ceil, fit: Math.round(clamp(base+((SIT_MOD[id]||{})[d.sit]||0),2,98)) }; };
+  { const sell=.08*d.arv, hold=Math.max(12000,.036*d.arv), target=Math.max(15000,.08*d.arv);
+    out.push(gapFit('flip', d.arv-d.rep-sell-hold-target)); }
+  { const pay=d.rent*.60/1.25, price=pay/MPD/.75; out.push(gapFit('hold', price)); }
+  if (d.piti != null){ const spread=d.rent*.82-d.piti;
+    out.push({ id:'subto', spread, fit: Math.round(clamp(clamp(spread/4,4,96)+((SIT_MOD.subto||{})[d.sit]||0),2,98)) }); }
+  if (d.rep <= 0.10*d.arv){                    // the desk's gate: no retail listing on a non-retail house
+    const check=d.arv*(1-.08-.005)-d.ask-Math.max(8000,d.rep)-25*95;
+    out.push({ id:'novation', check, fit: Math.round(clamp(clamp(check/250,4,96)+((SIT_MOD.novation||{})[d.sit]||0),2,98)) }); }
+  out.sort((a,b)=>b.fit-a.fit);
+  return out;
+}
+const WALK_UNDER = 25;                       // best fit under this = nothing fits = walk
+const answerFor = d => { const R=rank(d); return R[0].fit < WALK_UNDER ? 'walk' : R[0].id; };
+
+/* ── deals ──────────────────────────────────────────────────────────────────
+   Shapes are targeted, then honestly verified: a candidate only ships if the
+   intended answer wins the ranking above by at least 12 fit points (or, for
+   walk, if every fit is under 25 with room to spare). No deal has two right
+   answers, because a drill that argues with its own answer key trains doubt. */
+let seed = (typeof window!=='undefined' && window.__seed) || (Date.now()>>>0);
+const rnd = () => { seed=Math.imul(seed^seed>>>16,0x45d9f3b); seed=Math.imul(seed^seed>>>16,0x45d9f3b);
+  seed^=seed>>>16; return (seed>>>0)/4294967296; };
+const r500=v=>Math.round(v/500)*500, r25=v=>Math.round(v/25)*25;
+const SHAPES = ['flip','hold','subto','novation','walk'];
+const SELLERS = {
+ flip:     [['urgent','<b>Needs it gone yesterday.</b> Job starts across the state on the first. The kitchen is from two owners ago.'],
+            ['motivated','<b>Motivated.</b> Already made an offer on the next place. This one has to move first.']],
+ hold:     [['unknown','<b>Unread.</b> A landlord special — deferred maintenance with a paying tenant. The rent roll says more than the photos do.'],
+            ['nohurry','<b>No hurry.</b> A retiring landlord thinning the portfolio. The tenant pays on the first; the roof explains the price.']],
+ subto:    [['behind','<b>Behind on payments.</b> Three months of arrears, a 2021 loan at a rate nobody is getting back.']],
+ novation: [['estate','<b>An estate.</b> The executor is two states away and wants a date and a clean wire, not a journey.'],
+            ['nohurry','<b>No hurry.</b> They want retail and will sit until somebody runs the last hundred yards for it.']],
+ walk:     [['nohurry','<b>No hurry, and priced like it.</b> They read a headline about the market once and believed it.'],
+            ['unknown','<b>Unread.</b> The ask came from a cousin who watches renovation television.']],
+};
+function candidate(shape){
+  const arv = r500(150000 + rnd()*330000);
+  const d = { arv, sit:'unknown', piti:null };
+  /* Each recipe leans on the arithmetic's own gates so one answer wins alone:
+     heavy repairs close the novation and wholetail; a thin rent closes the
+     hold; a near-retail ask closes everything except the loan already on the
+     house. The verifier holds every shipped deal to a 12-point fit margin. */
+  if (shape==='flip'){ d.rep=r500(arv*(0.13+rnd()*0.06)); d.ask=r500(arv*(0.42+rnd()*0.1)); d.rent=r25(arv*(0.0042+rnd()*0.001)); }
+  if (shape==='hold'){ d.rep=r500(arv*(0.11+rnd()*0.03)); d.ask=r500(arv*(0.60+rnd()*0.06)); d.rent=r25(arv*(0.0080+rnd()*0.0014)); }
+  if (shape==='subto'){ d.rep=r500(arv*(0.02+rnd()*0.06)); d.ask=r500(arv*(0.88+rnd()*0.1)); d.rent=r25(arv*(0.0062+rnd()*0.0016));
+    d.piti=r25(d.rent*(0.38+rnd()*0.18)); d.balance=r500(d.ask*(0.82+rnd()*0.1)); }
+  if (shape==='novation'){ d.rep=r500(arv*(0.01+rnd()*0.025)); d.ask=r500(arv*(0.68+rnd()*0.1)); d.rent=r25(arv*(0.0048+rnd()*0.0012)); }
+  if (shape==='walk'){ d.rep=r500(arv*(0.14+rnd()*0.1)); d.ask=r500(arv*(1.02+rnd()*0.16)); d.rent=r25(arv*(0.0038+rnd()*0.0012)); }
+  const opts = SELLERS[shape]; const pick = opts[Math.floor(rnd()*opts.length)];
+  d.sit = pick[0]; d.sellerHtml = pick[1]; d.shape = shape;
+  return d;
+}
+function deal(shape){
+  for (let t=0;t<80;t++){
+    const d = candidate(shape);
+    const R = rank(d), top=R[0], second=R[1];
+    if (shape==='walk'){ if (top.fit <= WALK_UNDER-6) { d.rank=R; return d; } continue; }
+    if (top.id===shape && top.fit>=WALK_UNDER+10 && (top.fit-(second?.fit??0))>=12){ d.rank=R; return d; }
+  }
+  if (window.__strict) throw new Error('generator exhausted 80 tries for '+shape);
+  return deal(SHAPES[Math.floor(rnd()*4)]);   // a stubborn shape yields to a workable one
+}
+
+/* ── the pixel house ────────────────────────────────────────────────────────
+   Drawn, not fetched: the arcade draws its own world everywhere else, and the
+   drill's houses vary with the deal — boarded windows past 15% repairs, a
+   patched roof past 9%, weeds past 5%. The tells are the data, drawn. */
+function drawHouse(cv,d){
+  const g=cv.getContext('2d'); const W=cv.width,H=cv.height;
+  const rat=d.rep/d.arv;
+  const hue=[['#1b2b45','#223760'],['#25203c','#332a52'],['#1c3130','#264441']][Math.floor(rnd()*3)];
+  g.fillStyle=hue[0]; g.fillRect(0,0,W,H);                    // sky
+  g.fillStyle=hue[1]; for(let i=0;i<28;i++) g.fillRect(Math.floor(rnd()*W),Math.floor(rnd()*(H-22)),1,1); // stars
+  g.fillStyle='#2a2620'; g.fillRect(0,H-14,W,14);             // ground
+  const bx=18,by=H-38,bw=60,bh=24;
+  g.fillStyle=rat>.15?'#5c5346':'#7a6f5c'; g.fillRect(bx,by,bw,bh);          // walls, tired when heavy
+  g.fillStyle=rat>.09?'#4a4038':'#6b4a3a';                                    // roof, patched when worn
+  for(let i=0;i<=6;i++) g.fillRect(bx-4+i,by-8+ (6-i),bw+8-2*i,1+(i<6?1:0));
+  if (rat>.09){ g.fillStyle='#3a6ea5'; g.fillRect(bx+38,by-7,12,4); }         // the tarp
+  g.fillStyle='#2e2a24'; g.fillRect(bx+26,by+8,10,16);                        // door
+  g.fillStyle=rat>.15?'#3a352d':'#d8c66a';                                    // windows: lit or boarded
+  g.fillRect(bx+8,by+7,10,8); g.fillRect(bx+44,by+7,10,8);
+  if (rat>.15){ g.fillStyle='#8a7a58';
+    g.fillRect(bx+7,by+9,12,2); g.fillRect(bx+43,by+11,12,2); }               // boards
+  g.fillStyle='#4a4038'; g.fillRect(bx+50,by-14,5,8);                         // chimney
+  if (rat>.05){ g.fillStyle='#4a5a34';                                        // weeds
+    for(let i=0;i<9;i++){ const x=4+Math.floor(rnd()*(W-8)); g.fillRect(x,H-16,1,3); } }
+  g.fillStyle='#8b98ac'; g.fillRect(6,H-24,2,10); g.fillStyle='#c9c0ad'; g.fillRect(4,H-27,10,5); // the sign
+}
+
+/* ── the game loop ──────────────────────────────────────────────────────────
+   The clock only runs while a question is open. Reading a verdict is free,
+   because punishing the player for learning would be a strange curriculum. */
+const $=id=>document.getElementById(id);
+const fmt=v=>(v<0?'−$':'$')+Math.abs(Math.round(v)).toLocaleString('en-US');
+const LS={ get(k){try{return localStorage.getItem(k)}catch(e){return null}},
+           set(k,v){try{localStorage.setItem(k,v)}catch(e){}} };
+const ANSWERS=[['flip','The fix and flip','buy it, fix it, sell it'],
+               ['hold','The buy and hold','the rent carries a loan'],
+               ['subto','The subject-to','take over their payments'],
+               ['novation','The novation','deliver their number, sell at retail'],
+               ['walk','Walk away','no exit pays at this ask']];
+const NAME=Object.fromEntries(ANSWERS.map(a=>[a[0],a[1]]));
+const G={ t:60, score:0, streak:0, reads:0, right:0, cur:null, open:false, over:false, last:null, askedAt:0 };
+const best0=+(LS.get('ni-drill-best')||0); if (best0) $('best').textContent=best0;
+
+function working(d){
+  const R=rank(d), by=Object.fromEntries(R.map(x=>[x.id,x]));
+  const w=[];
+  if (by.flip) w.push(`flip ceiling ${fmt(by.flip.ceil)} vs ask ${fmt(d.ask)} — fit ${by.flip.fit}`);
+  if (by.hold) w.push(`DSCR price ${fmt(by.hold.ceil)} vs ask ${fmt(d.ask)} — fit ${by.hold.fit}`);
+  if (by.subto) w.push(`spread ${fmt(by.subto.spread)}/mo — fit ${by.subto.fit}`);
+  if (by.novation) w.push(`novation check ${fmt(by.novation.check)} — fit ${by.novation.fit}`);
+  return w.join(' · ');
+}
+function next(){
+  G.cur = deal(SHAPES[Math.floor(rnd()*SHAPES.length)]);
+  drawHouse($('px'),G.cur);
+  $('seller').innerHTML = G.cur.sellerHtml;
+  const d=G.cur, figs=[['They ask',fmt(d.ask)],['Comps say (ARV)',fmt(d.arv)],['Repairs walk-through',fmt(d.rep)],['Rent, realistic',fmt(d.rent)+'<small>/mo</small>']];
+  if (d.piti!=null){ figs.push(['Their payment (PITI)',fmt(d.piti)+'<small>/mo</small>']); figs.push(['Loan balance',fmt(d.balance)]); }
+  $('figs').innerHTML = figs.map(f=>`<div class="fig"><div class="fl">${f[0]}</div><div class="fv">${f[1]}</div></div>`).join('');
+  $('answers').innerHTML = ANSWERS.map((a,i)=>
+   `<button class="ans" data-a="${a[0]}"><span class="key">${i+1}</span><span>${a[1]}</span><span class="hint">${a[2]}</span></button>`).join('');
+  document.querySelectorAll('.ans').forEach(b=>b.onclick=()=>answer(b.dataset.a));
+  $('verdict').className='verdict hidden';
+  G.open=true; G.askedAt=G.t;
+}
+function answer(a){
+  if(!G.open||G.over) return; G.open=false;
+  const correct = answerFor(G.cur); G.reads++;
+  const took = G.askedAt-G.t;
+  document.querySelectorAll('.ans').forEach(b=>{ b.disabled=true;
+    if(b.dataset.a===correct) b.classList.add('right');
+    else if(b.dataset.a===a) b.classList.add('wrong'); });
+  const v=$('verdict');
+  if (a===correct){
+    G.right++; G.streak++;
+    const bonus = Math.max(0, Math.round(40*(1 - Math.min(took,12)/12)));
+    const chain = (G.streak>0 && G.streak%3===0) ? 50 : 0;
+    G.score += 100+bonus+chain;
+    v.className='verdict right';
+    v.innerHTML=`<div class="vh">Right — ${NAME[correct]||'the walk'} · +${100+bonus}${chain?' +50 streak':''}</div>
+      ${working(G.cur)}<div class="go">Space or click for the next house.</div>`;
+  } else {
+    G.streak=0; G.t=Math.max(0,G.t-5);
+    v.className='verdict wrong';
+    v.innerHTML=`<div class="vh">The desk says ${NAME[correct]||'walk away'} · −5 seconds</div>
+      ${working(G.cur)}${correct==='walk'?` · every fit under ${WALK_UNDER} — nothing pays at this ask`:''}
+      <div class="go">Space or click for the next house.</div>`;
+  }
+  G.last=G.cur;
+  $('score').textContent=G.score; $('streak').textContent=G.streak;
+  if (G.t<=0) end();
+}
+function advance(){ if(G.over) return; if(!G.open && G.t>0) next(); }
+document.addEventListener('keydown',e=>{
+  if (G.over) return;
+  if (G.open && e.key>='1' && e.key<='5'){ const b=document.querySelectorAll('.ans')[+e.key-1]; if(b) answer(b.dataset.a); }
+  else if (!G.open && (e.key===' '||e.key==='Enter')){ e.preventDefault(); advance(); }
+});
+$('deck').addEventListener('click',e=>{ if(!G.open && !e.target.closest('.ans')) advance(); });
+
+let lastTick=performance.now();
+function tick(now){
+  if (G.over) return;
+  const dt=(now-lastTick)/1000; lastTick=now;
+  if (G.open) G.t=Math.max(0,G.t-dt);
+  $('clock').style.transform=`scaleX(${G.t/60})`;
+  $('rail').classList.toggle('low',G.t<12);
+  if (G.t<=0 && G.open){ G.open=false; end(); }
+  requestAnimationFrame(tick);
+}
+function end(){
+  G.over=true;
+  const best=Math.max(best0,+(LS.get('ni-drill-best')||0),G.score);
+  LS.set('ni-drill-best',String(best)); $('best').textContent=best;
+  const acc=G.reads?Math.round(100*G.right/G.reads):0;
+  const grade = G.score>=1400?['Closer','You are reading the seller before the spreadsheet loads. Take real numbers to the desk.']
+    : G.score>=900?['Underwriter','The reads are right; the speed will come. The desk will slow the same arithmetic down for you.']
+    : G.score>=450?['Apprentice','You are pricing the house. Start pricing the person selling it — the seller line is half the answer.']
+    : ['Door-knocker','Lesson one of the course is exactly this drill, slowed down and explained.'];
+  const d=G.last, handoff = d ? 'desk.html#'+[`asking=${d.ask}`,`arv=${d.arv}`,`repairs=${d.rep}`,`rent=${d.rent}`,
+    ...(d.piti!=null?[`piti=${d.piti}`,`balance=${d.balance}`]:[]),
+    `est=${['arv','repairs','rent',...(d.piti!=null?['piti']:[])].join(',')}`,
+    `sit=${d.sit}`,'from=arcade',`title=${encodeURIComponent('Exit Drill — the last house')}`].join('&') : 'desk.html';
+  $('deck').classList.add('hidden');
+  const c=$('card'); c.classList.remove('hidden');
+  c.innerHTML=`<div class="eyebrow">Time</div><h2>${grade[0]}</h2>
+   <div class="big">${G.score}</div>
+   <div class="statrow"><div class="s"><div class="t">Houses read</div><div class="v">${G.reads}</div></div>
+    <div class="s"><div class="t">Called right</div><div class="v">${acc}%</div></div>
+    <div class="s"><div class="t">Best</div><div class="v">${best}</div></div></div>
+   <div class="grade">${grade[1]}</div>
+   <div class="btnrow"><button class="btn p" id="again">Run it again</button>
+    ${d?`<a class="btn" href="${handoff}">Take the last house to the desk →</a>`:''}
+    <a class="btn" href="arcade.html">Back to the floor</a></div>`;
+  $('again').onclick=()=>{ Object.assign(G,{t:60,score:0,streak:0,reads:0,right:0,over:false,open:false,last:null});
+    $('score').textContent=0; $('streak').textContent=0;
+    c.classList.add('hidden'); $('deck').classList.remove('hidden');
+    lastTick=performance.now(); next(); requestAnimationFrame(tick); };
+}
+next(); requestAnimationFrame(tick);
+</script>
+</body></html>

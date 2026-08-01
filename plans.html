@@ -1,0 +1,260 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plans · Negotiation Inc</title>
+<meta name="description" content="What is free forever, what a workspace adds, and what is still in build. Every row says which.">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   PLANS.
+
+   The temptation on a page like this is to list forty features and let the
+   reader assume all forty exist. That is the ordinary dishonesty of SaaS
+   pricing pages and it is the exact thing this product is positioned against,
+   so every row carries a state: LIVE, or IN BUILD. A reader can therefore
+   trust the LIVE column completely — which is worth more than a longer list.
+
+   The prices are marked indicative for the same reason: nothing is charged yet
+   and no card is collected, so quoting a firm number would be a claim we have
+   not earned.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --faint:#9aa3b2;
+  --line:#e4e8ef; --line-2:#c9d0dc; --wash:#f6f8fb;
+  --blue:#1f5fd0; --blue-deep:#153872; --blue-soft:#eaf0fc;
+  --green:#177a4d; --green-soft:#eaf6f0; --green-line:#bfe0cd;
+  --amber:#a6610d; --amber-soft:#fdf8ee; --amber-line:#ecd9b0;
+  --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:#fff}
+body{font-family:var(--sans);color:var(--ink);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.02em;line-height:1.1}
+a{color:var(--blue)}
+.wrap{max-width:1140px;margin:0 auto;padding:0 26px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);z-index:20}
+.mast{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:14px 0;flex-wrap:wrap}
+.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:inherit}
+.mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
+.mark .inc{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--blue)}
+.mark:hover .nm{color:var(--blue)}
+.masknav{display:flex;align-items:center;gap:18px;font-size:14px;flex-wrap:wrap}
+.masknav a{color:var(--mid);text-decoration:none}.masknav a:hover{color:var(--ink)}
+.masknav a.on{color:var(--ink);font-weight:650;box-shadow:inset 0 -2px 0 var(--blue)}
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:var(--sans);font-size:14px;font-weight:650;
+ padding:9px 16px;border:1.5px solid var(--ink);background:#fff;color:var(--ink);text-decoration:none;cursor:pointer}
+.btn:hover{border-color:var(--blue);color:var(--blue)}
+.btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.p:hover{background:var(--blue-deep);border-color:var(--blue-deep)}
+.btn.sm{font-size:12.5px;padding:6px 12px}
+.btn.q{border-color:var(--line-2);color:var(--mid)}
+.top{padding:46px 0 10px;max-width:62ch}
+h1{font-size:44px}
+.lede{font-size:18px;color:var(--mid);margin-top:14px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:32px 0 12px}
+.plan{border:1px solid var(--line-2);background:#fff;display:flex;flex-direction:column}
+.plan.mid{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.plan .ph{padding:18px 20px 16px;border-bottom:1px solid var(--line)}
+.plan h2{font-size:23px}
+.plan .price{font-family:var(--serif);font-size:35px;font-weight:700;letter-spacing:-.025em;margin-top:10px}
+.plan .price small{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--soft);letter-spacing:0}
+.plan .note{font-size:13px;color:var(--soft);margin-top:5px}
+.plan .who{font-size:14.5px;color:var(--mid);margin-top:11px}
+.plan .pb{padding:16px 20px;flex:1}
+.plan ul{list-style:none;padding:0;display:grid;gap:9px}
+.plan li{display:grid;grid-template-columns:16px 1fr;gap:9px;font-size:14px;color:var(--mid);align-items:start}
+.plan li i{font-style:normal;color:var(--green);font-weight:700;line-height:1.4}
+.plan li.soon i{color:var(--faint)}
+.plan li.soon{color:var(--soft)}
+.plan .pf{padding:14px 20px 18px;border-top:1px solid var(--line);background:var(--wash)}
+.plan .pf .btn{width:100%;justify-content:center}
+.tagline{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)}
+
+.matrix{margin:44px 0 0;border:1px solid var(--line-2)}
+.matrix .mh{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;
+ justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap}
+.matrix h2{font-size:22px}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th,td{padding:11px 14px;border-bottom:1px solid var(--line);text-align:center}
+th:first-child,td:first-child{text-align:left;width:44%}
+thead th{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);
+ background:var(--wash)}
+tbody tr:last-child td{border-bottom:0}
+td .y{color:var(--green);font-weight:700}
+td .n{color:var(--faint)}
+.sec td{background:var(--wash);font-weight:700;font-family:var(--serif);font-size:16px;text-align:left}
+.state{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.1em;padding:2px 6px;border:1px solid;margin-left:8px;vertical-align:1px}
+.s-live{color:var(--green);background:var(--green-soft);border-color:var(--green-line)}
+.s-soon{color:var(--amber);background:var(--amber-soft);border-color:var(--amber-line)}
+.fine{margin:26px 0 60px;border-left:4px solid var(--blue);background:var(--blue-soft);
+ padding:14px 18px;font-size:14.5px;color:var(--mid);max-width:78ch}
+.fine b{color:var(--ink)}
+footer{border-top:1px solid var(--line);padding:24px 0 44px;font-size:13.5px;color:var(--soft)}
+footer a{color:var(--mid);text-decoration:none;margin-right:16px}
+@media(max-width:900px){.cards{grid-template-columns:1fr}h1{font-size:32px}th:first-child,td:first-child{width:40%}}
+</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Fraunces ships its "wonk" letterforms on by default — the single-storey f
+   and its friends. They read as a novelty at body sizes and Elijah clipped
+   them immediately. WONK 0 keeps the face and drops the party trick. */
+@font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
+ font-weight:100 900;font-style:normal;font-display:swap;
+ font-variation-settings:'WONK' 0}
+:root{
+ --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
+ /* NO MONOSPACE ANYWHERE IN THE SOFTWARE. Small letterspaced caps set in a
+    monospace face is the single most recognisable "an AI made this" tell on
+    the internet right now, and it was on every label we shipped. The eyebrows
+    keep their letterspacing; they lose the typewriter. Tabular figures come
+    from font-feature-settings instead, which is what they were always for.
+    (The arcade keeps its own type. It is a different world on purpose.) */
+ --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif !important;
+}
+.mono,.num,[class*="fig"],[class*="num"]{font-variant-numeric:tabular-nums}
+h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Plans · Negotiation Inc">
+<meta property="og:description" content="Everything that prices a deal is free. Every row says whether it is live today or still in build.">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+
+<header>
+ <div class="wrap mast">
+  <a class="mark" href="index.html"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+  <nav class="masknav">
+   <a href="exits.html">Course</a>
+   <a href="desk.html">The desk</a>
+   <a href="arcade.html">Arcade</a>
+   <a href="plans.html" class="on">Plans</a>
+   <a class="btn sm q" href="office.html">Sign in</a>
+   <a class="btn sm p" href="desk.html">Price a property</a>
+  </nav>
+ </div>
+</header>
+
+<div class="wrap top">
+ <div class="eyebrow">Plans</div>
+ <h1>Everything that prices a deal is free.</h1>
+ <p class="lede">What a paid plan buys is the part that makes it a job rather than a calculation:
+  the assumptions, the portfolio, the data, and the paperwork at the end. Every line below says
+  whether it is live today or still in build — no row is a promise dressed as a feature.</p>
+</div>
+
+<div class="wrap cards">
+ <div class="plan">
+  <div class="ph">
+   <div class="tagline">Free forever</div>
+   <h2>The Desk</h2>
+   <div class="price">$0</div>
+   <div class="note">No card, no account required</div>
+   <p class="who">For anyone learning to price a deal, and for the first hundred deals after that.</p>
+  </div>
+  <div class="pb"><ul>
+   <li><i>✓</i>Every exit priced against one property, ranked by fit</li>
+   <li><i>✓</i>The full arithmetic shown for each</li>
+   <li><i>✓</i>Condition panel — five systems, priced against ARV</li>
+   <li><i>✓</i>Seller-situation dial that re-ranks the exits</li>
+   <li><i>✓</i>ZIP market medians from Census data</li>
+   <li><i>✓</i>The Eight Exits course and the arcade</li>
+   <li><i>✓</i>One property, saved on this device</li>
+  </ul></div>
+  <div class="pf"><a class="btn" href="desk.html">Open the desk</a></div>
+ </div>
+
+ <div class="plan mid">
+  <div class="ph">
+   <div class="tagline">Indicative · not charged yet</div>
+   <h2>Underwriter</h2>
+   <div class="price">$29 <small>/ month</small></div>
+   <div class="note">Free during beta — a workspace is all it takes</div>
+   <p class="who">For the person doing this weekly, who needs the model to be theirs and the file to survive the week.</p>
+  </div>
+  <div class="pb"><ul>
+   <li><i>✓</i><b>Advanced mode</b> — rate, LTV, DSCR floor, selling and holding costs, target profit</li>
+   <li><i>✓</i><b>Sensitivity grid</b> — profit when ARV and repairs are wrong by the amounts they are usually wrong by</li>
+   <li><i>✓</i>A workspace that remembers your market and your sheet</li>
+   <li><i>✓</i><b>Unlimited saved properties</b>, compared side by side</li>
+   <li class="soon"><i>○</i>Lender-ready PDF with your name on it</li>
+   <li class="soon"><i>○</i>Address-level values and rents</li>
+  </ul></div>
+  <div class="pf"><a class="btn p" href="office.html">Open a workspace</a></div>
+ </div>
+
+ <div class="plan">
+  <div class="ph">
+   <div class="tagline">Indicative · in build</div>
+   <h2>Desk &amp; Team</h2>
+   <div class="price">$99 <small>/ month</small></div>
+   <div class="note">Talk to us before beta ends</div>
+   <p class="who">For a small shop where more than one person prices, and the model has to be the same one every time.</p>
+  </div>
+  <div class="pb"><ul>
+   <li class="soon"><i>○</i>Shared assumption sets, so the whole desk underwrites alike</li>
+   <li class="soon"><i>○</i>Pipeline view across every property in the office</li>
+   <li class="soon"><i>○</i>Comps pulled and attached to the sheet</li>
+   <li class="soon"><i>○</i>Offer letters generated from the winning exit</li>
+   <li class="soon"><i>○</i>Seats, roles and an audit trail</li>
+  </ul></div>
+  <div class="pf"><a class="btn q" href="office.html">Register interest</a></div>
+ </div>
+</div>
+
+<div class="wrap">
+<div class="matrix">
+ <div class="mh"><h2>Every feature, and whether it exists</h2>
+  <span style="font-size:13.5px;color:var(--soft)">
+   <span class="state s-live">Live</span> works today ·
+   <span class="state s-soon">In build</span> not yet</span></div>
+ <table>
+  <thead><tr><th>Feature</th><th>Free</th><th>Underwriter</th><th>Team</th></tr></thead>
+  <tbody>
+   <tr class="sec"><td colspan="4">Pricing a deal</td></tr>
+   <tr><td>Seven exits priced and ranked<span class="state s-live">Live</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>Arithmetic shown for every exit<span class="state s-live">Live</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>Entered / estimate / needed states<span class="state s-live">Live</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>Bands that widen for uncertainty<span class="state s-live">Live</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>Condition panel, five systems<span class="state s-live">Live</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>Seller-situation dial<span class="state s-live">Live</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+
+   <tr class="sec"><td colspan="4">Making the model yours</td></tr>
+   <tr><td>Editable assumptions<span class="state s-live">Live</span></td><td><span class="n">—</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>Sensitivity grid<span class="state s-live">Live</span></td><td><span class="n">—</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>Saved assumption presets<span class="state s-soon">In build</span></td><td><span class="n">—</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>Shared across a team<span class="state s-soon">In build</span></td><td><span class="n">—</span></td><td><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
+
+   <tr class="sec"><td colspan="4">Data behind the numbers</td></tr>
+   <tr><td>ZIP medians, Census ACS<span class="state s-live">Live</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>Address-level value and rent<span class="state s-soon">In build</span></td><td><span class="n">—</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>Comps attached to the sheet<span class="state s-soon">In build</span></td><td><span class="n">—</span></td><td><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
+
+   <tr class="sec"><td colspan="4">Carrying the work</td></tr>
+   <tr><td>One property, free forever<span class="state s-live">Live</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>Workspace that follows you<span class="state s-soon">In build</span></td><td><span class="n">—</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>Unlimited properties, compared<span class="state s-live">Live</span></td><td><span class="n">—</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>Lender-ready PDF<span class="state s-soon">In build</span></td><td><span class="n">—</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>Offer letters from the winning exit<span class="state s-soon">In build</span></td><td><span class="n">—</span></td><td><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
+
+   <tr class="sec"><td colspan="4">Learning it</td></tr>
+   <tr><td>The Eight Exits course<span class="state s-live">Live</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td>The arcade, every cabinet<span class="state s-live">Live</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+  </tbody>
+ </table>
+</div>
+
+<div class="fine"><b>Nothing is being charged today.</b> There is no card field anywhere in this
+ product and no billing system behind it. The prices above are what these plans are expected to
+ cost when beta ends; they are printed now so you can see the shape of it, and so nobody is
+ surprised later. Everything marked <b>Live</b> works this minute — open the desk and check.</div>
+</div>
+
+<footer><div class="wrap">
+ <a href="index.html">Home</a><a href="desk.html">The desk</a>
+ <a href="exits.html">The course</a><a href="arcade.html">The arcade</a>
+ <a href="office.html">Your desk</a>
+</div></footer>
+
+</body></html>
