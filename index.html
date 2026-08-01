@@ -50,7 +50,7 @@
 }
 
 *{box-sizing:border-box}
-html,body{margin:0;padding:0;background:#0e1116}
+html,body{margin:0;padding:0;background:#fff}
 body{-webkit-font-smoothing:antialiased}
 
 /* The desk. Only surface that goes edge to edge. */
@@ -72,8 +72,16 @@ body{-webkit-font-smoothing:antialiased}
    from reading as a template. Body and money stay sans. */
 .app h1,.app h2{font-family:Georgia,'Iowan Old Style','Times New Roman',serif;
   font-weight:700;letter-spacing:-.02em}
-.page{max-width:1180px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
-.pad{padding:0 34px}
+/* FULL BLEED. The mock floated an 1180px sheet on a near-black desk, which is
+   how a designer presents a page and not how a product should meet a visitor:
+   on any monitor wider than the sheet it reads as a screenshot of a website
+   rather than the website, and the arcade section — the immersive one — loses
+   to two black gutters. The COLOUR now runs edge to edge and only the TEXT is
+   measured: sections span the viewport, their contents stay at a readable
+   1180px. Nothing about the seam or the two worlds changes; both worlds simply
+   fill the screen they are given. */
+.page{max-width:none;margin:0;box-shadow:none}
+.pad{max-width:1180px;margin:0 auto;padding:0 34px}
 .mono{font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
 /* app-side money: sans, tabular, weighted. Mono money is the PAPER world's
    grammar — using it in the app makes the two mistakable from a screenshot,
