@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Negotiation Inc — every exit priced, the working shown</title>
+<meta name="description" content="A course that teaches the eight ways out of a property deal, a desk that prices them, and an arcade that trains the instinct. No account, no email.">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   LANDING — REVISION 2
+
+   One change, and it is structural rather than cosmetic:
+
+     THE PAGE CROSSES THE SEAM ONCE, AND STAYS CROSSED.
+
+   Revision 1 put the app on the page as a specimen — a framed figure inside
+   the paper world — and then returned to paper for movements 3, 4 and 5. That
+   is a page ABOUT the software.
+
+   Here, the seam is the last thing that happens in the paper world. Everything
+   after it is the app: white, blue, system sans, the real tokens. The visitor
+   does not read about crossing over. They cross.
+
+   Which also answers the note that prompted this revision — "the professional
+   half should be cohesive with the blue and white" — without recolouring the
+   arcade, which would have cost the seam its meaning. Both worlds are intact
+   and the page is the funnel instead of a description of it.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── ARCADE (movements 1–2) — from ni-paper-world ─────────────────────── */
+  --manila:#d9c8a4; --cream:#f4efe2; --carbon-pink:#f0d9d5; --newsprint:#e8e2d4;
+  --ink:#23201c; --ink-mid:#47423b; --ink-soft:#5a544b;
+  --rule:#b9ae95; --rule-hi:#cdc3ac;
+  --stamp-red:#a8271f;
+
+  /* ── APP (movements 3–5) — from 02 Product/UI System §1, verbatim ──────
+     Four meanings, one accent. Colour is never decorative here. */
+  --a-accent:#1f5fd0;   /* recommended, primary action, focus */
+  --a-good:#177a4d;     /* confirmed, verified */
+  --a-warn:#a6610d;     /* caveat, ceiling, not-suitable */
+  --a-bad:#b3372c;      /* refused */
+  --a-ink:#101725;      /* 17.9:1 */
+  --a-ink-2:#5a6478;    /*  5.9:1 */
+  --a-ink-3:#677187;    /*  4.9:1 — the floor. NOT #8d96a8, which is 2.97:1
+                            and is the exact failure UI System §1 records as
+                            already fixed. Revision 1 used the old value for
+                            every piece of secondary text in the app section. */
+  --a-line:#e3e7ee; --a-wash:#f7f8fa;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#0e1116}
+body{-webkit-font-smoothing:antialiased}
+
+/* The desk. Only surface that goes edge to edge. */
+.desk{
+  background:var(--manila);
+  background-image:
+    repeating-linear-gradient(0deg,rgba(35,32,28,.014) 0 2px,transparent 2px 4px),
+    radial-gradient(120% 80% at 50% -10%,rgba(255,255,255,.20),transparent 60%);
+  font-family:'Iowan Old Style',Georgia,serif;
+  color:var(--ink); line-height:1.55;
+}
+.app{
+  background:#fff; color:var(--a-ink);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  line-height:1.5; letter-spacing:-.005em;
+}
+/* Display type is serif everywhere in this product — the desk and the course
+   both set it, and it is the single thing that keeps a page of system sans
+   from reading as a template. Body and money stay sans. */
+.app h1,.app h2{font-family:Georgia,'Iowan Old Style','Times New Roman',serif;
+  font-weight:700;letter-spacing:-.02em}
+.page{max-width:1180px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.pad{padding:0 34px}
+.mono{font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+/* app-side money: sans, tabular, weighted. Mono money is the PAPER world's
+   grammar — using it in the app makes the two mistakable from a screenshot,
+   which costs the seam its meaning. Design flagged this; it was true here too. */
+.anum{font-variant-numeric:tabular-nums;font-weight:600}
+.eyebrow{font-family:monospace;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+.stencil{font-family:monospace}
+
+h1,h2,h3{margin:0;font-weight:600;line-height:1.18;letter-spacing:-.01em}
+p{margin:.6rem 0}
+
+/* ── Arcade furniture ─────────────────────────────────────────────────── */
+.sheet{position:relative;border:1px solid var(--rule);box-shadow:0 1px 0 rgba(35,32,28,.10),0 6px 18px -10px rgba(35,32,28,.45)}
+.staple::before{content:'';position:absolute;left:13px;top:11px;width:15px;height:3px;background:#8d8577;transform:rotate(-38deg);box-shadow:0 3px 4px -2px rgba(35,32,28,.5)}
+.stamp{
+  display:inline-block;font-family:monospace;font-size:15px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--stamp-red);border:2.5px solid var(--stamp-red);
+  padding:5px 11px 4px;transform:rotate(-6deg);opacity:.92;mix-blend-mode:multiply;
+}
+.ledger{width:100%;border-collapse:collapse;font-size:15px}
+.ledger th{text-align:left;font-family:monospace;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--ink);padding:0 8px 4px 0}
+.ledger td{padding:5px 8px 5px 0;border-bottom:1px solid var(--rule-hi)}
+.ledger td:last-child,.ledger th:last-child{text-align:right;padding-right:0;font-family:monospace;font-variant-numeric:tabular-nums}
+.ledger tr.tot td{border-top:2px solid var(--ink);border-bottom:none;font-weight:700;padding-top:8px}
+
+/* ── App furniture ────────────────────────────────────────────────────── */
+.card{border:1px solid var(--a-line);border-radius:10px;background:#fff}
+.kpi{background:var(--a-wash);border:1px solid #eef1f6;border-radius:8px;padding:11px 13px}
+.row{display:grid;grid-template-columns:22px 1fr 116px 62px;gap:12px;align-items:center;padding:11px 12px;border:1px solid var(--a-line);border-radius:8px;margin-bottom:6px;background:#fff}
+.row.top{border-color:rgba(31,95,208,.42);background:rgba(31,95,208,.045)}
+.tag{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:999px}
+.btn{display:inline-block;border-radius:8px;padding:11px 18px;font-size:14px;font-weight:600;text-decoration:none;border:1px solid transparent}
+.btn-p{background:var(--a-accent);color:#fff}
+.btn-s{border-color:#ccd4e2;color:var(--a-ink)}
+
+/* The seam, drawn as a static diagram — the real one is a 620ms wipe. */
+.seam{position:relative;overflow:hidden}
+.seamline{position:absolute;left:-10px;right:-10px;height:2px;background:var(--ink);box-shadow:0 0 0 1px rgba(244,239,226,.55)}
+
+.note{font-size:13px;color:var(--ink-soft);line-height:1.55}
+.hair{border:0;border-top:1px solid var(--rule);margin:0}
+
+@media (max-width:640px){
+  .pad{padding:0 18px}
+  h1{font-size:32px!important}
+  .row{grid-template-columns:20px 1fr 92px;}
+  .row .score{display:none}
+}
+</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Negotiation Inc">
+<meta property="og:description" content="A course that teaches the eight exits, a desk that prices them, and an arcade that trains the instinct. No account, no email.">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+
+<div class="page">
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     THE FRONT DOOR — the company, in the software's world.
+
+     The masthead, the claim and the course ribbon used to sit inside the paper
+     world, which meant the first impression of the COMPANY was the game's
+     stock. Paper is the arcade's costume; it begins where the arcade demo
+     begins, one section down, clearly framed as a specimen. Design's rule —
+     cross once and stay crossed — is intact: the page still crosses exactly
+     once, at the seam, out of the specimen and into the product.
+     ══════════════════════════════════════════════════════════════════════ -->
+<div class="app">
+  <!-- Masthead -->
+  <div class="pad" style="display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;padding-top:20px;padding-bottom:20px;border-bottom:1px solid var(--a-line)">
+    <div>
+      <div style="display:flex;align-items:baseline;gap:9px;border-bottom:2px solid var(--a-ink);padding-bottom:3px">
+        <span style="font-size:20px;font-weight:600;letter-spacing:.14em;text-transform:uppercase">Negotiation</span>
+        <span class="mono" style="font-size:11px;font-weight:700;letter-spacing:.2em;padding-bottom:2px">INC</span>
+      </div>
+      <div class="mono" style="font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--a-ink-3);margin-top:4px">Underwriting · est. of record</div>
+    </div>
+    <span style="display:flex;gap:16px;align-items:baseline">
+     <a href="desk.html" data-desk class="mono" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--a-ink);text-decoration:none;border-bottom:2px solid var(--a-ink);padding-bottom:2px;font-weight:700">Open the desk</a>
+     <a href="#in" class="mono" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--a-ink-2);text-decoration:none;border-bottom:1px solid var(--a-line);padding-bottom:2px">Sign in</a></span>
+  </div>
+
+
+  <section class="pad" style="padding-top:44px;padding-bottom:34px">
+    <div class="eyebrow" style="color:var(--a-ink-3)">Movement 1 · the claim</div>
+    <h1 style="font-size:48px;margin-top:12px;max-width:24ch;text-wrap:pretty">Know what to pay before you call.</h1>
+    <p style="font-size:18px;color:var(--a-ink-2);margin-top:14px;max-width:52ch;text-wrap:pretty">
+      Six ways to buy the same house, priced against one seller’s situation. Play a street below and find out how close you get.
+    </p>
+
+    <!-- The course ribbon. The position made visible: the tool that assumes
+         you have never done this before, teaching first and selling never.
+         NEEDS CLAUDE DESIGN: composition is provisional; tokens are theirs. -->
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;border:2px solid var(--a-ink);
+         background:#fff;margin-top:22px;padding:13px 18px">
+      <div style="flex:1 1 320px;min-width:260px">
+        <span class="eyebrow" style="color:var(--a-ink-3)">Free forever · no email · the arithmetic shown</span>
+        <div style="font-size:18px;font-weight:600;margin-top:2px">New to this? Start with The Eight Exits.</div>
+        <div style="font-size:13.5px;color:var(--a-ink-2);margin-top:2px">Every way out of a property deal, one number each, fifteen minutes. It is the whole beginner problem in this business, and it is free because it should be.</div>
+      </div>
+      <a href="exits.html" class="mono" data-course
+         style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#fff;
+         background:var(--a-ink);text-decoration:none;padding:12px 18px;white-space:nowrap">Take the course →</a>
+    </div>
+    <div style="flex-basis:100%;width:100%;display:flex;flex-wrap:wrap;gap:4px 16px;border-top:1px solid var(--a-line);padding-top:9px;margin-top:9px">
+     <a href="exits.html#wholesale" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">I</b> Wholesale</a>
+     <a href="exits.html#flip" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">II</b> Flip</a>
+     <a href="exits.html#wholetail" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">III</b> Wholetail</a>
+     <a href="exits.html#hold" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">IV</b> Hold</a>
+     <a href="exits.html#brrrr" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">V</b> BRRRR</a>
+     <a href="exits.html#subto" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">VI</b> Subject-to</a>
+     <a href="exits.html#novation" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">VII</b> Novation</a>
+     <a href="exits.html#land" class="mono" style="font-size:10px;color:var(--a-ink-2);text-decoration:none"><b style="color:#8a6b1f">VIII</b> Land</a>
+    </div>
+
+  </section>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     THE ARCADE, AS A SPECIMEN — movements 1 and 2
+     ══════════════════════════════════════════════════════════════════════ -->
+<div class="desk">
+  <section class="pad" style="padding-top:30px;padding-bottom:38px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;
+         border-bottom:1px solid var(--rule);padding-bottom:9px;margin-bottom:22px">
+      <div>
+        <span class="eyebrow" style="color:var(--ink-soft)">Movement 2 &middot; the claim, played</span>
+        <div style="font-size:20px;font-weight:600;margin-top:3px">The arcade &mdash; where the instinct is trained</div>
+      </div>
+      <span class="mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);text-align:right;line-height:1.6">A specimen of the game<br>No account required</span>
+    </div>
+    <div class="sheet" style="background:var(--newsprint);margin-top:26px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding:16px 20px 8px">
+        <div>
+          <span class="eyebrow" style="color:var(--ink-soft)">Classified listings · street 3382 · five properties</span>
+          <div style="font-size:19px;font-weight:600;margin-top:3px">Buy one for less than it is worth</div>
+        </div>
+        <div class="mono" style="font-size:11px;color:var(--ink-mid);text-align:right;line-height:1.6">FOUR QUESTIONS EACH<br>NO ACCOUNT REQUIRED</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;background:var(--rule)">
+        <div style="background:var(--newsprint);padding:14px 16px 15px">
+          <div class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Lot 01 · Single-family</div>
+          <div style="font-size:16px;font-weight:600;margin-top:5px;line-height:1.25">1128 Marrow Lane</div>
+          <div style="font-size:13.5px;color:var(--ink-mid);margin-top:5px;line-height:1.45;min-height:5.6em">Fair throughout. Roof noted as “recent” by a party with no roofing qualification. Vacant since March, mail held.</div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--rule-hi);margin-top:9px;padding-top:8px">
+            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)">Asking</span>
+            <span class="mono" style="font-size:16px">$249,500</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:8px;border-bottom:1px dotted var(--rule);margin-top:11px;padding-bottom:4px">
+            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap">Your bid</span>
+            <span class="mono" style="font-size:15px;color:var(--rule)">$</span>
+          </div>
+        </div>
+        <div style="background:var(--newsprint);padding:14px 16px 15px">
+          <div class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Lot 02 · Duplex</div>
+          <div style="font-size:16px;font-weight:600;margin-top:5px;line-height:1.25">4 Pellet Row</div>
+          <div style="font-size:13.5px;color:var(--ink-mid);margin-top:5px;line-height:1.45;min-height:5.6em">Both units occupied. Upstairs tenant has not been formally notified of anything since 2019.</div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--rule-hi);margin-top:9px;padding-top:8px">
+            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)">Asking</span>
+            <span class="mono" style="font-size:16px">$196,000</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:8px;border-bottom:1px dotted var(--rule);margin-top:11px;padding-bottom:4px">
+            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap">Your bid</span>
+            <span class="mono" style="font-size:15px;color:var(--rule)">$</span>
+          </div>
+        </div>
+        <div style="background:var(--newsprint);padding:14px 16px 15px">
+          <div class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Lot 03 · Single-family</div>
+          <div style="font-size:16px;font-weight:600;margin-top:5px;line-height:1.25">15 Corliss Way</div>
+          <div style="font-size:13.5px;color:var(--ink-mid);margin-top:5px;line-height:1.45;min-height:5.6em">Structural note on file regarding the sill plate. Seller has stated a number and has not moved off it in ninety-four days.</div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--rule-hi);margin-top:9px;padding-top:8px">
+            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)">Asking</span>
+            <span class="mono" style="font-size:16px">$214,000</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:8px;border-bottom:1px dotted var(--rule);margin-top:11px;padding-bottom:4px">
+            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap">Your bid</span>
+            <span class="mono" style="font-size:15px;color:var(--rule)">$</span>
+          </div>
+        </div>
+        <div style="background:var(--newsprint);padding:14px 16px 15px">
+          <div class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Lot 04 · Bungalow</div>
+          <div style="font-size:16px;font-weight:600;margin-top:5px;line-height:1.25">82 Ostend Street</div>
+          <div style="font-size:13.5px;color:var(--ink-mid);margin-top:5px;line-height:1.45;min-height:5.6em">Estate sale. Two heirs, one of whom is contactable. Waterfront, obviously.</div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--rule-hi);margin-top:9px;padding-top:8px">
+            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)">Asking</span>
+            <span class="mono" style="font-size:16px">$168,000</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:8px;border-bottom:1px dotted var(--rule);margin-top:11px;padding-bottom:4px">
+            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap">Your bid</span>
+            <span class="mono" style="font-size:15px;color:var(--rule)">$</span>
+          </div>
+        </div>
+        <div style="background:var(--newsprint);padding:14px 16px 15px">
+          <div class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Lot 05 · Fourplex</div>
+          <div style="font-size:16px;font-weight:600;margin-top:5px;line-height:1.25">990 Tannery Hill</div>
+          <div style="font-size:13.5px;color:var(--ink-mid);margin-top:5px;line-height:1.45;min-height:5.6em">Cash-flowing. Priced accordingly, by someone who knows what it cash-flows.</div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--rule-hi);margin-top:9px;padding-top:8px">
+            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)">Asking</span>
+            <span class="mono" style="font-size:16px">$418,000</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:8px;border-bottom:1px dotted var(--rule);margin-top:11px;padding-bottom:4px">
+            <span class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap">Your bid</span>
+            <span class="mono" style="font-size:15px;color:var(--rule)">$</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;border-top:1px solid var(--rule);padding:11px 20px">
+        <span class="mono" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)">Round 1 of 4 · sealed bids · one buyer per lot</span>
+        <span class="mono" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)">Seed 3382 · deterministic</span>
+      </div>
+    </div>
+    <p class="note" style="margin-top:10px;max-width:60ch">Everyone gets this street. Bid on any lot, or all five. Nothing is saved until you ask for it to be.</p>
+  </section>
+
+  <!-- ── M2 · the result, and the ache ────────────────────────────────── -->
+  <section class="pad" style="padding-bottom:8px">
+    <hr class="hair">
+    <div style="padding-top:34px">
+      <div class="eyebrow" style="color:var(--ink-soft)">Movement 3 · the result</div>
+      <h2 style="font-size:26px;margin-top:10px">Four months later, the street settles</h2>
+    </div>
+
+    <div class="sheet" style="background:var(--carbon-pink);margin-top:18px;padding:18px 22px 20px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:7px">
+        <div>
+          <span class="eyebrow" style="color:var(--ink-soft)">Settlement · round 4 · file copy</span>
+          <div style="font-size:22px;font-weight:600;margin-top:3px">1128 Marrow Lane</div>
+        </div>
+        <span class="stamp">Overpaid</span>
+      </div>
+      <table class="ledger" style="margin-top:12px">
+        <thead><tr><th>Line</th><th>Amount</th></tr></thead>
+        <tbody>
+          <tr><td>What you paid the seller</td><td>$252,000</td></tr>
+          <tr><td>What the work cost</td><td>$41,300</td></tr>
+          <tr><td>Holding it for four months</td><td>$6,800</td></tr>
+          <tr><td>What it sold for</td><td>$291,000</td></tr>
+          <tr class="tot"><td>You lost</td><td style="font-size:17px">$9,100</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:15px;color:var(--ink-mid);margin-top:14px;max-width:56ch">Two other buyers walked away from this one. The roof was not recent.</p>
+      <p style="font-size:19px;margin-top:16px;max-width:48ch;text-wrap:pretty">The real version asks the same four questions. The houses are just real.</p>
+    </div>
+  </section>
+
+  <!-- ── THE SEAM ─────────────────────────────────────────────────────────
+       Design pass 3, ported from the mock to vanilla JS. The address never
+       moves — only its typeface converts. Click-staged so the visitor asks
+       for the crossing; autoplays once if the trigger is ignored; a cut, not
+       a slower sweep, under reduced motion.                                -->
+  <section class="pad" style="padding-top:26px;padding-bottom:0">
+    <div id="seam" style="position:relative;height:216px;overflow:hidden;background:#fff;
+         border-left:1px solid var(--rule);border-right:1px solid var(--rule)">
+      <!-- the far side: the app, already there, waiting to be uncovered -->
+      <div style="position:absolute;inset:0;background:#fff;display:flex;flex-direction:column;
+           align-items:center;justify-content:center;gap:6px;
+           font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--a-ink-3)">The same address</div>
+        <div style="font-size:31px;font-weight:650;letter-spacing:-.015em;color:var(--a-ink)">1128 Marrow Lane</div>
+        <div style="font-size:12.5px;color:var(--a-ink-3)">looked at through a different instrument</div>
+        <div style="display:flex;align-items:center;gap:18px;margin-top:8px">
+          <a href="desk.html" data-desk style="font-size:13.5px;font-weight:600;color:var(--a-accent);text-decoration:none">The desk is on the other side &rarr;</a>
+          <button id="seam-back" style="font-family:ui-monospace,Menlo,monospace;font-size:9px;letter-spacing:.12em;
+            text-transform:uppercase;color:#8a93a6;background:none;border:0;cursor:pointer;padding:0">run it back</button>
+        </div>
+      </div>
+      <!-- the near side: paper, clipped away by the wipe -->
+      <div id="seam-paper" style="position:absolute;inset:0;background:var(--carbon-pink);
+           background-image:repeating-linear-gradient(0deg,rgba(35,32,28,.014) 0 2px,transparent 2px 4px);
+           display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+           clip-path:inset(0 0 0 0);transition:clip-path 620ms cubic-bezier(.2,.7,.3,1)">
+        <div class="mono" style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft)">The same address</div>
+        <div style="font-size:31px;font-weight:600;letter-spacing:.01em">1128 Marrow Lane</div>
+        <div class="mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">as the arcade&rsquo;s file holds it</div>
+        <button id="seam-go" class="mono" style="margin-top:8px;font-size:10.5px;letter-spacing:.14em;
+          text-transform:uppercase;border:1.5px solid var(--ink);background:transparent;color:var(--ink);
+          padding:9px 15px;cursor:pointer">Run it through the software &rarr;</button>
+      </div>
+      <!-- one scan line, riding the wipe -->
+      <div id="seam-scan" style="position:absolute;left:0;right:0;top:-3px;height:2.5px;background:var(--ink);
+           box-shadow:0 0 14px rgba(31,95,208,.85),0 0 3px rgba(31,95,208,.9);opacity:0;
+           transform:translateY(0);transition:transform 620ms cubic-bezier(.2,.7,.3,1)"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:8px 2px 0">
+      <span class="mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Sweep · 620ms · click-driven · autoplays once if ignored</span>
+      <span class="mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)">Reduced motion → a cut, not a slower sweep</span>
+    </div>
+<script>
+/* The seam. Ported from Design's pass-3 mock. Three rules it must keep:
+   the visitor ASKS for the crossing (a seam that fires unasked is decoration);
+   it autoplays once if the trigger is ignored, because a landing cannot rely
+   on a click; and reduced motion gets a cut, never a slower sweep. */
+(function(){
+  var seam = document.getElementById('seam');
+  if (!seam) return;
+  var paper = document.getElementById('seam-paper'),
+      scan  = document.getElementById('seam-scan'),
+      go    = document.getElementById('seam-go'),
+      back  = document.getElementById('seam-back');
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var MS = reduce ? 1 : 620, crossed = false, autoUsed = false, t;
+  if (reduce) { paper.style.transitionDuration = '1ms'; scan.style.transitionDuration = '1ms'; }
+
+  function cross(){
+    if (crossed) return;
+    crossed = true; autoUsed = true;
+    paper.style.clipPath = 'inset(100% 0 0 0)';
+    // clip-path hides pixels, NOT hit-testing. Without this the clipped paper
+    // layer keeps swallowing clicks and the desk link on the far side — the
+    // page's primary CTA — is invisible AND unclickable.
+    paper.style.pointerEvents = 'none';
+    if (!reduce) {
+      scan.style.opacity = '1';
+      scan.style.transform = 'translateY(' + (seam.offsetHeight + 6) + 'px)';
+      clearTimeout(t); t = setTimeout(function(){ scan.style.opacity = '0'; }, MS + 60);
+    }
+  }
+  function runBack(){
+    crossed = false; autoUsed = true;
+    clearTimeout(t);
+    scan.style.opacity = '0';
+    scan.style.transition = 'none'; scan.style.transform = 'translateY(0)';
+    requestAnimationFrame(function(){ scan.style.transition = 'transform ' + MS + 'ms cubic-bezier(.2,.7,.3,1)'; });
+    paper.style.clipPath = 'inset(0 0 0 0)';
+    paper.style.pointerEvents = '';
+  }
+  go.addEventListener('click', cross);
+  back.addEventListener('click', runBack);
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if (e.isIntersecting && !crossed && !autoUsed) {
+          autoUsed = true;
+          setTimeout(function(){ if (!crossed) cross(); }, 700);
+        }
+      });
+    }, { threshold: 0.7 });
+    io.observe(seam);
+  }
+})();
+</script>
+
+  </section>
+
+  <div style="height:30px"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════
+     THE APP — movements 3, 4 and 5. Nothing returns to paper.
+     ══════════════════════════════════════════════════════════════════════ -->
+<div class="app">
+
+  <!-- ── M3 · what it actually is ─────────────────────────────────────── -->
+  <section class="pad" style="padding-top:44px;padding-bottom:8px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--a-ink-3)">Movement 4 · what it actually is</div>
+    <h2 style="font-size:34px;margin-top:12px;max-width:26ch;text-wrap:pretty">The offer you can make is not one number. It is six.</h2>
+    <p style="font-size:17px;color:var(--a-ink-2);margin-top:12px;max-width:60ch;text-wrap:pretty">
+      You paid <span class="anum">$252,000</span> in cash for this house and lost <span class="anum">$9,100</span>.
+      The structure that scored highest pays this seller <span class="anum">$258,000</span> and asks
+      <span class="anum">$26,000</span> of your money at the table. Two of the six do not work here — and the
+      software says which two, and why.
+    </p>
+
+    <div class="card" style="margin-top:22px;overflow:hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:13px 17px;border-bottom:1px solid var(--a-line)">
+        <div style="display:flex;align-items:center;gap:13px">
+          <span style="font-size:13px;font-weight:650">Negotiation Inc</span>
+          <span style="font-size:12px;color:var(--a-ink-3)">Underwrite</span>
+        </div>
+        <span class="mono" style="font-size:11px;color:var(--a-ink-3)">strategy_fit.v1 · confidence high</span>
+      </div>
+
+      <div style="padding:15px 17px 4px">
+        <div style="font-size:20px;font-weight:650">1128 Marrow Lane</div>
+        <div style="font-size:13px;color:var(--a-ink-2);margin-top:3px">Single-family · 1,610 sqft · vacant since March · listed at $249,500</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;padding:13px 17px 4px">
+        <div class="kpi">
+          <div style="font-size:11px;color:var(--a-ink-3)">ARV</div>
+          <div class="anum" style="font-size:20px;font-weight:650;margin-top:2px">$291,000</div>
+          <div class="anum" style="font-size:11px;color:var(--a-ink-3);margin-top:1px">$268k–$308k</div>
+        </div>
+        <div class="kpi">
+          <div style="font-size:11px;color:var(--a-ink-3)">Repairs</div>
+          <div class="anum" style="font-size:20px;font-weight:650;margin-top:2px">$41,300</div>
+          <div style="font-size:11px;color:var(--a-ink-3);margin-top:1px">12 systems priced</div>
+        </div>
+        <div class="kpi">
+          <div style="font-size:11px;color:var(--a-ink-3)">Smart MAO</div>
+          <div class="anum" style="font-size:20px;font-weight:650;margin-top:2px">$163,000</div>
+          <div style="font-size:11px;color:var(--a-ink-3);margin-top:1px">35% under ask</div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;padding:14px 17px 8px">
+        <span style="font-size:12px;font-weight:650;color:var(--a-ink-2)">Six structures, scored against this seller’s situation</span>
+        <span style="font-size:11px;color:var(--a-ink-3)">Fit is not profit</span>
+      </div>
+
+      <div style="padding:0 17px 6px">
+        <div class="row top">
+          <span class="mono" style="font-size:12px;color:var(--a-ink-3)">1</span>
+          <div>
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:14px;font-weight:600">Seller finance</div>
+            <div style="font-size:12.5px;color:var(--a-ink-2);margin-top:2px;line-height:1.45">Owned free and clear, vacant since March. Nobody here needs the lump sum this month.</div>
+          </div>
+          <span class="anum" style="font-size:14px;font-weight:650;text-align:right">$258,000</span>
+          <span class="mono score" style="font-size:12px;color:var(--a-ink-3);text-align:right">84</span>
+        </div>
+        <div class="row">
+          <span class="mono" style="font-size:12px;color:var(--a-ink-3)">2</span>
+          <div>
+            <div style="font-size:14px;font-weight:600">Novation</div>
+            <div style="font-size:12.5px;color:var(--a-ink-2);margin-top:2px;line-height:1.45">Listed with an agent whose commission has to be handled somewhere. This is where.</div>
+          </div>
+          <span class="anum" style="font-size:14px;font-weight:650;text-align:right">$221,000</span>
+          <span class="mono score" style="font-size:12px;color:var(--a-ink-3);text-align:right">71</span>
+        </div>
+        <div class="row">
+          <span class="mono" style="font-size:12px;color:var(--a-ink-3)">3</span>
+          <div>
+            <div style="font-size:14px;font-weight:600">Cash</div>
+            <div style="font-size:12.5px;color:var(--a-ink-2);margin-top:2px;line-height:1.45">Closes in eleven days and is $86,500 under what they asked for.</div>
+          </div>
+          <span class="anum" style="font-size:14px;font-weight:650;text-align:right">$163,000</span>
+          <span class="mono score" style="font-size:12px;color:var(--a-ink-3);text-align:right">66</span>
+        </div>
+        <div class="row">
+          <span class="mono" style="font-size:12px;color:var(--a-ink-3)">4</span>
+          <div>
+            <div style="font-size:14px;font-weight:600">Wrap</div>
+            <div style="font-size:12.5px;color:var(--a-ink-2);margin-top:2px;line-height:1.45">Works on paper and adds a moving part to a file that has an estate in it.</div>
+          </div>
+          <span class="anum" style="font-size:14px;font-weight:650;text-align:right">$187,000</span>
+          <span class="mono score" style="font-size:12px;color:var(--a-ink-3);text-align:right">41</span>
+        </div>
+        <div class="row">
+          <span class="mono" style="font-size:12px;color:var(--a-ink-3)">5</span>
+          <div>
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:14px;font-weight:600">
+              Hybrid <span class="tag" style="background:rgba(166,97,13,.12);color:var(--a-warn)">Does not pencil</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--a-ink-2);margin-top:2px;line-height:1.45">The repair number is too large for any part of it to be deferred safely.</div>
+          </div>
+          <span class="anum" style="font-size:14px;font-weight:650;text-align:right">$191,000</span>
+          <span class="mono score" style="font-size:12px;color:var(--a-ink-3);text-align:right">22</span>
+        </div>
+        <div class="row">
+          <span class="mono" style="font-size:12px;color:var(--a-ink-3)">6</span>
+          <div>
+            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:14px;font-weight:600">
+              Subject-to <span class="tag" style="background:#eef1f6;color:var(--a-ink-2)">Not suitable</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--a-ink-2);margin-top:2px;line-height:1.45">No loan on record. This structure needs one to exist.</div>
+          </div>
+          <span class="anum" style="font-size:14px;font-weight:650;text-align:right">—</span>
+          <span class="mono score" style="font-size:12px;color:var(--a-ink-3);text-align:right">—</span>
+        </div>
+      </div>
+
+      <div style="margin:8px 17px 17px;padding:11px 13px;background:rgba(166,97,13,.07);border:1px solid rgba(166,97,13,.22);border-radius:8px;font-size:12.5px;color:#6f4409;line-height:1.5">
+        Of the exits priced here, renting it is the tightest at $198,000 — that is the real ceiling under any of these structures.
+      </div>
+    </div>
+  </section>
+
+  <!-- ── M4 · who it is for ───────────────────────────────────────────── -->
+  <section class="pad" style="padding-top:40px;padding-bottom:8px">
+    <div style="border-top:1px solid var(--a-line);padding-top:34px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--a-ink-3)">Movement 5 · who it is for</div>
+      <h2 style="font-size:28px;margin:12px 0 18px">Three desks, one file format</h2>
+      <dl style="margin:0">
+        <div style="display:grid;grid-template-columns:11rem 1fr;gap:20px;border-bottom:1px solid var(--a-line);padding:13px 0">
+          <dt style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--a-ink-3);padding-top:4px">Wholesalers</dt>
+          <dd style="margin:0;font-size:16px;line-height:1.55;max-width:62ch;color:var(--a-ink)">You already know six ways to buy a house. This prices all six against one seller while you are still reading the notes.</dd>
+        </div>
+        <div style="display:grid;grid-template-columns:11rem 1fr;gap:20px;border-bottom:1px solid var(--a-line);padding:13px 0">
+          <dt style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--a-ink-3);padding-top:4px">Lenders</dt>
+          <dd style="margin:0;font-size:16px;line-height:1.55;max-width:62ch;color:var(--a-ink)">The file shows whether the borrower’s exit is the only exit available on that address. It usually is not.</dd>
+        </div>
+        <div style="display:grid;grid-template-columns:11rem 1fr;gap:20px;border-bottom:1px solid var(--a-line);padding:13px 0">
+          <dt style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--a-ink-3);padding-top:4px">Funds</dt>
+          <dd style="margin:0;font-size:16px;line-height:1.55;max-width:62ch;color:var(--a-ink)">The same underwriting on every address, run by whoever is at the desk. The model is in the file, not in someone’s head.</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ── M5 · the way in ──────────────────────────────────────────────── -->
+  <section id="in" class="pad" style="padding-top:40px;padding-bottom:44px">
+    <div style="border-top:1px solid var(--a-line);padding-top:34px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--a-ink-3)">Movement 6 · the way in</div>
+      <div style="background:var(--a-wash);border:1px solid var(--a-line);border-radius:12px;padding:26px 28px;margin-top:14px;max-width:44rem">
+        <h2 style="font-size:26px;line-height:1.25;max-width:26ch">Play. When you want to run a real address, make an account.</h2>
+        <p style="font-size:16px;color:var(--a-ink-2);margin-top:12px;max-width:52ch">
+          Saving your board is free and does not ask for a card. The street above needs nothing from you at all.
+        </p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px">
+          <a href="arcade.html" class="btn btn-p" data-arcade>Play the arcade</a>
+          <a href="exits.html" class="btn btn-s" data-course>Take the course</a>
+        </div>
+        <p style="font-size:12.5px;color:var(--a-ink-3);margin-top:12px;max-width:52ch">
+          The account arrives with the desk. Until then, everything above is the product being itself.</p>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;border-top:1px solid var(--a-line);margin-top:34px;padding-top:14px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--a-ink-3)">
+        <span>Negotiation Inc · underwriting of record</span>
+        <span>No pricing on this page. The trial fires on usage, never on a timer.</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+</div>
+
+</body>
+</html>

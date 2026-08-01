@@ -1,0 +1,291 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Desk · Negotiation Inc</title>
+<meta name="description" content="Type what you know about a property. The sheet runs every exit, shows its working, and says what it is estimating.">
+<style>
+:root{
+  /* app tokens throughout. The warm off-whites this used were the arcade's
+     paper leaking into a software surface — paper stays in the arcade now. */
+  --page:#f7f8fa; --card:#ffffff; --ink:#101725; --mid:#4a5162; --soft:#677187;
+  --line:#e3e7ee; --line-ink:#c3cad6; --wash:#f7f8fa;
+  --blue:#1f5fd0; --blue-deep:#173f8a; --blue-soft:#e9effb;
+  --green:#177a4d; --green-soft:#eaf6f0; --green-line:#bfe0cd;
+  --amber:#a6610d; --amber-soft:#fbf4e6; --amber-line:#ecd9b0;
+  --red:#b3372c; --red-soft:#faeeec; --red-line:#f0d2ce;
+  --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--sans);background:var(--page);color:var(--ink);min-height:100vh;
+ font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.mono{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:880px;margin:0 auto;padding:26px 20px 80px}
+a{color:var(--blue)}
+
+/* ── masthead: the editorial spine, not the AI-SaaS one ── */
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+ padding-bottom:14px;border-bottom:3px solid var(--ink)}
+.mark{display:inline-flex;align-items:baseline;gap:8px}
+.mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.11em}
+.mark .inc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em}
+.marksub{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-top:4px}
+header nav{display:flex;gap:16px;font-size:13px}
+header nav a{text-decoration:none;color:var(--mid);border-bottom:1px solid var(--line);padding-bottom:1px}
+header nav a:hover{color:var(--ink);border-bottom-color:var(--ink)}
+
+h1{font-family:var(--serif);font-size:34px;font-weight:700;letter-spacing:-.015em;margin-top:26px;line-height:1.15}
+.standfirst{font-size:15.5px;color:var(--mid);margin-top:9px;max-width:60ch}
+.standfirst strong{color:var(--ink)}
+.promise{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-top:11px}
+
+/* ── arrived from the course ────────────────────────────────────────────────
+   A lesson's figures are not a property, and the sheet must never let the two
+   blur. The strip says which lesson sent them, and it is the only way out. */
+.fromc{margin-top:20px;border:1px solid var(--line-ink);border-left:4px solid var(--blue);
+ background:var(--blue-soft);padding:12px 16px;display:flex;justify-content:space-between;
+ align-items:center;gap:16px;flex-wrap:wrap}
+.fromc .k{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.16em;
+ text-transform:uppercase;color:var(--blue-deep)}
+.fromc .m{font-size:13px;line-height:1.5;margin-top:3px;max-width:62ch}
+.fromc .acts{display:flex;gap:8px;flex-wrap:wrap}
+.fromc button{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;
+ text-transform:uppercase;padding:7px 12px;cursor:pointer;border:1.5px solid var(--blue-deep);
+ background:transparent;color:var(--blue-deep);white-space:nowrap}
+.fromc button:hover{background:var(--blue-deep);color:#fff}
+.fromc button.go{background:var(--blue-deep);color:#fff}
+.fromc button.go:hover{background:var(--ink);border-color:var(--ink)}
+
+/* ── the property card ── */
+.sheet{background:var(--card);border:1px solid var(--line-ink);margin-top:22px;box-shadow:0 1px 0 rgba(16,23,37,.05)}
+.scotch{height:1px;background:var(--ink);margin-top:2px}
+.scotch-heavy{height:3px;background:var(--ink);margin-top:2px}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
+ padding:11px 18px;border-bottom:1px solid var(--line)}
+.sheet-h .t{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+.printbtn{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+ color:var(--ink);background:transparent;border:1.5px solid var(--ink);padding:7px 12px;cursor:pointer}
+.printbtn:hover:not(:disabled){background:var(--ink);color:#fff}
+.printbtn:disabled{opacity:.35;cursor:default}
+.sheet-b{padding:16px 18px 18px}
+.addr input{width:100%;border:0;border-bottom:2px solid var(--line);background:transparent;
+ font-family:var(--serif);font-size:23px;font-weight:700;letter-spacing:-.01em;padding:4px 2px 7px;color:var(--ink);outline:none}
+.addr input:focus{border-bottom-color:var(--blue)}
+.addr .note{font-size:11.5px;color:var(--soft);margin-top:6px}
+
+/* the field: one designed unit, state on the border */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px}
+.field{background:#fff;border:1px solid var(--line-ink);padding:11px 13px;transition:border-color .12s,box-shadow .12s}
+/* provenance under an estimate: the arithmetic it used, and what replaces it */
+.prov{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);margin-top:8px;line-height:1.6}
+.field.entered{border-style:solid}
+/* the wash, not the soft tint: at field size #fbf4e6 reads as manila stock,
+   and paper belongs to the arcade. The signal stays; the costume goes. */
+.field.estimate{border-color:var(--amber-line);background:#fdfbf7}
+.field.needed{border-style:dashed}
+.field.focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.field label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+ font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid)}
+.field label a{font-family:var(--mono);font-size:10px;text-decoration:none;color:var(--soft);
+ border:1px solid var(--line);border-radius:50%;width:16px;height:16px;line-height:14px;text-align:center;flex:none}
+.field label a:hover{color:var(--blue);border-color:var(--blue)}
+.frow{display:flex;align-items:center;gap:8px;margin-top:5px}
+.frow input{flex:1;min-width:0;border:0;background:transparent;font-family:var(--sans);
+ font-variant-numeric:tabular-nums;font-size:17px;font-weight:650;color:var(--ink);outline:none;padding:2px 0}
+.frow input::placeholder{color:#aab1c0;font-weight:400;font-size:13px}
+/* state tags: squared, mono — a filing notation, not a SaaS pill */
+.stchip{flex:none;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;padding:3px 7px;border:1px solid}
+.st-entered{background:var(--green-soft);color:var(--green);border-color:var(--green-line)}
+.st-estimate{background:var(--amber-soft);color:var(--amber);border-color:var(--amber-line)}
+.st-needed{background:#eef0f4;color:var(--soft);border-color:var(--line)}
+.gline{display:flex;align-items:center;gap:7px;background:none;border:0;padding:0;margin-top:9px;cursor:pointer;
+ font-family:var(--sans);font-size:12px;color:var(--soft)}
+.gline.on{color:var(--amber)}
+.gknob{position:relative;width:26px;height:15px;border-radius:2px;background:#cdd3de;transition:background .12s;flex:none}
+.gline.on .gknob{background:var(--amber)}
+.gknob i{position:absolute;top:2px;left:2px;width:11px;height:11px;border-radius:1px;background:#fff;
+ box-shadow:0 1px 2px rgba(20,18,15,.3);transition:left .12s}
+.gline.on .gknob i{left:13px}
+/* estimate quick-fills: the intake that writes the number FOR you, honestly */
+.est{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.est .cap{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-bottom:5px}
+.est button{display:inline-flex;align-items:baseline;gap:7px;font-family:var(--sans);font-size:11.5px;font-weight:600;
+ color:var(--mid);background:var(--wash);border:1px solid var(--line-ink);padding:4px 8px;cursor:pointer}
+.est button b{font-weight:650;font-variant-numeric:tabular-nums;color:var(--ink)}
+.est button:hover:not(:disabled){border-color:var(--ink);color:var(--ink);background:#fff}
+.est button:disabled{opacity:.4;cursor:default}
+
+details.loan{margin-top:14px;border-top:1px dashed var(--line);padding-top:11px}
+details.loan summary{font-size:13px;color:var(--mid);cursor:pointer;font-weight:600;list-style:none}
+details.loan summary::before{content:'▸';display:inline-block;margin-right:7px;font-size:10px;color:var(--soft);transition:transform .15s}
+details.loan[open] summary::before{transform:rotate(90deg)}
+details.loan .grid{margin-top:11px}
+
+/* the seller's situation */
+.sit{margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+.sit .t{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mid)}
+.sit .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.sit .chips button{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--mid);background:#fff;
+ border:1px solid var(--line-ink);padding:6px 13px;cursor:pointer}
+.sit .chips button:hover{border-color:var(--mid)}
+.sit .chips button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.sit .why{font-size:11.5px;color:var(--soft);margin-top:7px}
+
+/* ── the verdicts ── */
+.conf{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;
+ border-top:3px solid var(--ink);margin-top:32px;padding-top:12px}
+.conf .eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft)}
+.conf h2{font-family:var(--serif);font-size:23px;font-weight:700;letter-spacing:-.01em;margin-top:3px}
+.confchip{display:inline-flex;align-items:center;gap:8px;padding:5px 11px;border:1px solid}
+.confchip i{width:8px;height:8px;flex:none}
+.confchip .w{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.confchip .d{font-size:12px;color:var(--mid)}
+.docket{margin-top:14px;background:#fff;border:1px solid var(--line-ink);border-top:2.5px solid var(--ink)}
+.exit{border-bottom:1px solid var(--line)}
+.exit:last-child{border-bottom:0}
+.exit.na{background:var(--page)}
+.exit.best{box-shadow:inset 0 0 0 1.5px var(--blue)}
+.exit.best .exit-h{background:var(--blue-soft)}
+.exit-h{display:grid;grid-template-columns:30px 1fr auto;gap:13px;align-items:center;padding:12px 16px;cursor:pointer}
+.exit-h:hover{background:#fafbfd}
+.exit-h:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+.exit-h .rank{font-family:var(--mono);font-size:12px;color:var(--soft);width:24px;height:22px;
+ display:inline-flex;align-items:center;justify-content:center;border-radius:3px}
+.exit.best .exit-h .rank{background:var(--blue);color:#fff;font-weight:700}
+.exit-h .nm{font-family:var(--serif);font-size:16.5px;font-weight:700;letter-spacing:-.01em}
+.exit-h .tags{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.flag{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border:1px solid}
+.flag.est{background:var(--amber-soft);color:var(--amber);border-color:var(--amber-line)}
+.flag.ref{background:#eef0f4;color:var(--soft);border-color:var(--line)}
+.exit-h .reason{font-size:13px;color:var(--mid);margin-top:2px;line-height:1.5;max-width:56ch}
+.exit-h .reason b{color:var(--ink);font-weight:600}
+.exit-h .figs{text-align:right}
+.exit-h .keyfig{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap}
+.exit-h .keyfig.neg{color:var(--red)}
+.exit-h .keyfig.na{color:var(--soft);font-size:12.5px;font-weight:600}
+.exit-h .keylab{font-size:10.5px;color:var(--soft);margin-top:1px}
+.exit-h .fit{font-family:var(--mono);font-size:11px;color:var(--soft);margin-top:3px}
+.exit.best .exit-h .fit{color:var(--blue)}
+.exit-b{border-top:1px solid var(--line);background:var(--wash);padding:14px 16px 15px}
+.bandwrap{margin-bottom:13px}
+.bandtop{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.bandtop .lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)}
+.bandtop .rng{font-size:15.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.bandtrack{position:relative;height:14px;background:#eceef3;margin-top:8px}
+.bandtrack .est-ext{position:absolute;top:0;bottom:0;background:var(--amber-soft);border:1px dashed var(--amber-line)}
+.bandtrack .core{position:absolute;top:0;bottom:0;background:rgba(31,95,208,.16);border:1.5px solid var(--blue)}
+.bandnote{font-size:11.5px;color:var(--amber);margin-top:6px}
+.working{background:#fff;border:1px solid var(--line);padding:10px 14px;
+ font-size:13.5px;line-height:1.85;color:var(--mid);font-variant-numeric:tabular-nums}
+.working b{color:var(--blue);font-weight:650}
+.exit-verdict{font-size:14.5px;color:var(--ink);margin-top:11px;line-height:1.55;max-width:64ch}
+
+/* empty state */
+.empty{background:#fff;border:1px solid var(--line-ink);border-top:2.5px solid var(--ink);margin-top:14px;padding:20px 22px 24px}
+.empty .t{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+.empty .g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:14px}
+.empty .g3 > div{border-top:2px solid var(--ink);padding-top:10px}
+.empty .g3 .n{font-family:var(--mono);font-size:9px;color:var(--soft);letter-spacing:.14em;display:block;margin-bottom:8px}
+.empty .g3 p{font-size:13.5px;color:var(--mid);margin-top:9px;line-height:1.5}
+.demo{margin-top:18px;font-family:var(--sans);font-size:13.5px;font-weight:600;color:#fff;
+ background:var(--blue);border:1px solid var(--blue);padding:9px 15px;cursor:pointer}
+.demo:hover{background:var(--blue-deep);border-color:var(--blue-deep)}
+
+.eighth{margin-top:14px;font-size:12.5px;color:var(--soft);padding:0 4px}
+.eighth a{color:var(--soft)}
+footer{margin-top:12px;padding-top:12px;display:flex;
+ justify-content:space-between;flex-wrap:wrap;gap:8px;font-family:var(--mono);
+ font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+
+@media(max-width:600px){
+ h1{font-size:26px}
+ .exit-h{grid-template-columns:26px 1fr}
+ .exit-h .figs{grid-column:2;text-align:left;margin-top:2px}
+}
+@media print{
+ body{background:#fff}
+ .no-print{display:none!important}
+ #printdoc{display:block!important}
+ @page{margin:18mm 16mm}
+}
+#printdoc{display:none;max-width:720px;margin:0 auto;color:var(--ink);font-family:var(--sans)}
+</style>
+<!-- publish.mjs writes window.NI_PRIORS_URL here, and only when priors.js
+     actually exists. The desk then fetches that file the first time an address
+     yields a ZIP: no 404 when it is absent, no 570 KB when it is unused. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Desk · Negotiation Inc">
+<meta property="og:description" content="Type what you know about a property. The sheet runs every exit, shows its working, and says what it is estimating.">
+<meta name="twitter:card" content="summary">
+<script>window.NI_PRIORS_URL="priors.js"</script>
+</head><body>
+
+<div class="wrap no-print">
+<header>
+ <div>
+  <div class="mark"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></div>
+  <div class="marksub">The desk · underwriting worksheet</div>
+ </div>
+ <nav>
+  <a href="exits.html">The course</a>
+  <a href="arcade.html">The arcade</a>
+ </nav>
+</header>
+
+<h1>Type what you know. The sheet does the rest.</h1>
+<p class="standfirst">Every exit from the course, run against one property, ranked, with the working
+ shown. Anything marked as an <strong>estimate</strong> makes the sheet visibly less sure —
+ it will never quietly treat an estimate as a fact.</p>
+<div class="promise">Prices what you tell it · pulls nothing · nothing leaves this page</div>
+
+<div id="fromcourse"></div>
+
+<div class="scotch"></div>
+<div class="sheet">
+ <div class="sheet-h"><span class="t">Part I &middot; The property</span>
+  <span style="display:flex;align-items:center;gap:14px">
+   <span class="t" id="stamp">FORM D-1 · UNSAVED</span>
+   <button class="printbtn" id="print">Print for a lender</button></span></div>
+ <div class="sheet-b">
+  <div class="addr">
+   <input id="addr" type="text" placeholder="The address, as you'd say it aloud" autocomplete="off">
+   <div class="note">The address is a label. The numbers below are the property.</div>
+  </div>
+  <div class="grid" id="fields"></div>
+  <details class="loan" id="loan">
+   <summary>The seller's loan — if you know it, one more exit opens</summary>
+   <div class="grid" id="loanfields"></div>
+  </details>
+  <div class="sit">
+   <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
+    <span class="t">Part II &middot; The seller's situation — if you can read it</span>
+    <span class="stchip" id="sittag">UNREAD</span></div>
+   <div class="chips" id="sitchips"></div>
+   <div class="why" id="sitwhy">It changes which exit fits, not what the ground is worth. The fit column says how.</div>
+  </div>
+ </div>
+</div>
+
+<div class="conf">
+ <div>
+  <div class="eyebrow">Part III &middot; Ranked by fit, arithmetic shown</div>
+  <h2>The exits, for this property</h2>
+ </div>
+ <span class="confchip" id="conf"><i></i><span class="w"></span><span class="d"></span></span>
+</div>
+<div id="empty"></div>
+<div class="docket" id="docket" style="display:none"><div id="exits"></div></div>
+<p class="eighth" id="eighth"></p>
+
+<div class="scotch-heavy" style="margin-top:38px"></div>
+<footer>
+ <span>Negotiation Inc · the sheet shows its working</span>
+ <span>Every label links to its lesson</span>
+</footer>
+</div>
+
+<div id="printdoc"></div>
+
+<script>"use strict";const $=e=>document.getElementById(e),fmt=e=>(e<0?"−$":"$")+Math.abs(Math.round(e)).toLocaleString("en-US"),esc=e=>String(e??"").replace(/[&<>"']/g,e=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[e])),FIELDS=[{id:"asking",lab:"Asking price",hint:"#novation",ph:"e.g. 249,500"},{id:"arv",lab:"ARV — fixed value",hint:"#wholesale",ph:"sells for, repaired",est:[{t:"≈ asking + 15%",needs:["asking"],f:e=>1e3*Math.round(1.15*e.asking/1e3),unc:.2,prov:"wrote asking + 15% — the roughest number on this sheet. Verify against sold comps."}]},{id:"repairs",lab:"Repairs",hint:"#flip",ph:"the bid, or estimate it",est:[{t:"Light · paint & carpet",needs:["arv"],f:e=>500*Math.round(.03*e.arv/500),prov:"wrote 3% of ARV · replace with a bid when you have one",unc:.12},{t:"Medium · kitchen and up",needs:["arv"],f:e=>500*Math.round(.08*e.arv/500),prov:"wrote 8% of ARV · replace with a bid when you have one",unc:.12},{t:"Heavy · systems",needs:["arv"],f:e=>500*Math.round(.15*e.arv/500),prov:"wrote 15% of ARV · replace with a bid when you have one",unc:.12}]},{id:"rent",lab:"Monthly rent",hint:"#hold",ph:"what it actually gets",est:[{t:"≈ 0.65% of ARV / mo",needs:["arv"],f:e=>25*Math.round(.0065*e.arv/25),unc:.15,prov:"wrote 0.65% of ARV monthly · check three real listings"}]}],LOANFIELDS=[{id:"balance",lab:"Loan balance",hint:"#subto",ph:"what they still owe"},{id:"piti",lab:"PITI / month",hint:"#subto",ph:"their full payment"},{id:"arrears",lab:"Behind by",hint:"#subto",ph:"missed payments, total"}],SITS=[["unknown","Unknown"],["nohurry","No hurry"],["motivated","Motivated"],["urgent","Needs gone yesterday"],["estate","An estate"],["behind","Behind on payments"]],SIT_MOD={wholesale:{urgent:12,motivated:6,nohurry:-8,behind:6},wholetail:{urgent:6,estate:6},flip:{motivated:4},novation:{nohurry:6,estate:8,urgent:-6},subto:{behind:14,estate:-4}},SIT_WHY={unknown:"It changes which exit fits, not what the ground is worth. The fit column says how.",nohurry:"A patient seller waits for retail — the slow exits gain, the discount exits lose.",motivated:"A motivated seller meets real offers. The direct exits firm up.",urgent:"Speed is the product now. The exits that close fastest fit best.",estate:"Estates want certainty and a clean date. Managed exits fit; complexity does not.",behind:"Arrears make the loan itself the asset — the subject-to just woke up."},S={addr:"",raw:{},est:{},prov:{},unc:{},sit:"unknown",openId:null,userToggled:!1};try{const e=JSON.parse(localStorage.getItem("ni-desk-v2"));if(e&&"object"==typeof e){S.addr="string"==typeof e.addr?e.addr.slice(0,120):"",S.sit=SIT_WHY[e.sit]?e.sit:"unknown";for(const t in e.f||{}){const n=e.f[t];n&&"object"==typeof n&&(S.raw[t]="string"==typeof n.v?n.v.slice(0,40):"",S.est[t]=!!n.e,S.prov[t]="string"==typeof n.p?n.p.slice(0,300):null,S.unc[t]="number"==typeof n.u&&n.u>=0&&n.u<=1?n.u:null)}}}catch(e){}const save=()=>{try{const e={};[...FIELDS,...LOANFIELDS].forEach(t=>e[t.id]={v:S.raw[t.id]||"",e:!!S.est[t.id],p:S.prov[t.id]||null,u:S.unc[t.id]||null}),localStorage.setItem("ni-desk-v2",JSON.stringify({addr:S.addr,sit:S.sit,f:e}))}catch(e){}},val=e=>{const t=String(S.raw[e]||"").replace(/[^0-9.]/g,"");if(""===t)return null;const n=parseFloat(t);return Number.isFinite(n)&&n>=0?n:null},vals=()=>{const e={};return[...FIELDS,...LOANFIELDS].forEach(t=>e[t.id]=val(t.id)),e},RATE=.071,mpd=(()=>{const e=.071/12,t=Math.pow(1+e,360);return e*t/(t-1)})(),UNC_DEFAULT=.12,uncOf=(...e)=>Math.max(0,...e.map(e=>null!==val(e)&&S.est[e]?S.unc[e]||.12:0)),zipOf=e=>{const t=String(e||"").match(/\b(\d{5})\b(?!.*\b\d{5}\b)/);return t?t[1]:null};let priorsState=0;function ensurePriors(){if(priorsState||"undefined"==typeof NI_PRIORS_URL)return;priorsState=1;const e=document.createElement("script");e.src=NI_PRIORS_URL,e.onload=()=>{priorsState=2,render()},e.onerror=()=>{priorsState=3},document.head.appendChild(e)}const CEILING="the survey stops counting here, so this is a floor, not a middle";function priorChips(e){const t=zipOf(S.addr);if(!t)return[];if(ensurePriors(),"undefined"==typeof NI_PRIORS||!NI_PRIORS.z[t])return[];const n=NI_PRIORS.z[t],a=NI_PRIORS.meta,i=(n[0]||0)*(a.scale||1),s=n[1]||0,r=n[2]||0,o=!!(1&r),l=!!(2&r),d=[];return"arv"===e&&i&&d.push({t:`ZIP ${t} median value${o?" · at the ceiling":""}`,needs:[],f:()=>i,unc:o?.25:.18,pre:o?"≥":"≈",prov:`ZIP ${t} median home value · ${a.source} ${a.vintage}${o?` · ${CEILING}`:""} · a ZIP median is not this house — comps still win`}),"rent"===e&&s&&d.push({t:`ZIP ${t} median rent${l?" · at the ceiling":""}`,needs:[],f:()=>s,unc:l?.22:.15,pre:l?"≥":"≈",prov:`ZIP ${t} median gross rent · ${a.source} ${a.vintage}${l?` · ${CEILING}`:""} · check it against three live listings`}),d}function chipsFor(e){return[...priorChips(e.id),...e.est||[]]}function fieldHTML(e){const t=val(e.id),n=S.est[e.id]&&null!==t,a=null===t?"needed":n?"estimate":"entered",i={entered:"ENTERED",estimate:"ESTIMATE",needed:"NEEDED"}[a],s=vals();return`<div class="field ${a}" id="fb-${e.id}">\n  <label>${e.lab}<a href="exits.html${e.hint}" target="_blank" title="The lesson that defines this">?</a></label>\n  <div class="frow">\n   <input id="fi-${e.id}" inputmode="decimal" data-f="${e.id}" value="${esc(S.raw[e.id]||"")}" placeholder="${e.ph}" autocomplete="off">\n   <span class="stchip st-${a}">${i}</span>\n  </div>\n  ${null!==t?`<button class="gline${n?" on":""}" data-g="${e.id}"><span class="gknob"><i></i></span>mark as estimate</button>`:""}\n  ${n&&S.prov[e.id]?`<div class="prov">${esc(S.prov[e.id])}</div>`:""}\n  ${(()=>{const n=chipsFor(e);return null===t&&n.length?`<div><div class="cap" style="font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin:8px 0 5px">Rough it in — marked estimate, bands widen</div><div class="est">${n.map((t,n)=>{const a=t.needs.every(e=>null!==s[e]);return`<button data-est="${e.id}:${n}" ${a?"":`disabled title="needs ${t.needs.join(", ")}"`}><span>${t.t}</span>${a?`<b>${t.pre||"≈"} ${fmt(t.f(s))}</b>`:""}</button>`}).join("")}</div></div>`:""})()}\n </div>`}function exitsFor(){const e=vals(),t=(...t)=>t.filter(t=>null===e[t]),n=(...t)=>t.some(t=>null!==e[t]&&S.est[t]),a={arv:"ARV",repairs:"repairs",rent:"rent",asking:"asking price",piti:"PITI",balance:"loan balance"},i=(e,t,n,i,s)=>({id:e,nm:t,na:!0,e:!1,key:null,reason:`Needs <b>${i.map(e=>a[e]||e).join("</b> and <b>")}</b>${s?" — open the seller’s-loan section":""}. The sheet does not invent what you did not give it.`,missFields:i,needsLoan:!!s}),s=[];{const n=t("arv","repairs");if(n.length)s.push(i("wholesale","The wholesale",0,n));else{const t=uncOf("arv","repairs"),n=t>0,a=.7*e.arv-e.repairs,i=[a-2e4,a-8e3],r=[a-2e4*(1+t),a-8e3*(1-t)];s.push({id:"wholesale",nm:"The wholesale",keylab:"fee at the band’s middle",key:r[1]<=0?null:14e3,e:n,w:t,ceil:i[1],band:r,band0:i,bandlab:"offer the seller between",working:[`buyer’s ceiling = 70% × ${fmt(e.arv)} − ${fmt(e.repairs)} = <b>${fmt(a)}</b>`,"your fee = ceiling − your offer"],verdict:r[1]<=0?"The numbers leave no room for a fee. This is not a wholesale.":`Contract inside the band and assign at ${fmt(a)}. The buyer keeps their margin; you keep the difference.${n?" The band is wider to cover the estimate.":""}`})}}{const n=t("arv","repairs");if(n.length)s.push(i("flip","The fix and flip",0,n));else{const t=uncOf("arv","repairs"),n=t>0,a=.08*e.arv,i=Math.max(12e3,.035*e.arv),r=Math.max(25e3,.08*e.arv),o=e.arv-e.repairs-a-i-r,l=e=>[o*(.94-.5*e),o];s.push({id:"flip",nm:"The fix and flip",keylab:"profit at the band’s top",key:r,e:n,w:t,ceil:o,band:l(t),band0:l(0),bandlab:"pay no more than",working:[`ARV ${fmt(e.arv)} − repairs ${fmt(e.repairs)} − selling ${fmt(a)} − holding ${fmt(i)}`,`− target profit ${fmt(r)} = <b>max buy ${fmt(o)}</b>`],verdict:o<=0?"There is no price at which this flips. Walk.":`At ${fmt(o)} you clear ${fmt(r)} if the bid holds. The 70% rule would say ${fmt(.7*e.arv-e.repairs)} — the gap is your margin for being wrong.${n?" Estimated inputs: treat the top of the band as the whole band.":""}`})}}{const n=t("arv","repairs");if(n.length)s.push(i("wholetail","The wholetail",0,n));else if(e.repairs>.08*e.arv)s.push({id:"wholetail",nm:"The wholetail",na:!0,refused:!0,e:!1,key:null,reason:`Repairs are ${Math.round(e.repairs/e.arv*100)}% of ARV — past the 8% where “light work” stops being light. This is a flip wearing a disguise.`});else{const t=uncOf("arv","repairs"),n=t>0,a=e.arv-1.9*e.repairs,i=.4*e.repairs,r=.92*a-15e3-i-3e3,o=e=>[r*(.95-.5*e),r];s.push({id:"wholetail",nm:"The wholetail",keylab:"net at the band’s top",key:15e3,e:n,w:t,ceil:r,band:o(t),band0:o(0),bandlab:"pay no more than",working:[`as-is ≈ ARV − repairs × 1.9 = <b>${fmt(a)}</b> (the market discounts unfixed work at ~2×)`,`× 92% − light work ${fmt(i)} − holding $3,000 − target $15,000 = <b>max buy ${fmt(r)}</b>`],verdict:"Repairs are light enough to sell through. Clean it, photograph it, price it honest, and stop — lesson three is entirely about the stopping."})}}{const n=t("rent");if(n.length)s.push(i("hold","The buy and hold",0,n));else{const t=uncOf("rent"),n=t>0,a=.6*e.rent/1.25,i=a/mpd,r=i/.75,o=e=>[r*(1-.07-.5*e),r];s.push({id:"hold",nm:"The buy and hold",keylab:"DSCR at the band’s top",key:1.25,keyfmt:"1.25",e:n,w:t,ceil:r,band:o(t),band0:o(0),bandlab:"pay no more than",working:[`affordable debt = rent ${fmt(e.rent)} × 60% ÷ 1.25 = <b>${fmt(a)}/mo</b>`,`→ loan ${fmt(i)} at ${7.1.toFixed(1)}% ÷ 75% LTV = <b>max price ${fmt(r)}</b>`],verdict:`Above ${fmt(r)}, the rent stops covering the debt with room, and “covering with room” is the entire strategy. If the seller wants more, the price is wrong — not the rent.${n?" Rent is an estimate: check three real listings before you write anything.":""}`})}}{const n=t("arv","repairs");if(n.length)s.push(i("brrrr","The BRRRR",0,n));else{const t=uncOf("arv","repairs"),n=t>0,a=.75*e.arv,i=a-e.repairs-7e3,r=e=>[i*(.94-.5*e),i];s.push({id:"brrrr",nm:"The BRRRR",keylab:"cash left at the band’s top",key:0,keyfmt:"$0 left in",e:n,w:t,ceil:i,band:r(t),band0:r(0),bandlab:"pay no more than",working:[`refi returns 75% × ARV ${fmt(e.arv)} = <b>${fmt(a)}</b>`,`− repairs ${fmt(e.repairs)} − carry $7,000 = <b>max buy ${fmt(i)}</b>`],verdict:`Buy at or under ${fmt(i)} and the refinance hands every dollar back — the appraiser permitting, and lesson five is honest about the appraiser. The rent still has to clear lesson four on the new payment.`})}}{const a=t("piti","rent");if(a.length)s.push(i("subto","The subject-to",0,a,a.includes("piti")));else{const t=n("piti","rent","arrears"),a=.82*e.rent-e.piti,i=(e.arrears||0)+5e3+3e3;s.push({id:"subto",nm:"The subject-to",keylab:"monthly spread",key:a,keyfmt:fmt(a)+"/mo",e:t,band:null,spread:a,working:[`spread = rent ${fmt(e.rent)} × 82% − PITI ${fmt(e.piti)} = <b>${fmt(a)}/mo</b>`,`entry ≈ arrears ${fmt(e.arrears||0)} + walk $5,000 + closing $3,000 = <b>${fmt(i)}</b>${a>0?` · back in <b>${Math.ceil(i/a)} months</b>`:""}`],verdict:a<=0?"You would be assuming their payment in order to lose money monthly. The terms are not the asset here.":"Their rate is doing the work a discount usually does. Handle the insurance properly and have a lawyer who has seen a due-on-sale clause before — lesson six is not optional reading on this one."})}}{const a=t("arv","asking");if(a.length)s.push(i("novation","The novation",0,a));else{const t=n("arv","asking"),a=.92*e.arv-e.asking-8e3-2375;s.push({id:"novation",nm:"The novation",keylab:"check, listed at the comps",key:a,e:t,check:a,band:[.995*e.arv,1.03*e.arv],band0:[.995*e.arv,1.03*e.arv],bandlab:"list between",working:[`retail ${fmt(e.arv)} × 92% − owner’s ${fmt(e.asking)} − prep $8,000 − ~25 days carry = <b>${fmt(a)}</b>`],verdict:a<8e3?`${fmt(a)} for running a listing, a prep crew, and an owner relationship. Too thin to be worth the management.`:`The gap between their number and retail is real. Deliver them ${fmt(e.asking)}, run the last hundred yards, keep ${fmt(a)}.${t?" Verify the ARV before contracting a number the owner will hold you to.":""}`})}}return s}function fitFor(e){const t=val("asking");let n=null,a="";if(e.na||null===e.key)return{fit:null,basis:""};if("novation"===e.id)n=Math.max(4,Math.min(96,e.check/250)),a=`check ${fmt(e.check)} against a $24k benchmark`;else if("subto"===e.id)n=Math.max(4,Math.min(96,e.spread/4)),a=`spread ${fmt(e.spread)}/mo against a $380 benchmark`;else{if(null===t||void 0===e.ceil)return{fit:null,basis:""};{const i=(e.ceil-t)/t;n=Math.max(4,Math.min(96,50+220*i)),a=`your ceiling ${fmt(e.ceil)} vs their ${fmt(t)}`}}const i=(SIT_MOD[e.id]||{})[S.sit]||0;return{fit:Math.round(Math.max(2,Math.min(98,n+i))),basis:a,mod:i}}let lastFocus=null;function render(){$("fields").innerHTML=FIELDS.map(fieldHTML).join(""),$("loanfields").innerHTML=LOANFIELDS.map(fieldHTML).join(""),$("sitchips").innerHTML=SITS.map(e=>`<button data-sit="${e[0]}" class="${S.sit===e[0]?"on":""}">${e[1]}</button>`).join(""),$("sitwhy").textContent=SIT_WHY[S.sit],$("sittag").className="stchip "+("unknown"===S.sit?"st-needed":"st-entered"),$("sittag").textContent="unknown"===S.sit?"UNREAD":"READ",$("stamp").textContent=S.addr.trim()?"FORM D-1 · "+S.addr.trim().toUpperCase().slice(0,24):"FORM D-1 · UNSAVED",$("addr").value=S.addr;const e=vals(),t=[...FIELDS,...LOANFIELDS].filter(t=>null!==e[t.id]&&!S.est[t.id]).length,n=[...FIELDS,...LOANFIELDS].filter(t=>null!==e[t.id]&&S.est[t.id]).length,a=t+n>0;$("print").disabled=!a;const i=exitsFor().map(e=>Object.assign(e,fitFor(e))),s=val("asking"),r=i.filter(e=>!e.na&&null!==e.key);r.sort((e,t)=>(t.fit??-1)-(e.fit??-1)||("number"==typeof t.key?t.key:0)-("number"==typeof e.key?e.key:0));const o=[...r,...i.filter(e=>e.na||null===e.key)],l=a&&r.length?0===n&&t>=3?["#177a4d","#eaf6f0","#bfe6d3","Confidence high","no estimates"]:n<=1?["#a6610d","#fbf4e6","#ecd9b0","Confidence medium",`${t} entered · ${n} estimate`]:["#b3372c","#faeeec","#f0d2ce","Confidence low",`${t} entered · ${n} estimates`]:["#6b7386","#f6f6f3","#d9dde6","Confidence —","nothing to price yet"],d=$("conf");d.style.background=l[1],d.style.borderColor=l[2],d.querySelector("i").style.background=l[0],d.querySelector(".w").style.color=l[0],d.querySelector(".w").textContent=l[3],d.querySelector(".d").textContent=l[4],$("empty").innerHTML=a?"":'<div class="empty">\n  <div class="t">Form D-1 &middot; how this sheet works</div>\n  <div class="g3">\n   <div><span class="n">01</span><span class="stchip st-entered">ENTERED</span><p>A typed fact. The sheet prices it as given.</p></div>\n   <div><span class="n">02</span><span class="stchip st-estimate">ESTIMATE</span><p>Counted in full — and it widens every band it touches, so the sheet stays honest about what it knows.</p></div>\n   <div><span class="n">03</span><span class="stchip st-needed">NEEDED</span><p>Exits that need it refuse to price, and say exactly what they need.</p></div>\n  </div>\n  <p style="font-size:14px;color:var(--mid);margin-top:16px;max-width:62ch">The sheet never invents data. Start with an asking price — one number is enough to open the first exits, and the estimate buttons can rough in the rest.</p>\n  <button class="demo" id="demo">Load a worked example — 1128 Marrow Lane</button></div>';const p=S.userToggled?S.openId:r.length?r[0].id:null;if($("docket").style.display=a?"":"none",$("exits").innerHTML=a?o.map((e,t)=>{const n=!e.na&&null!==e.key,a=n&&0===t,i=n&&p===e.id,s=n?e.keyfmt||fmt(e.key):"not priced";let r="";if(n&&e.band){const t=Math.min(e.band[0],e.band0[0]),n=Math.max(e.band[1],e.band0[1])-t||1,a=t-.1*n,i=1.2*n,s=e=>Math.max(0,Math.min(100,(e-a)/i*100)),o=e.e&&(Math.abs(e.band[0]-e.band0[0])>1||Math.abs(e.band[1]-e.band0[1])>1);r=`<div class="bandwrap">\n    <div class="bandtop"><span class="lab">Negotiation Inc · ${e.bandlab}</span>\n     <span class="rng">${fmt(e.band[0])} — ${fmt(e.band[1])}</span></div>\n    <div class="bandtrack">\n     ${o?`<span class="est-ext" style="left:${s(e.band[0])}%;width:${Math.max(1.5,s(e.band[1])-s(e.band[0]))}%"></span>`:""}\n     <span class="core" style="left:${s(e.band0[0])}%;width:${Math.max(1.5,s(e.band0[1])-s(e.band0[0]))}%"></span>\n    </div>\n    ${o?`<div class="bandnote">The paler zone is the widening — +${Math.round(100*(e.w||.12))}% for the least certain estimate feeding this. Verify it and the band tightens.</div>`:""}\n   </div>`}const o=null!==e.fit?`fit ${e.fit}`:n?"fit —":"",l=null!==e.fit?`<br>fit ${e.fit} — ${e.basis}${e.mod?` · ${SITS.find(e=>e[0]===S.sit)[1].toLowerCase()} ${e.mod>0?"+":""}${e.mod}`:""}`:"";return`<div class="exit${a?" best":""}${n?"":" na"}" id="x-${e.id}">\n   <div class="exit-h" data-row="${e.id}" tabindex="0" role="button" aria-expanded="${i?"true":"false"}">\n    <span class="rank">${n?t+1:"·"}</span>\n    <div>\n     <div class="tags"><span class="nm">${e.nm}</span>\n      ${e.e?'<span class="flag est">Runs on estimates</span>':""}\n      ${e.refused?'<span class="flag ref">Refuses</span>':""}</div>\n     ${e.reason?`<div class="reason">${e.reason}</div>`:""}\n    </div>\n    <div class="figs">\n     <div class="keyfig ${n?"number"==typeof e.key&&e.key<0?"neg":"":"na"}">${s}</div>\n     ${n?`<div class="keylab">${e.keylab}</div><div class="fit">${o}</div>`:""}\n    </div>\n   </div>\n   ${i?`<div class="exit-b">\n    ${r}\n    <div class="working">${e.working.join("<br>")}${l}</div>\n    <div class="exit-verdict">${e.verdict}</div>\n   </div>`:""}\n  </div>`}).join(""):"",$("eighth").innerHTML=a?'VIII · The land play is not on this sheet. The eighth exit needs dirt, and this is a house — <a href="exits.html#land" target="_blank">the lesson still applies to you</a>, just not to it.':"",null===s&&a&&r.length&&($("eighth").innerHTML+="<br>No asking price yet — ranked by dollars at stake until there is one. Fit needs the other side of the table."),wire(o),lastFocus){const e=$("fi-"+lastFocus);e&&(e.focus(),e.setSelectionRange(e.value.length,e.value.length)),lastFocus=null}buildPrint(o,l),save()}function wire(e){document.querySelectorAll("[data-f]").forEach(e=>{e.oninput=()=>{S.raw[e.dataset.f]=e.value,S.prov[e.dataset.f]=null,S.unc[e.dataset.f]=null,lastFocus=e.dataset.f,render()},e.onfocus=()=>$("fb-"+e.dataset.f).classList.add("focus"),e.onblur=()=>{const t=$("fb-"+e.dataset.f);t&&t.classList.remove("focus");const n=e.dataset.f,a=val(n);if(null===a)return;const i=a.toLocaleString("en-US");e.value===i&&S.raw[n]===i||(S.raw[n]=i,e.value=i,save())}}),document.querySelectorAll("[data-g]").forEach(e=>e.onclick=()=>{S.est[e.dataset.g]=!S.est[e.dataset.g],S.est[e.dataset.g]||(S.prov[e.dataset.g]=null,S.unc[e.dataset.g]=null),render()}),document.querySelectorAll("[data-est]").forEach(e=>e.onclick=()=>{const[t,n]=e.dataset.est.split(":"),a=chipsFor(FIELDS.find(e=>e.id===t))[+n];S.raw[t]=fmt(a.f(vals())).replace("$",""),S.est[t]=!0,S.prov[t]=a.prov,S.unc[t]=a.unc||.12,render()}),document.querySelectorAll("[data-sit]").forEach(e=>e.onclick=()=>{S.sit=e.dataset.sit,render()}),document.querySelectorAll("[data-row]").forEach(e=>e.onkeydown=t=>{"Enter"!==t.key&&" "!==t.key||(t.preventDefault(),e.click())}),document.querySelectorAll("[data-row]").forEach(t=>t.onclick=n=>{if("A"===n.target.tagName)return;const a=e.find(e=>e.id===t.dataset.row);if(a&&(a.na||null===a.key)){a.needsLoan&&($("loan").open=!0);const e=a.needsLoan?"piti":a.missFields&&a.missFields[0];return void(e&&setTimeout(()=>{const t=$("fi-"+e);t&&t.focus()},60))}S.userToggled=!0,S.openId=S.openId===t.dataset.row?null:t.dataset.row,render()});const t=$("demo");t&&(t.onclick=demoFill)}function demoFill(){S.addr="1128 Marrow Lane",Object.assign(S.raw,{asking:"249,500",arv:"291,000",repairs:"41,300",rent:"1,850"}),S.est.repairs=!0,S.prov.repairs="the bid is not back — marked estimate until it is",S.sit="estate",S.userToggled=!1,S.openId=null,CASE={from:"demo"};try{localStorage.setItem("ni-desk-case","demo")}catch(e){}save(),strip(),render()}let addrT=null;function buildPrint(e,t){const n=[...FIELDS,...LOANFIELDS].map(e=>{const t=val(e.id),n=S.est[e.id]&&null!==t;return`<tr><td style="padding:6px 8px 6px 0;border-bottom:1px solid #d9dde6">${e.lab}</td>\n   <td class="num" style="padding:6px 8px 6px 0;border-bottom:1px solid #d9dde6;text-align:right;font-weight:${null===t?400:650}">${null===t?"—":fmt(t)}</td>\n   <td style="padding:6px 0;border-bottom:1px solid #d9dde6;text-align:right;font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:${null===t?"#8a93a6":n?"#a6610d":"#177a4d"}">${null===t?"NEEDED":n?"ESTIMATE":"ENTERED"}</td></tr>`}).join("");$("printdoc").innerHTML=`\n  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px">\n   <div><div style="display:inline-flex;align-items:baseline;gap:8px">\n     <span style="font-family:var(--serif);font-size:21px;font-weight:700;letter-spacing:.11em">NEGOTIATION</span>\n     <span style="font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.2em">INC</span></div>\n    <div style="font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#4a5162;margin-top:4px">Underwriting sheet · prepared at the desk</div></div>\n   <div style="text-align:right;font-family:var(--mono);font-size:10px;color:#4a5162;line-height:1.7">${(new Date).toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"}).toUpperCase()}<br>${t[3].toUpperCase()} · ${t[4].toUpperCase()}</div></div>\n  <div style="border-top:2.5px solid #14120f;margin-top:10px"></div>\n  <div style="font-family:var(--serif);font-size:25px;font-weight:700;margin-top:14px">${esc(S.addr.trim())||"Address not given"}</div>\n  ${caseLabel()?`<div style="font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#a6610d;border:1px solid #ecd9b0;background:#fdfbf7;padding:5px 8px;margin-top:7px;display:inline-block">${"demo"===caseLabel()?"Sample sheet · made-up figures · not a property":0===caseLabel().indexOf("arcade")?"Carried from the arcade · a rescaled shape · not a property":`Teaching example · The Eight Exits, Section ${esc(caseLabel())} · not a property`}</div>`:""}\n  <div style="font-size:12px;color:#4a5162;margin-top:2px">Every figure below is arithmetic on the givens in this table. Estimates are marked because they are estimates.</div>\n  <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:12.5px">\n   <thead><tr>${["Given","Value","State"].map((e,t)=>`<th style="text-align:${t?"right":"left"};font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#4a5162;border-bottom:1.5px solid #14120f;padding:0 ${t<2?"8px":"0"} 5px 0">${e}</th>`).join("")}</tr></thead>\n   <tbody>${n}\n    <tr><td style="padding:6px 8px 6px 0">Seller’s situation</td><td style="padding:6px 8px 6px 0;text-align:right;font-weight:650">${SITS.find(e=>e[0]===S.sit)[1]}</td><td style="padding:6px 0;text-align:right;font-family:var(--mono);font-size:10px;color:#4a5162">READ</td></tr></tbody></table>\n  <div style="font-family:var(--serif);font-size:16px;font-weight:700;margin-top:22px">THE EXITS, RANKED</div>\n  ${e.map((e,t)=>{const n=!e.na&&null!==e.key;return`<div style="border-top:1px solid #c9cfda;margin-top:12px;padding-top:11px;break-inside:avoid">\n    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px">\n     <div style="font-family:var(--serif);font-size:15px;font-weight:700"><span style="font-family:var(--mono);font-size:11px;color:#4a5162;margin-right:8px">${n?t+1:"·"}</span>${e.nm}${e.e?'<span style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:#a6610d;margin-left:9px">RUNS ON ESTIMATES</span>':""}</div>\n     <div class="num" style="font-size:14.5px;font-weight:700;white-space:nowrap">${n?e.keyfmt||fmt(e.key):"not priced"} <span style="font-weight:400;font-size:10.5px;color:#4a5162">${n?e.keylab:""}</span></div></div>\n    ${e.reason?`<div style="font-size:12.5px;color:#4a5162;margin-top:3px">${e.reason.replace(/<[^>]+>/g,"")}</div>`:""}\n    ${n&&e.band?`<div style="font-size:12.5px;margin-top:5px"><span style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:#1f5fd0">${(e.bandlab||"").toUpperCase()}</span>&nbsp; <b class="num">${fmt(e.band[0])} — ${fmt(e.band[1])}</b>${e.e?'<span style="color:#a6610d"> · widened for the estimate</span>':""}</div>`:""}\n    ${n?`<div class="num" style="font-size:12px;line-height:1.8;color:#4a5162;margin-top:5px">${e.working.join("<br>").replace(/<b>/g,'<b style="color:#1f5fd0">')}</div>\n    <div style="font-size:12.5px;line-height:1.5;margin-top:5px;max-width:70ch">${e.verdict}</div>`:""}\n   </div>`}).join("")}\n  <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;border-top:2.5px solid #14120f;margin-top:18px;padding-top:10px">\n   <div style="font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:#4a5162">Prepared with Negotiation Inc · the sheet shows its working</div>\n   <div style="text-align:right"><div style="border-bottom:1px solid #14120f;width:190px;height:26px"></div>\n    <div style="font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:#4a5162;margin-top:3px">Prepared by</div></div>\n  </div>`}$("addr").addEventListener("input",e=>{S.addr=e.target.value,$("stamp").textContent=S.addr.trim()?"FORM D-1 · "+S.addr.trim().toUpperCase().slice(0,24):"FORM D-1 · UNSAVED",clearTimeout(addrT),addrT=setTimeout(render,350),save()}),$("print").onclick=()=>window.print(),window.__render=render;const NUMFIELDS=["asking","arv","repairs","rent","balance","piti","arrears"],hashParams=()=>new URLSearchParams((location.hash||"").replace(/^#/,"")),CAP=999999999;function readCase(){const e=hashParams();if(!NUMFIELDS.some(t=>e.get(t)))return null;const t=e.get("from")||"";if(!/^([IVX]{1,4}|arcade)$/.test(t))return null;const n=e.get("exit")||null,a={raw:{},est:{},from:t,exit:n&&/^[a-z]{3,12}$/.test(n)?n:null,title:String(e.get("title")||"").slice(0,80),sit:e.get("sit")||"unknown"};return NUMFIELDS.forEach(t=>{const n=e.get(t);n&&Number.isFinite(+n)&&+n>=0&&+n<=CAP&&(a.raw[t]=(+n).toLocaleString("en-US"))}),(e.get("est")||"").split(",").filter(Boolean).forEach(e=>{a.raw[e]&&(a.est[e]=!0)}),Object.keys(a.raw).length?a:null}let CASE=null,pending=null;function applyCase(e){S.addr="",S.raw={},S.est={},S.prov={},S.unc={},Object.assign(S.raw,e.raw);const t="arcade"===e.from?"the arcade knew this one for a fact — the world does not, so the band widens":"the lesson marks this one an estimate — the band widens for it";for(const n in e.est)S.est[n]=!0,S.unc[n]=.12,S.prov[n]=t;S.sit=SIT_WHY[e.sit]?e.sit:"unknown",S.userToggled=!!SIT_WHY[e.sit]&&"unknown"!==e.sit,S.openId=e.exit||null,CASE=e,pending=null;try{localStorage.setItem("ni-desk-case",e.from+(e.title?" — "+e.title:""))}catch(e){}save(),strip(),render();const n=$("fromcourse");n&&n.scrollIntoView({block:"nearest"})}const dropHash=()=>{try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}};function clearCase(){S.addr="",S.raw={},S.est={},S.prov={},S.unc={},S.sit="unknown",S.userToggled=!1,S.openId=null,CASE=null,pending=null,dropHash();try{localStorage.removeItem("ni-desk-case")}catch(e){}save(),strip(),render()}function caseLabel(){if(CASE)return CASE.from+(CASE.title?" — "+CASE.title:"");try{return localStorage.getItem("ni-desk-case")}catch(e){return null}}function strip(){const e=$("fromcourse");if(!e)return;if(pending)return e.innerHTML=`<div class="fromc"><div>\n      <div class="k">The course sent a worked example</div>\n      <div class="m">Section ${esc(pending.from)}${pending.title?" — "+esc(pending.title):""} wants to load its figures.\n        You already have a sheet in progress, so nothing has changed yet.</div></div>\n      <div class="acts"><button class="go" id="c-load">Load the example</button>\n      <button id="c-keep">Keep my sheet</button></div></div>`,$("c-load").onclick=()=>applyCase(pending),void($("c-keep").onclick=()=>{pending=null,dropHash(),strip()});const t=caseLabel();if(!t)return void(e.innerHTML="");const n="demo"===t,a=0===t.indexOf("arcade"),i=esc(a?t.replace(/^arcade\s*—\s*/,""):"");e.innerHTML=`<div class="fromc"><div>\n    <div class="k">${n?"Sample sheet":a?"Carried over from the arcade &middot; a shape, not a property":"Teaching example &middot; from The Eight Exits"}</div>\n    <div class="m">${n?"1128 Marrow Lane is not a real property. Everything below is real arithmetic on made-up\n         numbers — change any of them and it re-prices, or start clean and use your own.":a?`“${i}” — the lot you just read, rescaled to today's money. The game's digits are\n         its own; what crossed over is the <em>proposition</em>: what it asks, what it is worth,\n         what it needs, and who the seller is. Both figures the settlement handed you are marked\n         estimates here, because in the world nobody hands them to you.`:`These are Section ${esc(t)}'s figures, not a property. Everything below is real\n         arithmetic on made-up numbers — change any of them and it re-prices, or start clean and\n         use your own.`}</div></div>\n    <div class="acts"><button class="go" id="c-blank">Start a blank sheet</button></div></div>`;let s=null;$("c-blank").onclick=()=>{const e=$("c-blank");if(e.dataset.armed)return clearTimeout(s),void clearCase();e.dataset.armed="1",e.textContent="Clear everything on it?",s=setTimeout(()=>{$("c-blank")&&(delete $("c-blank").dataset.armed,$("c-blank").textContent="Start a blank sheet")},4e3)}}window.addEventListener("hashchange",()=>{const e=readCase();e&&(sheetHasWork()?(pending=e,strip(),render()):applyCase(e))});const incoming=readCase(),sheetHasWork=()=>[...FIELDS,...LOANFIELDS].some(e=>null!==val(e.id))||!!S.addr.trim();incoming?sheetHasWork()?(pending=incoming,strip(),render()):applyCase(incoming):(strip(),render(),"#example"!==(location.hash||"").toLowerCase()||sheetHasWork()||demoFill());</script></body></html>
