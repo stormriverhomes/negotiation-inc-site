@@ -32,6 +32,68 @@
   --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;   /* no typewriter in the software */
 }
 *{box-sizing:border-box;margin:0}
+/* ── the rail ─────────────────────────────────────────────────────────────
+   The same fixed rail the desk grew, for the same reason: once somebody has
+   signed in, the account should read as a PLACE rather than as one more page
+   with the marketing nav on top of it. Identical markup, identical classes,
+   identical collapse state (`ni-rail`), so walking between the office and the
+   desk does not move a single pixel of furniture. */
+.rail-nav{position:fixed;left:0;top:0;bottom:0;width:232px;z-index:30;overflow-y:auto;
+ background:linear-gradient(180deg,#101f38,#16283f);color:#c9d8ee;
+ border-right:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column}
+.rail-nav[hidden]{display:none}   /* the class sets display:flex, which beats the UA hidden rule */
+body.hasrail{padding-left:232px}
+body.hasrail.railtight{padding-left:64px}
+body.railtight .rail-nav{width:64px}
+.rn-top{padding:16px 16px 12px;border-bottom:1px solid rgba(255,255,255,.09);position:relative}
+.rn-mark{display:flex;align-items:baseline;gap:7px;text-decoration:none;color:#fff}
+.rn-mark .nm{font-family:var(--serif);font-size:14.5px;font-weight:700;letter-spacing:.09em}
+.rn-mark .inc{font-size:8.5px;font-weight:700;letter-spacing:.2em;color:#e8cf72}
+.rn-who{display:flex;align-items:center;gap:9px;margin-top:12px}
+.rn-av{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;flex:none;
+ display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:13px}
+.rn-nm{font-size:13px;font-weight:650;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rn-tier{font-size:10px;color:#8ba3c4}
+.rn-act{padding:12px 12px 10px;display:grid;gap:7px}
+.rn-btn{display:flex;align-items:center;gap:9px;font-family:var(--sans);font-size:13px;font-weight:650;
+ padding:9px 11px;border-radius:10px;text-decoration:none;color:#dce7f7;
+ background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);
+ transition:background .12s,border-color .12s,transform .12s}
+.rn-btn:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.20);transform:translateX(1px)}
+.rn-btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+.rn-btn.p:hover{background:#3b78e0;border-color:#3b78e0}
+.rn-h{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+ color:#7c93b5;padding:14px 16px 6px}
+.rn-list{padding:0 10px;display:grid;gap:3px}
+.rn-p{display:block;padding:9px 10px;border-radius:9px;text-decoration:none;color:#c9d8ee;
+ border:1px solid transparent;transition:background .12s,border-color .12s}
+.rn-p:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.10)}
+.rn-p.on{background:rgba(31,95,208,.26);border-color:rgba(143,180,255,.42)}
+.rn-p .t{font-size:12.5px;font-weight:650;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rn-p .s{font-size:10.5px;color:#8ba3c4;margin-top:1px;font-variant-numeric:tabular-nums}
+.rn-p .s b{color:#8fe0b4;font-weight:700}
+.rn-empty{padding:2px 16px 0;font-size:11.5px;color:#7c93b5;line-height:1.5}
+.rn-foot{margin-top:auto;padding:12px;border-top:1px solid rgba(255,255,255,.09);display:grid;gap:5px}
+.rn-lnk{font-size:12px;color:#9db4d4;text-decoration:none;padding:5px 6px;border-radius:7px}
+.rn-lnk:hover{color:#fff;background:rgba(255,255,255,.07)}
+.rn-up{margin:8px 12px 0;padding:11px 12px;border-radius:11px;background:rgba(232,207,114,.10);
+ border:1px solid rgba(232,207,114,.30);text-decoration:none;display:block}
+.rn-up .k{font-size:9.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#e8cf72}
+.rn-up .v{font-size:12.5px;color:#e7eefb;margin-top:3px;line-height:1.4}
+.rn-toggle{position:absolute;top:14px;right:10px;width:24px;height:24px;border-radius:7px;
+ border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#c9d8ee;
+ font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.rn-toggle:hover{background:rgba(255,255,255,.14);color:#fff}
+body.railtight .rn-top .rn-who,body.railtight .rn-nm,body.railtight .rn-tier,
+body.railtight .rn-h,body.railtight .rn-list,body.railtight .rn-empty,
+body.railtight .rn-foot,body.railtight .rn-up,body.railtight .rn-btn span{display:none}
+body.railtight .rn-btn{justify-content:center;padding:9px 0}
+body.railtight .rn-mark .inc{display:none}
+/* With the rail up, the masthead and the hero's arcade button are both second
+   copies of links standing two inches to the left. They go. */
+@media (min-width:1081px){ body.hasrail > header{display:none}
+ body.hasrail #hero-arcade{display:none} }
+@media (max-width:1080px){ .rail-nav{display:none} body.hasrail{padding-left:0} }
 html,body{background:var(--wash)}
 body{font-family:var(--sans);color:var(--ink);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
 h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.02em;line-height:1.12}
@@ -161,6 +223,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 </head>
 <body>
 
+<aside class="rail-nav" id="rail-nav" hidden></aside>
+
 <header>
  <div class="wrap mast">
   <a class="mark" href="index.html" title="Negotiation Inc"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
@@ -222,7 +286,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   </div>
   <div style="display:flex;gap:9px;flex-wrap:wrap">
    <a class="btn p" href="desk.html#new">Price a property →</a>
-   <a class="btn" href="arcade.html">The arcade</a>
+   <a class="btn" href="arcade.html" id="hero-arcade">The arcade</a>
   </div>
  </div>
 
@@ -316,13 +380,64 @@ $('out').onclick = () => {
   boot();
 };
 
+/* ── the rail ───────────────────────────────────────────────────────────
+   A copy of the desk's `renderShell`, fed by this page's own reading of the
+   same two records. Kept byte-identical in markup so the two pages cannot
+   drift apart visually; the only difference is which button is current. */
+function renderShell(a, props, active, nameOf, spreadOf, filledOf, onPlan, left){
+ const el = $('rail-nav'); if (!el) return;
+ el.hidden = false; document.body.classList.add('hasrail');
+ try { if (localStorage.getItem('ni-rail') === 'tight') document.body.classList.add('railtight'); } catch(e){}
+
+ const first = esc(a.name.split(/\s+/)[0] || 'You');
+ const tier = onPlan ? esc(a.plan) : left > 0 ? left + ' days left' : 'Free tier';
+ const rows = props.map((p,i) => {
+   const sp = spreadOf(p), n = filledOf(p).length;
+   return `<a class="rn-p${i===active?' on':''}" href="desk.html#open=${i}">
+     <div class="t">${esc(nameOf(p,i))}</div>
+     <div class="s">${sp!==null?`<b>${money(sp)}</b> spread`:(n?`${n} figure${n>1?'s':''}`:'empty')}</div></a>`;
+ }).join('');
+
+ const html = `
+  <div class="rn-top">
+   <a class="rn-mark" href="index.html"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+   <button class="rn-toggle" id="rn-toggle" type="button" title="Collapse the rail">‹</button>
+   <div class="rn-who"><span class="rn-av">${first[0].toUpperCase()}</span>
+    <span><span class="rn-nm">${first}</span><span class="rn-tier" style="display:block">${tier}</span></span></div>
+  </div>
+  <div class="rn-act">
+   <a class="rn-btn p" href="desk.html#new"><span>+ New sheet</span></a>
+   <a class="rn-btn" href="office.html" aria-current="page"><span>Your desk</span></a>
+  </div>
+  <div class="rn-h">Your properties</div>
+  ${rows ? `<div class="rn-list">${rows}</div>`
+         : `<div class="rn-empty">Nothing priced yet. The first sheet lands here.</div>`}
+  ${(!onPlan && left <= 0) ? `<a class="rn-up" href="plans.html">
+     <div class="k">On a plan</div>
+     <div class="v">The photo read, comps pulled, the lender packet. 14 days free.</div></a>` : ''}
+  <div class="rn-foot">
+   <a class="rn-lnk" href="arcade.html">The arcade</a>
+   <a class="rn-lnk" href="exits.html">The eight exits</a>
+   <a class="rn-lnk" href="plans.html">Plans</a>
+  </div>`;
+ if (el.dataset.sig !== html){ el.innerHTML = html; el.dataset.sig = html;
+   const t = $('rn-toggle');
+   if (t){ t.onclick = () => { const tight = document.body.classList.toggle('railtight');
+     try { localStorage.setItem('ni-rail', tight ? 'tight' : 'wide'); } catch(e){}
+     t.textContent = tight ? '›' : '‹'; };
+     if (document.body.classList.contains('railtight')) t.textContent = '›'; }
+ }
+}
+
 /* ── the hub ──────────────────────────────────────────────────────────── */
 function boot(){
   const a = account();
   $('gate').classList.toggle('hidden', !!a);
   $('hub').classList.toggle('hidden', !a);
   $('who').classList.toggle('hidden', !a);
-  if (!a) return;
+  if (!a){ const el = $('rail-nav');
+    if (el){ el.hidden = true; el.innerHTML = ''; delete el.dataset.sig; }
+    document.body.classList.remove('hasrail','railtight'); return; }
   wantPriors(a);
   const first = a.name.split(/\s+/)[0];
   $('av').textContent = first[0].toUpperCase();
@@ -372,6 +487,12 @@ function boot(){
     : left > 0 ? { k:left + ' day' + (left===1?'':'s'), d:'of the full product left' }
     : a.trial ? { k:'Free', d:'trial finished · pricing still unlimited' }
     : { k:'Free', d:'14 days waiting, unstarted' };
+
+  /* ── the rail ─────────────────────────────────────────────────────────
+     Same furniture as the desk, drawn from the same record, so the account
+     reads as one place rather than two pages that happen to know your name. */
+  renderShell(a, props, (v3 && typeof v3.active === 'number') ? v3.active : 0,
+              nameOf, spreadOf, filledOf, onPlan, left);
 
   /* the one offer worth making on this page: a member who has never spent
      their fourteen days. One button, no card, and it says what it opens. */
