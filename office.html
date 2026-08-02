@@ -207,19 +207,41 @@ header{background:#fff;border-bottom:1px solid var(--line)}
 .btn.q{border-color:var(--line-2);color:var(--mid);font-weight:600}
 
 /* ── the door ── */
-.gate{max-width:440px;margin:56px auto 90px;background:#fff;border:1px solid var(--line-2);
- box-shadow:0 1px 0 rgba(13,20,32,.05)}
-.gate .gh{padding:22px 26px 0}
+.gate{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:0;align-items:stretch;
+ max-width:920px;margin:48px auto 90px;background:#fff;border:1px solid var(--line-2);
+ border-radius:20px;overflow:hidden;box-shadow:0 22px 50px -30px rgba(13,20,32,.4)}
+@media(max-width:820px){.gate{grid-template-columns:1fr;max-width:460px}}
+.gate .gsell{padding:28px 28px 30px;background:linear-gradient(160deg,#1a2436,#0d1420);color:#dbe6f6;
+ align-self:stretch}
+.gate .gsell .eyebrow{color:#8298bb}
+.gate .gsell h1{color:#fff}
+.gate .gsell p{color:#a9b7cd;font-size:14.5px}
+.gwhy{list-style:none;padding:0;margin:20px 0 0;display:grid;gap:11px}
+.gwhy li{font-size:13px;color:#a9b7cd;line-height:1.5;padding-left:16px;position:relative}
+.gwhy li::before{content:'+';position:absolute;left:0;color:#8fe0b4;font-weight:800}
+.gwhy li b{color:#fff;font-weight:650}
+/* their own sheet, named, with what happens to it said out loud */
+.ghave{margin-top:20px;padding:14px 15px;border-radius:13px;
+ background:linear-gradient(180deg,rgba(63,160,106,.18),rgba(63,160,106,.06));
+ border:1px solid rgba(120,214,163,.34)}
+.ghave .k{font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8fe0b4}
+.ghave .n{font-family:var(--serif);font-size:18px;font-weight:700;color:#fff;margin-top:5px;
+ line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ghave .f{font-size:12.5px;color:#c9d8ee;margin-top:4px;font-variant-numeric:tabular-nums}
+.ghave .f b{color:#8fe0b4;font-weight:700}
+.ghave .w{font-size:12px;color:#9db4d4;margin-top:9px;padding-top:8px;
+ border-top:1px solid rgba(255,255,255,.12);line-height:1.45}
+.gate h1{font-size:29px}
 .gate h1{font-size:29px}
 .gate p{color:var(--mid);font-size:15px;margin-top:9px}
-.gate form{padding:18px 26px 22px}
+.gate form{padding:26px 28px 26px}
 label{display:block;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.14em;
  text-transform:uppercase;color:var(--soft);margin-top:14px}
 input[type=text],input[type=email]{width:100%;font-family:inherit;font-size:16px;padding:10px 12px;
  border:1px solid var(--line-2);background:#fff;color:var(--ink);margin-top:6px}
 input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
 .gate .go{width:100%;justify-content:center;margin-top:18px}
-.gate .fine{padding:13px 26px;border-top:1px solid var(--line);background:var(--wash);
+.gate .fine{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--wash);
  font-size:12.5px;color:var(--soft);line-height:1.5}
 .gate .fine b{color:var(--mid)}
 .err{color:#b3372c;font-size:13px;margin-top:9px;display:none}
@@ -418,21 +440,42 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  </div>
 </header>
 
-<!-- ══ the door ══════════════════════════════════════════════════════════ -->
+<!-- ══ the door ══════════════════════════════════════════════════════════
+     A form floating in a grey void, asking four questions before it gave
+     anything, with a paragraph asserting that an account is useful and no
+     reason at all to believe it. And a footnote apologising that there is no
+     server yet, which is the one kind of sentence that has no business on a
+     page trying to look finished.
+
+     The strongest argument available is one we already have and were not
+     using: THEIR OWN WORK. Somebody arriving here has usually just priced a
+     house in this browser, and that sheet is one cleared history from gone.
+     So the left column names it, with its spread on it, and says plainly what
+     happens to it either way. Nothing is invented — if there is no work, the
+     column says what an account is for instead. ══════════════════════════ -->
 <div class="wrap"><div class="gate" id="gate">
- <div class="gh">
+ <div class="gsell">
   <div class="eyebrow" id="gate-k">Your desk</div>
   <h1 id="gate-h">Open your workspace.</h1>
   <p id="gate-p">Everything you price, learn and play is kept together and picked up
-   where you left it — the sheet in progress, the market you are working, the properties
+   where you left it &mdash; the sheet in progress, the market you are working, the properties
    you have priced.</p>
+  <div id="gate-have"></div>
+  <ul class="gwhy">
+   <li><b>Free, and it stays free.</b> Pricing a property needs no account and never will
+     &mdash; what this adds is memory.</li>
+   <li><b>No card.</b> Fourteen days of the whole product come with it, unstarted, so you spend
+     them on a week you are actually working.</li>
+   <li><b>Yours to take.</b> Export every sheet as a file whenever you like, and delete the lot
+     in one press.</li>
+  </ul>
  </div>
  <form id="gate-form" autocomplete="on">
   <label for="g-name">Your name</label>
   <input id="g-name" type="text" placeholder="Elijah Payne" autocomplete="name" required>
   <label for="g-email">Email</label>
   <input id="g-email" type="email" placeholder="you@example.com" autocomplete="email" required>
-  <label for="g-market">The market you work <span style="color:var(--faint)">— optional</span></label>
+  <label for="g-market">The market you work <span style="color:var(--faint)">&mdash; optional</span></label>
   <input id="g-market" type="text" placeholder="Atlanta, GA 30310" autocomplete="off">
   <label style="margin-top:16px">How much of this have you done before?</label>
   <div class="lvl" id="g-lvl" role="radiogroup" aria-label="Experience">
@@ -441,17 +484,11 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <button type="button" data-lvl="pro" role="radio" aria-checked="true">I do this<span>straight to the desk</span></button>
   </div>
   <div class="err" id="g-err">A name and an email, and the desk is yours.</div>
-  <button class="btn p go" type="submit" id="g-go">Create my workspace →</button>
-  <div class="fine" style="margin-top:10px"><b>An account holds your work.</b> Pricing is free and
-   unlimited with or without one — what this adds is memory: the sheet still here next week, the
-   properties you have priced, the market you work. <b>Fourteen days of the full product</b> come
-   with it, unstarted, to spend on a week you are actually working. No card, and you start the
-   clock yourself.</div>
+  <button class="btn p go" type="submit" id="g-go">Create my workspace &rarr;</button>
+  <div class="fine" style="margin-top:12px"><b>Where this lives:</b> on this device, in this
+   browser. Nothing you type here is transmitted anywhere, and there is no password to lose.
+   Your workspace comes with you when you sign in from somewhere else.</div>
  </form>
- <div class="fine"><b>Where this lives:</b> on this device, in this browser. No password,
-  because there is no server yet to keep one — so nothing you type here is transmitted
-  anywhere. When accounts go live this same door starts syncing, and your workspace comes
-  with you.</div>
 </div></div>
 
 <!-- ══ the hub ═══════════════════════════════════════════════════════════ -->
@@ -744,11 +781,41 @@ function wireAcct(){
 }
 
 /* ── the hub ──────────────────────────────────────────────────────────── */
+/* ── WHAT YOU ALREADY HAVE ─────────────────────────────────────────────────
+   The most persuasive sentence on this page is not one we can write — it is
+   the name of the house they priced ten minutes ago, and the fact that it is
+   one cleared history from gone. Read from the same record the desk writes,
+   invented from nothing, and silent when there is nothing to say. */
+function gateHave(){
+  const el = document.getElementById('gate-have'); if (!el) return;
+  const F = ['asking','arv','repairs','rent','balance','piti','arrears'];
+  const v3 = read('ni-desk-v3');
+  const props = (v3 && Array.isArray(v3.props)) ? v3.props : [];
+  const numOf = (p,id) => { const r = String(((p.f||{})[id]||{}).v||'').replace(/[^0-9.]/g,'');
+    return r === '' ? null : parseFloat(r); };
+  const live = props.filter(p => F.some(k => numOf(p,k) !== null)
+    || String(p.addr||'').trim() || (p.comps||[]).length);
+  if (!live.length){ el.innerHTML = ''; return; }
+  const cur = live[Math.min(live.length-1, (typeof v3.active==='number'?v3.active:0))] || live[0];
+  const nm = (cur.name && cur.name.trim()) || (cur.addr && cur.addr.trim()) || 'A sheet in progress';
+  const a = numOf(cur,'arv'), r = numOf(cur,'repairs'), k = numOf(cur,'asking');
+  const sp = (a===null||r===null||k===null) ? null : a - r - k;
+  el.innerHTML = `<div class="ghave">
+    <div class="k">Already in this browser</div>
+    <div class="n">${esc(nm)}</div>
+    <div class="f">${sp!==null ? `<b>${money(sp)}</b> of spread on paper` : 'not priced through yet'}${
+      live.length>1 ? ` &middot; and ${live.length-1} more` : ''}</div>
+    <div class="w">It lives in this browser and nowhere else &mdash; clearing your history takes it
+      with it, and it does not follow you to your phone. An account is what stops that.</div>
+  </div>`;
+}
+
 function boot(){
   const a = account();
   $('gate').classList.toggle('hidden', !!a);
   $('hub').classList.toggle('hidden', !a);
   $('who').classList.toggle('hidden', !a);
+  if (!a) gateHave();
   if (!a){ const el = $('rail-nav');
     if (el){ el.hidden = true; el.innerHTML = ''; delete el.dataset.sig; }
     document.body.classList.remove('hasrail','railtight'); return; }
@@ -885,9 +952,12 @@ function boot(){
     { i:'⇄', t:'Compare deals', d: t>=1 ? 'Two, three or four side by side, one engine, and where the winner flips'
         : 'Both sheets side by side — on Solo',
       href: t>=1 ? 'desk.html#compare' : 'plans.html#compare', lock: t<1 ? 'Solo' : null },
+    /* this used to point at desk.html#new — the same place as the tile above
+       it — so two promises opened one blank step and the second read as
+       decoration. It goes to the condition panel, which is what it says. */
     { i:'◎', t:'Read the condition', d: t>=2 ? 'Drop the walk-through photos, get the lines back'
         : 'From your photos, seventeen lines — on Underwriter',
-      href: t>=2 ? 'desk.html#new' : 'plans.html#photos', lock: t<2 ? 'Underwriter' : null },
+      href: t>=2 ? 'desk.html#condition' : 'plans.html#photos', lock: t<2 ? 'Underwriter' : null },
     { i:'▤', t:'The eight ways out', d:'What an exit is, and the one number that decides each',
       href:'exits.html' },
   ];
