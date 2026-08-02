@@ -101,6 +101,12 @@ h1 em{font-style:normal;color:var(--blue)}
 .plan.solo li i{color:var(--gold)}
 .plan .fair{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line-2);
  font-size:12px;color:var(--faint);line-height:1.45}
+/* A price that is going up, said out loud with the reason attached. This is
+   the only kind of urgency this product is allowed: a fact, checkable, with a
+   date set by shipping rather than by a countdown clock. */
+.plan .rise{margin-top:9px;padding:8px 10px;border-radius:9px;font-size:12.5px;line-height:1.45;
+ color:#5f4813;background:var(--gold-soft);border:1px solid #e6d5a8}
+.plan .rise b{color:#402f0a;font-weight:700}
 
 /* ── the cards ── */
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:30px 0 0;align-items:start}
@@ -344,6 +350,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <h2>Underwriter</h2>
    <div class="price">$99 <small>/ month</small></div>
    <div class="note">Or $990 a year — two months back</div>
+   <div class="rise"><b>$99 until the photo read ships</b>, then $129 for new
+    subscribers. Join before and you keep $99 for as long as you stay.</div>
    <p class="who">For somebody underwriting weekly, who wants the forty minutes to be eight —
     and does not want to go and find the data first.</p>
   </div>
@@ -749,6 +757,14 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    arrive already scored, the condition comes off your photographs, and the letter writes itself.
    That is a data-and-AI product, and every other one of those in this category starts at $99 and
    only gives you leads.</p>
+ </div>
+ <div class="q">
+  <h4>Why does the price go up, and why tell me?</h4>
+  <p>Because right now Underwriter is mostly a promise. The photo condition read is the feature
+   that makes it worth $129 and it is <b>not shipped yet</b> — so charging $129 today would be
+   selling you a roadmap, which is the one thing this product refuses to do. $99 is what it is
+   worth as it stands. When the read ships it is worth more, and the price will say so — for new
+   subscribers only. If you are already in, you are in at $99, permanently.</p>
  </div>
  <div class="q">
   <h4>Which one should I be on?</h4>
