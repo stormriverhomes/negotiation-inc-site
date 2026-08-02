@@ -305,14 +305,24 @@ function draw(cv, d){
    px(bx-6,by,bw+12,1,'rgba(0,0,0,.30)');
    /* Two identical units, so every opening is mirrored across the party wall
       to the pixel. The earlier numbers were eyeballed and drifted by three. */
-   const half=Math.round(bw/2), wW=13, wx=Math.round((half-wW)/2);
-   [7,21].forEach((wy2,rowI) => {
-     window_(bx+wx,     by+wy2, wW, 9, true);
-     window_(bx+half+wx,by+wy2, wW, 9, rowI===1 ? false : true);   // one back room dark
-   });
-   door(bx+Math.round(bw*0.30),by+bh-13,10,13);
-   door(bx+Math.round(bw*0.60),by+bh-13,10,13);
-   px(bx+Math.round(bw*0.28),GROUND-1,Math.round(bw*0.44),1,'#4a463d');  // shared stoop
+   /* Two identical units, mirrored across the party wall. The doors sit on the
+      ground floor and the windows must not — the first version centred both in
+      their unit and the lower-left window landed on top of its own front door,
+      which is the single most "drawn by a machine" thing a house can do. The
+      ground floor now has ONE opening per unit: the door, off to the inner
+      side, with its window beside it rather than through it. */
+   const half=Math.round(bw/2), wW=12, dW=10;
+   const dx1=bx+Math.round(half*0.62), dx2=bx+half+Math.round(half*0.62);
+   // upper storey: centred in each unit, both lit
+   const uwx=Math.round((half-wW)/2);
+   window_(bx+uwx,      by+7, wW, 9, true);
+   window_(bx+half+uwx, by+7, wW, 9, true);
+   // ground floor: a window on the outer side, the door on the inner side
+   window_(bx+6,            by+21, wW, 9, true);
+   window_(bx+half+6,       by+21, wW, 9, false);        // one back room dark
+   door(dx1, by+bh-13, dW, 13);
+   door(dx2, by+bh-13, dW, 13);
+   px(dx1-2,GROUND-1,(dx2+dW+2)-(dx1-2),1,'#4a463d');   // one stoop, both doors on it
    // two mailboxes and two meters — the detail that says "two households"
    px(bx-9,GROUND-13,3,13,'#585048'); px(bx-12,GROUND-17,9,5,'#8d8578');
    px(bx-9+7,GROUND-13,3,13,'#585048'); px(bx-4,GROUND-17,9,5,'#8d8578');

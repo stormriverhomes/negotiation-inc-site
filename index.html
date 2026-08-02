@@ -103,11 +103,24 @@ h1 em{font-style:italic;color:var(--blue)}
 .ex .f{font-variant-numeric:tabular-nums;font-weight:650}
 /* the same red the desk uses for a refusal, so the landing is not describing a
    different product from the one behind the button */
-.ex .f.no{color:#b3372c;font-weight:700}
-/* money, in the colour the desk uses for money */
-.ex .f.yes{color:#177a4d;font-weight:750}
-.ex .f.yes em{font-style:normal;font-weight:600;font-size:11.5px;color:#5f8a72;
- font-variant-numeric:normal;margin-left:2px}
+/* ── the rows read the way the desk reads ────────────────────────────────
+   The first pass at this made the whole right-hand slot red on a refused row,
+   at the same size as the money — so the eye landed on the two exits that fail
+   before the two that pay, and the landing looked nothing like the product it
+   was advertising. The desk marks a refusal with a small pill beside the name
+   and puts a quiet "not priced" where the figure would be. This does the same.
+   Money is the biggest thing on the row; the refusal is the smallest. */
+.ex .nm{display:flex;align-items:center;gap:8px;min-width:0}
+.ex .pill{display:inline-flex;align-items:center;height:17px;padding:0 8px;border-radius:999px;
+ font-family:var(--mono);font-size:8px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+ white-space:nowrap;flex:none}
+.ex .pill.no{color:#b3372c;background:#faeeec;border:1px solid rgba(179,55,44,.28)}
+.ex .f.na{color:var(--soft);font-weight:500;font-size:12.5px;text-align:right}
+.ex .f.na em{display:block;font-style:normal;font-size:11px;color:var(--faint);margin-top:1px}
+/* money, in the colour the desk uses for money, and the largest thing on the row */
+.ex .f.yes{color:#177a4d;font-weight:750;font-size:15.5px}
+.ex .f.yes em{font-style:normal;font-weight:600;font-size:11px;color:#5f8a72;
+ font-variant-numeric:normal;margin-left:3px}
 .payline{margin-top:14px;border:1px solid #bfe0cd;border-radius:14px;
  background:linear-gradient(180deg,#eaf6f0,#fff);padding:15px 17px 14px}
 .payline .pl{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#177a4d}
@@ -117,7 +130,7 @@ h1 em{font-style:italic;color:var(--blue)}
 .payline .ps b{color:var(--ink);font-weight:650}
 .ex.best{background:var(--blue-soft)}
 .ex.best .r{color:var(--blue)}
-.ex.na .f{color:var(--soft);font-weight:400;font-size:12.5px;font-family:var(--mono)}
+.ex.na .f{color:var(--soft);font-weight:500;font-size:12.5px}
 .rfoot{padding:10px 14px;border-top:1px solid var(--line);background:var(--wash);
  font-size:12.5px;color:var(--mid)}
 .rfoot b{color:var(--ink)}
@@ -314,11 +327,11 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
         arithmetic or a refusal gate moves, this hero has to move with it — a
         landing that advertises a ranking the product no longer produces is the
         precise dishonesty this page is selling against. Checked by v3.mjs. -->
-   <div class="ex best"><span class="r">01</span><span>The wholesale</span><span class="f yes">$14,000 <em>fee</em></span></div>
-   <div class="ex"><span class="r">02</span><span>The fix and flip</span><span class="f yes">$23,280 <em>profit</em></span></div>
-   <div class="ex"><span class="r">03</span><span>The wholetail</span><span class="f no">Refused · repairs &gt; 8% of ARV</span></div>
-   <div class="ex"><span class="r">04</span><span>The novation</span><span class="f no">Refused · not retail yet</span></div>
-   <div class="ex na"><span class="r">05</span><span>The buy and hold</span><span class="f">needs monthly rent</span></div>
+   <div class="ex best"><span class="r">01</span><span class="nm">The wholesale</span><span class="f yes">$14,000 <em>fee</em></span></div>
+   <div class="ex"><span class="r">02</span><span class="nm">The fix and flip</span><span class="f yes">$23,280 <em>profit</em></span></div>
+   <div class="ex"><span class="r">03</span><span class="nm">The wholetail <b class="pill no">Refused</b></span><span class="f na">not priced <em>repairs &gt; 8% of ARV</em></span></div>
+   <div class="ex"><span class="r">04</span><span class="nm">The novation <b class="pill no">Refused</b></span><span class="f na">not priced <em>not retail yet</em></span></div>
+   <div class="ex na"><span class="r">05</span><span class="nm">The buy and hold</span><span class="f na">not priced <em>needs monthly rent</em></span></div>
   </div>
   <!-- The reason anybody opened the page, said once, in the colour the desk
        uses for money. The red was doing half the job: a reader could see which

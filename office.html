@@ -372,21 +372,18 @@ function boot(){
           <div class="eyebrow" style="color:var(--blue)">Unstarted</div>
           <h2 style="margin:2px 0 5px">Fourteen days of the whole thing.</h2>
           <p style="margin:0;color:var(--mid);line-height:1.55;font-size:14px">Every condition line
-           instead of three presets, comps without a cap, the seven assumptions and the sensitivity
-           grid. The clock starts when you click it — not when you registered.</p>
+           instead of three presets, comps without a cap, the photo condition read, the lender
+           packet. <b>Nothing is charged for fourteen days</b>, and cancelling takes one click.</p>
          </div>
          <div style="display:flex;gap:9px;flex-wrap:wrap">
-          <button class="btn p" type="button" id="pb-go">Start the 14 days →</button>
-          <a class="btn" href="plans.html">What is in it</a></div>
+          <a class="btn p" href="plans.html" id="pb-go">Start 14 days free →</a>
+          <a class="btn" href="plans.html#photos">What is in it</a></div>
         </div></div>`;
-      const g = $('pb-go');
-      if (g) g.onclick = () => { const acc = account(); if (!acc || acc.trial) return;
-        acc.trial = new Date().toISOString().slice(0,10);
-        try { localStorage.setItem(ACC, JSON.stringify(acc)); } catch(e){}
-        /* NOT #new. Starting a trial is not a reason to throw away the sheet
-           somebody is in the middle of — the first version of this button did
-           exactly that, and the walk-through caught it. */
-        location.href = 'desk.html'; };
+      /* No handler. The trial begins at checkout on the plans page, not with a
+         click here — a fourteen-day trial that asks for a card converts around
+         six times better than one that does not, and this is the moment to ask
+         for it: they have registered, they have priced something, and they are
+         looking at the one panel on the page that says what they are missing. */
     } else if (!onPlan && left === 0 && a.trial){
       pb.innerHTML = `<div class="panel" style="margin-top:20px">
         <div class="pb" style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:space-between">
@@ -481,8 +478,14 @@ function boot(){
      leads with a course looks like it is selling a course. Same material, new
      job: an optional walk-through offered to a NEW workspace, whose only
      purpose is getting somebody from signing up to their third real deal. */
+  /* The bar counts SECTIONS READ and the sentence names where you stopped, and
+     those are two different numbers — a reader who jumped to section VI and read
+     one lesson saw "You were on VI" over a bar at 12%, which looks broken
+     because it is incoherent. The sentence now says both, in that order. */
   $('course').innerHTML = seen.length
-    ? `<div style="font-size:15px">${at < 8 ? 'You were on <b>' + R[at] + ' · ' + NAMES[at] + '</b>' : 'You have seen all eight.'}</div>
+    ? `<div style="font-size:15px"><b>${seen.length} of 8</b> read${
+         at < 8 && !seen.includes(at) ? ` — you were reading <b>${R[at]} · ${NAMES[at]}</b>`
+         : seen.length === 8 ? ' — all of them' : `, last finished <b>${R[Math.max(...seen)]} · ${NAMES[Math.max(...seen)]}</b>` }</div>
        <div class="bar"><i style="width:${seen.length/8*100}%"></i></div>
        <div class="pips">${R.map((r,i)=>`<span class="${seen.includes(i)?'on':''}">${r}</span>`).join('')}</div>`
     : `<p class="empty">Optional. Eight exits, one number each — about fifteen minutes, and every
