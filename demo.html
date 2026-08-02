@@ -38,10 +38,16 @@ header{display:flex;justify-content:space-between;align-items:center;gap:16px;fl
 .mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.11em}
 .mark .inc{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--soft)}
 .marksub{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-top:4px}
-nav{display:flex;gap:16px;font-size:13px;flex-wrap:wrap}
-nav a{text-decoration:none;color:var(--mid)}
+/* Every item in this row is optically centred on the same line. The account
+   chip carries a border and more padding than the plain links, so without an
+   explicit align-items the flex row stretched them to different heights and the
+   chip sat a pixel or two low — the kind of drift that reads as carelessness
+   long before anybody can name it. */
+nav{display:flex;align-items:center;gap:16px;font-size:13px;flex-wrap:wrap}
+nav a{display:inline-flex;align-items:center;text-decoration:none;color:var(--mid);
+ padding:6px 2px;line-height:1}
 nav a:hover{color:var(--ink)}
-nav a.acct{border:1.5px solid var(--line-ink);border-radius:var(--r-btn);padding:5px 12px;
+nav a.acct{border:1.5px solid var(--line-ink);border-radius:var(--r-btn);padding:6px 12px;
  color:var(--ink);font-weight:650}
 
 h1{font-family:var(--serif);font-size:38px;font-weight:700;letter-spacing:-.018em;
@@ -273,8 +279,14 @@ function draw(cv, d){
    px(bx-7,by,bw+14,1,'rgba(0,0,0,.30)');            // eave shadow
    px(bx+bw-16,by-22,5,15,roof);                               // chimney
    px(bx+bw-17,by-18,7,2,'#4d443a');
-   window_(bx+7,by+7,12,8,false); window_(bx+bw-24,by+7,12,8,true);
-   door(bx+Math.round(bw*0.45),by+bh-12,9,12);
+   /* A ranch IS asymmetric — the door sits off to one side and the picture
+      window takes the long wall — but the two windows still have to share a
+      sill line and equal margins, or it reads as a mistake rather than a
+      style. Left margin and right margin are both 7. */
+   window_(bx+7,by+7,14,9,false); window_(bx+bw-21,by+7,14,9,true);
+   px(bx+14,by+7,1,9,'#6a5f4f');                       // a mullion on the picture window
+   door(bx+Math.round(bw*0.52),by+bh-13,10,13);
+   px(bx+Math.round(bw*0.52)-3,by+bh-16,16,3,roof);    // a stoop hood over it
    // carport: a flat roof on two posts, one car-shaped shadow beneath
    const cx=bx-30;
    px(cx,by+2,32,2,roof); px(cx,by+4,2,18,trim); px(cx+29,by+4,2,18,trim);
@@ -291,9 +303,13 @@ function draw(cv, d){
    px(bx+Math.round(bw/2)-1,by,2,bh,'rgba(0,0,0,.22)');        // the party wall
    gable(bx,by,bw,15,roof,6);
    px(bx-6,by,bw+12,1,'rgba(0,0,0,.30)');
-   const q=Math.round(bw/4);
-   window_(bx+q-9,by+7,13,9,true);  window_(bx+bw-q-4,by+7,13,9,true);
-   window_(bx+q-9,by+21,13,9,true); window_(bx+bw-q-4,by+21,13,9,false);
+   /* Two identical units, so every opening is mirrored across the party wall
+      to the pixel. The earlier numbers were eyeballed and drifted by three. */
+   const half=Math.round(bw/2), wW=13, wx=Math.round((half-wW)/2);
+   [7,21].forEach((wy2,rowI) => {
+     window_(bx+wx,     by+wy2, wW, 9, true);
+     window_(bx+half+wx,by+wy2, wW, 9, rowI===1 ? false : true);   // one back room dark
+   });
    door(bx+Math.round(bw*0.30),by+bh-13,10,13);
    door(bx+Math.round(bw*0.60),by+bh-13,10,13);
    px(bx+Math.round(bw*0.28),GROUND-1,Math.round(bw*0.44),1,'#4a463d');  // shared stoop
@@ -311,9 +327,12 @@ function draw(cv, d){
    gable(bx,by,bw,20,roof,6);
    px(bx-6,by,bw+12,1,'rgba(0,0,0,.30)');
    px(bx+7,by-22,5,13,roof);
-   window_(bx+6,by+7,11,9,false); window_(bx+bw-17,by+7,11,9,false);
-   window_(bx+6,by+21,11,9,false); window_(bx+bw-17,by+21,11,9,false);
-   const dx=bx+Math.round(bw/2)-5;
+   /* A colonial is symmetrical or it is nothing: equal margins, equal gaps,
+      and the door exactly on the centre line the ridge sits over. */
+   const m2=7, wW2=11;
+   [7,21].forEach(wy2 => { window_(bx+m2,by+wy2,wW2,9,false);
+                           window_(bx+bw-m2-wW2,by+wy2,wW2,9,false); });
+   const dx=bx+Math.round((bw-10)/2);
    px(dx-7,by+bh-17,24,3,roof);                                 // porch roof
    px(dx-7,by+bh-14,2,14,trim); px(dx+15,by+bh-14,2,14,trim);
    door(dx,by+bh-13,10,13);
@@ -349,31 +368,135 @@ function draw(cv, d){
    px(8,GROUND-37,9,4,'#577a4f');
  }
  else {
-   /* the wreck: the ridge sags, the tarp is doing structural work, the grass
-      has reached the sill and the sign has been up long enough to fade */
-   const bw=Math.round(W*0.54), bh=26, bx=Math.round((W-bw)/2), by=GROUND-bh;
-   px(bx,by,bw,bh,'#6d6252'); px(bx,by,bw,1,'rgba(255,255,255,.10)');
-   // stains running down from the gutter line — the house is telling you why
-   for (let i=0;i<9;i++){ const stx=bx+3+Math.floor(rnd()*(bw-6));
-     px(stx,by+1,2,4+Math.floor(rnd()*9),'rgba(40,32,24,.45)'); }
-   for (let i=0;i<16;i++){                                          // sagging roof
-     const inset=Math.round(i*(bw/2)/16), sag=Math.round(Math.sin(i/16*Math.PI)*3);
-     px(bx-7+inset, by-i-1+sag, bw+14-inset*2, 1, i<4 ? '#5a4c3e' : '#4a4036');
+   /* THE WRECK.
+
+      The first two attempts at this were a brown box with a blue smudge over
+      it, which is what "distressed" looks like when it is drawn as an absence
+      — take the good house and subtract. Damage does not read as subtraction.
+      It reads as ADDED things in the wrong places: a hole with rafters showing
+      through it, plywood where glass should be, a porch roof that has come off
+      its posts at one end, weeds standing in front of the wall rather than
+      beside it.
+
+      So this one is built out of what went wrong, in the order it went wrong:
+      a real two-storey house first, then the roof opened, then the tarp that
+      did not fix it, then the boards, then the collapse, then the years. */
+   const bw=Math.round(W*0.50), bh=40, bx=Math.round((W-bw)/2)-4, by=GROUND-bh;
+
+   // the house it used to be
+   px(bx,by,bw,bh,'#78695a'); px(bx,by,bw,1,'rgba(255,255,255,.10)');
+   px(bx,by,2,bh,'rgba(255,255,255,.06)'); px(bx+bw-2,by,2,bh,'rgba(0,0,0,.18)');
+   // clapboard, so the wall has a surface to be ruined
+   for (let y=by+3;y<GROUND;y+=4) px(bx,y,bw,1,'rgba(0,0,0,.13)');
+   // water running from the gutter line for several winters
+   for (let i=0;i<10;i++){ const stx=bx+3+Math.floor(rnd()*(bw-7));
+     px(stx,by+1,2,6+Math.floor(rnd()*14),'rgba(38,29,20,.34)'); }
+
+   /* the roof: a proper pitch, with a hole eaten out of the left slope. The
+      rafters show through the hole — that is the detail that says "structural"
+      rather than "needs a clean". */
+   /* The roof is drawn scanline by scanline from an explicit triangle, and
+      everything that happens TO it — the hole, the rafters behind the hole,
+      the tarp — is positioned from the same geometry. The earlier version
+      placed each of those by eye, which is why the rafters floated above the
+      ridge and the tarp hung in the sky. */
+   const peak=22, cx=bx+bw/2, eave=bw/2+9;
+   const halfAt = i => eave * (1 - i/peak);
+   const rowOf  = i => by - 1 - i + Math.round(Math.sin(i/peak*Math.PI)*2);  // the sag
+   // where the roof has gone: a torn opening on the near slope
+   const holeTop=4, holeBot=15, hx0=bx+Math.round(bw*0.13);
+   const holeAt = i => { const w2 = Math.round(30 - (i-holeTop)*1.1 + (rnd()>0.7?1:0));
+     return [hx0 + Math.round((i-holeTop)*0.9), w2]; };
+   for (let i=0;i<peak;i++){
+     const y=rowOf(i), h2=halfAt(i), x0=Math.round(cx-h2), w0=Math.round(h2*2);
+     px(x0,y,w0,1, i<3 ? '#6a5a49' : i<13 ? '#57493c' : '#4a3d33');
+     if (i>=holeTop && i<=holeBot){
+       const [ox,ow]=holeAt(i);
+       const c0=Math.max(x0,ox), c1=Math.min(x0+w0, ox+ow);
+       if (c1>c0){
+         px(c0,y,c1-c0,1,'#1e1813');                       // through to the dark
+         px(c0,y,1,1,'#7a6248'); px(c1-1,y,1,1,'#7a6248'); // the torn edge, splintered
+       }
+     }
    }
-   px(bx-7,by,bw+14,1,'rgba(0,0,0,.30)');
-   // the tarp, following the slope it is failing to replace
-   for (let i=0;i<8;i++) px(bx+Math.round(bw*0.44)+i*2, by-4-i*1.4, 3, 5,
-     i<4 ? '#3a6ea5' : '#2f5b8a');
-   px(bx+Math.round(bw*0.44), by-4, 16, 1, '#6ba0dd');
-   px(bx+bw-15,by-15,5,11,'#5a4c3e'); px(bx+bw-16,by-8,3,3,'#3a332b'); // broken chimney
-   window_(bx+6,by+8,12,9,false,true); window_(bx+bw-18,by+8,12,9,false,true);
-   door(bx+Math.round(bw/2)-5,by+bh-12,10,12,'#2e2822');
-   px(bx+Math.round(bw/2)-6,by+bh-13,12,3,'#a08a62');                // door boarded shut
-   for (let i=0;i<34;i++){ const gx=2+Math.floor(rnd()*(W-4)), gh=5+Math.floor(rnd()*9);
-     px(gx,GROUND-gh+2,1,gh,'#55663a'); }
-   for (let i=0;i<7;i++) px(bx-26+i*7,GROUND-10,2,10,'#6b5c47');     // a fence, half gone
-   px(bx-26,GROUND-10,16,1,'#6b5c47');
-   px(bx-26+28,GROUND-6,2,6,'#6b5c47');                              // one post left leaning
+   // rafters seen THROUGH the hole, clipped to it, so they can never float
+   for (let i=holeTop+1;i<=holeBot;i++){
+     const y=rowOf(i), [ox,ow]=holeAt(i);
+     for (let k=0;k<4;k++){ const rxp=ox+3+k*7;
+       if (rxp>ox && rxp<ox+ow-1) px(rxp,y,2,1,'rgba(176,152,118,.42)'); }
+   }
+   px(Math.round(cx-eave),by,Math.round(eave*2),1,'rgba(0,0,0,.34)');   // eave shadow
+
+   /* The tarp lies ON the far side of the hole, following the same slope, so it
+      reads as fabric over a roof rather than a flag in the air. It is the
+      brightest thing in the frame on purpose — a blue tarp is the one signal
+      everybody already knows how to read. */
+   for (let i=holeTop-1;i<=holeBot+2;i++){
+     const y=rowOf(i), [ox,ow]=holeAt(Math.max(holeTop,Math.min(holeBot,i)));
+     // the tarp tracks the slope: without this offset it reads as a flag
+     const t0=ox+ow-6+Math.round((i-holeTop)*0.8), t1=t0+24;
+     const shade = i<holeTop+4 ? '#5a92cc' : i<holeTop+8 ? '#3f79b4' : '#315c88';
+     px(t0,y,t1-t0,1,shade);
+     if (i===holeTop-1) px(t0,y,t1-t0,1,'#84b9ea');       // the lit top fold
+     if ((i-holeTop)%4===0) px(t0+9,y,1,1,'rgba(255,255,255,.22)');   // creases
+   }
+   { const yTop=rowOf(holeTop-1), [ox,ow]=holeAt(holeTop);
+     px(ox+ow-10,yTop+1,4,1,'#9aa3ad');                    // ropes to the eave
+     px(ox+ow+19,yTop+3,5,1,'#9aa3ad'); }
+
+   px(bx+bw-14,by-19,6,13,'#57493c');                                // chimney, half gone
+   px(bx+bw-15,by-8,4,3,'#332b24'); px(bx+bw-9,by-13,2,4,'#332b24');
+
+   // plywood over every opening, nailed at the corners, one sheet crooked
+   const board=(x,y,w2,h2,skew)=>{
+     px(x-1,y-1,w2+2,h2+2,'#2a231d');
+     px(x,y+(skew||0),w2,h2,'#a4854f');
+     px(x,y+(skew||0),w2,1,'#c0a066'); px(x,y+h2-1+(skew||0),w2,1,'#7d6337');
+     px(x+1,y+1+(skew||0),1,1,'#3a3028'); px(x+w2-2,y+1+(skew||0),1,1,'#3a3028');
+     px(x+1,y+h2-2+(skew||0),1,1,'#3a3028'); px(x+w2-2,y+h2-2+(skew||0),1,1,'#3a3028');
+   };
+   /* Same window grid the house was built with — equal margins, one sill line
+      per storey — then plywood over it. Damage lands ON the architecture; a
+      board that misses its opening by three pixels reads as a drawing error
+      rather than a boarded window. */
+   const m3=8, wW3=13, rx=bx+bw-m3-wW3;
+   board(bx+m3,by+7,wW3,10,0); board(rx,by+7,wW3,10,1);
+   board(bx+m3,by+22,wW3,10,0);
+   px(rx,by+22,wW3,10,'#141010');                                   // one they never got to
+   px(rx-1,by+21,wW3+2,1,'#4a4036'); px(rx,by+22,wW3,1,'#3a322a');
+   px(rx+4,by+25,2,4,'#2a231d'); px(rx+8,by+23,1,6,'#2a231d');      // the frame still in it
+
+   /* the porch: still attached at one end, off its post at the other. Drawn as
+      a line with a slope, because a level porch roof would undo the whole
+      picture in one stroke. */
+   const pxs=bx+Math.round(bw*0.26), pw=40;
+   for (let i=0;i<pw;i++){ const py2=GROUND-16+Math.round(i*0.34);
+     px(pxs+i, py2, 1, 4, i<3 ? '#6d5b49' : '#5c4c3d');
+     px(pxs+i, py2, 1, 1, '#7d6a55'); }
+   px(pxs,GROUND-16,3,16,'#5c4c3d'); px(pxs,GROUND-16,3,1,'#7d6a55');   // the post that held
+   px(pxs+pw-14,GROUND-3,15,3,'#5c4c3d');                               // the one that did not
+   px(pxs+pw-3,GROUND-6,3,6,'#4a3d33');                                 // its splintered stub
+   door(bx+Math.round(bw*0.44),by+bh-13,11,13,'#241d18');
+   // an X of boards across the door
+   for (let i=0;i<12;i++){ px(bx+Math.round(bw*0.44)+i, by+bh-13+i, 2, 1, '#a4854f');
+     px(bx+Math.round(bw*0.44)+i, by+bh-2-i, 2, 1, '#a4854f'); }
+
+   /* the years: weeds drawn AFTER the house, so they stand in front of the
+      wall and reach the sill. Overgrowth is an occlusion, not a texture. */
+   for (let i=0;i<70;i++){
+     const gx=1+Math.floor(rnd()*(W-2)), gh=6+Math.floor(rnd()*13);
+     const near=gx>bx-14 && gx<bx+bw+14;
+     px(gx, GROUND-gh+3, 1, gh, near ? '#4e6033' : '#3f5029');
+     if (rnd()>0.86) px(gx-1, GROUND-gh+1, 3, 2, '#5d7040');
+   }
+   // a dead tree: trunk, then three bare limbs
+   px(W-22,GROUND-30,3,30,'#463a2e');
+   px(W-30,GROUND-30,9,2,'#463a2e'); px(W-19,GROUND-36,8,2,'#463a2e');
+   px(W-33,GROUND-36,5,2,'#463a2e'); px(W-19,GROUND-24,7,2,'#463a2e');
+   // the fence: four pickets standing, one leaning, the rest gone
+   for (const [fx,fh,tilt] of [[bx-34,11,0],[bx-27,11,0],[bx-20,7,2],[bx+bw+14,11,0]])
+     { px(fx+tilt,GROUND-fh,2,fh,'#6b5c47'); }
+   px(bx-34,GROUND-9,16,1,'#6b5c47');
  }
 
  /* ── the sign, last, in front of everything ── */

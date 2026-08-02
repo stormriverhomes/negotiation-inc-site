@@ -101,6 +101,9 @@ h1 em{font-style:italic;color:var(--blue)}
 .ex:last-child{border-bottom:0}
 .ex .r{font-family:var(--mono);font-size:11px;color:var(--faint);font-weight:700}
 .ex .f{font-variant-numeric:tabular-nums;font-weight:650}
+/* the same red the desk uses for a refusal, so the landing is not describing a
+   different product from the one behind the button */
+.ex .f.no{color:#b3372c;font-weight:700}
 .ex.best{background:var(--blue-soft)}
 .ex.best .r{color:var(--blue)}
 .ex.na .f{color:var(--soft);font-weight:400;font-size:12.5px;font-family:var(--mono)}
@@ -302,8 +305,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
         precise dishonesty this page is selling against. Checked by v3.mjs. -->
    <div class="ex best"><span class="r">01</span><span>The wholesale</span><span class="f">$14,000</span></div>
    <div class="ex"><span class="r">02</span><span>The fix and flip</span><span class="f">$23,280</span></div>
-   <div class="ex"><span class="r">03</span><span>The wholetail</span><span class="f">refuses · repairs &gt; 8% of ARV</span></div>
-   <div class="ex"><span class="r">04</span><span>The novation</span><span class="f">refuses · not retail yet</span></div>
+   <div class="ex"><span class="r">03</span><span>The wholetail</span><span class="f no">Refused · repairs &gt; 8% of ARV</span></div>
+   <div class="ex"><span class="r">04</span><span>The novation</span><span class="f no">Refused · not retail yet</span></div>
    <div class="ex na"><span class="r">05</span><span>The buy and hold</span><span class="f">needs monthly rent</span></div>
   </div>
   <div class="rfoot"><b>Confidence: medium.</b> Two figures entered, one estimated —

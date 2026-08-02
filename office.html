@@ -383,7 +383,10 @@ function boot(){
       if (g) g.onclick = () => { const acc = account(); if (!acc || acc.trial) return;
         acc.trial = new Date().toISOString().slice(0,10);
         try { localStorage.setItem(ACC, JSON.stringify(acc)); } catch(e){}
-        location.href = 'desk.html#new'; };
+        /* NOT #new. Starting a trial is not a reason to throw away the sheet
+           somebody is in the middle of — the first version of this button did
+           exactly that, and the walk-through caught it. */
+        location.href = 'desk.html'; };
     } else if (!onPlan && left === 0 && a.trial){
       pb.innerHTML = `<div class="panel" style="margin-top:20px">
         <div class="pb" style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:space-between">

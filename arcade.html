@@ -37,8 +37,13 @@ header{border-bottom:1px solid #223047;background:rgba(13,20,32,.9)}
 .mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
 .mark .inc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--gold)}
 .mark:hover .nm{color:#fff}
-.masknav{display:flex;gap:18px;font-size:14px;flex-wrap:wrap}
-.masknav a{color:#aeb8c8;text-decoration:none}.masknav a:hover{color:#fff}
+/* Every item in this row is optically centred on the same line. The account
+   chip carries a border and more padding than the plain links, so without an
+   explicit align-items the flex row stretched them to different heights and the
+   chip sat a pixel or two low — the kind of drift that reads as carelessness
+   long before anybody can name it. */
+.masknav{display:flex;align-items:center;gap:18px;font-size:14px;flex-wrap:wrap}
+.masknav a{display:inline-flex;align-items:center;padding:6px 2px;line-height:1;color:#aeb8c8;text-decoration:none}.masknav a:hover{color:#fff}
 
 .top{padding:44px 0 8px}
 h1{font-size:46px}
@@ -122,45 +127,58 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 
 <div class="wrap floor">
 
- <div class="cab">
-  <img class="shot" src="art/world-now.png" alt="A pixel-art street of houses" width="960" height="540" fetchpriority="high" decoding="sync">
-  <div class="body">
-   <div class="marquee">Cabinet 01 · the long game</div>
-   <h2>Comp Run</h2>
-   <p>Knock doors, buy ground, and climb eight eras from a pole stapler to whatever
-      comes after the crash. An idle game with a phone that rings.</p>
-   <div class="trains"><b>Trains:</b> pricing under pressure, and the patience to let a
-     bad deal go past.</div>
-  </div>
-  <div class="foot"><a class="btn p" href="comp-run.html">Play →</a>
-   <a class="btn sm" href="comp-run.html#street">Skip to today's street</a></div>
- </div>
+ <!-- ══ ORDERED BY WHAT THEY TEACH, NOT BY WHAT THEY COST TO BUILD ═══════
+      The floor used to open with the idle game, because the idle game was the
+      biggest. That is a shelf arranged by weight. It also pointed two cabinets
+      at the same URL — the Daily Street was a hash inside the long game — so
+      the two most different machines here were, to a link, one machine.
 
- <div class="cab">
-  <img class="shot" src="art/door-now.png" alt="A pixel-art front door" width="540" height="450" fetchpriority="high" decoding="sync">
-  <div class="body">
-   <div class="marquee">Cabinet 02 · ninety seconds</div>
-   <h2>The Daily Street</h2>
-   <p>Five properties, one street, the same five for everybody who plays today.
-      Read the tells, bid once, and find out what the other buyer knew.</p>
-   <div class="trains"><b>Trains:</b> reading a seller from a listing — the skill that
-     transfers straight to the desk.</div>
-  </div>
-  <div class="foot"><a class="btn p" href="comp-run.html#street">Work today's street →</a></div>
- </div>
+      Now: the drill first, because sixty seconds is the shortest distance
+      between a stranger and the idea this whole company is built on. The
+      street second, because it is the same read against a clock and a rival.
+      The long game last, because it is the most fun and the least educational,
+      and a floor that leads with its idle game is an idle game with a business
+      attached rather than the other way round. ══════════════════════════ -->
 
  <div class="cab">
   <img class="shot" src="art/door-future.png" alt="A pixel-art door from a later era" width="540" height="450" fetchpriority="high" decoding="sync">
   <div class="body">
-   <div class="marquee">Cabinet 03 · sixty seconds</div>
+   <div class="marquee">Cabinet 01 · sixty seconds a house</div>
    <h2>Exit Drill</h2>
    <p>One house at a time, sixty seconds on the clock: flip it, hold it, take the
-      payments, run the listing, or walk. The desk's own arithmetic decides who was right.</p>
+      payments, run the listing, or walk. The desk's own arithmetic decides who was right,
+      and tells you by how much.</p>
    <div class="trains"><b>Trains:</b> the first cut — matching the exit to the seller
      before you reach for the sheet.</div>
   </div>
   <div class="foot"><a class="btn p" href="exit-drill.html">Run the drill →</a>
    <a class="btn sm" href="exits.html">Learn the exits first</a></div>
+ </div>
+
+ <div class="cab">
+  <img class="shot" src="art/door-now.png" alt="A pixel-art front door" width="540" height="450" fetchpriority="high" decoding="sync">
+  <div class="body">
+   <div class="marquee">Cabinet 02 · three streets, three minutes</div>
+   <h2>The Daily Street</h2>
+   <p>Three streets a day, the same three for everybody playing today. Looks cost you
+      time, the offer is sealed, and the other buyers already made theirs.</p>
+   <div class="trains"><b>Trains:</b> reading a seller from a listing, and spending a
+     limited look where it actually changes the number.</div>
+  </div>
+  <div class="foot"><a class="btn p" href="daily-street.html">Work today's street →</a></div>
+ </div>
+
+ <div class="cab">
+  <img class="shot" src="art/world-now.png" alt="A pixel-art street of houses" width="960" height="540" fetchpriority="high" decoding="sync">
+  <div class="body">
+   <div class="marquee">Cabinet 03 · the long game</div>
+   <h2>Comp Run</h2>
+   <p>Knock doors, buy ground, and climb eight eras from a pole stapler to whatever
+      comes after the crash. An idle game with a phone that rings.</p>
+   <div class="trains"><b>Trains:</b> the least of the three, honestly — it is here
+     because it is the most fun, and because forty deeds is a long argument for patience.</div>
+  </div>
+  <div class="foot"><a class="btn p" href="comp-run.html">Play →</a></div>
  </div>
 
 </div>

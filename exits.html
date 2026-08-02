@@ -51,11 +51,18 @@ header{padding:26px 0 0}
 .mark .nm{font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:.11em}
 .mark .inc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em}
 .marksub{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-top:4px}
-.top nav{display:flex;gap:16px;font-size:13px}
-.top nav a{text-decoration:none;color:var(--mid);padding:4px 2px;border-bottom:2px solid transparent}
+/* Every item in this row is optically centred on the same line. The account
+   chip carries a border and more padding than the plain links, so without an
+   explicit align-items the flex row stretched them to different heights and the
+   chip sat a pixel or two low — the kind of drift that reads as carelessness
+   long before anybody can name it. */
+.top nav{display:flex;align-items:center;gap:16px;font-size:13px;flex-wrap:wrap}
+.top nav a{display:inline-flex;align-items:center;text-decoration:none;color:var(--mid);
+ padding:6px 2px;border-bottom:2px solid transparent;line-height:1}
 .top nav a:hover{color:var(--ink)}
 .top nav a.on{color:var(--ink);font-weight:650;border-bottom-color:var(--blue)}
-.top nav a.acct{border:1.5px solid var(--line-ink);padding:5px 12px;color:var(--ink);font-weight:650}
+.top nav a.acct{border:1.5px solid var(--line-ink);border-radius:9px;padding:6px 12px;
+ color:var(--ink);font-weight:650;border-bottom-width:1.5px}
 .top nav a.acct:hover{border-color:var(--blue);color:var(--blue)}
 .title{display:grid;grid-template-columns:1fr;gap:0;padding:26px 0 20px;border-bottom:1px solid var(--line)}
 h1{font-family:var(--serif);font-size:42px;font-weight:700;line-height:1.06;letter-spacing:-.02em}
