@@ -138,10 +138,16 @@ h2{font-family:var(--serif);font-size:33px;font-weight:700;letter-spacing:-.02em
 .sliderlab{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:5px}
 .sliderlab .l{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
 .sliderlab .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+/* The band is the product's signature shape, so the lesson has to draw it the
+   way the desk draws it — rounded, inset, the same blue core. A reader who
+   learns a shape here and meets a different one on the sheet has to learn it
+   twice, and the second time they wonder whether it means the same thing. */
 .track{position:relative;height:32px;margin-bottom:2px}
-.track::before{content:'';position:absolute;left:0;right:0;top:12px;height:8px;background:#e7eaf0}
-.band{position:absolute;top:11px;height:10px;background:rgba(31,95,208,.16);border:1.5px solid var(--blue);
- pointer-events:none;z-index:1}
+.track::before{content:'';position:absolute;left:0;right:0;top:12px;height:8px;border-radius:999px;
+ background:linear-gradient(180deg,#e4e8f0,#eef1f6);box-shadow:inset 0 1px 2px rgba(16,23,37,.09)}
+.band{position:absolute;top:11px;height:10px;border-radius:999px;pointer-events:none;z-index:1;
+ background:linear-gradient(180deg,rgba(31,95,208,.24),rgba(31,95,208,.14));
+ box-shadow:inset 0 0 0 1.5px var(--blue)}
 .band::after{content:'NEGOTIATION INC';position:absolute;top:-12px;left:1px;
  font-family:var(--mono);font-size:7.5px;letter-spacing:.14em;color:var(--blue);white-space:nowrap}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:32px;background:transparent;
