@@ -1104,10 +1104,36 @@ footer{margin-top:12px;padding-top:12px;display:flex;
  justify-content:space-between;flex-wrap:wrap;gap:8px;font-family:var(--mono);
  font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
 
+/* ── THE PHONE ─────────────────────────────────────────────────────────────
+   The desk reflowed onto a phone from the first day and was never designed
+   for one, which is a different thing. Half of first visits arrive on a
+   phone — often standing in a driveway, which is the single best moment this
+   product will ever get — and a page that merely does not break is not the
+   same as a page you can use one-handed.
+
+   Three rules, applied here rather than scattered:
+     · nothing you tap is under 40px tall;
+     · anything that is a row of two things on a desk becomes a stack;
+     · the numbers stay large and the prose gets out of the way. */
 @media(max-width:600px){
  h1{font-size:26px}
  .exit-h{grid-template-columns:26px 1fr}
  .exit-h .figs{grid-column:2;text-align:left;margin-top:2px}
+ /* tap targets. 27px links were fine with a mouse and a coin-toss with a thumb. */
+ header nav a,.masknav a{min-height:40px;padding-top:9px;padding-bottom:9px}
+ .modes button,.rail button,.presets button{min-height:42px}
+ .flow .btn,.redo button,.cardnav .btn{min-height:44px}
+ /* the photo read: chip over title, both left, instead of a chip beside a
+    three-line heading pushed to the right of it */
+ .aihead{flex-direction:column;align-items:flex-start;gap:6px}
+ .aihead .ttl{font-size:19px;line-height:1.15}
+ /* the mode toggle earns its own line rather than sharing one with the rail */
+ .modes{width:100%;justify-content:stretch}
+ .modes button{flex:1}
+ /* the comparison keeps two columns; everything else that is a desk-width
+    two-up becomes a stack */
+ .agb,.grid,.subj{grid-template-columns:1fr}
+ .fields-ask,.fields-property{grid-template-columns:1fr}
 }
 @media print{
  body{background:#fff}

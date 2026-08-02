@@ -82,6 +82,8 @@ h1{font-size:40px}
  font-size:12px;color:var(--faint)}
 .ans .hint{font-size:12px;font-weight:400;color:var(--faint)}
 .ans[disabled]{opacity:.55;cursor:default}
+.ans.shut{opacity:.4;border-style:dashed;border-color:#39435a}
+.ans.shut .hint{color:#e8cf72;opacity:.8}
 .ans.right{border-color:var(--green);background:rgba(63,160,106,.12)}
 .ans.wrong{border-color:var(--red);background:rgba(217,106,90,.12)}
 
@@ -105,6 +107,39 @@ h1{font-size:40px}
 .btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
 .btn.p:hover{background:#5a92ff;border-color:#5a92ff}
 .btnrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+/* ── the start screen ─────────────────────────────────────────────────────
+   The cabinet used to open mid-run: a stranger's first sixty seconds were
+   spent working out what the buttons meant, and the score they got was a
+   score for reading a rulebook under a clock. Sixty seconds is short enough
+   that the rules have to be free. */
+.start{padding:30px 28px 32px;display:grid;gap:22px}
+.start .sh{display:grid;gap:9px;max-width:60ch}
+.start h2{font-family:var(--serif);font-size:29px;font-weight:700;letter-spacing:-.02em}
+.start .sub{font-size:15.5px;color:var(--dim);line-height:1.55}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.rule{border:1px solid #2b3850;background:#151f31;padding:13px 15px;display:grid;gap:5px}
+.rule .n{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--blue)}
+.rule .t{font-size:14.5px;font-weight:650;color:var(--txt)}
+.rule .d{font-size:12.5px;color:var(--faint);line-height:1.45}
+.ladder{display:grid;gap:5px}
+.ladder .lh{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6f7d94}
+.rk{display:grid;grid-template-columns:74px 128px 1fr;gap:14px;align-items:baseline;
+ padding:8px 12px;border-left:2px solid #2b3850;font-size:13px}
+.rk .sc{font-variant-numeric:tabular-nums;color:var(--faint);font-size:12px}
+.rk .nm{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--dim)}
+.rk .lo{color:var(--faint);line-height:1.45}
+.rk.have{border-left-color:var(--green)} .rk.have .nm{color:var(--txt)}
+.rk.now{border-left-color:var(--gold,#e8cf72);background:rgba(232,207,114,.07)}
+.rk.now .nm{color:var(--gold,#e8cf72)}
+.rk.now .sc{color:var(--gold,#e8cf72)}
+@media(max-width:640px){ .rk{grid-template-columns:64px 1fr;row-gap:2px} .rk .lo{grid-column:1/-1} }
+/* the position line: the one thing on the card that is about YOU */
+.posline{font-size:13.5px;line-height:1.5;color:#e8cf72;background:rgba(232,207,114,.09);
+ border-left:2px solid #e8cf72;padding:9px 12px;margin-top:2px}
+.posline b{color:#f4e4ad;font-weight:700}
+.addr{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--txt);letter-spacing:-.01em}
+.tierpip{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
 .finefoot{border-top:1px solid var(--edge);padding:16px 22px;font-size:12.5px;color:#6f7d94;line-height:1.5}
 .finefoot b{color:var(--faint)}
 .hidden{display:none !important}
@@ -153,8 +188,9 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  <div>
   <div class="eyebrow">Cabinet 03 · sixty seconds</div>
   <h1>Exit Drill</h1>
-  <p class="lede">One house at a time. Five answers: flip it, hold it, take the payments,
-   run the listing, or walk. The desk's own arithmetic decides who was right.</p>
+  <p class="lede">One house at a time, and every exit the desk knows. It starts at five doors and
+   ends at eight — with a line about <b>your</b> position that closes some of them, which is how
+   the choice is actually made.</p>
  </div>
  <div class="tally">
   <div><div class="t">Score</div><div class="v" id="score">0</div></div>
@@ -165,12 +201,16 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 
 <div class="wrap">
  <div class="stage">
-  <div class="clockrail" id="rail"><i id="clock"></i></div>
+  <div class="clockrail hidden" id="rail"><i id="clock"></i></div>
 
-  <div class="deck" id="deck">
+  <div class="start" id="start"></div>
+
+  <div class="deck hidden" id="deck">
    <div class="house">
     <canvas id="px" width="96" height="64" aria-label="A pixel drawing of the property"></canvas>
+    <div class="addr" id="addr"></div>
     <div class="sellerline" id="seller"></div>
+    <div id="pos"></div>
     <div class="figs" id="figs"></div>
    </div>
    <div class="play">
@@ -183,10 +223,10 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   <div class="card hidden" id="card"></div>
 
   <div class="finefoot">Same arithmetic as the desk, dials at their defaults — a 7.1% rate, 75% LTV,
-   a 1.25 DSCR floor, 8% selling costs. <b>Where are the other three exits?</b> Inside these: the
-   wholesale is the flip's read assigned to another buyer's money, the BRRRR is the hold's read with
-   a refinance, and the wholetail is a flip that stops early. The drill trains the read; the desk
-   prices whichever role you take in it.</div>
+   a 1.25 DSCR floor, 8% selling costs. <b>All eight exits are in here now</b>, and three of them —
+   the wholesale, the BRRRR and the wholetail — are only ever the right answer once your own
+   position rules the others out. That is not a game mechanic; it is the reason those three exits
+   exist at all.</div>
  </div>
 </div>
 
@@ -198,14 +238,25 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    rank differently — that is the enforcement behind "same arithmetic". */
 const MPD = (r => { const m=r/12, k=Math.pow(1+m,360); return m*k/(k-1); })(0.071);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const SIT_MOD = { flip:{motivated:4}, novation:{nohurry:6,estate:8,urgent:-6}, subto:{behind:14,estate:-4} };
+const SIT_MOD = {   // identical to the desk's, line for line
+ wholesale:{ urgent:12, motivated:6, nohurry:-8, behind:6 },
+ wholetail:{ urgent:6, estate:6 },
+ flip:{ motivated:4 },
+ novation:{ nohurry:6, estate:8, urgent:-6 },
+ subto:{ behind:14, estate:-4 },
+};
 function rank(d){
   const out=[];
   const gapFit=(id,ceil)=>{ const base=clamp(50+220*(ceil-d.ask)/d.ask,4,96);
     return { id, ceil, fit: Math.round(clamp(base+((SIT_MOD[id]||{})[d.sit]||0),2,98)) }; };
+  out.push(gapFit('wholesale', 0.70*d.arv - d.rep - 8000));
   { const sell=.08*d.arv, hold=Math.max(12000,.036*d.arv), target=Math.max(15000,.08*d.arv);
     out.push(gapFit('flip', d.arv-d.rep-sell-hold-target)); }
+  if (d.rep <= 0.08*d.arv){                    // the desk's gate: light work only
+    const asIs = d.arv - d.rep*1.9;
+    out.push(gapFit('wholetail', asIs*0.92 - 15000 - 0.4*d.rep - 3000)); }
   { const pay=d.rent*.60/1.25, price=pay/MPD/.75; out.push(gapFit('hold', price)); }
+  out.push(gapFit('brrrr', 0.75*d.arv - d.rep - 7000));
   if (d.piti != null){ const spread=d.rent*.82-d.piti;
     out.push({ id:'subto', spread, fit: Math.round(clamp(clamp(spread/4,4,96)+((SIT_MOD.subto||{})[d.sit]||0),2,98)) }); }
   if (d.rep <= 0.10*d.arv){                    // the desk's gate: no retail listing on a non-retail house
@@ -215,7 +266,36 @@ function rank(d){
   return out;
 }
 const WALK_UNDER = 25;                       // best fit under this = nothing fits = walk
-const answerFor = d => { const R=rank(d); return R[0].fit < WALK_UNDER ? 'walk' : R[0].id; };
+
+/* ── YOUR POSITION ─────────────────────────────────────────────────────────
+   The drill used to explain, in a footnote, that the wholesale and the BRRRR
+   live "inside" the flip and the hold. That was true of the arithmetic and
+   wrong about the job: the flip's ceiling is always above the wholesale's, so
+   on a pure fit ranking the wholesale can never be the right answer — and yet
+   thousands of people wholesale for a living.
+
+   The missing variable was never a number on the house. It is what YOU can do.
+   No money and no lender, and every exit needing a down payment is closed to
+   you; the wholesale is not second best, it is the only door. Building a
+   portfolio and refusing to sell, and the flip is closed by choice; that is
+   the entire reason the BRRRR exists.
+
+   So the harder rounds deal a position with the house, and the answer is the
+   best fit AMONG THE EXITS YOU CAN ACTUALLY TAKE. Same arithmetic, one honest
+   constraint on top — which is how the real decision is made. */
+const POS = {
+ funded: { allows:null, line:'' },
+ nocash: { allows:['wholesale','subto','novation'],
+   line:'<b>Your position:</b> $6,000 to your name and no lender. Anything with a down payment is closed to you.' },
+ keeper: { allows:['hold','brrrr','subto'],
+   line:'<b>Your position:</b> you are building a rental portfolio. This one is not for sale, whatever it would fetch.' },
+};
+const allowsOf = d => (POS[d.pos] || POS.funded).allows;
+function answerFor(d){
+  const allow = allowsOf(d);
+  const R = rank(d).filter(x => !allow || allow.indexOf(x.id) >= 0);
+  return (!R.length || R[0].fit < WALK_UNDER) ? 'walk' : R[0].id;
+}
 
 /* ── deals ──────────────────────────────────────────────────────────────────
    Shapes are targeted, then honestly verified: a candidate only ships if the
@@ -227,16 +307,56 @@ const rnd = () => { seed=Math.imul(seed^seed>>>16,0x45d9f3b); seed=Math.imul(see
   seed^=seed>>>16; return (seed>>>0)/4294967296; };
 const r500=v=>Math.round(v/500)*500, r25=v=>Math.round(v/25)*25;
 const SHAPES = ['flip','hold','subto','novation','walk'];
+const SHAPES_2 = SHAPES.concat(['wholetail']);
+const SHAPES_3 = SHAPES_2.concat(['wholesale','brrrr']);
+/* Sixty seconds is twelve to sixteen houses, and a drill that recycles four
+   seller lines inside one run stops being a read and becomes a lookup table.
+   Streets, numbers and a much deeper bench of sellers — every line still says
+   exactly one thing about motivation, because that is the variable. */
+const STREETS = ['Sylvan','Peach Tree','Marigold','Cottonwood','Bellview','Harlan','Ridgeway',
+ 'Pine Hollow','Ashby','Kestrel','Dunmore','Willowbank','Cardinal','Foxglove','Tanner',
+ 'Old Mill','Brightwater','Quarry','Halloway','Sable Creek','Winslow','Underhill'];
+const SUFFIX = ['Rd','St','Ave','Ct','Ln','Way','Terr','Dr'];
+const DIRS = ['','',' SW',' NE',' N',' E'];
+const addressOf = () => (100 + Math.floor(rnd()*8900)) + ' ' +
+  STREETS[Math.floor(rnd()*STREETS.length)] + ' ' + SUFFIX[Math.floor(rnd()*SUFFIX.length)] +
+  DIRS[Math.floor(rnd()*DIRS.length)];
 const SELLERS = {
  flip:     [['urgent','<b>Needs it gone yesterday.</b> Job starts across the state on the first. The kitchen is from two owners ago.'],
-            ['motivated','<b>Motivated.</b> Already made an offer on the next place. This one has to move first.']],
+            ['motivated','<b>Motivated.</b> Already made an offer on the next place. This one has to move first.'],
+            ['urgent','<b>Divorce, and neither of them wants it.</b> Two signatures, one deadline, and a bathroom nobody has touched since 1994.'],
+            ['motivated','<b>Relocating in six weeks.</b> They have priced it to be gone, not to be admired.'],
+            ['urgent','<b>Insurance paid out and they never fixed it.</b> The cheque is spent and the ceiling is still open.'],
+            ['motivated','<b>Tired landlord.</b> The last tenant left it in a state and they have decided they are done.']],
  hold:     [['unknown','<b>Unread.</b> A landlord special — deferred maintenance with a paying tenant. The rent roll says more than the photos do.'],
-            ['nohurry','<b>No hurry.</b> A retiring landlord thinning the portfolio. The tenant pays on the first; the roof explains the price.']],
- subto:    [['behind','<b>Behind on payments.</b> Three months of arrears, a 2021 loan at a rate nobody is getting back.']],
+            ['nohurry','<b>No hurry.</b> A retiring landlord thinning the portfolio. The tenant pays on the first; the roof explains the price.'],
+            ['unknown','<b>Inherited, and already rented.</b> The tenant has been there nine years and has never once been late.'],
+            ['nohurry','<b>Selling three of eleven.</b> They know exactly what it rents for and will tell you to the dollar.'],
+            ['unknown','<b>Section 8, paid on the first.</b> Cosmetically rough, financially boring, which is the point.']],
+ subto:    [['behind','<b>Behind on payments.</b> Three months of arrears, a 2021 loan at a rate nobody is getting back.'],
+            ['behind','<b>Two payments down and the letters have started.</b> A 2020 loan they would not qualify for today.'],
+            ['behind','<b>Lost the job in March.</b> The house is fine; the payment is not. The rate on it is from another era.'],
+            ['behind','<b>Moved for work and could not sell.</b> Renting it out badly, paying the shortfall, done with it.']],
  novation: [['estate','<b>An estate.</b> The executor is two states away and wants a date and a clean wire, not a journey.'],
-            ['nohurry','<b>No hurry.</b> They want retail and will sit until somebody runs the last hundred yards for it.']],
+            ['nohurry','<b>No hurry.</b> They want retail and will sit until somebody runs the last hundred yards for it.'],
+            ['estate','<b>Probate, three siblings, one number.</b> They will not haggle; they will not do the work either.'],
+            ['nohurry','<b>Already listed once and withdrew it.</b> The agent wanted a price cut; they wanted a plan.'],
+            ['estate','<b>Trustee sale, clean title.</b> The house shows well. Nobody involved wants to manage a renovation.']],
  walk:     [['nohurry','<b>No hurry, and priced like it.</b> They read a headline about the market once and believed it.'],
-            ['unknown','<b>Unread.</b> The ask came from a cousin who watches renovation television.']],
+            ['unknown','<b>Unread.</b> The ask came from a cousin who watches renovation television.'],
+            ['nohurry','<b>Zillow says.</b> They have said "Zillow says" four times and it is not a negotiation yet.'],
+            ['unknown','<b>Priced off the neighbour\u2019s sale.</b> The neighbour had a new roof and a finished basement.'],
+            ['nohurry','<b>Will wait for the right buyer.</b> They can, and they will, and it will not be you.']],
+ wholetail:[['urgent','<b>Estate, and the family wants it closed this quarter.</b> Clean house, dated everything, no structural anything.'],
+            ['estate','<b>An estate that has already been emptied.</b> Carpets, paint, and a lockbox is the whole job.'],
+            ['urgent','<b>Moving into care next month.</b> Immaculate for its age; the kitchen is simply forty years old.']],
+ wholesale:[['urgent','<b>Needs it gone yesterday.</b> The furnace is out, the roof is patched, and they cannot afford either.'],
+            ['motivated','<b>Code letter on the door.</b> They want the problem to be somebody else\u2019s by the end of the month.'],
+            ['urgent','<b>Fire in the back bedroom last winter.</b> Boarded, insured, and completely beyond them.'],
+            ['behind','<b>Behind on taxes and the auction date is set.</b> Whoever moves first gets it.']],
+ brrrr:    [['motivated','<b>Half-finished flip they ran out of money on.</b> Studs, a permit, and a lot of regret.'],
+            ['unknown','<b>Empty two years.</b> Solid bones, dead systems, and a street full of tenants paying good rent.'],
+            ['motivated','<b>Out-of-state owner who has never seen it.</b> The property manager quit; so have they.']],
 };
 function candidate(shape){
   const arv = r500(150000 + rnd()*330000);
@@ -251,18 +371,36 @@ function candidate(shape){
     d.piti=r25(d.rent*(0.38+rnd()*0.18)); d.balance=r500(d.ask*(0.82+rnd()*0.1)); }
   if (shape==='novation'){ d.rep=r500(arv*(0.01+rnd()*0.025)); d.ask=r500(arv*(0.68+rnd()*0.1)); d.rent=r25(arv*(0.0048+rnd()*0.0012)); }
   if (shape==='walk'){ d.rep=r500(arv*(0.14+rnd()*0.1)); d.ask=r500(arv*(1.02+rnd()*0.16)); d.rent=r25(arv*(0.0038+rnd()*0.0012)); }
+  /* The three exits that only exist because of your position. Each recipe puts
+     the house squarely in the window where that exit is the honest read:
+       wholetail — nearly nothing to do, priced close enough to retail that the
+                   novation's cheque disappears and tidy-and-relist is all that
+                   is left;
+       wholesale — repairs past the retail gates, and no capital, so the only
+                   door is somebody else's money;
+       brrrr     — rentable stock with real work in it, kept rather than sold. */
+  if (shape==='wholetail'){ d.rep=r500(arv*(0.012+rnd()*0.022)); d.ask=r500(arv*(0.845+rnd()*0.035));
+    d.rent=r25(arv*(0.0036+rnd()*0.0008)); d.pos='funded'; }
+  if (shape==='wholesale'){ d.rep=r500(arv*(0.13+rnd()*0.07)); d.ask=r500(arv*(0.40+rnd()*0.10));
+    d.rent=r25(arv*(0.0040+rnd()*0.0012)); d.pos='nocash'; }
+  if (shape==='brrrr'){ d.rep=r500(arv*(0.10+rnd()*0.08)); d.ask=r500(arv*(0.44+rnd()*0.10));
+    d.rent=r25(arv*(0.0040+rnd()*0.0010)); d.pos='keeper'; }
   const opts = SELLERS[shape]; const pick = opts[Math.floor(rnd()*opts.length)];
   d.sit = pick[0]; d.sellerHtml = pick[1]; d.shape = shape;
+  d.pos = d.pos || 'funded';
+  d.addr = addressOf();
   return d;
 }
 function deal(shape){
-  for (let t=0;t<80;t++){
+  for (let t=0;t<300;t++){
     const d = candidate(shape);
-    const R = rank(d), top=R[0], second=R[1];
-    if (shape==='walk'){ if (top.fit <= WALK_UNDER-6) { d.rank=R; return d; } continue; }
-    if (top.id===shape && top.fit>=WALK_UNDER+10 && (top.fit-(second?.fit??0))>=12){ d.rank=R; return d; }
+    const allow = allowsOf(d);
+    const R = rank(d).filter(x => !allow || allow.indexOf(x.id) >= 0);
+    const top=R[0], second=R[1];
+    if (shape==='walk'){ if (top && top.fit <= WALK_UNDER-6) { d.rank=R; return d; } continue; }
+    if (top && top.id===shape && top.fit>=WALK_UNDER+10 && (top.fit-(second?second.fit:0))>=12){ d.rank=R; return d; }
   }
-  if (window.__strict) throw new Error('generator exhausted 80 tries for '+shape);
+  if (window.__strict) throw new Error('generator exhausted 300 tries for '+shape);
   return deal(SHAPES[Math.floor(rnd()*4)]);   // a stubborn shape yields to a workable one
 }
 
@@ -300,14 +438,47 @@ const $=id=>document.getElementById(id);
 const fmt=v=>(v<0?'−$':'$')+Math.abs(Math.round(v)).toLocaleString('en-US');
 const LS={ get(k){try{return localStorage.getItem(k)}catch(e){return null}},
            set(k,v){try{localStorage.setItem(k,v)}catch(e){}} };
-const ANSWERS=[['flip','The fix and flip','buy it, fix it, sell it'],
+const ANSWERS=[['wholesale','The wholesale','sell the contract, never own it'],
+               ['flip','The fix and flip','buy it, fix it, sell it'],
+               ['wholetail','The wholetail','clean it, photograph it, list it'],
                ['hold','The buy and hold','the rent carries a loan'],
+               ['brrrr','The BRRRR','fix it, rent it, refinance, keep it'],
                ['subto','The subject-to','take over their payments'],
                ['novation','The novation','deliver their number, sell at retail'],
                ['walk','Walk away','no exit pays at this ask']];
 const NAME=Object.fromEntries(ANSWERS.map(a=>[a[0],a[1]]));
-const G={ t:60, score:0, streak:0, reads:0, right:0, cur:null, open:false, over:false, last:null, askedAt:0 };
+const HINT=Object.fromEntries(ANSWERS.map(a=>[a[0],a[2]]));
+const G={ t:60, score:0, streak:0, reads:0, right:0, cur:null, open:false, over:false, last:null,
+          askedAt:0, house:0, teaching:false, started:false };
 const best0=+(LS.get('ni-drill-best')||0); if (best0) $('best').textContent=best0;
+
+/* ── the ladder ────────────────────────────────────────────────────────────
+   Four flat grades became six ranks with something to say, because the reason
+   anybody plays a sixty-second game twice is to move one line up a list they
+   can see. The top two are the ones that make you want the eighth answer. */
+const RANKS = [
+ { at:0,    n:'Door-knocker', lore:'A clipboard and a list. Everything past that is learned on somebody’s porch.' },
+ { at:450,  n:'Bird dog',     lore:'You can spot the house worth another investor’s phone call. That is a skill, and it pays.' },
+ { at:900,  n:'Apprentice',   lore:'You are pricing the house. Start pricing the person selling it — the seller line is half the answer.' },
+ { at:1500, n:'Underwriter',  lore:'The reads are right and the speed is arriving. This is the rank the desk was built for.' },
+ { at:2300, n:'Closer',       lore:'You are reading the seller before the arithmetic finishes. Eight doors, and you know which one is yours.' },
+ { at:3200, n:'The Desk',     lore:'Somebody else’s offer arrived second, and they still do not know why.' },
+];
+const rankFor = sc => RANKS.filter(r => sc >= r.at).pop() || RANKS[0];
+
+/* Difficulty arrives inside the run, not across sessions: house one is five
+   doors, and by house eight it is all eight plus a position that closes some
+   of them. A first-timer is never shown nine buttons; somebody on their
+   fortieth run never sees five. */
+const TIERS = [
+ { from:1, shapes:SHAPES,   answers:['flip','hold','subto','novation','walk'], hints:true,
+   pip:'Five doors' },
+ { from:4, shapes:SHAPES_2, answers:['flip','wholetail','hold','subto','novation','walk'], hints:true,
+   pip:'Six doors — the wholetail is open' },
+ { from:7, shapes:SHAPES_3, answers:['wholesale','flip','wholetail','hold','brrrr','subto','novation','walk'],
+   hints:false, pip:'All eight — and your position decides which are open' },
+];
+const tierFor = n => TIERS.filter(t => n >= t.from).pop() || TIERS[0];
 
 function working(d){
   const R=rank(d), by=Object.fromEntries(R.map(x=>[x.id,x]));
@@ -319,15 +490,28 @@ function working(d){
   return w.join(' · ');
 }
 function next(){
-  G.cur = deal(SHAPES[Math.floor(rnd()*SHAPES.length)]);
+  G.house++;
+  const T = tierFor(G.house);
+  G.cur = deal(T.shapes[Math.floor(rnd()*T.shapes.length)]);
   drawHouse($('px'),G.cur);
-  $('seller').innerHTML = G.cur.sellerHtml;
-  const d=G.cur, figs=[['They ask',fmt(d.ask)],['Comps say (ARV)',fmt(d.arv)],['Repairs walk-through',fmt(d.rep)],['Rent, realistic',fmt(d.rent)+'<small>/mo</small>']];
+  const d=G.cur;
+  $('addr').textContent = d.addr || '';
+  $('seller').innerHTML = d.sellerHtml;
+  $('pos').innerHTML = (POS[d.pos]||POS.funded).line
+    ? `<div class="posline">${(POS[d.pos]||POS.funded).line}</div>` : '';
+  const figs=[['They ask',fmt(d.ask)],['Comps say (ARV)',fmt(d.arv)],['Repairs walk-through',fmt(d.rep)],['Rent, realistic',fmt(d.rent)+'<small>/mo</small>']];
   if (d.piti!=null){ figs.push(['Their payment (PITI)',fmt(d.piti)+'<small>/mo</small>']); figs.push(['Loan balance',fmt(d.balance)]); }
   $('figs').innerHTML = figs.map(f=>`<div class="fig"><div class="fl">${f[0]}</div><div class="fv">${f[1]}</div></div>`).join('');
-  $('answers').innerHTML = ANSWERS.map((a,i)=>
-   `<button class="ans" data-a="${a[0]}"><span class="key">${i+1}</span><span>${a[1]}</span><span class="hint">${a[2]}</span></button>`).join('');
-  document.querySelectorAll('.ans').forEach(b=>b.onclick=()=>answer(b.dataset.a));
+  const allow = allowsOf(d);
+  $('answers').innerHTML = T.answers.map((id,i)=>{
+    const shut = allow && allow.indexOf(id) < 0 && id !== 'walk';
+    return `<button class="ans${shut?' shut':''}" data-a="${id}"${shut?' disabled':''}>
+      <span class="key">${i+1}</span><span>${NAME[id]}</span>
+      <span class="hint">${shut ? 'closed to you here' : (T.hints ? HINT[id] : '')}</span></button>`;
+  }).join('');
+  document.querySelectorAll('.ans:not([disabled])').forEach(b=>b.onclick=()=>answer(b.dataset.a));
+  $('prompt').innerHTML = `<b>Which exit fits?</b> Keys 1–${T.answers.length} answer. Wrong costs five seconds.
+    <span class="tierpip"> · ${T.pip}</span>`;
   $('verdict').className='verdict hidden';
   G.open=true; G.askedAt=G.t;
 }
@@ -355,36 +539,102 @@ function answer(a){
       <div class="go">Space or click for the next house.</div>`;
   }
   G.last=G.cur;
+  if (G.teaching){
+    G.score=0; G.streak=0; G.t=60;
+    $('verdict').innerHTML += `<div class="go" style="color:#e8cf72">That is the whole game.
+      <button class="btn p" id="tgo" style="margin-left:10px;padding:6px 13px;font-size:13px">Start the drill →</button></div>`;
+    const tg=$('tgo'); if (tg) tg.onclick=()=>beginRun();
+  }
   $('score').textContent=G.score; $('streak').textContent=G.streak;
   if (G.t<=0) end();
 }
-function advance(){ if(G.over) return; if(!G.open && G.t>0) next(); }
+function advance(){ if(G.over||G.teaching||!G.started) return; if(!G.open && G.t>0) next(); }
 document.addEventListener('keydown',e=>{
-  if (G.over) return;
-  if (G.open && e.key>='1' && e.key<='5'){ const b=document.querySelectorAll('.ans')[+e.key-1]; if(b) answer(b.dataset.a); }
+  if (G.over || !G.started) return;
+  if (G.open && e.key>='1' && e.key<='8'){ const b=document.querySelectorAll('.ans')[+e.key-1];
+    if(b && !b.disabled) answer(b.dataset.a); }
   else if (!G.open && (e.key===' '||e.key==='Enter')){ e.preventDefault(); advance(); }
 });
 $('deck').addEventListener('click',e=>{ if(!G.open && !e.target.closest('.ans')) advance(); });
 
 let lastTick=performance.now();
 function tick(now){
-  if (G.over) return;
+  if (G.over || !G.started) return;
   const dt=(now-lastTick)/1000; lastTick=now;
-  if (G.open) G.t=Math.max(0,G.t-dt);
+  if (G.open && !G.teaching) G.t=Math.max(0,G.t-dt);
   $('clock').style.transform=`scaleX(${G.t/60})`;
   $('rail').classList.toggle('low',G.t<12);
   if (G.t<=0 && G.open){ G.open=false; end(); }
   requestAnimationFrame(tick);
+}
+/* ── the door ──────────────────────────────────────────────────────────────
+   Rules for free, the ladder visible, and a way to see one house without a
+   clock running. Everything here is one screen, because the drill is sixty
+   seconds and a two-minute briefing would be a joke at its own expense. */
+function ladderHTML(best){
+  const have = rankFor(best);
+  return `<div class="ladder"><div class="lh">The ladder</div>
+   ${RANKS.map(r=>`<div class="rk${best>=r.at?' have':''}${r===have?' now':''}">
+     <span class="sc">${r.at ? r.at.toLocaleString('en-US')+'+' : '—'}</span>
+     <span class="nm">${r.n}</span><span class="lo">${r.lore}</span></div>`).join('')}</div>`;
+}
+function showStart(){
+  const best = Math.max(best0, +(LS.get('ni-drill-best')||0));
+  const you = rankFor(best);
+  $('deck').classList.add('hidden'); $('card').classList.add('hidden');
+  $('rail').classList.add('hidden');
+  $('start').classList.remove('hidden');
+  $('start').innerHTML = `
+   <div class="sh">
+    <div class="eyebrow">${best ? 'You are a ' + you.n : 'Cabinet 03'}</div>
+    <h2>Sixty seconds. One house at a time.</h2>
+    <p class="sub">You get the address, the seller in one line, and four numbers. Pick the exit
+     that pays. <b>The desk's own arithmetic decides who was right</b> — the same code that
+     prices your real deals, with the dials at their defaults.</p>
+   </div>
+   <div class="rules">
+    <div class="rule"><div class="n">Scoring</div><div class="t">100 a house, plus speed</div>
+     <div class="d">Up to 40 more for answering inside twelve seconds, and 50 every third right in a row.</div></div>
+    <div class="rule"><div class="n">Wrong</div><div class="t">Five seconds off the clock</div>
+     <div class="d">No score penalty. Time is the only currency here, which is also true on a Tuesday.</div></div>
+    <div class="rule"><div class="n">It gets harder</div><div class="t">Five doors, then six, then eight</div>
+     <div class="d">By the eighth house every exit is open — and a line about <b>your</b> position closes some of them.</div></div>
+   </div>
+   ${ladderHTML(best)}
+   <div class="btnrow" style="justify-content:flex-start">
+    <button class="btn p" id="go">Start the drill →</button>
+    <button class="btn" id="teach">Show me one house first</button>
+    <a class="btn" href="exits.html">Learn the eight exits</a>
+   </div>`;
+  $('go').onclick = () => beginRun();
+  $('teach').onclick = () => tutorial();
+}
+/* One house, no clock, the answer explained rather than scored. */
+function tutorial(){
+  G.teaching = true; G.started = true; G.house = 3;   // the six-door tier, so the wholetail is visible
+  $('start').classList.add('hidden'); $('deck').classList.remove('hidden');
+  $('rail').classList.remove('hidden');
+  $('clock').style.transform='scaleX(1)';
+  next();
+  $('prompt').innerHTML = `<b>A practice house — no clock.</b> Pick any answer and the sheet will
+    show you its working.`;
+}
+function beginRun(){
+  Object.assign(G,{t:60,score:0,streak:0,reads:0,right:0,over:false,open:false,last:null,
+                   house:0,teaching:false,started:true});
+  $('score').textContent=0; $('streak').textContent=0;
+  $('start').classList.add('hidden'); $('card').classList.add('hidden');
+  $('deck').classList.remove('hidden'); $('rail').classList.remove('hidden');
+  lastTick=performance.now(); next(); requestAnimationFrame(tick);
 }
 function end(){
   G.over=true;
   const best=Math.max(best0,+(LS.get('ni-drill-best')||0),G.score);
   LS.set('ni-drill-best',String(best)); $('best').textContent=best;
   const acc=G.reads?Math.round(100*G.right/G.reads):0;
-  const grade = G.score>=1400?['Closer','You are reading the seller before the spreadsheet loads. Take real numbers to the desk.']
-    : G.score>=900?['Underwriter','The reads are right; the speed will come. The desk will slow the same arithmetic down for you.']
-    : G.score>=450?['Apprentice','You are pricing the house. Start pricing the person selling it — the seller line is half the answer.']
-    : ['Door-knocker','Lesson one of the course is exactly this drill, slowed down and explained.'];
+  const rk = rankFor(G.score);
+  const nextRk = RANKS[RANKS.indexOf(rk)+1];
+  const grade = [rk.n, rk.lore];
   const d=G.last, handoff = d ? 'desk.html#'+[`asking=${d.ask}`,`arv=${d.arv}`,`repairs=${d.rep}`,`rent=${d.rent}`,
     ...(d.piti!=null?[`piti=${d.piti}`,`balance=${d.balance}`]:[]),
     `est=${['arv','repairs','rent',...(d.piti!=null?['piti']:[])].join(',')}`,
@@ -397,14 +647,15 @@ function end(){
     <div class="s"><div class="t">Called right</div><div class="v">${acc}%</div></div>
     <div class="s"><div class="t">Best</div><div class="v">${best}</div></div></div>
    <div class="grade">${grade[1]}</div>
+   ${nextRk ? `<div class="grade" style="color:#e8cf72">
+     <b>${(nextRk.at-G.score).toLocaleString('en-US')}</b> more and you are a ${nextRk.n}.</div>` : ''}
    <div class="btnrow"><button class="btn p" id="again">Run it again</button>
     ${d?`<a class="btn" href="${handoff}">Take the last house to the desk →</a>`:''}
+    <button class="btn" id="ladder">The ladder</button>
     <a class="btn" href="arcade.html">Back to the floor</a></div>`;
-  $('again').onclick=()=>{ Object.assign(G,{t:60,score:0,streak:0,reads:0,right:0,over:false,open:false,last:null});
-    $('score').textContent=0; $('streak').textContent=0;
-    c.classList.add('hidden'); $('deck').classList.remove('hidden');
-    lastTick=performance.now(); next(); requestAnimationFrame(tick); };
+  $('again').onclick=()=>beginRun();
+  const lb=$('ladder'); if (lb) lb.onclick=()=>showStart();
 }
-next(); requestAnimationFrame(tick);
+showStart();
 </script>
 </body></html>

@@ -303,29 +303,39 @@ function draw(cv, d){
    px(bx+Math.round(bw/2)-1,by,2,bh,'rgba(0,0,0,.22)');        // the party wall
    gable(bx,by,bw,15,roof,6);
    px(bx-6,by,bw+12,1,'rgba(0,0,0,.30)');
-   /* Two identical units, so every opening is mirrored across the party wall
-      to the pixel. The earlier numbers were eyeballed and drifted by three. */
-   /* Two identical units, mirrored across the party wall. The doors sit on the
-      ground floor and the windows must not — the first version centred both in
-      their unit and the lower-left window landed on top of its own front door,
-      which is the single most "drawn by a machine" thing a house can do. The
-      ground floor now has ONE opening per unit: the door, off to the inner
-      side, with its window beside it rather than through it. */
+   /* MIRRORED, properly this time.
+
+      Two previous passes fixed an overlap and left something worse: unit one
+      had its door on the inner side and its window outer, unit two had them
+      the other way round. Nothing collided, and it still read as machine-drawn
+      — because a duplex is the most symmetrical building on any street and
+      the eye checks that before it checks anything else.
+
+      So every opening is now derived from the party wall and mirrored about
+      it: the two front doors flank the centre line on a shared stoop, each
+      unit's ground-floor window sits at its own outer end, and the upper
+      windows are centred in their halves. Every x below is pw ± something. */
    const half=Math.round(bw/2), wW=12, dW=10;
-   const dx1=bx+Math.round(half*0.62), dx2=bx+half+Math.round(half*0.62);
+   const pw = bx + half;              // the party wall, and the axis of everything
+   const gap = 4;                     // between each door and the centre line
+   const dx1 = pw - gap - dW, dx2 = pw + gap;
    // upper storey: centred in each unit, both lit
-   const uwx=Math.round((half-wW)/2);
-   window_(bx+uwx,      by+7, wW, 9, true);
-   window_(bx+half+uwx, by+7, wW, 9, true);
-   // ground floor: a window on the outer side, the door on the inner side
-   window_(bx+6,            by+21, wW, 9, true);
-   window_(bx+half+6,       by+21, wW, 9, false);        // one back room dark
+   const uwx = Math.round((half - wW) / 2);
+   window_(pw - half + uwx, by+7, wW, 9, true);
+   window_(pw + uwx,        by+7, wW, 9, true);
+   // ground floor: each unit's window at its OWN outer end, mirrored about pw
+   const outer = Math.round(half - 6 - wW);
+   window_(pw - half + 6,       by+21, wW, 9, true);
+   window_(pw + outer,          by+21, wW, 9, false);    // one back room dark
    door(dx1, by+bh-13, dW, 13);
    door(dx2, by+bh-13, dW, 13);
-   px(dx1-2,GROUND-1,(dx2+dW+2)-(dx1-2),1,'#4a463d');   // one stoop, both doors on it
-   // two mailboxes and two meters — the detail that says "two households"
-   px(bx-9,GROUND-13,3,13,'#585048'); px(bx-12,GROUND-17,9,5,'#8d8578');
-   px(bx-9+7,GROUND-13,3,13,'#585048'); px(bx-4,GROUND-17,9,5,'#8d8578');
+   px(dx1-3,GROUND-1,(dx2+dW+3)-(dx1-3),1,'#4a463d');   // one stoop, both doors on it
+   px(dx1-3,by+bh-16,(dx2+dW+3)-(dx1-3),3,roof);        // one hood over both
+   // two mailboxes and two meters — the detail that says "two households".
+   // They live OFF the facade: put them on the party wall and they merge with
+   // the stoop hood, which is how the last pass turned symmetry into mush.
+   px(bx-19,GROUND-13,3,13,'#585048'); px(bx-22,GROUND-17,9,5,'#8d8578');
+   px(bx-6,GROUND-13,3,13,'#585048');  px(bx-9,GROUND-17,9,5,'#8d8578');
    px(bx+bw+3,by+18,4,6,'#9aa3ad'); px(bx+bw+9,by+18,4,6,'#9aa3ad');
    for (let i=0;i<9;i++) px(bx-16+i*3,GROUND-4,2,4,'#3d5230');           // clipped hedge
  }
