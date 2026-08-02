@@ -105,6 +105,18 @@ body.railtight .rn-caret{display:none}
 .ac-sw button{font-family:var(--sans);font-size:11px;font-weight:650;cursor:pointer;padding:7px 4px;
  border-radius:8px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#c9d8ee}
 .ac-sw button:hover{background:rgba(255,255,255,.14);color:#fff}
+.ac-data{padding-top:10px;border-top:1px dashed rgba(255,255,255,.14)}
+.ac-data .k{font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:#7c93b5;font-weight:800}
+.ac-row{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}
+.ac-data button,.ac-data .acbtn{display:flex;align-items:center;justify-content:center;text-align:center;
+ font-family:var(--sans);font-size:11px;font-weight:650;cursor:pointer;padding:7px 4px;text-decoration:none;
+ border-radius:8px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#c9d8ee}
+.ac-data button:hover,.ac-data .acbtn:hover{background:rgba(255,255,255,.14);color:#fff}
+.ac-del{width:100%;margin-top:5px;border-color:rgba(214,120,110,.4)!important;color:#f0b4ac!important}
+.ac-del:hover{background:rgba(180,60,48,.28)!important;border-color:#d6786e!important;color:#fff!important}
+.ac-del.armed{background:#a8332a!important;border-color:#a8332a!important;color:#fff!important}
+#ac-note{font-size:10.5px;color:#8ba3c4;line-height:1.45;margin:8px 0 0}
+#ac-note.ok{color:#8fe0b4} #ac-note.bad{color:#f0b4ac}
 .ac-sw button.on{background:var(--blue);border-color:var(--blue);color:#fff}
 .ac-dev p{font-size:10px;color:#7c93b5;margin-top:7px;line-height:1.4}
 .ac-out{font-family:var(--sans);font-size:12px;font-weight:650;cursor:pointer;padding:8px;
@@ -710,7 +722,8 @@ function renderShell(a, props, active, nameOf, spreadOf, filledOf, onPlan, left)
    if (w) w.onclick = () => { const box = $('rn-acct');
      if (!box) return;
      if (box.hidden){ box.innerHTML = acctPanel(); box.hidden = false; wireAcct(); }
-     else box.hidden = true;
+     else { box.hidden = true; ACCT_SAY = null; }
+     ACCT_OPEN = !box.hidden;
      w.classList.toggle('open', !box.hidden); };
    const t = $('rn-toggle');
    if (t){ t.onclick = () => { const tight = document.body.classList.toggle('railtight');
@@ -718,6 +731,7 @@ function renderShell(a, props, active, nameOf, spreadOf, filledOf, onPlan, left)
      t.textContent = tight ? '›' : '‹'; };
      if (document.body.classList.contains('railtight')) t.textContent = '›'; }
  }
+ acctRestore();
 }
 
 /* ── THE ACCOUNT PANEL ─────────────────────────────────────────────────────
@@ -737,6 +751,23 @@ const NEXT_TIER = [
      'Seats, roles and your branding on everything'] },
  null,
 ];
+/* Importing a file rebuilds the rail — the property list changed — and the
+   rebuild took the panel with it, along with the "Added 2 properties" line
+   that was the only confirmation anything had happened. The panel's open
+   state and its last message are held outside the markup now, and restored
+   after every rail render, so a control can report on work that changes the
+   thing the control is sitting in. */
+let ACCT_OPEN = false, ACCT_SAY = null;
+function acctSay(m, bad){ ACCT_SAY = m ? [m, !!bad] : null;
+  const n = document.getElementById('ac-note'); if (!n) return;
+  n.textContent = m; n.className = bad ? 'bad' : 'ok'; }
+function acctRestore(){
+  const w = document.getElementById('rn-who'), box = document.getElementById('rn-acct');
+  if (!w || !box || !ACCT_OPEN) return;
+  box.innerHTML = acctPanel(); box.hidden = false; wireAcct(); w.classList.add('open');
+  if (ACCT_SAY){ const n = document.getElementById('ac-note');
+    if (n){ n.textContent = ACCT_SAY[0]; n.className = ACCT_SAY[1] ? 'bad' : 'ok'; } }
+}
 function acctPanel(){
  const a = account(); if (!a) return '';
  const TR = { 'solo':1, 'underwriter':2, 'the office':3, 'office':3 };
@@ -760,7 +791,39 @@ function acctPanel(){
      <div class="ac-sw">${['Free','Solo','Underwriter','The Office'].map((n,i)=>
        `<button type="button" data-plan="${i?esc(n):''}" class="${t===i?'on':''}">${n}</button>`).join('')}</div>
      <p>Switches this browser only. Nothing is charged and nothing is sent anywhere.</p></div>` : ''}
+   <div class="ac-data"><span class="k">Your data</span>
+     <div class="ac-row">
+       <button type="button" id="ac-exp">Export everything</button>
+       <a class="acbtn" href="desk.html">Add from a file</a>
+     </div>
+     <button type="button" class="ac-del" id="ac-del">Delete everything</button>
+     <p id="ac-note">Every sheet, comp and note as one plain readable file.</p></div>
    <button class="ac-out" id="ac-out" type="button">Sign out</button></div>`;
+}
+/* The privacy page promises both of these from the account panel, and the hub
+   IS the account panel on half the visits. Export reads the same record the
+   desk writes; delete takes the account and the sheets together, because
+   "delete my data" meaning "delete my login" is the kind of half-answer that
+   makes the rest of the page unbelievable. */
+function exportAll(){
+  try {
+    const d = JSON.parse(localStorage.getItem('ni-desk-v3') || 'null') || { props: [] };
+    const blob = new Blob([JSON.stringify({ saved:new Date().toISOString(),
+      active:d.active|0, mode:d.mode||'simple', adv:d.adv||null, props:d.props||[] }, null, 1)],
+      {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = 'negotiation-inc-sheets.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    return (d.props||[]).length;
+  } catch(e){ return -1; }
+}
+function wipeAll(){
+  for (const k of ['ni-account-v1','ni-desk-v3','ni-desk-v2','ni-desk-case','ni-cmp-v1',
+                   'ni-exits-v1','ni-portfolio-v2','ni-offer-course','ni-course-hidden',
+                   'ni-trial-hushed','ni-drill-best','ni-rail','ni-tray'])
+    try { localStorage.removeItem(k); } catch(e){}
+  location.href = 'office.html';
 }
 function wireAcct(){
  const box = $('rn-acct'); if (!box) return;
@@ -769,9 +832,23 @@ function wireAcct(){
    a.plan = b.dataset.plan || null;
    try { localStorage.setItem(ACC, JSON.stringify(a)); } catch(e){}
    const el = $('rail-nav'); if (el) delete el.dataset.sig;
-   boot();
-   const w = $('rn-who'); if (w) w.click();
+   boot();          // acctRestore() puts the panel back where it was
  });
+ const say = acctSay;
+ const exp = $('ac-exp');
+ if (exp) exp.onclick = () => { const n = exportAll();
+   say(n < 0 ? 'This browser would not let that be written.'
+     : `${n} propert${n===1?'y':'ies'} written to a file.`, n < 0); };
+ const del = $('ac-del'); let delT = null;
+ if (del) del.onclick = () => {
+   if (del.dataset.armed){ clearTimeout(delT); wipeAll(); return; }
+   del.dataset.armed = '1'; del.classList.add('armed');
+   del.textContent = 'Delete the account and every sheet?';
+   say('This cannot be undone. Export first if you want a copy.', true);
+   delT = setTimeout(() => { delete del.dataset.armed; del.classList.remove('armed');
+     del.textContent = 'Delete everything';
+     say('Every sheet, comp and note as one plain readable file.'); }, 5000);
+ };
  const out = $('ac-out');
  /* signing out clears the workspace record, never the work itself — and it
     lands you on the door, which is the anonymous product, not a dashboard
