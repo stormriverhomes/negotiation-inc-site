@@ -84,11 +84,21 @@ body.railtight .rail-nav{width:64px}
  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#c9d8ee;
  font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .rn-toggle:hover{background:rgba(255,255,255,.14);color:#fff}
-body.railtight .rn-top .rn-who,body.railtight .rn-nm,body.railtight .rn-tier,
+/* Collapsed means icons, not truncation — and the toggle stays reachable.
+   See the long note in desk.html; this file must not drift from it. */
+body.railtight .rn-nm,body.railtight .rn-tier,
 body.railtight .rn-h,body.railtight .rn-list,body.railtight .rn-empty,
-body.railtight .rn-foot,body.railtight .rn-up,body.railtight .rn-btn span{display:none}
-body.railtight .rn-btn{justify-content:center;padding:9px 0}
-body.railtight .rn-mark .inc{display:none}
+body.railtight .rn-foot,body.railtight .rn-up,body.railtight .rn-btn span,
+body.railtight .rn-pro,body.railtight .rn-mark .nm,body.railtight .rn-mark .inc{display:none}
+body.railtight .rn-top{padding:14px 8px 12px;text-align:center}
+body.railtight .rn-mark{justify-content:center}
+body.railtight .rn-mark::after{content:'N';font-family:var(--serif);font-size:20px;font-weight:700;color:#fff}
+body.railtight .rn-toggle{position:static;margin:10px auto 0}
+body.railtight .rn-who{justify-content:center;margin-top:10px}
+body.railtight .rn-act{padding:10px 8px}
+body.railtight .rn-btn{justify-content:center;padding:10px 0}
+body.railtight .rn-btn::before{content:attr(data-i);font-size:15px;line-height:1}
+.rn-btn::before{content:none}
 /* With the rail up, the masthead and the hero's arcade button are both second
    copies of links standing two inches to the left. They go. */
 @media (min-width:1081px){ body.hasrail > header{display:none}
@@ -143,13 +153,20 @@ input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blu
 .hero{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;padding:30px 0 6px}
 h1.big{font-size:38px}
 .sub{font-size:16px;color:var(--mid);margin-top:6px}
-.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0 0}
+.strip{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:22px 0 0;max-width:560px}
 .stat{background:#fff;border:1px solid var(--line);padding:14px 16px}
 .stat .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
 .stat .v{font-family:var(--serif);font-size:29px;font-weight:700;letter-spacing:-.02em;margin-top:3px}
 .stat .d{font-size:12.5px;color:var(--soft);margin-top:2px}
 .cols{display:grid;grid-template-columns:1.35fr .65fr;gap:20px;margin:20px 0 50px}
-.panel{background:#fff;border:1px solid var(--line)}
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+/* ── the offer, at the size an offer should be ──────────────────────────── */
+.offer{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+ margin-top:20px;padding:16px 20px;border-radius:16px;border:1.5px solid var(--blue-line);
+ background:linear-gradient(180deg,var(--blue-soft),#fff)}
+.offer h2{font-size:20px;margin:3px 0 4px}
+.offer p{font-size:13.5px;color:var(--mid);line-height:1.5;margin:0;max-width:58ch}
+.offer .ob-a{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
 .ph{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 17px;border-bottom:1px solid var(--line)}
 .ph h2{font-size:18px}
 .pb{padding:17px}
@@ -242,7 +259,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 <!-- ══ the door ══════════════════════════════════════════════════════════ -->
 <div class="wrap"><div class="gate" id="gate">
  <div class="gh">
-  <div class="eyebrow">Your desk</div>
+  <div class="eyebrow" id="gate-k">Your desk</div>
   <h1 id="gate-h">Open your workspace.</h1>
   <p id="gate-p">Everything you price, learn and play is kept together and picked up
    where you left it — the sheet in progress, the market you are working, the properties
@@ -311,8 +328,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
          them uneditable was throwing away free goodwill. -->
     <div class="pf" id="market-edit"></div>
    </div>
-   <div class="panel">
-    <div class="ph"><h2>The walk-through</h2><span class="eyebrow" id="c-state"></span></div>
+   <div class="panel" id="coursecard">
+    <div class="ph"><h2>The eight ways out</h2><span class="eyebrow" id="c-state"></span></div>
     <div class="pb" id="course"></div>
     <div class="pf" id="course-foot"></div>
    </div>
@@ -337,11 +354,39 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money = v => '$' + Math.round(v).toLocaleString('en-US');
 const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } };
+const LS_get = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
+const LS_set = (k,v) => { try { localStorage.setItem(k,v); } catch(e){} };
 const ACC = 'ni-account-v1';
 
 /* ── the account ──────────────────────────────────────────────────────── */
 function account(){ const a = read(ACC);
   return (a && typeof a === 'object' && typeof a.name === 'string' && a.name) ? a : null; }
+/* ── ARRIVING FROM A REASON ────────────────────────────────────────────────
+   Somebody who clicked "keep my work" or "second sheet" arrives having already
+   decided something specific. A generic "open your workspace" throws that away
+   and makes them re-derive why they are here. The door answers the sentence
+   they clicked. */
+(function(){
+  const want = new URLSearchParams(location.search).get('want');
+  const H = {
+    save:   { k:'Nothing has been lost yet',
+              h:'Keep the sheet you just built.',
+              p:'It is in this browser and nowhere else — a cleared history takes it with it. '
+              + 'A free account keeps it, on every device you open, for as long as you want it. '
+              + '<b>No card, no plan.</b>' },
+    second: { k:'A second sheet is free',
+              h:'One desk, as many properties as you work.',
+              p:'The free tier holds one sheet in this browser. An account holds forty, side by '
+              + 'side, with what each one is worth — and it costs nothing. <b>No card, no plan.</b>' },
+  }[want];
+  if (!H) return;
+  const k = document.getElementById('gate-k'), h = document.getElementById('gate-h'),
+        p = document.getElementById('gate-p');
+  if (k) k.textContent = H.k;
+  if (h) h.textContent = H.h;
+  if (p) p.innerHTML = H.p;
+})();
+
 let LVL = 'pro';
 (function(){ const box = document.getElementById('g-lvl'); if (!box) return;
   box.querySelectorAll('[data-lvl]').forEach(b => b.onclick = () => {
@@ -368,7 +413,12 @@ $('gate-form').onsubmit = e => {
      to a blank underwriting sheet is where beginners quietly leave. Everybody
      else goes straight to the desk — and somebody who does this for a living
      gets advanced mode already on, so the product does not open beneath them. */
-  if (LVL === 'new'){ location.href = 'exits.html'; return; }
+  /* Somebody who says "new to it" used to be REDIRECTED into the course, with
+     no way past it. That reads as homework before the thing they came for, and
+     "new" is exactly the person you can least afford to bore. Everybody lands
+     on a blank sheet; the beginner gets the course OFFERED on it, once, with a
+     way to say no that sticks. */
+  if (LVL === 'new'){ try { localStorage.setItem('ni-offer-course','1'); } catch(e){} }
   /* advanced mode is a plan feature, so a new account no longer arrives with it
      switched on — it arrives at a blank sheet, which is what it came for */
   location.href = 'desk.html#new';
@@ -406,15 +456,14 @@ function renderShell(a, props, active, nameOf, spreadOf, filledOf, onPlan, left)
     <span><span class="rn-nm">${first}</span><span class="rn-tier" style="display:block">${tier}</span></span></div>
   </div>
   <div class="rn-act">
-   <a class="rn-btn p" href="desk.html#new"><span>+ New sheet</span></a>
-   <a class="rn-btn" href="office.html" aria-current="page"><span>Your desk</span></a>
+   <a class="rn-btn p" href="desk.html#new" data-i="+" title="A new sheet"><span>+ New sheet</span></a>
+   <a class="rn-btn" href="office.html" data-i="▦" aria-current="page" title="Your desk"><span>Your desk</span></a>
+   <a class="rn-btn" href="desk.html#compare" data-i="⇄" title="Compare two deals"><span>Compare two deals</span></a>
   </div>
   <div class="rn-h">Your properties</div>
   ${rows ? `<div class="rn-list">${rows}</div>`
          : `<div class="rn-empty">Nothing priced yet. The first sheet lands here.</div>`}
-  ${(!onPlan && left <= 0) ? `<a class="rn-up" href="plans.html">
-     <div class="k">On a plan</div>
-     <div class="v">The photo read, comps pulled, the lender packet. 14 days free.</div></a>` : ''}
+
   <div class="rn-foot">
    <a class="rn-lnk" href="arcade.html">The arcade</a>
    <a class="rn-lnk" href="exits.html">The eight exits</a>
@@ -499,20 +548,33 @@ function boot(){
   const pb = $('planbar');
   if (pb){
     if (!a.trial && !onPlan){
-      pb.innerHTML = `<div class="panel" style="margin-top:20px;border-color:var(--blue);
-        background:linear-gradient(180deg,rgba(31,95,208,.05),#fff)">
-        <div class="pb" style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:space-between">
-         <div style="max-width:52ch">
-          <div class="eyebrow" style="color:var(--blue)">Unstarted</div>
-          <h2 style="margin:2px 0 5px">Fourteen days of the whole thing.</h2>
-          <p style="margin:0;color:var(--mid);line-height:1.55;font-size:14px">Every condition line
-           instead of three presets, comps without a cap, the photo condition read, the lender
-           packet. <b>Nothing is charged for fourteen days</b>, and cancelling takes one click.</p>
-         </div>
-         <div style="display:flex;gap:9px;flex-wrap:wrap">
-          <a class="btn p" href="plans.html" id="pb-go">Start 14 days free →</a>
-          <a class="btn" href="plans.html#photos">What is in it</a></div>
-        </div></div>`;
+      /* ── HOW OFTEN TO ASK ────────────────────────────────────────────
+         A panel this size, on every visit, with no way to put it down, is
+         the thing that makes a good product feel like a pitch. Recurring it
+         on every login would be worse — that punishes the person for coming
+         back, which is the opposite of what you want from the one screen
+         they see most.
+
+         So: dismissible, and dismissing it means fourteen days of silence.
+         The ask still arrives at the moments that earn it — the fourth comp,
+         a locked slider, the end of a finished sheet — which is where an
+         offer is an answer to something rather than an interruption. */
+      const hid = +(LS_get('ni-trial-hushed') || 0);
+      if (Date.now() - hid < 14*86400000){ pb.innerHTML = ''; return; }
+      pb.innerHTML = `<div class="offer" id="offerbox">
+        <div class="ob-t">
+         <div class="eyebrow" style="color:var(--blue)">Unstarted · nothing is charged</div>
+         <h2>Fourteen days of the whole thing.</h2>
+         <p>Every condition line instead of three presets, comps without a cap, the photo
+          condition read, the lender packet.</p>
+        </div>
+        <div class="ob-a">
+         <a class="btn p" href="plans.html" id="pb-go">Start 14 days free →</a>
+         <button class="btn q sm" type="button" id="pb-hush">Not now</button></div>
+       </div>`;
+      const hush = document.getElementById('pb-hush');
+      if (hush) hush.onclick = () => { LS_set('ni-trial-hushed', String(Date.now()));
+        pb.innerHTML = ''; };
       /* No handler. The trial begins at checkout on the plans page, not with a
          click here — a fourteen-day trial that asks for a card converts around
          six times better than one that does not, and this is the moment to ask
@@ -532,11 +594,13 @@ function boot(){
   /* ── the strip ── */
   const spread = (num('arv') !== null && num('repairs') !== null && num('asking') !== null)
     ? num('arv') - num('repairs') - num('asking') : null;
+  /* Four stats, a hero, a full-width offer panel and three side cards was six
+     things competing before the eye had found the one that matters. The strip
+     is two numbers now — how much work is open, and what it is worth — and the
+     plan moved into the rail's account panel where it is asked for. */
   $('strip').innerHTML = [
     ['On the desk', String(live.length), live.length ? (live.length===1 ? (addr || 'one property') : 'properties open') : 'nothing priced yet'],
     ['Spread on it', spread === null ? '—' : money(spread), spread === null ? 'needs asking, ARV and repairs' : 'worth, less work, less price'],
-    ['Your plan', TIER.k, TIER.d],
-    ['Ground held', G ? (Array.isArray(G.deeds) ? G.deeds.length : 0) + '/40' : '0/40', G ? 'in the arcade' : 'arcade not played'],
   ].map(([k,v,dd]) => `<div class="stat"><div class="k">${k}</div><div class="v">${esc(v)}</div><div class="d">${esc(dd)}</div></div>`).join('');
 
   /* ── properties ── */
@@ -648,11 +712,16 @@ function boot(){
          : seen.length === 8 ? ' — all of them' : `, last finished <b>${R[Math.max(...seen)]} · ${NAMES[Math.max(...seen)]}</b>` }</div>
        <div class="bar"><i style="width:${seen.length/8*100}%"></i></div>
        <div class="pips">${R.map((r,i)=>`<span class="${seen.includes(i)?'on':''}">${r}</span>`).join('')}</div>`
-    : `<p class="empty">Optional. Eight exits, one number each — about fifteen minutes, and every
-       lesson hands its worked example straight to your desk.</p>`;
+    : `<p class="empty"><b>An "exit" is how you get your money back out of a house</b> — sell it,
+       rent it, take over the payments. There are eight, each with one number that decides it.
+       Fifteen minutes, entirely optional, and every lesson hands its worked example to your desk.</p>`;
   $('course-foot').innerHTML = seen.length && at < 8
     ? `<a class="btn p sm" href="exits.html">Resume at ${R[at]}</a>`
-    : `<a class="btn p sm" href="exits.html">${seen.length ? 'Run it again' : 'Take the walk-through'}</a>`;
+    : `<a class="btn p sm" href="exits.html">${seen.length ? 'Read it again' : 'Show me the eight'}</a>`
+      + `<button class="btn q sm" type="button" id="c-hush" style="margin-left:8px">Hide this</button>`;
+  const chush = $('c-hush');
+  if (chush) chush.onclick = () => { LS_set('ni-course-hidden','1'); $('coursecard').remove(); };
+  if (LS_get('ni-course-hidden') && !seen.length){ const cc=$('coursecard'); if (cc) cc.remove(); }
 
   /* ── arcade ── */
   $('a-state').textContent = G ? 'saved' : 'not played';
