@@ -104,6 +104,17 @@ h1 em{font-style:italic;color:var(--blue)}
 /* the same red the desk uses for a refusal, so the landing is not describing a
    different product from the one behind the button */
 .ex .f.no{color:#b3372c;font-weight:700}
+/* money, in the colour the desk uses for money */
+.ex .f.yes{color:#177a4d;font-weight:750}
+.ex .f.yes em{font-style:normal;font-weight:600;font-size:11.5px;color:#5f8a72;
+ font-variant-numeric:normal;margin-left:2px}
+.payline{margin-top:14px;border:1px solid #bfe0cd;border-radius:14px;
+ background:linear-gradient(180deg,#eaf6f0,#fff);padding:15px 17px 14px}
+.payline .pl{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#177a4d}
+.payline .pv{font-family:var(--serif);font-size:38px;font-weight:700;letter-spacing:-.03em;
+ line-height:1.02;color:#177a4d;font-variant-numeric:tabular-nums;margin-top:1px}
+.payline .ps{font-size:13px;color:var(--mid);line-height:1.5;margin-top:5px}
+.payline .ps b{color:var(--ink);font-weight:650}
 .ex.best{background:var(--blue-soft)}
 .ex.best .r{color:var(--blue)}
 .ex.na .f{color:var(--soft);font-weight:400;font-size:12.5px;font-family:var(--mono)}
@@ -303,14 +314,23 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
         arithmetic or a refusal gate moves, this hero has to move with it — a
         landing that advertises a ranking the product no longer produces is the
         precise dishonesty this page is selling against. Checked by v3.mjs. -->
-   <div class="ex best"><span class="r">01</span><span>The wholesale</span><span class="f">$14,000</span></div>
-   <div class="ex"><span class="r">02</span><span>The fix and flip</span><span class="f">$23,280</span></div>
+   <div class="ex best"><span class="r">01</span><span>The wholesale</span><span class="f yes">$14,000 <em>fee</em></span></div>
+   <div class="ex"><span class="r">02</span><span>The fix and flip</span><span class="f yes">$23,280 <em>profit</em></span></div>
    <div class="ex"><span class="r">03</span><span>The wholetail</span><span class="f no">Refused · repairs &gt; 8% of ARV</span></div>
    <div class="ex"><span class="r">04</span><span>The novation</span><span class="f no">Refused · not retail yet</span></div>
    <div class="ex na"><span class="r">05</span><span>The buy and hold</span><span class="f">needs monthly rent</span></div>
   </div>
+  <!-- The reason anybody opened the page, said once, in the colour the desk
+       uses for money. The red was doing half the job: a reader could see which
+       exits fail before they could see that two of them pay. -->
+  <div class="payline">
+   <div class="pl">This house pays you</div>
+   <div class="pv">$23,680</div>
+   <div class="ps">as <b>the fix and flip</b> — and <b>$14,000</b> as a wholesale you never own.
+    The same house, two right answers, a nine-thousand-dollar difference between them.</div>
+  </div>
   <div class="rfoot"><b>Confidence: medium.</b> Two figures entered, one estimated —
-   every band below widens by 12% until the repair bid comes back.</div>
+   every band widens by 12% until the repair bid comes back.</div>
  </div>
 </div>
 
