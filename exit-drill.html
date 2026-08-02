@@ -30,6 +30,11 @@ body{font-family:var(--sans);color:var(--txt);font-size:16px;line-height:1.55;-w
 h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.02em;line-height:1.1}
 a{color:#8fb4ff}
 .wrap{max-width:1020px;margin:0 auto;padding:0 26px}
+.ftlegal{border-top:1px solid var(--edge);color:#8794aa;margin-top:34px;padding:18px 0 40px;
+ font-size:12.5px;opacity:.72}
+.ftlegal a{color:inherit;text-decoration:none;margin-right:15px;border-bottom:1px solid transparent}
+.ftlegal a:hover{opacity:1;border-bottom-color:currentColor}
+
 .eyebrow{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#6f7d94}
 header{border-bottom:1px solid var(--edge);background:rgba(13,20,32,.9)}
 .mast{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:14px 0;flex-wrap:wrap}
@@ -52,7 +57,7 @@ h1{font-size:40px}
 .tally .t{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#6f7d94}
 .tally .v{font-family:var(--serif);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
 
-.stage{margin:22px 0 60px;background:var(--panel);border:1px solid var(--edge)}
+.stage{margin:22px 0 60px;background:var(--panel);border:1px solid var(--edge);border-radius:12px;overflow:hidden}
 .clockrail{height:10px;background:var(--well);position:relative;overflow:hidden}
 .clockrail i{position:absolute;inset:0;transform-origin:left;background:var(--gold);transition:none}
 .clockrail.low i{background:var(--red)}
@@ -101,7 +106,7 @@ h1{font-size:40px}
 .statrow{display:flex;gap:26px;justify-content:center;flex-wrap:wrap}
 .statrow .s .t{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#6f7d94}
 .statrow .s .v{font-family:var(--serif);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
-.btn{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:14.5px;font-weight:650;
+.btn{border-radius:10px;display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:14.5px;font-weight:650;
  padding:10px 16px;border:1.5px solid #39435a;background:transparent;color:#cdd6e4;text-decoration:none;cursor:pointer}
 .btn:hover{border-color:#fff;color:#fff}
 .btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
@@ -118,7 +123,7 @@ h1{font-size:40px}
 .start h2{font-family:var(--serif);font-size:29px;font-weight:700;letter-spacing:-.02em}
 .start .sub{font-size:15.5px;color:var(--dim);line-height:1.55}
 .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
-.rule{border:1px solid #2b3850;background:#151f31;padding:13px 15px;display:grid;gap:5px}
+.rule{border:1px solid #2b3850;background:#151f31;padding:13px 15px;display:grid;gap:5px;border-radius:10px}
 .rule .n{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--blue)}
 .rule .t{font-size:14.5px;font-weight:650;color:var(--txt)}
 .rule .d{font-size:12.5px;color:var(--faint);line-height:1.45}
@@ -658,4 +663,9 @@ function end(){
 }
 showStart();
 </script>
+
+<footer class="ftlegal"><div class="wrap" style="font-size:12.5px">
+ <a href="arcade.html">The arcade</a><a href="desk.html">The desk</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Billing</a>
+</div></footer>
+
 </body></html>

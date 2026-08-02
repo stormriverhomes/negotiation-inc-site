@@ -1,0 +1,336 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy · Negotiation Inc</title>
+<meta name="description" content="What Negotiation Inc collects, what it never collects, exactly who else touches it, and how to get all of it back or delete it.">
+<style>
+:root{
+  --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --faint:#9aa3b2;
+  --line:#e4e8ef; --line-2:#c9d0dc; --wash:#f6f8fb;
+  --blue:#1f5fd0; --blue-deep:#153872; --blue-soft:#eaf0fc; --blue-line:#c3d4f5;
+  --green:#177a4d; --green-soft:#eaf6f0; --green-line:#bfe0cd;
+  --gold:#8a6a1f; --gold-soft:#fbf6e9; --gold-line:#e8dcb8;
+  --red:#a8332a; --red-soft:#fcf0ee; --red-line:#f0cdc7;
+  --r-btn:12px; --r-card:18px; --r-in:12px; --r-pill:999px;
+  --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+html,body{background:#fff}
+body{font-family:var(--sans);color:var(--ink);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-height:1.15}
+a{color:var(--blue)}
+.wrap{max-width:1250px;margin:0 auto;padding:0 26px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+
+header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(255,255,255,.94);
+ backdrop-filter:blur(8px);z-index:20}
+.mast{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:13px 0;flex-wrap:wrap}
+.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:inherit}
+.mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
+.mark .inc{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--blue)}
+.mark:hover .nm{color:var(--blue)}
+.masknav{display:flex;align-items:center;gap:18px;font-size:14px;flex-wrap:wrap}
+.masknav a{display:inline-flex;align-items:center;padding:6px 2px;line-height:1;color:var(--mid);text-decoration:none}
+.masknav a:hover{color:var(--ink)}
+.masknav a.on{color:var(--ink);font-weight:650;box-shadow:inset 0 -2px 0 var(--blue)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:14.5px;font-weight:650;
+ padding:11px 18px;border:1.5px solid var(--ink);border-radius:var(--r-btn);background:#fff;color:var(--ink);
+ text-decoration:none;cursor:pointer;transition:border-color .13s,color .13s,background .13s,transform .13s}
+.btn:hover{transform:translateY(-1px)}
+.btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* ── the document ─────────────────────────────────────────────────────────
+   A legal page is read in two ways and only two: skimmed by somebody deciding
+   whether to trust you, and searched by somebody with one specific question.
+   So: a short version at the top for the first reader, and a sticky contents
+   list for the second. Measure capped near 68 characters because these are the
+   longest paragraphs in the product and the eye needs the returns. */
+.doc{display:grid;grid-template-columns:230px minmax(0,1fr);gap:52px;
+ max-width:1050px;margin:0 auto;padding:0 26px 90px}
+@media(max-width:900px){.doc{grid-template-columns:1fr;gap:0}}
+
+.hero{max-width:1050px;margin:0 auto;padding:52px 26px 30px}
+.hero h1{font-size:clamp(34px,5.2vw,50px);margin:8px 0 12px}
+.hero .sub{font-size:17.5px;color:var(--mid);max-width:60ch}
+.stamp{margin-top:18px;display:inline-flex;align-items:center;gap:9px;font-size:13px;color:var(--soft);
+ border:1px solid var(--line);border-radius:var(--r-pill);padding:6px 14px;background:var(--wash)}
+.stamp b{color:var(--ink);font-weight:650}
+
+.toc{position:sticky;top:84px;align-self:start;font-size:13.5px;padding-top:6px}
+@media(max-width:900px){.toc{position:static;border:1px solid var(--line);border-radius:var(--r-card);
+ padding:16px 18px;margin-bottom:34px;background:var(--wash)}}
+.toc .lab{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
+ margin-bottom:10px}
+.toc ol{list-style:none;padding:0;margin:0;counter-reset:t}
+.toc li{counter-increment:t;margin:0 0 2px}
+.toc a{display:block;padding:5px 8px;border-radius:9px;color:var(--mid);text-decoration:none;line-height:1.35}
+.toc a::before{content:counter(t) ".";color:var(--faint);margin-right:7px;font-variant-numeric:tabular-nums}
+.toc a:hover{background:var(--wash);color:var(--ink)}
+
+.body{max-width:68ch}
+section{scroll-margin-top:88px;padding:0 0 8px}
+section+section{margin-top:38px}
+section h2{font-size:24px;margin:0 0 12px;display:flex;gap:11px;align-items:baseline}
+section h2 .n{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--faint);
+ font-variant-numeric:tabular-nums;letter-spacing:.06em;flex:none;padding-top:3px}
+.body p{margin:0 0 13px;color:var(--mid)}
+.body p strong,.body li strong{color:var(--ink);font-weight:650}
+.body h3{font-size:16.5px;margin:20px 0 8px;font-family:var(--sans);font-weight:700;letter-spacing:-.005em}
+.body ul{margin:0 0 14px;padding-left:0;list-style:none}
+.body ul li{position:relative;padding-left:19px;margin:0 0 8px;color:var(--mid)}
+.body ul li::before{content:"";position:absolute;left:2px;top:10px;width:5px;height:5px;border-radius:50%;
+ background:var(--line-2)}
+.body ol{margin:0 0 14px;padding-left:20px}
+.body ol li{margin:0 0 8px;color:var(--mid)}
+
+.short{border:1.5px solid var(--blue-line);background:var(--blue-soft);border-radius:var(--r-card);
+ padding:22px 24px;margin:0 0 40px}
+.short .lab{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+ color:var(--blue-deep);margin-bottom:10px}
+.short p{color:var(--blue-deep);margin:0 0 10px}
+.short p:last-child{margin:0}
+.short ul li{color:var(--blue-deep)}
+.short ul li::before{background:var(--blue-line)}
+.short ul{margin-bottom:0}
+
+.note{border:1px solid var(--line);background:var(--wash);border-radius:var(--r-card);padding:17px 20px;margin:0 0 16px}
+.note p:last-child{margin:0}
+.warn{border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:var(--r-card);
+ padding:19px 22px;margin:0 0 16px}
+.warn .lab{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);
+ margin-bottom:8px}
+.warn p{color:#5c4712}
+.warn p:last-child{margin:0}
+
+table{width:100%;border-collapse:collapse;font-size:14px;margin:4px 0 18px;
+ border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
+th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+ color:var(--soft);padding:11px 14px;background:var(--wash);border-bottom:1px solid var(--line)}
+td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--mid);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td b{color:var(--ink);font-weight:650}
+
+.contact{border:1.5px solid var(--line-2);border-radius:var(--r-card);padding:22px 24px;margin-top:30px}
+.contact h3{margin-top:0;font-family:var(--serif);font-size:19px;font-weight:700}
+.crumb{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.crumb a{font-size:13px;padding:7px 13px;border:1px solid var(--line);border-radius:var(--r-pill);
+ color:var(--mid);text-decoration:none;background:#fff}
+.crumb a:hover{border-color:var(--line-2);color:var(--ink)}
+.crumb a.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+footer{border-top:1px solid var(--line);padding:26px 0 46px;font-size:13.5px;color:var(--soft)}
+footer a{color:var(--mid);text-decoration:none;margin-right:18px}
+footer a:hover{color:var(--ink)}
+</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Fraunces ships its "wonk" letterforms on by default — the single-storey f
+   and its friends. They read as a novelty at body sizes and Elijah clipped
+   them immediately. WONK 0 keeps the face and drops the party trick. */
+@font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
+ font-weight:100 900;font-style:normal;font-display:swap;
+ font-variation-settings:'WONK' 0}
+:root{
+ --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
+ /* NO MONOSPACE ANYWHERE IN THE SOFTWARE. Small letterspaced caps set in a
+    monospace face is the single most recognisable "an AI made this" tell on
+    the internet right now, and it was on every label we shipped. The eyebrows
+    keep their letterspacing; they lose the typewriter. Tabular figures come
+    from font-feature-settings instead, which is what they were always for.
+    (The arcade keeps its own type. It is a different world on purpose.) */
+ --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif !important;
+}
+.mono,.num,[class*="fig"],[class*="num"]{font-variant-numeric:tabular-nums}
+h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Privacy · Negotiation Inc">
+<meta property="og:description" content="Use the desk without an account and we collect nothing. With one we hold your email and your sheets. No analytics, no ad pixels, no data sold, no model trained on your deals.">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+
+<header><div class="wrap"><div class="mast">
+ <a class="mark" href="index.html"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+ <nav class="masknav">
+  <a href="desk.html">The desk</a>
+  <a href="demo.html">See how it works</a>
+  <a href="exits.html">The eight exits</a>
+  <a href="arcade.html">The arcade</a>
+  <a href="plans.html">Plans</a>
+  <a class="btn p" href="desk.html#new">Price a property →</a>
+ </nav>
+</div></div></header>
+
+<div class="hero">
+ <div class="eyebrow">Privacy</div>
+ <h1>What we know about you</h1>
+ <p class="sub">Short answer: less than you would expect, and none of it is for sale. The long answer names every company that touches a byte.</p>
+ <div class="stamp">Effective <b>2 August 2026</b></div>
+ <div class="crumb"><a href="terms.html">Terms</a><a href="privacy.html" class="on">Privacy</a><a href="refunds.html">Billing &amp; refunds</a></div>
+</div>
+
+<div class="doc">
+ <aside class="toc"><div class="lab">On this page</div><ol><li><a href="#who">Who is asking</a></li><li><a href="#free">The free desk transmits nothing</a></li><li><a href="#collect">What we collect when you have an account</a></li><li><a href="#legal">The lawful basis, for those who need one</a></li><li><a href="#ai">Photographs and the AI features</a></li><li><a href="#share">Everyone who touches it</a></li><li><a href="#cookies">Cookies and what is in your browser</a></li><li><a href="#security">How it is kept</a></li><li><a href="#rights">Your rights, and the buttons that exercise them</a></li><li><a href="#ca">California residents</a></li><li><a href="#kids">Children</a></li><li><a href="#changes">Changes to this page</a></li><li><a href="#contact">Getting hold of us</a></li></ol></aside>
+ <main class="body">
+<div class="short"><div class="lab">The short version</div>
+ <ul>
+  <li><b>Use the desk without an account and we collect nothing.</b> Your figures stay in your browser and are never transmitted to us. There is no anonymous telemetry hiding behind that sentence.</li>
+  <li><b>With an account we hold your email, your name and your sheets.</b> That is the list.</li>
+  <li><b>We do not sell or share your data with advertisers, brokers or lead buyers.</b> Not now, not as a later revenue idea.</li>
+  <li><b>No third-party analytics, no advertising pixels, no fonts loaded from someone else's server.</b> Nothing on our pages phones anyone.</li>
+  <li><b>Your deals never train a model.</b> Photographs and sheets sent to the condition read are processed and discarded, not learned from.</li>
+  <li><b>Export everything or delete everything, yourself, at any time.</b> Section 9.</li>
+ </ul>
+ </div>
+<section id="who">
+<h2><span class="n">01</span>Who is asking</h2>
+<p>Negotiation Inc is the controller of the personal data described here. Write to <a href="mailto:privacy@negotiationinc.com">privacy@negotiationinc.com</a> about anything on this page and a person will answer it.</p>
+<p>This page covers the website, the desk, the comparison workbench, the course and the arcade. It does not cover anything you reach by clicking a link out of them &mdash; once you are on someone else's site you are on their policy.</p>
+</section>
+
+<section id="free">
+<h2><span class="n">02</span>The free desk transmits nothing</h2>
+<p>This is the part most privacy policies would bury, so it goes first.</p>
+<p>When you price a property without an account, the whole thing runs in your browser. Your address, your figures, your comps and your condition ratings are written to that browser's local storage and read back from it. <b>They are not sent to us.</b> We have no copy, no backup and no way to look at them.</p>
+<p>The practical consequences are worth knowing:</p>
+<ul>
+  <li>Clearing your browser data, or using private browsing and closing the window, deletes the work permanently. We cannot recover it, because we never had it.</li>
+  <li>The work does not follow you to another device or another browser.</li>
+  <li>Anyone with access to that browser profile can see it. On a shared machine, that matters.</li>
+</ul>
+<p>An account exists to solve the first two. It costs you an email address, and that is the trade we are making explicit here rather than in a footnote.</p>
+</section>
+
+<section id="collect">
+<h2><span class="n">03</span>What we collect when you have an account</h2>
+<table>
+ <tr><th>What</th><th>Why</th><th>How long</th></tr>
+ <tr><td><b>Name and email</b></td><td>To sign you in, and to send billing and security notices</td><td>Until you delete the account</td></tr>
+ <tr><td><b>Password hash</b></td><td>To sign you in. We never hold the password itself</td><td>Until you delete the account</td></tr>
+ <tr><td><b>Your sheets</b> &mdash; addresses, figures, comps, notes, condition ratings, saved assumptions</td><td>They are the product. Storing them is the feature you signed up for</td><td>Until you delete them, or 30 days after you close the account</td></tr>
+ <tr><td><b>Plan, trial dates and billing status</b></td><td>To know what to unlock and what to charge</td><td>Seven years, because tax law says so</td></tr>
+ <tr><td><b>Photographs you upload</b></td><td>To read condition from them</td><td>Deleted from our side within 24 hours of the read (section 5)</td></tr>
+ <tr><td><b>Server logs</b> &mdash; IP address, browser string, page, timestamp, errors</td><td>To keep the thing running and to notice an attack</td><td>30 days, then deleted</td></tr>
+ <tr><td><b>Support email</b></td><td>To answer you, and to remember the answer next time</td><td>Two years</td></tr>
+</table>
+<h3>What we deliberately do not collect</h3>
+<ul>
+  <li><b>Card numbers.</b> Stripe takes those directly. They never reach our servers.</li>
+  <li><b>Social security numbers, credit reports, bank credentials or income verification.</b> The software has no use for them and no field to put them in.</li>
+  <li><b>Your location.</b> We never ask the browser for it. Typing an address is not the same thing.</li>
+  <li><b>Contacts, calendar or files.</b> Nothing on our pages asks for access to any of it.</li>
+  <li><b>Behavioural profiles.</b> There is no analytics product recording what you click, how long you hovered, or where your mouse went.</li>
+</ul>
+</section>
+
+<section id="legal">
+<h2><span class="n">04</span>The lawful basis, for those who need one</h2>
+<p>If you are in the UK or the EEA, the bases we rely on are: <b>contract</b> for anything needed to give you the service you signed up for; <b>legitimate interests</b> for security logging, fraud prevention and answering support email; <b>legal obligation</b> for keeping billing records; and <b>consent</b> for the one optional thing we do, which is product email you can decline at signup and unsubscribe from in one click.</p>
+</section>
+
+<section id="ai">
+<h2><span class="n">05</span>Photographs and the AI features</h2>
+<p>Two features send data outside our own systems to a model provider: the <b>photo condition read</b>, and the <b>written comparison</b> that explains why one deal beats another.</p>
+<p>Both run on Anthropic's models. When you use them:</p>
+<ul>
+  <li>The photograph, or the two sheets being compared, is sent to Anthropic to produce the answer, along with the prompt that asks for it.</li>
+  <li>Photographs are resized in your browser before they leave it &mdash; partly because it makes the read cheaper, and partly because a smaller image carries less than a full-resolution one.</li>
+  <li><b>Anthropic does not use it to train its models.</b> We use their commercial API, where that is the contractual default.</li>
+  <li>We keep the uploaded photograph only as long as it takes to run the read and show you the result, and delete it from our storage within 24 hours. The <em>result</em> &mdash; the condition ratings it produced &mdash; stays on your sheet, because that is what you asked for.</li>
+</ul>
+<div class="note"><p><b>Strip the photograph first if it matters to you.</b> A phone photograph can carry GPS coordinates and a timestamp in its metadata. We remove that metadata before the image leaves your browser, but nothing removes the fact that a photograph of a house is a photograph of a house. Do not upload images containing people, documents or anything else you would not want processed.</p></div>
+<p>Neither feature runs unless you press the button that runs it. Nothing is sent to a model in the background.</p>
+</section>
+
+<section id="share">
+<h2><span class="n">06</span>Everyone who touches it</h2>
+<p>We use other companies to run the service. This is the complete list, and what each one gets:</p>
+<table>
+ <tr><th>Company</th><th>What it does</th><th>What it sees</th></tr>
+ <tr><td><b>Supabase</b></td><td>Accounts and database</td><td>Your name, email, password hash and sheets</td></tr>
+ <tr><td><b>Render</b></td><td>Hosting</td><td>Server logs, and traffic in transit</td></tr>
+ <tr><td><b>Stripe</b></td><td>Payments</td><td>Your name, email, card details and billing address &mdash; directly from you</td></tr>
+ <tr><td><b>Anthropic</b></td><td>Photo condition read, written comparison</td><td>Only the photograph or sheet figures for the request you ran</td></tr>
+ <tr><td><b>RentCast</b></td><td>Comparable sales and rent estimates</td><td>The property address you asked about. Not your identity</td></tr>
+ <tr><td><b>Google Maps</b></td><td>Aerial and street-level imagery</td><td>The property address, and your IP address, when a map loads</td></tr>
+ <tr><td><b>Resend</b></td><td>Sending email</td><td>Your email address and the contents of our emails to you</td></tr>
+</table>
+<p>Each is bound by a data processing agreement, may only use the data to provide its service to us, and none of them is permitted to sell it. Some are in the United States; where personal data of UK or EEA residents moves there, it moves under Standard Contractual Clauses.</p>
+<p>We will also disclose data where a valid legal order requires it, and we will tell you when we are allowed to. If the company is ever sold or merged, your data moves with it, still under this policy or one at least as protective, and we will email you before that happens.</p>
+<h3>Nobody else</h3>
+<p>No advertisers. No data brokers. No lead-generation companies. No affiliate networks. Nobody buys a list from us, because there is no list to sell and building one would end the only advantage this product has, which is that people tell it the truth about their deals.</p>
+</section>
+
+<section id="cookies">
+<h2><span class="n">07</span>Cookies and what is in your browser</h2>
+<p>We use two things and neither is an advertising cookie.</p>
+<ul>
+  <li><b>A session cookie</b>, set only after you sign in, so the site knows it is you on the next page. It is strictly necessary and expires when the session does.</li>
+  <li><b>Local storage</b>, which holds your work on the free desk, your interface preferences, and whether you dismissed a message. It never leaves your browser and it is not a cookie in the legal sense &mdash; but you should know it is there, so it is on this page.</li>
+</ul>
+<p>There is no analytics cookie, no advertising pixel, no Facebook tag, no Google tag, and no consent banner &mdash; because with nothing to consent to, a banner would be theatre.</p>
+<p>We honour Global Privacy Control and Do Not Track headers by default, which is easy for us: there is nothing to turn off.</p>
+</section>
+
+<section id="security">
+<h2><span class="n">08</span>How it is kept</h2>
+<ul>
+  <li>Everything travels over TLS. Everything at rest is encrypted on the provider's disks.</li>
+  <li>Passwords are stored as salted hashes. Nobody here can read yours, including us.</li>
+  <li>Access to production data is limited to the people who need it to fix something and is logged.</li>
+  <li>Payments are handled entirely by Stripe, which is PCI-DSS certified. We are not in the card path at all.</li>
+</ul>
+<p>No system is perfect. If there is a breach affecting your data we will tell you and the relevant regulator without undue delay, and within 72 hours where the law requires it &mdash; what happened, what was taken, and what to do about it.</p>
+</section>
+
+<section id="rights">
+<h2><span class="n">09</span>Your rights, and the buttons that exercise them</h2>
+<p>Most policies list rights and then make you write an email to use them. Two of these are buttons.</p>
+<ul>
+  <li><b>Export everything.</b> From the account panel, one click gives you a file containing every sheet, comp, note and assumption you have. It is plain readable JSON, not a locked format, and it is yours to take elsewhere.</li>
+  <li><b>Delete everything.</b> Also from the account panel. It removes the account and its sheets. Billing records survive because tax law requires it; nothing else does.</li>
+  <li><b>See what we hold</b> &mdash; ask and we will send it, within 30 days.</li>
+  <li><b>Correct it</b> &mdash; your name and email are editable in the account panel; anything else, ask.</li>
+  <li><b>Object, restrict, or withdraw consent</b> &mdash; ask, and for product email, one click in any email.</li>
+  <li><b>Complain</b> &mdash; to us first, please, at <a href="mailto:privacy@negotiationinc.com">privacy@negotiationinc.com</a>. If we do not fix it, UK and EEA residents may complain to their data protection authority; the UK's is the Information Commissioner's Office.</li>
+</ul>
+<p>We do not charge for any of this, and we will not make you sit through a retention offer to do it.</p>
+</section>
+
+<section id="ca">
+<h2><span class="n">10</span>California residents</h2>
+<p>Under the CCPA and CPRA you have the right to know what personal information we collect, to have it deleted, to correct it, and to opt out of its sale or sharing.</p>
+<p><b>We do not sell personal information, and we do not share it for cross-context behavioural advertising.</b> We have not done so in the past twelve months. There is therefore no &ldquo;Do Not Sell or Share&rdquo; link, because there is nothing behind it.</p>
+<p>The categories we collect are identifiers (name, email, IP address), commercial information (your subscription), internet activity (server logs), and the content you create. Section 3 says what each is for and how long it stays. We will never discriminate against you for exercising these rights &mdash; the product does not change based on whether you have asked us something.</p>
+</section>
+
+<section id="kids">
+<h2><span class="n">11</span>Children</h2>
+<p>The service is for adults doing property deals and is not directed at children. We do not knowingly collect personal data from anyone under 18. If you believe a child has given us data, write to <a href="mailto:privacy@negotiationinc.com">privacy@negotiationinc.com</a> and we will delete it.</p>
+</section>
+
+<section id="changes">
+<h2><span class="n">12</span>Changes to this page</h2>
+<p>If we change something material &mdash; a new company in the table in section 6, a new category of data in section 3 &mdash; we will email account holders before it takes effect, and the date at the top will change. We will not quietly add an analytics provider and rely on you re-reading this page.</p>
+</section>
+
+<section id="contact">
+<h2><span class="n">13</span>Getting hold of us</h2>
+<div class="contact"><h3>Contact</h3>
+<p>Privacy, exports, deletion and anything on this page &mdash; <a href="mailto:privacy@negotiationinc.com">privacy@negotiationinc.com</a><br>
+Everything else &mdash; <a href="mailto:support@negotiationinc.com">support@negotiationinc.com</a></p>
+<p style="margin-top:10px">Related: the <a href="terms.html">terms</a> cover what the software is and is not, and the <a href="refunds.html">billing page</a> covers money.</p></div>
+</section>
+ </main>
+</div>
+
+<footer><div class="wrap">
+ <a href="index.html">Home</a><a href="desk.html">The desk</a><a href="plans.html">Plans</a>
+ <a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Billing &amp; refunds</a>
+ <span style="display:block;margin-top:10px">Negotiation Inc — the sheet shows its working.</span>
+</div></footer>
+
+</body></html>

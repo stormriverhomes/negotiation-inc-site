@@ -33,6 +33,7 @@
   --green:#177a4d; --green-soft:#eaf6f0;
   /* an estimate is a worked-out number, not a warning — see desk.html */
   --est:#5f6b82; --est-soft:#f4f6f9; --est-line:#dde3ec;
+  --r-btn:12px; --r-card:18px; --r-in:12px; --r-pill:999px;
   --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
   --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
   --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;   /* no typewriter in the software */
@@ -177,7 +178,8 @@ h2{font-size:34px;margin-top:8px}
  border:1px solid var(--line);margin-top:30px}
 
 /* who it is for — four jobs, four answers */
-.who{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;
+.who{border-radius:var(--r-card);overflow:hidden;
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;
  background:var(--line);border:1px solid var(--line);margin-top:26px}
 .who>div{background:#fff;padding:18px 20px 20px}
 .who h3{font-family:var(--serif);font-size:19px;font-weight:650}
@@ -249,6 +251,24 @@ footer a:hover{color:var(--ink)}
   .doors{grid-template-columns:1fr}
   .givens{grid-template-columns:1fr}
 }
+/* ── ROUNDING ──────────────────────────────────────────────────────────────
+   The landing was drawn before the software was, and it kept the square
+   corners the first pass gave it. Everything the reader touches after this
+   page — the desk, the office, the plans, the drill — is rounded, so the
+   landing was the one screen that looked like a different product's homepage.
+
+   These are all overrides on purpose: the rules above stay as the record of
+   how the page is composed, and this block is the one place the shape lives. */
+.btn,.cta a,.btn.p,.btn.q{border-radius:var(--r-btn)}
+.hero .art,.showstage,.showbar,.show,.given,.givens,.ex,.exits,.eight,.arcade,
+.trust,.doors,.state,.states,.rc,.readout,.repl,.band,.three,.horizon{border-radius:var(--r-card)}
+.given,.state,.tag,.t-e,.t-n,.t-s{border-radius:var(--r-in)}
+.tag,.t-e,.t-n,.t-s,.pill{border-radius:var(--r-pill)}
+.showtabs button{border-radius:var(--r-btn)}
+img,canvas,svg.art{border-radius:var(--r-card)}
+/* a rounded card cannot let a square child bleed out of its corner */
+.showstage,.hero .art,.arcade,.doors{overflow:hidden}
+
 </style>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
@@ -544,6 +564,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
     <a href="index.html">Home</a><a href="desk.html">The desk</a>
     <a href="arcade.html">The arcade</a>
     <a href="office.html">Your desk</a>
+    <span style="display:block;margin-top:8px"><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Billing</a></span>
    </div>
    <div class="mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase">
     Negotiation Inc · the sheet shows its working</div>
