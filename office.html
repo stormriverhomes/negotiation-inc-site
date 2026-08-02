@@ -187,13 +187,15 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   <div class="lvl" id="g-lvl" role="radiogroup" aria-label="Experience">
    <button type="button" data-lvl="new" role="radio" aria-checked="false">New to it<span>show me the walk-through first</span></button>
    <button type="button" data-lvl="some" role="radio" aria-checked="false">A few deals<span>straight to the desk</span></button>
-   <button type="button" data-lvl="pro" role="radio" aria-checked="true">I do this<span>straight to the desk, advanced on</span></button>
+   <button type="button" data-lvl="pro" role="radio" aria-checked="true">I do this<span>straight to the desk</span></button>
   </div>
   <div class="err" id="g-err">A name and an email, and the desk is yours.</div>
   <button class="btn p go" type="submit" id="g-go">Create my workspace →</button>
-  <div class="fine" style="margin-top:10px"><b>Everything switched on for 14 days.</b> After that your
-   workspace settles onto the free tier — pricing stays unlimited and nothing you have worked out is
-   ever hidden; the assumptions, the sensitivity grid and extra properties live on a plan.</div>
+  <div class="fine" style="margin-top:10px"><b>An account holds your work.</b> Pricing is free and
+   unlimited with or without one — what this adds is memory: the sheet still here next week, the
+   properties you have priced, the market you work. <b>Fourteen days of the full product</b> come
+   with it, unstarted, to spend on a week you are actually working. No card, and you start the
+   clock yourself.</div>
  </form>
  <div class="fine"><b>Where this lives:</b> on this device, in this browser. No password,
   because there is no server yet to keep one — so nothing you type here is transmitted
@@ -211,11 +213,12 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <p class="sub" id="hisub">Here is everything you have open.</p>
   </div>
   <div style="display:flex;gap:9px;flex-wrap:wrap">
-   <a class="btn p" href="desk.html">Price a property →</a>
+   <a class="btn p" href="desk.html#new">Price a property →</a>
    <a class="btn" href="arcade.html">The arcade</a>
   </div>
  </div>
 
+ <div id="planbar"></div>
  <div class="strip" id="strip"></div>
 
  <div class="cols">
@@ -274,8 +277,14 @@ $('gate-form').onsubmit = e => {
   const name = $('g-name').value.trim().slice(0,60);
   const email = $('g-email').value.trim().slice(0,120);
   if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { $('g-err').style.display='block'; return; }
+  /* An account is not a plan. Registering used to switch the whole product on
+     for fourteen days, which spent the trial on people who had not decided to
+     try anything and made the day it lapsed feel like a penalty for having
+     signed up. `trial` stays null until the person clicks Start — the clock is
+     theirs to run. */
   const a = { name, email, market: $('g-market').value.trim().slice(0,80),
-              level: LVL, since: new Date().toISOString().slice(0,10) };
+              level: LVL, since: new Date().toISOString().slice(0,10),
+              trial: null, plan: null };
   try { localStorage.setItem(ACC, JSON.stringify(a)); } catch(err){}
   /* Where a brand-new workspace lands is the whole retention question. Somebody
      who has never done this is sent to the walk-through, because a first visit
@@ -283,11 +292,9 @@ $('gate-form').onsubmit = e => {
      else goes straight to the desk — and somebody who does this for a living
      gets advanced mode already on, so the product does not open beneath them. */
   if (LVL === 'new'){ location.href = 'exits.html'; return; }
-  if (LVL === 'pro'){ try {
-    const d = JSON.parse(localStorage.getItem('ni-desk-v3') || '{}');
-    d.mode = 'advanced'; localStorage.setItem('ni-desk-v3', JSON.stringify(d));
-  } catch(err){} }
-  location.href = 'desk.html';
+  /* advanced mode is a plan feature, so a new account no longer arrives with it
+     switched on — it arrives at a blank sheet, which is what it came for */
+  location.href = 'desk.html#new';
 };
 $('out').onclick = () => {
   // signing out clears the workspace record, never the work itself — a sheet
@@ -339,13 +346,62 @@ function boot(){
   /* the arcade */
   const w = read('ni-portfolio-v2'), G = (w && typeof w === 'object' && w.S) || null;
 
+  /* ── which tier this workspace is on ──────────────────────────────────
+     Read the same way the desk reads it, from the same record, so the two
+     pages can never disagree about what somebody is paying for. */
+  const TRIAL_DAYS = 14;
+  const trialLeft = () => { if (!a.trial) return 0;
+    const t = Date.parse(a.trial + 'T00:00:00Z'); if (!Number.isFinite(t)) return 0;
+    return Math.max(0, TRIAL_DAYS - Math.floor((Date.now() - t) / 86400000)); };
+  const onPlan = !!(a.plan && typeof a.plan === 'string');
+  const left = trialLeft();
+  const TIER = onPlan ? { k:'Plan', d:esc(a.plan) }
+    : left > 0 ? { k:left + ' day' + (left===1?'':'s'), d:'of the full product left' }
+    : a.trial ? { k:'Free', d:'trial finished · pricing still unlimited' }
+    : { k:'Free', d:'14 days waiting, unstarted' };
+
+  /* the one offer worth making on this page: a member who has never spent
+     their fourteen days. One button, no card, and it says what it opens. */
+  const pb = $('planbar');
+  if (pb){
+    if (!a.trial && !onPlan){
+      pb.innerHTML = `<div class="panel" style="margin-top:20px;border-color:var(--blue);
+        background:linear-gradient(180deg,rgba(31,95,208,.05),#fff)">
+        <div class="pb" style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:space-between">
+         <div style="max-width:52ch">
+          <div class="eyebrow" style="color:var(--blue)">Unstarted</div>
+          <h2 style="margin:2px 0 5px">Fourteen days of the whole thing.</h2>
+          <p style="margin:0;color:var(--mid);line-height:1.55;font-size:14px">Every condition line
+           instead of three presets, comps without a cap, the seven assumptions and the sensitivity
+           grid. The clock starts when you click it — not when you registered.</p>
+         </div>
+         <div style="display:flex;gap:9px;flex-wrap:wrap">
+          <button class="btn p" type="button" id="pb-go">Start the 14 days →</button>
+          <a class="btn" href="plans.html">What is in it</a></div>
+        </div></div>`;
+      const g = $('pb-go');
+      if (g) g.onclick = () => { const acc = account(); if (!acc || acc.trial) return;
+        acc.trial = new Date().toISOString().slice(0,10);
+        try { localStorage.setItem(ACC, JSON.stringify(acc)); } catch(e){}
+        location.href = 'desk.html#new'; };
+    } else if (!onPlan && left === 0 && a.trial){
+      pb.innerHTML = `<div class="panel" style="margin-top:20px">
+        <div class="pb" style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:space-between">
+         <div style="max-width:56ch"><h2 style="margin:0 0 5px">Your trial has finished.</h2>
+          <p style="margin:0;color:var(--mid);line-height:1.55;font-size:14px">Nothing was taken away
+           from the sheets you already built and pricing stays unlimited. What a plan puts back is the
+           precision — every condition line, comps without a cap, the assumptions and the grid.</p></div>
+         <a class="btn p" href="plans.html">See the plans</a></div></div>`;
+    } else pb.innerHTML = '';
+  }
+
   /* ── the strip ── */
   const spread = (num('arv') !== null && num('repairs') !== null && num('asking') !== null)
     ? num('arv') - num('repairs') - num('asking') : null;
   $('strip').innerHTML = [
     ['On the desk', String(live.length), live.length ? (live.length===1 ? (addr || 'one property') : 'properties open') : 'nothing priced yet'],
     ['Spread on it', spread === null ? '—' : money(spread), spread === null ? 'needs asking, ARV and repairs' : 'worth, less work, less price'],
-    ['Course', seen.length + '/8', seen.length === 8 ? 'finished' : seen.length ? 'in progress' : 'not started'],
+    ['Your plan', TIER.k, TIER.d],
     ['Ground held', G ? (Array.isArray(G.deeds) ? G.deeds.length : 0) + '/40' : '0/40', G ? 'in the arcade' : 'arcade not played'],
   ].map(([k,v,dd]) => `<div class="stat"><div class="k">${k}</div><div class="v">${esc(v)}</div><div class="d">${esc(dd)}</div></div>`).join('');
 
@@ -354,8 +410,10 @@ function boot(){
     $('p-count').textContent = '';
     $('props').innerHTML = `<p class="empty">Nothing on the desk yet. One number — an asking price —
       is enough to open the first exits, and the condition dial can rough in the rest.</p>`;
-    $('props-foot').innerHTML = `<a class="btn p sm" href="desk.html">Start a sheet</a>
-      <a class="btn sm" href="desk.html#example">Load a worked example</a>`;
+    /* No worked example here. A logged-in person has already decided to do
+       this — offering them a pretend property is answering a question they
+       stopped asking when they registered. The demo lives on the way IN. */
+    $('props-foot').innerHTML = `<a class="btn p sm" href="desk.html#new">Start a sheet</a>`;
   } else {
     $('p-count').textContent = live.length + (live.length === 1 ? ' open' : ' open');
     $('props').innerHTML = live.map((p,i) => {
@@ -388,7 +446,7 @@ function boot(){
         </tbody></table></div>`;
     }
     $('props-foot').innerHTML = `<a class="btn p sm" href="desk.html">Open the desk</a>
-      <a class="btn sm" href="desk.html">Price another</a>`;
+      <a class="btn sm" href="desk.html#new">Price another</a>`;
   }
 
   /* ── market ── */

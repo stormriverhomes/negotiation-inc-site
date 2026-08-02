@@ -150,7 +150,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   not because its arithmetic is wrong, but because it was answering a question you had not
   established was the right one.</p>
  <div class="cta">
-  <a class="btn p" href="desk.html">Price your own property →</a>
+  <a class="btn p" href="desk.html#new">Price your own property →</a>
   <a class="btn" href="plans.html">What a workspace adds</a>
  </div>
 </div>
@@ -170,76 +170,224 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    walk-away gets weeds and a sign that has been up too long. */
 const DEALS = [
  { key:'flip', tag:'A flip', name:'The tired ranch', addr:'1104 Elm Street',
-   ask:168000, arv:296000, wear:0.82, doors:1, sky:['#1b2b45','#223760'],
+   ask:168000, arv:296000, style:'ranch', wear:0.82, hour:'dusk',
    p:'Everything is original and the kitchen is two owners old. The seller has already made an offer on the next place, so the clock is theirs, not yours.' },
  { key:'hold', tag:'A rental', name:'The paying duplex', addr:'77 Ostend Street',
-   ask:188000, arv:236000, wear:0.28, doors:2, tall:true, sky:['#1c3130','#264441'],
+   ask:188000, arv:236000, style:'duplex', wear:0.28, hour:'evening',
    p:'Tenants in place and paying on the first. A retiring landlord thinning the portfolio, in no hurry at all — which changes what your terms are worth.' },
  { key:'subto', tag:'A subject-to', name:'Behind on a 2021 loan', addr:'318 Sells Avenue',
-   ask:268000, arv:279000, wear:0.30, doors:1, sky:['#25203c','#332a52'],
+   ask:268000, arv:279000, style:'colonial', wear:0.30, hour:'night',
    p:'Three months of arrears against a loan at a rate nobody is getting back. The asking price is nearly retail — and the terms are the asset, not the discount.' },
  { key:'novation', tag:'A novation', name:'The estate, nearly retail', addr:'2210 Ashby Street',
-   ask:259000, arv:316000, wear:0.16, doors:1, tall:true, sky:['#2a2338','#3a3050'],
+   ask:259000, arv:316000, style:'cottage', wear:0.16, hour:'dawn',
    p:'An executor two states away who wants a date and a clean wire. The house barely needs anything, which closes some exits and opens the one most people never run.' },
  { key:'walk', tag:'A walk-away', name:'The one to leave', addr:'14 Hopkins Street',
-   ask:329000, arv:300500, wear:0.95, doors:1, sky:['#2b2118','#3d2f22'],
+   ask:329000, arv:300500, style:'wreck', wear:0.95, hour:'overcast',
    p:'Priced above what the comps support, needing more work than any of them. Every exit refuses. Knowing that in ninety seconds is the feature.' },
 ];
 const money = v => '$' + Math.round(v).toLocaleString('en-US');
+
+/* ── FIVE HOUSES, NOT ONE HOUSE FIVE TIMES ────────────────────────────────
+   The first version of this drew the same gable box every time and changed a
+   wear number, which is exactly what it looked like. These are five different
+   buildings with five different stories told in the props: the ranch has a
+   carport and a skip in the drive because somebody is already moving out; the
+   duplex has two mailboxes, two meters and four lit windows because people
+   live there and pay on the first; the colonial is dark except a porch light
+   with a notice taped to the door; the cottage is a tidy estate with drawn
+   curtains, a flower bed and a crisp agent's sign; the wreck has a sagging
+   ridge, a tarp, boarded windows, a leaning sign and grass to the sill.
+   Every prop is a fact from the scenario, which is the only reason to draw
+   any of them. ──────────────────────────────────────────────────────────── */
+const SKY = {
+ dusk:     ['#1b2b45','#2c4571','#101725','#e8b06a'],
+ evening:  ['#16242c','#22394a','#0e1a20','#cfe0ea'],
+ night:    ['#171531','#262246','#0f0e22','#c9cbe8'],
+ dawn:     ['#2b2440','#4a3a5c','#1d1830','#f2c9a0'],
+ overcast: ['#3b3833','#514c44','#2a2724','#b4ada2'],
+};
 
 function draw(cv, d){
  const g = cv.getContext('2d'), W = cv.width, H = cv.height;
  let sd = 0; for (const c of d.key) sd = (sd*31 + c.charCodeAt(0)) >>> 0;
  const rnd = () => { sd = Math.imul(sd^sd>>>16,0x45d9f3b); sd = Math.imul(sd^sd>>>16,0x45d9f3b); sd^=sd>>>16; return (sd>>>0)/4294967296; };
- const w = d.wear;
+ const w = d.wear, S = SKY[d.hour] || SKY.night;
  const px = (x,y,ww,hh,c) => { g.fillStyle=c; g.fillRect(Math.round(x),Math.round(y),Math.round(ww),Math.round(hh)); };
+ /* a gable drawn as a real triangle, one scanline at a time */
+ const gable = (x,y,ww,peak,c,eave) => {
+   for (let i=0;i<peak;i++){
+     const inset = Math.round(i*(ww/2)/peak);
+     px(x-(eave||0)+inset, y-i-1, ww+(eave||0)*2-inset*2, 1, c);
+   }
+ };
+ const GROUND = H-16;
 
- px(0,0,W,H,d.sky[0]);
- for (let i=0;i<44;i++) px(Math.floor(rnd()*W), Math.floor(rnd()*(H-26)), 1, 1, d.sky[1]);
- // a moon, so the skies differ by more than hue
- px(W-34, 12, 7, 7, 'rgba(255,255,255,.20)'); px(W-33, 13, 5, 5, 'rgba(255,255,255,.34)');
-
- px(0,H-16,W,16,'#2a2620');                                    // ground
- px(0,H-16,W,1,'#3a352c');
-
- // ── the building: width, height and roof shape vary by scenario ──
- const bw = d.doors === 2 ? Math.round(W*0.72) : Math.round(W*0.52);
- const bh = d.tall ? 30 : 24;
- const bx = Math.round((W-bw)/2), by = H-16-bh;
- const wall = w>0.6 ? '#584f43' : w>0.3 ? '#6d6252' : '#7d7260';
- px(bx,by,bw,bh,wall);
- px(bx,by,bw,1,'rgba(255,255,255,.10)');
-
- // gable roof — a real triangle rather than a flat slab
- const rc = w>0.5 ? '#463c34' : '#6b4a3a', peak = d.doors===2 ? 9 : 13;
- for (let i=0;i<peak;i++){
-   const inset = Math.round(i*(bw/2)/peak);
-   px(bx-5+inset, by-i-1, bw+10-inset*2, 1, rc);
+ // ── sky: a two-band gradient, stars or cloud depending on the hour ──
+ px(0,0,W,H,S[0]);
+ for (let y=0;y<GROUND;y++){
+   if (y % 3 === 0) px(0,y,W,1, y < GROUND*0.45 ? S[0] : S[1]);
  }
- if (w>0.55){ px(bx+Math.round(bw*0.52), by-7, 13, 4, '#3a6ea5'); }        // the tarp
- px(bx+bw-14, by-14, 5, 9, rc);                                            // chimney
+ px(0,0,W,Math.round(GROUND*0.42),S[0]);
+ px(0,Math.round(GROUND*0.42),W,GROUND-Math.round(GROUND*0.42),S[1]);
+ if (d.hour === 'overcast'){
+   for (let i=0;i<7;i++){ const cx=Math.floor(rnd()*W), cy=6+Math.floor(rnd()*22), cw=18+Math.floor(rnd()*26);
+     px(cx,cy,cw,4,'rgba(255,255,255,.055)'); px(cx+4,cy-3,cw-10,3,'rgba(255,255,255,.04)'); }
+ } else {
+   for (let i=0;i<38;i++){ const sx2=Math.floor(rnd()*W), sy2=Math.floor(rnd()*(GROUND-30));
+     px(sx2,sy2,1,1, rnd()>0.75 ? '#ffffff' : S[3]); }
+   // the moon, at a different phase per house so no two skies match
+   const mx = d.key==='hold' ? 30 : W-36, my = 11 + Math.floor(rnd()*7);
+   px(mx,my,8,8,'rgba(255,255,255,.16)'); px(mx+1,my+1,6,6,S[3]);
+   if (d.key==='subto' || d.key==='walk') px(mx+4,my,4,8, S[0]);        // waning
+ }
+ // a treeline, so the houses sit in a place rather than on a shelf
+ for (let x=0;x<W;x+=4){
+   const h2 = 5 + Math.floor(rnd()*9);
+   px(x, GROUND-h2, 4, h2, 'rgba(0,0,0,.30)');
+ }
 
- // doors and windows
- const gap = Math.round(bw/(d.doors+1));
- for (let k=1;k<=d.doors;k++) px(bx+gap*k-4, by+bh-13, 9, 13, '#2b2721');
- const lit = w>0.6 ? '#39342c' : '#e2cf72';
- const wy = by + 6;
- px(bx+6, wy, 10, 8, lit); px(bx+bw-16, wy, 10, 8, lit);
- if (d.doors===2){ px(bx+Math.round(bw*0.40), wy, 10, 8, lit); px(bx+Math.round(bw*0.56), wy, 10, 8, lit); }
- if (w>0.6){ px(bx+5, wy+2, 12, 2, '#8a7a58'); px(bx+bw-17, wy+4, 12, 2, '#8a7a58'); }   // boards
+ // ── ground ──
+ px(0,GROUND,W,16,'#2a2620'); px(0,GROUND,W,1,'#3a352c');
+ px(0,H-5,W,5,'#1f1c17');                                     // the road
 
- if (w>0.35){ const n = Math.round(w*18);
-   for (let i=0;i<n;i++){ const x = 3+Math.floor(rnd()*(W-6)); px(x, H-18, 1, 3+Math.floor(rnd()*3), '#4a5a34'); } }
- // the sign: crisp when it just went up, leaning and faded when it has not moved
- const sx = 12, lean = d.key==='walk' ? 2 : 0;
- px(sx+lean, H-30, 2, 14, '#8b98ac');
- px(sx-4+lean, H-35, 13, 6, d.key==='walk' ? '#b9a98e' : '#e8e2d4');
- px(sx-2+lean, H-33, 9, 1, '#6b6153'); px(sx-2+lean, H-31, 6, 1, '#6b6153');
+ /* ══ the buildings ══════════════════════════════════════════════════════ */
+ const wall = w>0.6 ? '#584f43' : w>0.3 ? '#6d6252' : '#7f7462';
+ const trim = w>0.6 ? '#6a5f4f' : '#9b8f78';
+ const roof = w>0.5 ? '#3f372f' : '#6b4a3a';
+ const dark = '#241f1a';
+ const lit  = '#e8cf72', dim = '#3a352c';
+ const winC = (on) => on ? lit : dim;
+ const window_ = (x,y,ww,hh,on,boarded) => {
+   px(x-1,y-1,ww+2,hh+2,trim); px(x,y,ww,hh,winC(on));
+   if (on){ px(x,y,ww,1,'rgba(255,255,255,.45)'); px(x+Math.floor(ww/2),y,1,hh,'rgba(0,0,0,.25)'); }
+   if (boarded){ px(x-1,y+1,ww+2,2,'#8a7a58'); px(x-1,y+hh-4,ww+2,2,'#7c6d4d'); }
+ };
+ const door = (x,y,ww,hh,c) => { px(x-1,y-1,ww+2,hh+1,trim); px(x,y,ww,hh,c||dark);
+   px(x+ww-3,y+Math.floor(hh/2),1,1,'#d8c48a'); };
+
+ if (d.style === 'ranch'){
+   /* long and low, a carport on the left, a skip in the drive */
+   const bw=Math.round(W*0.58), bh=22, bx=Math.round(W*0.30), by=GROUND-bh;
+   px(bx,by,bw,bh,wall); px(bx,by,bw,1,'rgba(255,255,255,.09)');
+   gable(bx,by,bw,15,roof,7);
+   px(bx-7,by,bw+14,1,'rgba(0,0,0,.30)');            // eave shadow
+   px(bx+bw-16,by-22,5,15,roof);                               // chimney
+   px(bx+bw-17,by-18,7,2,'#4d443a');
+   window_(bx+7,by+7,12,8,false); window_(bx+bw-24,by+7,12,8,true);
+   door(bx+Math.round(bw*0.45),by+bh-12,9,12);
+   // carport: a flat roof on two posts, one car-shaped shadow beneath
+   const cx=bx-30;
+   px(cx,by+2,32,2,roof); px(cx,by+4,2,18,trim); px(cx+29,by+4,2,18,trim);
+   px(cx+5,GROUND-8,22,8,'#3a3b46'); px(cx+8,GROUND-12,15,4,'#4a4c58');
+   px(cx+7,GROUND-2,4,2,'#15161c'); px(cx+21,GROUND-2,4,2,'#15161c');
+   // the skip: somebody is already gutting it
+   px(W-40,GROUND-9,26,9,'#7a4a2c'); px(W-40,GROUND-10,26,1,'#96603a');
+   px(W-36,GROUND-13,5,4,'#5b5348'); px(W-28,GROUND-12,7,3,'#6a6154');
+ }
+ else if (d.style === 'duplex'){
+   /* two storeys, two of everything: doors, mailboxes, meters, tenants */
+   const bw=Math.round(W*0.56), bh=40, bx=Math.round((W-bw)/2), by=GROUND-bh;
+   px(bx,by,bw,bh,wall); px(bx,by,bw,1,'rgba(255,255,255,.09)');
+   px(bx+Math.round(bw/2)-1,by,2,bh,'rgba(0,0,0,.22)');        // the party wall
+   gable(bx,by,bw,15,roof,6);
+   px(bx-6,by,bw+12,1,'rgba(0,0,0,.30)');
+   const q=Math.round(bw/4);
+   window_(bx+q-9,by+7,13,9,true);  window_(bx+bw-q-4,by+7,13,9,true);
+   window_(bx+q-9,by+21,13,9,true); window_(bx+bw-q-4,by+21,13,9,false);
+   door(bx+Math.round(bw*0.30),by+bh-13,10,13);
+   door(bx+Math.round(bw*0.60),by+bh-13,10,13);
+   px(bx+Math.round(bw*0.28),GROUND-1,Math.round(bw*0.44),1,'#4a463d');  // shared stoop
+   // two mailboxes and two meters — the detail that says "two households"
+   px(bx-9,GROUND-13,3,13,'#585048'); px(bx-12,GROUND-17,9,5,'#8d8578');
+   px(bx-9+7,GROUND-13,3,13,'#585048'); px(bx-4,GROUND-17,9,5,'#8d8578');
+   px(bx+bw+3,by+18,4,6,'#9aa3ad'); px(bx+bw+9,by+18,4,6,'#9aa3ad');
+   for (let i=0;i<9;i++) px(bx-16+i*3,GROUND-4,2,4,'#3d5230');           // clipped hedge
+ }
+ else if (d.style === 'colonial'){
+   /* square, symmetrical, dark but for a porch light — and a notice on the
+      door, which is the whole story of this deal in four pixels */
+   const bw=Math.round(W*0.44), bh=38, bx=Math.round((W-bw)/2)-8, by=GROUND-bh;
+   px(bx,by,bw,bh,wall); px(bx,by,bw,1,'rgba(255,255,255,.09)');
+   gable(bx,by,bw,20,roof,6);
+   px(bx-6,by,bw+12,1,'rgba(0,0,0,.30)');
+   px(bx+7,by-22,5,13,roof);
+   window_(bx+6,by+7,11,9,false); window_(bx+bw-17,by+7,11,9,false);
+   window_(bx+6,by+21,11,9,false); window_(bx+bw-17,by+21,11,9,false);
+   const dx=bx+Math.round(bw/2)-5;
+   px(dx-7,by+bh-17,24,3,roof);                                 // porch roof
+   px(dx-7,by+bh-14,2,14,trim); px(dx+15,by+bh-14,2,14,trim);
+   door(dx,by+bh-13,10,13);
+   px(dx+11,by+bh-16,2,2,'#ffd98a');                            // porch light, on
+   px(dx+2,by+bh-9,6,5,'#d9d2c4'); px(dx+3,by+bh-8,4,1,'#a33');  // the notice
+   // garage, closed
+   px(bx+bw+3,GROUND-19,26,19,wall); gable(bx+bw+3,GROUND-19,26,7,roof,3);
+   px(bx+bw+6,GROUND-14,20,14,'#4a433a');
+   for (let i=0;i<4;i++) px(bx+bw+6,GROUND-14+i*4,20,1,'#3a342d');
+ }
+ else if (d.style === 'cottage'){
+   /* small, steep, immaculate, curtains drawn — nobody lives here now */
+   const bw=Math.round(W*0.46), bh=24, bx=Math.round((W-bw)/2), by=GROUND-bh;
+   px(bx,by,bw,bh,'#8a7f6a'); px(bx,by,bw,1,'rgba(255,255,255,.12)');
+   gable(bx,by,bw,26,'#7a4f3c',7);
+   px(bx-7,by,bw+14,1,'rgba(0,0,0,.30)');
+   // two dormers in the roof
+   // dormers, set INTO the slope rather than perched on top of it
+   const dm=(x)=>{ px(x,by-16,12,9,'#8a7f6a'); gable(x,by-16,12,6,'#6c452f',1);
+     px(x+3,by-13,6,6,'#cdbfa0'); px(x+3,by-13,6,1,'#e6dcc4'); };
+   dm(bx+9); dm(bx+bw-21);
+   px(bx+bw-12,by-31,5,12,'#6c452f');
+   window_(bx+7,by+8,12,9,false); window_(bx+bw-19,by+8,12,9,false);
+   px(bx+7,by+8,12,9,'#cdbfa0'); px(bx+bw-19,by+8,12,9,'#cdbfa0');   // drawn curtains
+   door(bx+Math.round(bw/2)-5,by+bh-12,10,12,'#3d5a46');
+   px(bx+Math.round(bw/2)-8,GROUND-1,16,1,'#5a5347');
+   for (let i=0;i<14;i++){ const fx=bx-14+i*2;                        // flower bed
+     px(fx,GROUND-4,1,4,'#3d5a30'); if (i%3===0) px(fx,GROUND-6,2,2, i%2 ? '#c4658a':'#d8a94e'); }
+   for (let i=0;i<12;i++) px(bx+bw+6+i*2,GROUND-3,1,3,'#3d5a30');
+   // a young tree: trunk, then three tapering bands of canopy
+   px(11,GROUND-20,3,20,'#4a4036');
+   px(3,GROUND-27,19,7,'#3f5a3a'); px(5,GROUND-33,15,6,'#4a6a44');
+   px(8,GROUND-37,9,4,'#577a4f');
+ }
+ else {
+   /* the wreck: the ridge sags, the tarp is doing structural work, the grass
+      has reached the sill and the sign has been up long enough to fade */
+   const bw=Math.round(W*0.54), bh=26, bx=Math.round((W-bw)/2), by=GROUND-bh;
+   px(bx,by,bw,bh,'#6d6252'); px(bx,by,bw,1,'rgba(255,255,255,.10)');
+   // stains running down from the gutter line — the house is telling you why
+   for (let i=0;i<9;i++){ const stx=bx+3+Math.floor(rnd()*(bw-6));
+     px(stx,by+1,2,4+Math.floor(rnd()*9),'rgba(40,32,24,.45)'); }
+   for (let i=0;i<16;i++){                                          // sagging roof
+     const inset=Math.round(i*(bw/2)/16), sag=Math.round(Math.sin(i/16*Math.PI)*3);
+     px(bx-7+inset, by-i-1+sag, bw+14-inset*2, 1, i<4 ? '#5a4c3e' : '#4a4036');
+   }
+   px(bx-7,by,bw+14,1,'rgba(0,0,0,.30)');
+   // the tarp, following the slope it is failing to replace
+   for (let i=0;i<8;i++) px(bx+Math.round(bw*0.44)+i*2, by-4-i*1.4, 3, 5,
+     i<4 ? '#3a6ea5' : '#2f5b8a');
+   px(bx+Math.round(bw*0.44), by-4, 16, 1, '#6ba0dd');
+   px(bx+bw-15,by-15,5,11,'#5a4c3e'); px(bx+bw-16,by-8,3,3,'#3a332b'); // broken chimney
+   window_(bx+6,by+8,12,9,false,true); window_(bx+bw-18,by+8,12,9,false,true);
+   door(bx+Math.round(bw/2)-5,by+bh-12,10,12,'#2e2822');
+   px(bx+Math.round(bw/2)-6,by+bh-13,12,3,'#a08a62');                // door boarded shut
+   for (let i=0;i<34;i++){ const gx=2+Math.floor(rnd()*(W-4)), gh=5+Math.floor(rnd()*9);
+     px(gx,GROUND-gh+2,1,gh,'#55663a'); }
+   for (let i=0;i<7;i++) px(bx-26+i*7,GROUND-10,2,10,'#6b5c47');     // a fence, half gone
+   px(bx-26,GROUND-10,16,1,'#6b5c47');
+   px(bx-26+28,GROUND-6,2,6,'#6b5c47');                              // one post left leaning
+ }
+
+ /* ── the sign, last, in front of everything ── */
+ const wrecked = d.style==='wreck', lean = wrecked ? 2 : 0;
+ const sx = wrecked ? 20 : W-30;
+ px(sx+lean, GROUND-14, 2, 14, wrecked ? '#6b7180' : '#8b98ac');
+ px(sx-5+lean, GROUND-21, 14, 7, wrecked ? '#a8987d' : '#eee8da');
+ px(sx-3+lean, GROUND-19, 10, 1, '#6b6153'); px(sx-3+lean, GROUND-17, 7, 1, '#6b6153');
+ if (!wrecked) px(sx-5+lean, GROUND-21, 14, 1, '#ffffff');
 }
 
 document.getElementById('floor').innerHTML = DEALS.map((d,i) => `
  <a class="deal" href="desk.html#demo=${d.key}">
-  <canvas width="240" height="112" aria-label="A pixel drawing of ${d.name}"></canvas>
+  <canvas width="256" height="120" aria-label="A pixel drawing of ${d.name}"></canvas>
   <div class="b">
    <div class="tag">${d.tag}</div>
    <h2>${d.name}</h2>
