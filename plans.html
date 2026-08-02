@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Plans · Negotiation Inc</title>
-<meta name="description" content="Pricing a property is free forever. A plan buys the twenty minutes: the photo condition read, comps pulled and scored, the lender packet, and a portfolio that remembers.">
+<meta name="description" content="Free forever to price a deal. Solo $39 unlocks your whole model; Underwriter $99 adds comps pulled, the photo condition read and the letters; The Office $249 runs a shop.">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
    PLANS.
@@ -40,7 +40,7 @@ html,body{background:#fff}
 body{font-family:var(--sans);color:var(--ink);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
 h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-height:1.1}
 a{color:var(--blue)}
-.wrap{max-width:1140px;margin:0 auto;padding:0 26px}
+.wrap{max-width:1250px;margin:0 auto;padding:0 26px}
 .eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
 
 header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(255,255,255,.94);
@@ -67,7 +67,8 @@ header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba
 .btn.q:hover{border-color:var(--blue);color:var(--blue)}
 
 /* ── the top ── */
-.top{padding:52px 0 6px;max-width:66ch}
+.top{padding:52px 0 6px}
+.topgrid > div:first-child{max-width:60ch}
 h1{font-size:46px}
 h1 em{font-style:normal;color:var(--blue)}
 .lede{font-size:18.5px;color:var(--mid);margin-top:15px}
@@ -76,10 +77,35 @@ h1 em{font-style:normal;color:var(--blue)}
 .prelaunch{display:inline-flex;align-items:center;gap:10px;margin-top:20px;padding:9px 15px;
  border:1px solid var(--gold-soft);background:var(--gold-soft);border-radius:var(--r-pill);
  font-size:13.5px;color:var(--gold)}
-.prelaunch b{color:#5f4813;font-weight:700}
+.prelaunch b{color:#5f4813;font-weight:700;white-space:nowrap}
+/* The founding offer. One hundred places at a price that never moves, which is
+   the only honest form of urgency: the number is finite and checkable, and the
+   people who take it are the ones who tell you what to build next. */
+.topgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,.7fr);
+ gap:46px;align-items:start}
+@media(max-width:1000px){ .topgrid{grid-template-columns:1fr;gap:22px} }
+.founding{padding:20px 22px;border-radius:var(--r-card);
+ border:1.5px solid var(--gold);background:linear-gradient(180deg,var(--gold-soft),#fff);
+ display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+@media(min-width:1001px){ .founding{margin-top:38px} }
+.founding .btn{width:100%}
+.founding .k{font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.founding h3{font-size:20px;margin-top:3px}
+.founding p{font-size:14px;color:var(--mid);margin-top:4px;max-width:64ch;line-height:1.5}
+.billing{display:flex;align-items:center;gap:9px;margin-top:16px;font-size:13.5px;color:var(--soft);flex-wrap:wrap}
+.billing b{color:var(--ink);font-weight:650}
+.billing .save{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+ color:var(--green);background:var(--green-soft);border:1px solid var(--green-line);
+ border-radius:var(--r-pill);padding:3px 9px}
+.plan.solo .tagline{color:var(--gold)}
+.plan.solo li i{color:var(--gold)}
+.plan .fair{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line-2);
+ font-size:12px;color:var(--faint);line-height:1.45}
 
 /* ── the cards ── */
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:34px 0 0;align-items:start}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:30px 0 0;align-items:start}
+@media(max-width:1180px){ .cards{grid-template-columns:repeat(2,1fr);gap:20px} }
+@media(max-width:640px){ .cards{grid-template-columns:1fr} }
 .plan{border:1px solid var(--line-2);border-radius:var(--r-card);background:#fff;display:flex;
  flex-direction:column;overflow:hidden;transition:border-color .15s,box-shadow .15s,transform .15s}
 .plan:hover{border-color:var(--line-2);box-shadow:0 8px 30px rgba(13,20,32,.07);transform:translateY(-2px)}
@@ -87,29 +113,34 @@ h1 em{font-style:normal;color:var(--blue)}
 .plan.mid:hover{box-shadow:0 0 0 3px var(--blue-soft),0 16px 44px rgba(31,95,208,.20);transform:translateY(-3px)}
 .ribbon{background:var(--blue);color:#fff;text-align:center;font-size:10.5px;font-weight:800;
  letter-spacing:.16em;text-transform:uppercase;padding:7px}
-.plan .ph{padding:20px 22px 18px;border-bottom:1px solid var(--line)}
-.plan h2{font-size:24px}
+/* Only one card has something to announce. The other three carry an invisible
+   copy so all four prices land on the same line — without it the cards step
+   down like a staircase and the eye reads it as three tiers and an afterthought. */
+.ribbon.ghost{visibility:hidden;background:transparent}
+@media(max-width:1180px){ .ribbon.ghost{display:none} }
+.plan .ph{padding:18px 19px 16px;border-bottom:1px solid var(--line)}
+.plan h2{font-size:22px}
 .tagline{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)}
 .plan.free .tagline{color:var(--green)}
-.plan .price{font-family:var(--serif);font-size:40px;font-weight:700;letter-spacing:-.03em;margin-top:11px;
+.plan .price{font-family:var(--serif);font-size:36px;font-weight:700;letter-spacing:-.03em;margin-top:10px;
  line-height:1}
 .plan .price small{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--soft);letter-spacing:0}
 .plan .note{font-size:13px;color:var(--soft);margin-top:7px}
-.plan .who{font-size:14.5px;color:var(--mid);margin-top:13px;line-height:1.5}
-.plan .pb{padding:18px 22px;flex:1}
+.plan .who{font-size:13.5px;color:var(--mid);margin-top:11px;line-height:1.45}
+.plan .pb{padding:16px 19px;flex:1}
 .plan .pbh{font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
  color:var(--soft);margin-bottom:11px}
-.plan ul{list-style:none;padding:0;display:grid;gap:10px}
+.plan ul{list-style:none;padding:0;display:grid;gap:9px}
 /* The check and the text, and nothing else, are grid children. The first
    version put the raw text next to an <i> and a <b>, which made the <b> a
    third column and stacked the rest of the sentence one word per line — a
    spectacular way to discover that grid counts every element child. */
-.plan li{display:grid;grid-template-columns:17px 1fr;gap:10px;font-size:14.5px;color:var(--mid);align-items:start}
+.plan li{display:grid;grid-template-columns:16px 1fr;gap:9px;font-size:13.8px;color:var(--mid);align-items:start;line-height:1.45}
 .plan li > span{min-width:0}
 .plan li i{font-style:normal;color:var(--green);font-weight:800;line-height:1.35;font-size:13px}
 .plan.mid li i{color:var(--blue)}
 .plan li b{color:var(--ink);font-weight:650}
-.plan .pf{padding:16px 22px 20px;border-top:1px solid var(--line);background:var(--wash)}
+.plan .pf{padding:15px 19px 18px;border-top:1px solid var(--line);background:var(--wash)}
 .plan .pf .btn{width:100%}
 .plan .pf .under{display:block;text-align:center;font-size:12px;color:var(--soft);margin-top:9px}
 
@@ -224,6 +255,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 <div class="wrap">
 
 <div class="top">
+ <div class="topgrid">
+ <div>
  <div class="eyebrow">Plans</div>
  <h1>Pricing a property is free. A plan buys back <em>the twenty minutes</em>.</h1>
  <p class="lede">Every exit, every band, every piece of the arithmetic — free, unlimited, no account.
@@ -231,11 +264,28 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   condition off your photos, pulling the comps, formatting the packet, and remembering the eleven
   deals you looked at last week.</p>
  <div class="prelaunch"><b>Pre-launch</b> — nothing charges today, and the desk is open and free while we finish.</div>
+ </div>
+
+ <div class="founding">
+  <div>
+   <div class="k">The founding hundred</div>
+   <h3>$49 a month for Underwriter — for as long as you stay.</h3>
+   <p>One hundred places. Take one and the price never moves, whatever it becomes later. In
+    exchange we want the thing money cannot buy at this stage: what breaks, what is missing,
+    and what you would have paid for instead.</p>
+  </div>
+  <a class="btn p" href="office.html">Take a place →</a>
+ </div>
+ </div>
+
+ <div class="billing"><b>Monthly or yearly</b><span class="save">Two months free on annual</span>
+  <span>·</span><span>Cancel in one click — no contract, no call</span></div>
 </div>
 
 <div class="cards">
 
  <div class="plan free">
+  <div class="ribbon ghost">·</div>
   <div class="ph">
    <div class="tagline">Free forever</div>
    <h2>The Desk</h2>
@@ -251,6 +301,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
     <li><i>✓</i><span>The comp workbench — score sales yourself, up to three at a time</span></li>
     <li><i>✓</i><span>Light, medium and heavy rehab profiles across seventeen line items</span></li>
     <li><i>✓</i><span>Every number shows its arithmetic, and says when it is estimating</span></li>
+    <li><i>✓</i><span>Print the offer sheet, and the whole eight-lesson walk-through</span></li>
     <li><i>✓</i><span>The arcade: Exit Drill, the Daily Street, and Comp Run</span></li>
    </ul>
   </div>
@@ -258,39 +309,68 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <span class="under">Nothing leaves your browser</span></div>
  </div>
 
- <div class="plan mid">
-  <div class="ribbon">The one to have</div>
+ <div class="plan solo">
+  <div class="ribbon ghost">·</div>
   <div class="ph">
-   <div class="tagline">For the person doing this weekly</div>
-   <h2>Underwriter</h2>
-   <div class="price">$29 <small>/ month</small></div>
-   <div class="note">Or $290 a year — two months back</div>
-   <p class="who">For somebody underwriting real deals on a real week, who needs the model to be
-    theirs and the file to survive until Friday.</p>
+   <div class="tagline">Your analysis, unlocked</div>
+   <h2>Solo</h2>
+   <div class="price">$39 <small>/ month</small></div>
+   <div class="note">Or $390 a year — two months back</div>
+   <p class="who">For the person doing two to six deals a year who wants the model to be
+    <b>theirs</b>, and the file still there on Friday.</p>
   </div>
   <div class="pb">
    <div class="pbh">Everything free, plus</div>
    <ul>
-    <li><i>✓</i><span><b>The photo condition read</b> — drop the walk-through pictures, get seventeen line items back with a number on each</span></li>
-    <li><i>✓</i><span><b>Comps pulled and scored</b> for the address, with street view and satellite on every card</span></li>
-    <li><i>✓</i><span>Unlimited comps, and every condition line on its own slider</span></li>
-    <li><i>✓</i><span>The seven assumptions, plus the grid showing what your profit does when you are wrong</span></li>
-    <li><i>✓</i><span><b>The lender packet</b> — one PDF with your name on it, the working shown, ready to send</span></li>
-    <li><i>✓</i><span>A portfolio that remembers: every deal you priced, side by side, on any device</span></li>
-    <li><i>✓</i><span>Offer letters and a text message, generated from the winning exit</span></li>
-    <li><i>✓</i><span>Your own market defaults, so the sheet stops asking questions it can answer</span></li>
+    <li><i>✓</i><span><b>Every condition line on its own slider</b> — roof, panel, each bath, priced separately</span></li>
+    <li><i>✓</i><span>Comps without a cap, scored and adjusted the way an appraiser would</span></li>
+    <li><i>✓</i><span>The seven assumptions, and the grid showing what your profit does when you are wrong</span></li>
+    <li><i>✓</i><span><b>Compare two deals</b> — both sheets, one engine, and where the winner changes</span></li>
+    <li><i>✓</i><span><b>The lender packet</b> — one PDF with your name on it, the working shown</span></li>
+    <li><i>✓</i><span>Unlimited properties, on every device, for as long as you keep them</span></li>
+    <li><i>✓</i><span>Your own market defaults, so the sheet stops asking what it can answer</span></li>
    </ul>
+   <div class="fair">Everything here runs in your browser. No lookups, no AI, nothing metered —
+    which is why it costs what it costs.</div>
+  </div>
+  <div class="pf"><a class="btn" href="office.html">Start 14 days free →</a>
+   <span class="under">Card on file, nothing charged for 14 days</span></div>
+ </div>
+
+ <div class="plan mid">
+  <div class="ribbon">The one to have</div>
+  <div class="ph">
+   <div class="tagline">The typing, done for you</div>
+   <h2>Underwriter</h2>
+   <div class="price">$99 <small>/ month</small></div>
+   <div class="note">Or $990 a year — two months back</div>
+   <p class="who">For somebody underwriting weekly, who wants the forty minutes to be eight —
+    and does not want to go and find the data first.</p>
+  </div>
+  <div class="pb">
+   <div class="pbh">Everything in Solo, plus</div>
+   <ul>
+    <li><i>✓</i><span><b>The photo condition read</b> — drop the walk-through pictures, get seventeen line items back with a number on each</span></li>
+    <li><i>✓</i><span><b>Comps pulled and scored</b> for the address, already adjusted, in one click</span></li>
+    <li><i>✓</i><span>Address-level values and rents — from the feed, not the ZIP average</span></li>
+    <li><i>✓</i><span>Street view and satellite on every comp card and on the subject</span></li>
+    <li><i>✓</i><span><b>Offer letters and the text message</b>, written from the winning exit in the seller's language</span></li>
+    <li><i>✓</i><span>The written comparison — the case for each deal, in prose you can forward</span></li>
+   </ul>
+   <div class="fair">Fair use: 200 property lookups and 100 photo reads a month. Nobody working
+    normally has ever come close; if you do, we will call you rather than cut you off.</div>
   </div>
   <div class="pf"><a class="btn p" href="office.html">Start 14 days free →</a>
    <span class="under">Card on file, nothing charged for 14 days, cancel in one click</span></div>
  </div>
 
  <div class="plan">
+  <div class="ribbon ghost">·</div>
   <div class="ph">
    <div class="tagline">For a shop, not a person</div>
    <h2>The Office</h2>
-   <div class="price">$99 <small>/ month</small></div>
-   <div class="note">Three seats included, $19 each after</div>
+   <div class="price">$249 <small>/ month</small></div>
+   <div class="note">Or $2,490 a year — two months back</div>
    <p class="who">For a small operation where more than one person prices, and the number has to
     mean the same thing whoever ran it.</p>
   </div>
@@ -299,15 +379,15 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <ul>
     <li><i>✓</i><span><b>Shared assumption sets</b> — one model, so two people cannot quietly disagree about a rate</span></li>
     <li><i>✓</i><span>The pipeline: every property in the office on one board, by stage and by spread</span></li>
-    <li><i>✓</i><span>Seats, roles, and a record of who changed which number and when</span></li>
-    <li><i>✓</i><span>Buy-box rules that flag a deal the moment it fits, or refuse it before anyone drives out</span></li>
+    <li><i>✓</i><span><b>Buy-box rules</b> that flag a deal the moment it fits, or refuse it before anyone drives out</span></li>
+    <li><i>✓</i><span>Compare a whole week of leads, not just two, in one table</span></li>
     <li><i>✓</i><span>Your branding on every packet and letter that leaves the office</span></li>
     <li><i>✓</i><span>Bulk underwriting — paste a list, get every exit priced on all of them</span></li>
-    <li><i>✓</i><span>API access and webhooks, for the CRM you already pay for</span></li>
+    <li><i>✓</i><span><b>Three seats included</b>, $29 each after — with roles, an audit trail, API access and webhooks</span></li>
    </ul>
   </div>
   <div class="pf"><a class="btn q" href="office.html">Talk to us</a>
-   <span class="under">Migration and setup included</span></div>
+   <span class="under">Migration, setup and onboarding included</span></div>
  </div>
 
 </div>
@@ -410,7 +490,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    </svg>
   </div>
   <div class="sb">
-   <span class="tier">Underwriter</span>
+   <span class="tier">Solo</span>
    <h3>The lender packet, in one click</h3>
    <p>One PDF with your name on it: the property, the comps you used, the condition read, every
     exit priced, and the arithmetic behind the number you are asking them to fund.
@@ -444,7 +524,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    </svg>
   </div>
   <div class="sb">
-   <span class="tier">Underwriter</span>
+   <span class="tier">Solo</span>
    <h3>A portfolio that remembers</h3>
    <p>Every property you priced, side by side, with its spread, its best exit and the day you ran
     it. Open it on the phone in the driveway and on the laptop that evening and it is
@@ -476,7 +556,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    </svg>
   </div>
   <div class="sb">
-   <span class="tier">Underwriter</span>
+   <span class="tier">Solo</span>
    <h3>Which of these two?</h3>
    <p>Nobody has one house. Put two sheets side by side and the same engine prices both —
     best exit, ceiling, room, spread, confidence — with <b>one set of assumptions driving
@@ -557,87 +637,93 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  <div class="mh">
   <h2>The whole sheet</h2>
   <p>Grouped the way the desk is: what it is worth, what it needs, what the deal is, and what
-   leaves the building.</p>
+   leaves the building. The line between Solo and Underwriter is not arbitrary — <b>Solo is
+   everything your browser can do on its own; Underwriter is everything that needs our data
+   or our AI.</b></p>
  </div>
  <table>
   <thead><tr>
-   <th>Feature</th><th>Free</th><th class="hi">Underwriter</th><th>The Office</th>
+   <th>Feature</th><th>Free</th><th>Solo</th><th class="hi">Underwriter</th><th>The Office</th>
   </tr></thead>
   <tbody>
 
-   <tr class="sec"><td colspan="4">What it is worth</td></tr>
+   <tr class="sec"><td colspan="5">What it is worth</td></tr>
    <tr><td><b>The comp workbench</b><small>score sales yourself, adjusted and weighted</small></td>
-     <td><span class="y">✓</span><small>3 comps</small></td><td class="hi"><span class="y">✓</span><small>unlimited</small></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>Comps pulled for the address</b><small>recent sales, already adjusted</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>Street view and satellite</b><small>on every comp card and the subject</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>ZIP-level market priors</b><small>values and rents where the census reaches</small></td>
-     <td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="y">✓</span><small>3 comps</small></td><td><span class="y">✓</span><small>unlimited</small></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td><b>Comps pulled for the address</b><small>recent sales, already adjusted, in one click</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Address-level values and rents</b><small>from the feed, not the ZIP average</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-
-   <tr class="sec"><td colspan="4">What it needs</td></tr>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td><b>Street view and satellite</b><small>on every comp card and the subject</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td><b>ZIP-level market priors</b><small>values and rents where the census reaches</small></td>
+     <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr class="sec"><td colspan="5">What it needs</td></tr>
    <tr><td><b>Light / medium / heavy profiles</b><small>real profiles across seventeen lines</small></td>
-     <td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>Every line on its own slider</b><small>roof, panel, each bath, priced separately</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>The photo condition read</b><small>drop the walk-through, get the lines back</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Scaled to the house</b><small>beds and baths change what each line is worth</small></td>
-     <td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-
-   <tr class="sec"><td colspan="4">The deal</td></tr>
+     <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td><b>Every line on its own slider</b><small>roof, panel, each bath, priced separately</small></td>
+     <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td><b>The photo condition read</b><small>drop the walk-through, get the lines back</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr class="sec"><td colspan="5">The deal</td></tr>
    <tr><td><b>All eight exits priced and ranked</b><small>against this seller, not in general</small></td>
-     <td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>The offer, with terms priced</b><small>what each concession is worth in dollars</small></td>
-     <td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>The seven assumptions</b><small>rate, LTV, DSCR floor, costs, target profit</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>The sensitivity grid</b><small>your profit when the two soft numbers are wrong</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Your own market defaults</b><small>the sheet stops asking what it can answer</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Compare two deals</b><small>both sheets, one engine, side by side</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Where the answer flips</b><small>the rate or the hold that changes the winner</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>The written comparison</b><small>the case for each, in prose you can forward</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td><b>Compare a whole week of leads</b><small>not two — the table, sorted by room</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Buy-box rules</b><small>flag a fit, refuse the drive-out</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
-
-   <tr class="sec"><td colspan="4">What leaves the building</td></tr>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
+   <tr class="sec"><td colspan="5">What leaves the building</td></tr>
    <tr><td><b>Print the offer sheet</b><small>the page, cleanly, on paper</small></td>
-     <td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>The lender packet</b><small>one PDF, your name on it, the working shown</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Offer letters and messages</b><small>written from the winning exit</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Your branding on everything</b><small>packets and letters, in your name</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
-
-   <tr class="sec"><td colspan="4">Memory and the office</td></tr>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
+   <tr class="sec"><td colspan="5">Memory and the office</td></tr>
    <tr><td><b>The sheet survives the tab</b><small>this browser, indefinitely</small></td>
-     <td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>The portfolio, on every device</b><small>the driveway and the desk, same sheet</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Properties at once</b></td>
-     <td>1</td><td class="hi">Unlimited</td><td>Unlimited</td></tr>
+     <td>1</td><td>Unlimited</td><td class="hi">Unlimited</td><td>Unlimited</td></tr>
+   <tr><td><b>The portfolio, on every device</b><small>the driveway and the desk, same sheet</small></td>
+     <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Shared assumption sets</b><small>one model for the whole desk</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Pipeline across the office</b><small>by stage and by spread</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Bulk underwriting</b><small>paste a list, price all of them</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Seats, roles and an audit trail</b></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td>3, then $19</td></tr>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td>3, then $29</td></tr>
    <tr><td><b>API and webhooks</b><small>into the CRM you already pay for</small></td>
-     <td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
-
-   <tr class="sec"><td colspan="4">The arcade</td></tr>
-   <tr><td><b>Exit Drill, Daily Street, Comp Run</b><small>free forever, no account, all three</small></td>
-     <td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
+   <tr class="sec"><td colspan="5">What the data costs</td></tr>
+   <tr><td><b>Property lookups a month</b><small>comps, records, rents</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">200</td><td>Pooled, 600</td></tr>
+   <tr><td><b>Photo condition reads a month</b></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">100</td><td>Pooled, 300</td></tr>
+   <tr class="sec"><td colspan="5">The walk-through and the arcade</td></tr>
+   <tr><td><b>The eight lessons, with live controls</b><small>free forever, no account</small></td>
+     <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td><b>Exit Drill, the Daily Street, Comp Run</b><small>free forever, no account, all three</small></td>
+     <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
 
   </tbody>
  </table>
@@ -646,7 +732,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 <!-- ══ the objections ═══════════════════════════════════════════════════════ -->
 <div class="sec-h">
  <div class="eyebrow">Before you ask</div>
- <h2>The five things people ask us.</h2>
+ <h2>The things people ask us.</h2>
 </div>
 
 <div class="qs">
@@ -655,6 +741,21 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   <p>Close a deal. Three comps draw a real range, the three rehab profiles price a rehab honestly,
    and every exit prices with its arithmetic shown. The free tier is narrower, not weaker — what a
    plan buys is precision and speed, never permission.</p>
+ </div>
+ <div class="q">
+  <h4>Why $99 when there are $20 deal calculators?</h4>
+  <p>Because they are calculators and you type into them. Solo, at $39, is the honest comparison —
+   and it does more than any of them. What $99 buys is the part that is not arithmetic: the comps
+   arrive already scored, the condition comes off your photographs, and the letter writes itself.
+   That is a data-and-AI product, and every other one of those in this category starts at $99 and
+   only gives you leads.</p>
+ </div>
+ <div class="q">
+  <h4>Which one should I be on?</h4>
+  <p>If you price a house every few months, <b>free</b> genuinely closes deals. If you have a model
+   you argue with and files you come back to, <b>Solo</b>. If you are underwriting weekly and the
+   forty minutes of typing is the actual cost, <b>Underwriter</b>. If two people price and the
+   numbers have to agree, <b>The Office</b>. Move up when something annoys you, not before.</p>
  </div>
  <div class="q">
   <h4>Do you sell my data?</h4>
@@ -687,8 +788,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 
 <div class="close">
  <h2>Price one, and decide after.</h2>
- <p>The desk is open, free, and needs nothing from you. If it saves you an afternoon, the plan is
-  twenty-nine dollars.</p>
+ <p>The desk is open, free, and needs nothing from you — no card, no account, no expiry. Price a
+  house on it first. If it gives you the afternoon back, the plans will still be here.</p>
  <div class="row">
   <a class="btn p" href="desk.html#new">Price a property →</a>
   <a class="btn" href="demo.html">See how it works</a>
