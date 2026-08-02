@@ -49,7 +49,25 @@ body.railtight .rail-nav{width:64px}
 .rn-mark{display:flex;align-items:baseline;gap:7px;text-decoration:none;color:#fff}
 .rn-mark .nm{font-family:var(--serif);font-size:14.5px;font-weight:700;letter-spacing:.09em}
 .rn-mark .inc{font-size:8.5px;font-weight:700;letter-spacing:.2em;color:#e8cf72}
-.rn-who{display:flex;align-items:center;gap:9px;margin-top:12px}
+/* ── THE ACCOUNT PANEL, ON THE HUB TOO ─────────────────────────────────────
+   The hub's rail showed your name as a LABEL. On desktop the rail also hides
+   the masthead — which is where the only "Sign out" button lived — so from
+   1081px up there was no way out of a signed-in state at all. Elijah hit
+   exactly that: not really signed in, and taken to the dashboard every time,
+   with nothing on screen offering to stop.
+
+   It is the desk's panel, ported whole: who you are, what you are on, what the
+   next tier adds, the pre-launch plan switcher, and sign out. Same markup,
+   same classes, so the two rails cannot drift into two different accounts. */
+.rn-who{display:flex;align-items:center;gap:9px;margin-top:12px;width:100%;
+ font-family:var(--sans);text-align:left;cursor:pointer;
+ background:transparent;border:1px solid transparent;border-radius:11px;padding:6px 7px;margin-left:-7px}
+.rn-who:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12)}
+.rn-whotx{display:grid;min-width:0;flex:1}
+.rn-caret{color:#8ba3c4;font-size:12px;transition:transform .15s}
+.rn-who.open .rn-caret{transform:rotate(180deg)}
+body.railtight .rn-caret{display:none}
+.rn-acct{margin-top:9px}
 .rn-av{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;flex:none;
  display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:13px}
 .rn-nm{font-size:13px;font-weight:650;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -64,6 +82,51 @@ body.railtight .rail-nav{width:64px}
 .rn-btn.p:hover{background:#3b78e0;border-color:#3b78e0}
 .rn-h{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
  color:#7c93b5;padding:14px 16px 6px}
+.ac-in{display:grid;gap:10px;padding:12px;border-radius:12px;background:rgba(0,0,0,.26);
+ border:1px solid rgba(255,255,255,.10)}
+.ac-id b{display:block;font-size:13px;color:#fff;font-weight:650}
+.ac-id span{font-size:11px;color:#8ba3c4;overflow:hidden;text-overflow:ellipsis;display:block}
+.ac-now{display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+ padding-top:9px;border-top:1px solid rgba(255,255,255,.09)}
+.ac-now .k{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:#7c93b5}
+.ac-now .v{font-size:12.5px;font-weight:700;color:#e8cf72}
+.ac-up{display:block;text-decoration:none;padding:11px 12px;border-radius:11px;
+ background:rgba(232,207,114,.10);border:1px solid rgba(232,207,114,.30)}
+.ac-up:hover{background:rgba(232,207,114,.18);border-color:rgba(232,207,114,.55)}
+.ac-up .k{font-size:11.5px;font-weight:800;color:#e8cf72;letter-spacing:.02em}
+.ac-up ul{list-style:none;padding:0;margin:7px 0 0;display:grid;gap:5px}
+.ac-up li{font-size:11.5px;color:#dbe6f6;line-height:1.4;padding-left:13px;position:relative}
+.ac-up li::before{content:'+';position:absolute;left:0;color:#e8cf72;font-weight:800}
+.ac-up .go{display:block;margin-top:9px;font-size:11.5px;font-weight:700;color:#fff}
+.ac-top{font-size:12px;color:#8fe0b4;text-align:center;padding:8px}
+.ac-dev{padding-top:10px;border-top:1px dashed rgba(255,255,255,.14)}
+.ac-dev .k{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:#7c93b5}
+.ac-sw{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}
+.ac-sw button{font-family:var(--sans);font-size:11px;font-weight:650;cursor:pointer;padding:7px 4px;
+ border-radius:8px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#c9d8ee}
+.ac-sw button:hover{background:rgba(255,255,255,.14);color:#fff}
+.ac-sw button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.ac-dev p{font-size:10px;color:#7c93b5;margin-top:7px;line-height:1.4}
+.ac-out{font-family:var(--sans);font-size:12px;font-weight:650;cursor:pointer;padding:8px;
+ border-radius:9px;border:1px solid rgba(255,255,255,.14);background:transparent;color:#9db4d4}
+.ac-out:hover{color:#fff;border-color:rgba(255,255,255,.30)}
+body.railtight .rn-acct{display:none}
+.rn-av{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;flex:none;
+ display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:13px}
+.rn-nm{font-size:13px;font-weight:650;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rn-tier{font-size:10px;color:#8ba3c4}
+.rn-act{padding:12px 12px 10px;display:grid;gap:7px}
+.rn-btn{display:flex;align-items:center;gap:9px;font-family:var(--sans);font-size:13px;font-weight:650;
+ padding:9px 11px;border-radius:10px;text-decoration:none;color:#dce7f7;
+ background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);
+ transition:background .12s,border-color .12s,transform .12s}
+.rn-btn:hover{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.20);transform:translateX(1px)}
+.rn-btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+.rn-btn.p:hover{background:#3b78e0;border-color:#3b78e0}
+.rn-pro{margin-left:auto;font-family:var(--mono);font-size:8px;font-weight:800;letter-spacing:.14em;
+ text-transform:uppercase;color:#0f1d33;background:#e8cf72;border-radius:4px;padding:2px 5px;font-style:normal}
+.rn-h{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+ color:#7c93b5;padding:14px 16px 6px}
 /* minmax(0,1fr), not the implicit auto: a grid track sized `auto` takes its
    width from the LONGEST child, so one property called "1104 Elm Street,
    Kansas City MO 64127" pushed the whole list 23px wider than the rail and
@@ -71,6 +134,12 @@ body.railtight .rail-nav{width:64px}
    ellipsis on .rn-p .t never fired because the box it was clipping to had
    already grown to fit. */
 .rn-list{padding:0 10px;display:grid;grid-template-columns:minmax(0,1fr);gap:3px}
+.rn-lnk.side{opacity:.62}
+.rn-lnk.side:hover{opacity:1}
+.rn-lnk em{font-style:normal;font-size:8.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+ margin-left:7px;padding:2px 6px;border-radius:999px;background:rgba(255,255,255,.09);color:#9fb2cd}
+body.railtight .rn-lnk em{display:none}
+
 .rn-p{display:block;padding:9px 10px;border-radius:9px;text-decoration:none;color:#c9d8ee;
  border:1px solid transparent;transition:background .12s,border-color .12s}
 .rn-p:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.10)}
@@ -220,6 +289,10 @@ h1.big{font-size:38px;color:#fff}
 .act .a-go{position:absolute;top:18px;right:18px;color:var(--line-2);font-size:17px;transition:transform .15s,color .15s}
 .act:hover .a-go{color:var(--blue);transform:translateX(3px)}
 /* ── properties as cards ──────────────────────────────────────────────── */
+.smp{display:inline-block;font-size:8.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+ background:#f2e8cd;color:#6c541a;border-radius:999px;padding:2px 6px;margin-right:6px;
+ vertical-align:2px;white-space:nowrap}
+.rn-p .smp{background:rgba(232,204,140,.22);color:#e3c98f;margin-right:5px}
 .pdeck{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:14px}
 .pcard{position:relative;display:grid;gap:4px;align-content:start;padding:16px 17px;border-radius:16px;
  text-decoration:none;background:#fff;border:1.5px solid var(--line-2);
@@ -389,8 +462,11 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <div class="eyebrow">Your desk</div>
    <h1 class="big" id="hi">Good to see you.</h1>
    <p class="sub" id="hisub">Here is everything you have open.</p>
+   <!-- On desktop the rail hides this; on a phone it is the only route, so it
+        stays — but it says what it is, because "The arcade" alone means
+        nothing until you have been inside one. -->
    <div class="hero-act" id="hero-arcade">
-    <a class="btn" href="arcade.html">The arcade</a>
+    <a class="btn" href="arcade.html">Practice games</a>
    </div>
   </div>
   <div class="strip" id="strip"></div>
@@ -531,6 +607,15 @@ $('out').onclick = () => {
    A copy of the desk's `renderShell`, fed by this page's own reading of the
    same two records. Kept byte-identical in markup so the two pages cannot
    drift apart visually; the only difference is which button is current. */
+/* A demo, an arcade hand-off or a lesson's figures are worked examples, not
+   houses you are buying — and in a list beside four real properties they look
+   exactly as authoritative. The desk marks them; so does the hub, in the same
+   words, from the same field. */
+const SAMPLE_OF = { demo:['Demo','a showroom property, not one of yours'],
+                    arcade:['From the arcade','a house the game invented'],
+                    lesson:['From a lesson','the course\u2019s worked example'] };
+const smp = p => SAMPLE_OF[p && p.sample]
+  ? `<span class="smp" title="${SAMPLE_OF[p.sample][1]}">${SAMPLE_OF[p.sample][0]}</span>` : '';
 function renderShell(a, props, active, nameOf, spreadOf, filledOf, onPlan, left){
  const el = $('rail-nav'); if (!el) return;
  el.hidden = false; document.body.classList.add('hasrail');
@@ -541,38 +626,121 @@ function renderShell(a, props, active, nameOf, spreadOf, filledOf, onPlan, left)
  const rows = props.map((p,i) => {
    const sp = spreadOf(p), n = filledOf(p).length;
    return `<a class="rn-p${i===active?' on':''}" href="desk.html#open=${i}">
-     <div class="t">${esc(nameOf(p,i))}</div>
+     <div class="t">${smp(p)}${esc(nameOf(p,i))}</div>
      <div class="s">${sp!==null?`<b>${money(sp)}</b> spread`:(n?`${n} figure${n>1?'s':''}`:'empty')}</div></a>`;
  }).join('');
 
  const html = `
   <div class="rn-top">
-   <a class="rn-mark" href="index.html"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+   <!-- Signed in, the wordmark means "my desk", not "the sales page" — see the
+        same note on the desk. Here it is a self-link, which is exactly what
+        every dashboard logo on the internet is, and it means the gesture works
+        the same on every page instead of only on some of them. -->
+   <a class="rn-mark" href="office.html" title="Your desk"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
    <button class="rn-toggle" id="rn-toggle" type="button" title="Collapse the rail">‹</button>
-   <div class="rn-who"><span class="rn-av">${first[0].toUpperCase()}</span>
-    <span><span class="rn-nm">${first}</span><span class="rn-tier" style="display:block">${tier}</span></span></div>
+   <button class="rn-who" id="rn-who" type="button" title="Your account and plan">
+    <span class="rn-av">${first[0].toUpperCase()}</span>
+    <span class="rn-whotx"><span class="rn-nm">${first}</span><span class="rn-tier">${tier}</span></span>
+    <span class="rn-caret">\u25be</span></button>
+   <div class="rn-acct" id="rn-acct" hidden></div>
   </div>
   <div class="rn-act">
    <a class="rn-btn p" href="desk.html#new" data-i="+" title="A new sheet"><span>+ New sheet</span></a>
    <a class="rn-btn" href="office.html" data-i="▦" aria-current="page" title="Your desk"><span>Your desk</span></a>
-   <a class="rn-btn" href="desk.html#compare" data-i="⇄" title="Compare two deals"><span>Compare two deals</span></a>
+   <a class="rn-btn" href="desk.html#compare" data-i="⇄" title="Compare your deals side by side"><span>Compare deals</span></a>
   </div>
   <div class="rn-h">Your properties</div>
   ${rows ? `<div class="rn-list">${rows}</div>`
          : `<div class="rn-empty">Nothing priced yet. The first sheet lands here.</div>`}
 
+  <!-- ── THE ARCADE IS A SIDE DOOR ──────────────────────────────────────
+       Elijah: to somebody who has never opened it, "the arcade" is a word
+       with no referent, and a link with no referent sitting level with the
+       course and the plans makes serious software look like a toy. It is not
+       a toy — the drill runs the desk's own arithmetic — but it is optional,
+       and a product that leads with the optional thing reads as a gimmick.
+
+       So: last in the list, and labelled with what it actually is rather
+       than with the name we gave it. Somebody who wants games will find them;
+       somebody who only wants the software never has to wonder. -->
   <div class="rn-foot">
-   <a class="rn-lnk" href="arcade.html">The arcade</a>
    <a class="rn-lnk" href="exits.html">The eight exits</a>
    <a class="rn-lnk" href="plans.html">Plans</a>
+   <a class="rn-lnk side" href="arcade.html" title="Practice games — optional, free, and they run the desk's own arithmetic">The arcade<em>games</em></a>
   </div>`;
  if (el.dataset.sig !== html){ el.innerHTML = html; el.dataset.sig = html;
+   const w = $('rn-who');
+   if (w) w.onclick = () => { const box = $('rn-acct');
+     if (!box) return;
+     if (box.hidden){ box.innerHTML = acctPanel(); box.hidden = false; wireAcct(); }
+     else box.hidden = true;
+     w.classList.toggle('open', !box.hidden); };
    const t = $('rn-toggle');
    if (t){ t.onclick = () => { const tight = document.body.classList.toggle('railtight');
      try { localStorage.setItem('ni-rail', tight ? 'tight' : 'wide'); } catch(e){}
      t.textContent = tight ? '›' : '‹'; };
      if (document.body.classList.contains('railtight')) t.textContent = '›'; }
  }
+}
+
+/* ── THE ACCOUNT PANEL ─────────────────────────────────────────────────────
+   Identical to the desk's, deliberately — same tiers, same next-tier copy,
+   same pre-launch switcher, same sign out. Two rails describing one account in
+   two different vocabularies is how a product starts contradicting itself. */
+const PRELAUNCH = true;
+const NEXT_TIER = [
+ { to:'Solo', price:'$39', gets:['Every condition line on its own slider',
+     'Comps without a cap, and the comparison',
+     'The lender packet, with your name on it'] },
+ { to:'Underwriter', price:'$99', gets:['The photo condition read',
+     'Comps pulled and scored for the address',
+     'Offer letters, written from the winning exit'] },
+ { to:'The Office', price:'$249', gets:['Buy-box rules that refuse the drive-out',
+     'Compare a whole week of leads, not two',
+     'Seats, roles and your branding on everything'] },
+ null,
+];
+function acctPanel(){
+ const a = account(); if (!a) return '';
+ const TR = { 'solo':1, 'underwriter':2, 'the office':3, 'office':3 };
+ const TRIAL_DAYS = 14;
+ const left = (() => { if (!a.trial) return 0;
+   const t = Date.parse(a.trial + 'T00:00:00Z'); if (!Number.isFinite(t)) return 0;
+   return Math.max(0, TRIAL_DAYS - Math.floor((Date.now() - t) / 86400000)); })();
+ const t = left > 0 ? 3 : (typeof a.plan === 'string' ? (TR[a.plan.trim().toLowerCase()] || 1) : 0);
+ const nx = NEXT_TIER[Math.min(t,3)];
+ const now = left > 0 ? `Trial · ${left} day${left===1?'':'s'} left`
+   : (a.plan ? esc(a.plan) : 'Free tier');
+ return `<div class="ac-in">
+   <div class="ac-id"><b>${esc(a.name)}</b><span>${esc(a.email||'')}</span></div>
+   <div class="ac-now"><span class="k">You are on</span><span class="v">${now}</span></div>
+   ${nx ? `<a class="ac-up" href="plans.html">
+     <div class="k">${esc(nx.to)} · ${nx.price} a month</div>
+     <ul>${nx.gets.map(g=>`<li>${g}</li>`).join('')}</ul>
+     <span class="go">See the plans →</span></a>`
+    : `<div class="ac-top">You are on everything.</div>`}
+   ${PRELAUNCH ? `<div class="ac-dev"><span class="k">Pre-launch · preview a plan</span>
+     <div class="ac-sw">${['Free','Solo','Underwriter','The Office'].map((n,i)=>
+       `<button type="button" data-plan="${i?esc(n):''}" class="${t===i?'on':''}">${n}</button>`).join('')}</div>
+     <p>Switches this browser only. Nothing is charged and nothing is sent anywhere.</p></div>` : ''}
+   <button class="ac-out" id="ac-out" type="button">Sign out</button></div>`;
+}
+function wireAcct(){
+ const box = $('rn-acct'); if (!box) return;
+ box.querySelectorAll('[data-plan]').forEach(b => b.onclick = () => {
+   const a = account(); if (!a) return;
+   a.plan = b.dataset.plan || null;
+   try { localStorage.setItem(ACC, JSON.stringify(a)); } catch(e){}
+   const el = $('rail-nav'); if (el) delete el.dataset.sig;
+   boot();
+   const w = $('rn-who'); if (w) w.click();
+ });
+ const out = $('ac-out');
+ /* signing out clears the workspace record, never the work itself — and it
+    lands you on the door, which is the anonymous product, not a dashboard
+    that has just been emptied of the person it was greeting */
+ if (out) out.onclick = () => { try { localStorage.removeItem(ACC); } catch(e){}
+   location.href = 'office.html'; };
 }
 
 /* ── the hub ──────────────────────────────────────────────────────────── */
@@ -714,7 +882,7 @@ function boot(){
   const ACTS = [
     { i:'✎', t:'Price a property', d:'Three steps, all eight exits, the working shown',
       href:'desk.html#new', p:1 },
-    { i:'⇄', t:'Compare two deals', d: t>=1 ? 'Both sheets, one engine, and where the winner flips'
+    { i:'⇄', t:'Compare deals', d: t>=1 ? 'Two, three or four side by side, one engine, and where the winner flips'
         : 'Both sheets side by side — on Solo',
       href: t>=1 ? 'desk.html#compare' : 'plans.html#compare', lock: t<1 ? 'Solo' : null },
     { i:'◎', t:'Read the condition', d: t>=2 ? 'Drop the walk-through photos, get the lines back'
@@ -769,7 +937,7 @@ function boot(){
       const ask = numOf(p,'asking');
       return `<a class="pcard${isCur?' on':''}" href="desk.html#open=${i}"
           title="Open ${esc(nameOf(p,i))} on the desk">
-        <span class="pc-n">${esc(nameOf(p,i))}</span>
+        <span class="pc-n">${smp(p)}${esc(nameOf(p,i))}</span>
         <span class="pc-s">${ask!==null?'asking '+money(ask):(fl.length+' figure'+(fl.length===1?'':'s'))}</span>
         <span class="pc-f"><b class="${sp===null?'':(sp>=0?'up':'dn')}">${sp!==null?money(sp):'—'}</b>
           <em>${sp!==null?'spread on paper':'needs three numbers'}</em></span>
@@ -869,14 +1037,24 @@ function boot(){
   if (chush) chush.onclick = () => { LS_set('ni-course-hidden','1'); $('coursecard').remove(); };
   if (LS_get('ni-course-hidden') && !seen.length){ const cc=$('coursecard'); if (cc) cc.remove(); }
 
-  /* ── arcade ── */
-  $('a-state').textContent = G ? 'saved' : 'not played';
+  /* ── arcade ────────────────────────────────────────────────────────────
+     "Back to the arcade" and "Eight eras of ground, a street a day, and a
+     phone that rings" are both written for somebody who has already been
+     there. To everybody else they are a card taking up hub real estate to
+     say nothing, next to a button asking them to play a game they have never
+     heard of — which is precisely how serious software starts looking like a
+     gimmick. Somebody who has played gets their figures back. Somebody who
+     has not gets one plain sentence saying what it is and why it exists, at
+     the size an optional thing deserves. */
+  $('a-state').textContent = G ? 'saved' : 'optional';
   $('arcade').innerHTML = G
     ? `<div class="rowline"><span>Cash</span><span class="v">${money(+G.cash||0)}</span></div>
        <div class="rowline"><span>Streets settled</span><span class="v">${+G.streets||0}</span></div>
        <div class="rowline"><span>Best read</span><span class="v">${+G.bestPct||0}%</span></div>`
-    : `<p class="empty">Eight eras of ground, a street a day, and a phone that rings.</p>`;
-  $('arcade-foot').innerHTML = `<a class="btn p sm" href="arcade.html">${G ? 'Back to the arcade' : 'Play the arcade'}</a>`;
+    : `<p class="empty">Three practice games that run this same arithmetic against a clock &mdash;
+       a house at a time, sixty seconds each. Free, and nothing you do in there touches your properties.</p>`;
+  $('arcade-foot').innerHTML = `<a class="btn sm" href="arcade.html">${
+    G ? 'Back to the games \u2192' : 'Take a look \u2192'}</a>`;
 }
 
 /* the priors file is optional and lazy everywhere else; the hub asks for it
@@ -893,5 +1071,61 @@ function wantPriors(a){
   document.head.appendChild(s);
 }
 boot();
+</script>
+<style>
+.whoami{border:1px solid currentColor!important;border-radius:999px;padding:5px 12px!important;
+ font-weight:650;opacity:.75;transition:opacity .13s;white-space:nowrap}
+.whoami:hover{opacity:1}
+</style>
+<script>
+(function(){
+ var a=null; try{ a=JSON.parse(localStorage.getItem('ni-account-v1')); }catch(e){}
+ if(!a || typeof a.name!=='string' || !a.name.trim()) return;
+ try{
+ var first=a.name.trim().split(/\s+/)[0]||'You';
+ document.body.classList.add('signedin');
+ var hdr=document.querySelector('header')||document.body;
+
+ var m=hdr.querySelector('a.mark,a.marklink');
+ if(m){ m.setAttribute('href','office.html'); m.setAttribute('title','Your desk'); }
+
+ /* "Sign in" is not a thing you do twice */
+ var got=false, ls=hdr.querySelectorAll('a[href="office.html"]');
+ for(var i=0;i<ls.length;i++){
+  var t=(ls[i].textContent||'').trim().toLowerCase().replace(/[\s\u2192]+$/,'');
+  if(t==='sign in'||t==='your desk'||t==='open a workspace'){
+   ls[i].textContent=first+' \u2192'; ls[i].className+=' whoami'; got=true; }
+ }
+ if(!got){
+  var nav=hdr.querySelector('.masknav')||hdr.querySelector('nav');
+  if(nav){ var l=document.createElement('a'); l.href='office.html';
+   l.className='whoami'; l.textContent=first+' \u2192';
+   /* insertBefore wants a CHILD, and querySelector returns a descendant — on a
+      masthead whose primary button is wrapped in a div that is a TypeError and
+      the whole page's script dies with it. Anchor to the button's own parent. */
+   var p=nav.querySelector('.btn');
+   if(p && p.parentNode) p.parentNode.insertBefore(l,p); else nav.appendChild(l); }
+ }
+
+ /* the arcade floor, once it has met you */
+ var eye=document.getElementById('ark-eye');
+ if(eye){
+  var best=0; try{ best=+(localStorage.getItem('ni-drill-best')||0)||0; }catch(e){}
+  var R=[[0,'Door-knocker'],[450,'Bird dog'],[900,'Apprentice'],
+         [1500,'Underwriter'],[2300,'Closer'],[3200,'The Desk']], nm='';
+  for(var j=0;j<R.length;j++) if(best>=R[j][0]) nm=R[j][1];
+  eye.textContent = best
+    ? first+'\u2019s floor \u00b7 '+nm+' \u00b7 best '+best.toLocaleString('en-US')
+    : first+'\u2019s floor \u00b7 nothing played yet';
+ }
+ var out=document.getElementById('ark-out');
+ if(out && out.parentNode){
+  var b=document.createElement('a');
+  b.href='office.html'; b.className='btn p'; b.textContent='Back to your desk \u2192';
+  out.parentNode.insertBefore(b,out);
+  out.textContent='Price a property'; out.href='desk.html#new';
+ }
+ }catch(e){ try{ console.warn('account chrome', e); }catch(_){}}
+})();
 </script>
 </body></html>
