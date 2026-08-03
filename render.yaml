@@ -48,6 +48,42 @@ services:
       - key: NI_MAX_IMAGE_KB
         value: "1600"      # per photograph, AFTER the browser has resized
 
+      # ── the account and the waitlist (srv/SUPABASE.md) ────────────────
+      #    Unset, /api/list returns 503 ON PURPOSE and the page hands over the
+      #    support mailbox rather than saying "thanks" into a void.
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false        # THE SERVICE ROLE KEY. Bypasses every row-level
+                           # policy. It lives here and never in a page — the
+                           # site build throws if it is ever put in the
+                           # browser variable.
+      - key: SUPABASE_ANON_KEY
+        sync: false        # the PUBLIC one. Used only to ask Supabase whether
+                           # an access token is real, so that this service
+                           # never has to verify a JWT itself.
+
+      # ── getting paid (srv/STRIPE.md) ───────────────────────────────────
+      #    Unset, /api/checkout and /api/portal return 503 and the plans page
+      #    is exactly what it is today. Fails closed, like everything else.
+      - key: STRIPE_SECRET
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false        # test and live signing secrets are DIFFERENT, and
+                           # a live webhook signed with a test secret fails
+                           # silently — which looks exactly like "nobody is
+                           # subscribing". Swap this on launch day too.
+      - key: STRIPE_PRICE_SOLO
+        sync: false        # what a NEW subscriber pays today. Changing these
+      - key: STRIPE_PRICE_UNDERWRITER
+        sync: false        # never touches anybody already subscribed — that
+      - key: STRIPE_PRICE_OFFICE
+        sync: false        # is the whole mechanism behind the price lock.
+      - key: STRIPE_TRIAL_DAYS
+        value: "14"
+      - key: NI_SITE_URL
+        value: "https://negotiationinc.com"
+
       # ── set this to 1 to run the whole pipeline on a fixture answer, with
       #    no key and no spend. Useful for testing the wiring. ─────────────
       # - key: NI_MOCK

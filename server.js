@@ -34,6 +34,7 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { MODEL, SYSTEM, TOOL, LINES, LINE_IDS, RARELY_VISIBLE, userBlock } from './prompt.js';
+import { mountBilling, billingState } from './billing.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -325,6 +326,16 @@ app.post('/api/list', express.json({ limit: '4kb' }), async (req, res) => {
   }
 });
 
+/* ══ BILLING ═══════════════════════════════════════════════════════════════
+   Three routes in their own file, because the rule they exist to protect is
+   worth stating in one place: the only thing that decides what somebody gets
+   is `profiles.plan`, and the webhook is the only writer of it.
+
+   Mounted HERE, above the static allowlist, so that /api/stripe reaches its
+   raw-body parser before anything else touches the bytes a signature is
+   computed over. */
+mountBilling(app);
+
 /* ══ HEALTH ════════════════════════════════════════════════════════════════
    Enough to diagnose a deploy, and nothing that helps anybody attack it: no
    key, no code, no counts by IP. */
@@ -333,6 +344,7 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok:true, service:'negotiation-inc', mock:MOCK,
     read: (ACCESS && (KEY || MOCK)) ? 'on' : 'off',
     list: LIST_ON ? 'on' : 'off',
+    billing: billingState(),
     today: { reads: day.n, capReads: LIM.perDay, capUsd: LIM.dailyUsd },
     limits: { maxImages: LIM.maxImages, maxImageKb: LIM.maxImageKb, perIpHour: LIM.perIpHour } });
 });
@@ -346,7 +358,7 @@ app.get('/api/health', (_req, res) => {
    allowlist of what a browser is ever meant to fetch rather than by handing
    out the directory and hoping. */
 const SERVE = /\.(html|css|js|mjs|json|png|jpe?g|gif|svg|webp|ico|woff2?|txt|xml|webmanifest|map)$/i;
-const NEVER = /^(server\.js|prompt\.js|package(-lock)?\.json|render\.yaml|test-api\.mjs|LAUNCH\.md|\.env.*)$/i;
+const NEVER = /^(server\.js|prompt\.js|billing\.js|package(-lock)?\.json|render\.yaml|test-api\.mjs|test-pay\.mjs|LAUNCH\.md|SUPABASE\.md|STRIPE\.md|\.env.*)$/i;
 app.use((req, res, next) => {
   const p = decodeURIComponent(req.path).replace(/^\/+/, '');
   if (!p || p.endsWith('/')) return next();

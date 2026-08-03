@@ -55,14 +55,18 @@ ENTITY = "Negotiation Inc"          # once the corporation exists
 Re-run `python3 legal_build.py`, rebuild. The build already fails if the three
 legal pages lose the entity name or if "Delaware" comes back.
 
-**2 · Stripe, live.** The integration is built and tested in the sandbox, so
-this is a key swap plus Stripe's business verification. Two things that are easy
-to get wrong and expensive to notice late:
+**2 · Stripe, live.** The integration is built and tested — `srv/STRIPE.md` is
+the setup, `srv/test-pay.mjs` and `_tpay.mjs` are the proof — so this is a key
+swap plus Stripe's business verification. Two things that are easy to get wrong
+and expensive to notice late, both of which the harness now refuses to let
+regress:
 
 - **Grandfathered prices must be separate price objects**, never a computed
   discount. Billing §6 promises $99 subscribers keep $99 and the founding
   hundred keep $49, permanently. A discount coupon does not survive a price
-  change; a distinct price object does.
+  change; a distinct price object does. And the plan is read from the
+  subscription's metadata, never from the price id — otherwise raising the
+  price puts every founding member's account dark.
 - **The webhook writes exactly one field** — `plan` on the profile. `tierOf()`
   reads exactly that one field and nothing else. Keep it that way.
 
