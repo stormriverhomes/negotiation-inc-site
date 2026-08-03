@@ -903,10 +903,16 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  function sent(){ try{ return localStorage.getItem(KEY)==='1'; }catch(e){ return false; } }
  function doneHTML(){ return '<div class="wl done"><span class="wt">You are on the list.</span>'+
    '<span class="ws">You will get one email the day it opens, and nothing else.</span></div>'; }
- function formHTML(tier){ return '<div class="wl"><span class="wt">'+esc(tier)+' opens soon.</span>'+
-   '<span class="ws">The desk is <b>free and finished</b> \u2014 pricing, the seven exits, the comparison, the print. '+
+ /* The default sentence is written for somebody standing on the plans page,
+    who has just read a price. A person who has been playing the arcade for
+    ten minutes has not, and the same paragraph read to them is a non-sequitur
+    that costs the capture. So a slot may carry its own line, and the ones that
+    sit at the end of a game or a lesson do. */
+ var LINE='The desk is <b>free and finished</b> \u2014 pricing, the seven exits, the comparison, the print. '+
    'The paid tiers are being wired to a payment rail. Leave an address and you get <b>one</b> email the day they '+
-   'open, with the founding price on it.</span>'+
+   'open, with the founding price on it.';
+ function formHTML(tier, line){ return '<div class="wl"><span class="wt">'+esc(tier)+' opens soon.</span>'+
+   '<span class="ws">'+(line||LINE)+'</span>'+
    '<form class="wf"><input type="email" required placeholder="you@example.com" aria-label="Your email" '+
    'autocomplete="email" spellcheck="false"><button type="submit" class="btn p sm">Tell me when it opens</button></form>'+
    '<div class="wn" role="status"></div></div>'; }
@@ -937,7 +943,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   for(var k=0;k<slots.length;k++){
    var el=slots[k], tier=el.getAttribute('data-waitlist')||'Paid plans';
    var from=el.getAttribute('data-from')||'plans';
-   el.innerHTML = sent() ? doneHTML() : formHTML(tier);
+   el.innerHTML = sent() ? doneHTML() : formHTML(tier, el.getAttribute('data-line'));
    if(!sent()) wire(el.firstChild, from);
   }
  }
