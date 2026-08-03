@@ -1,0 +1,54 @@
+# The desk stays a static page. This service exists so that ONE thing can
+# happen that a static page cannot do honestly: hold an API key.
+#
+# It serves the same files Render has been serving all along, from the same
+# origin, and adds /api/read. Same origin means no CORS today and a working
+# session cookie the day auth arrives.
+#
+# NOTHING SECRET IS IN THIS FILE. Both secrets are marked sync:false, which
+# means Render will not read them from the repo and will not let a blueprint
+# set them — they are typed into the dashboard, by you, once.
+
+services:
+  - type: web
+    name: negotiation-inc
+    runtime: node
+    plan: starter          # free spins down after inactivity; a photo read on a
+                           # cold start takes ~30s longer, which reads as broken
+    region: oregon
+    branch: main
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+
+      # ── the two you type in the dashboard, never here ──────────────────
+      - key: ANTHROPIC_API_KEY
+        sync: false        # your key. If this is unset the read is DISABLED,
+                           # not open — the service fails closed on purpose.
+      - key: NI_ACCESS_CODE
+        sync: false        # the code a tester types once. Unset = read disabled.
+                           # Rotate it by changing it here; every browser that
+                           # had the old one is locked out on the next request.
+
+      # ── the ceilings. Raise them when you know what normal looks like ──
+      - key: NI_PER_IP_HOUR
+        value: "20"        # reads per hour from one address
+      - key: NI_PER_DAY
+        value: "200"       # reads per day, everybody
+      - key: NI_DAILY_USD
+        value: "5"         # the one that actually protects the wallet: the
+                           # service stops when the day's estimated spend hits
+                           # this, whatever the request count says
+      - key: NI_MAX_IMAGES
+        value: "8"
+      - key: NI_MAX_IMAGE_KB
+        value: "1600"      # per photograph, AFTER the browser has resized
+
+      # ── set this to 1 to run the whole pipeline on a fixture answer, with
+      #    no key and no spend. Useful for testing the wiring. ─────────────
+      # - key: NI_MOCK
+      #   value: "1"
