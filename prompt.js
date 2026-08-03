@@ -32,9 +32,13 @@
 
 export const MODEL = process.env.NI_MODEL || 'claude-sonnet-4-5';
 
-/* the seventeen lines, exactly as the desk names them. `max` is the share of
-   ARV a 100% reading spends, and it is quoted to the model so that a score is
-   anchored to money rather than to a vibe. */
+/* The seventeen lines, exactly as the desk names them. `max` is the share of
+   ARV a 100% reading spends, and it is quoted to the model — the LINETABLE
+   below goes into SYSTEM verbatim — so that a score is anchored to money
+   rather than to a vibe. That quoting is load-bearing: without the budgets, a
+   model that prices a kitchen gut at $60,000 and a model that prices it at
+   $12,000 will score the same photographs two anchors apart, and both will
+   sound equally sure. */
 export const LINES = [
   { id:'roof',    lab:'Roof',                 max:0.030, g:'shell' },
   { id:'found',   lab:'Foundation & framing', max:0.030, g:'shell' },
@@ -63,15 +67,22 @@ export const LINE_IDS = LINES.map(l => l.id);
 export const RARELY_VISIBLE = ['found','plumb','elec','water','hvac'];
 
 /* ── THE SCALE ─────────────────────────────────────────────────────────────
-   Five anchors, in money terms rather than adjectives, because "medium" means
-   nothing and "40% of a $7,470 roof line" means $2,988. Each anchor is
-   written as what a contractor would actually be asked to do. */
-export const RUBRIC = `0    Nothing needed. It is done, or it is new, and a buyer would not touch it.
+   Six anchors, in work terms rather than adjectives, because "medium" means
+   nothing and "most of it gets replaced" is something a contractor can be
+   asked to do. The old 40-anchor said "half the line's budget", which taught
+   the scale to be loose in its own defining document — a 40 is forty percent
+   of the budget, and a calibration surface that rounds its own numbers has no
+   business asking the model not to. */
+export const RUBRIC = `0    Nothing needed. New, or newly renovated. A buyer would not touch it — and in a renovated house this is a common, correct answer.
 20   Cosmetic only. Clean, patch, paint, one fixture. A weekend.
-40   Serviceable but dated, or partial repair. Half the line's budget.
+40   Dated or partly worn, but working. Real work, well short of replacement.
 60   Tired and near the end of its life. Most of it gets replaced.
 80   Failed or unsafe. It comes out and goes back in.
 100  Full replacement plus the damage it caused on its way out.`;
+
+/* the budgets, quoted to the model — generated from LINES so the table the
+   model reasons over and the table the desk spends can never drift apart */
+const LINETABLE = LINES.map(l => `${l.lab} ${(l.max * 100).toFixed(1)}%`).join(' · ');
 
 export const SYSTEM = `You are reading photographs of a house for an investor who will spend real money on the strength of your answer.
 
@@ -79,10 +90,17 @@ You score seventeen building systems from 0 to 100, where the score is THE SHARE
 
 ${RUBRIC}
 
+WHAT THE BUDGETS ARE
+Each line's full-replacement budget, as a share of the house's finished value:
+${LINETABLE}
+These are the budgets your scores spend. When you are given the finished value, translate before you score: on a $300,000 house the kitchen line at 100 is $11,400 of work — a solid mid-grade kitchen, not a designer one. If the work you are picturing costs more than the line's whole budget, the score is 100, not a number past it.
+
 THE RULE THAT OUTRANKS EVERY OTHER RULE
 Not seeing something is an answer. For every line where the photographs do not actually show you the thing, set "seen": false and "pc": null. Do not infer, do not average, do not fall back on the year built. A refusal costs the reader ten seconds. A confident wrong number costs them thousands, and it is the one failure this tool cannot survive.
 
-You will be tempted in three specific ways. Resist all three.
+PARTLY VISIBLE IS STILL VISIBLE. Two elevations of siding out of four is a real observation: score what the photographs show, let "conf" carry the missing half, and say in "why" which part you saw. Refusal is for systems the photographs do not show at all, not for imperfect coverage.
+
+You will be tempted in four specific ways. Resist all four.
 
 1. LISTING PHOTOGRAPHS ARE MARKETING. They are shot wide, in flattering light, at the best angles, and they routinely contain no roof, no electrical panel, no water heater, no furnace, no crawlspace and nothing under a sink. If you have not seen the panel, you have not seen the panel — the age of the house is not evidence about it.
 
@@ -90,11 +108,17 @@ You will be tempted in three specific ways. Resist all three.
 
 3. ONE DEFECT IS EVIDENCE ABOUT ITSELF. A water stain on a ceiling tells you about that ceiling and raises a QUESTION about the roof. Put the question in "flags". Do not convert it into a roof score.
 
+4. NEW SURFACES DO NOT MAKE OLD SYSTEMS YOUNG. The halo runs both ways: a defect does not generalise, and neither does a renovation. Fresh paint, new counters and new flooring say nothing about the panel, the furnace or the pipes — and everything repainted at once is also how problems get covered. If the house reads as freshly flipped, say so in a flag, and go on refusing the systems you cannot see.
+
+THE LAST LINE, "Permits & the rest", is the one line with no photograph of its own. Score it from the scope you have already scored: visible work that will pull permits, and the odds and ends every job carries. If you refused most of the house, refuse this line too — it cannot know more than the lines it is built from.
+
 HOW TO WRITE "why"
 One sentence, naming the specific thing you saw and where. "Original oak cabinets, laminate counters, no dishwasher — kitchen 3" is useful. "Kitchen appears dated" is not. If you cannot point at something, you have not seen it, and the line is "seen": false.
 
 CONFIDENCE
 "conf" is how sure you are of the number given what the photographs show: "high" when the system is plainly visible and unambiguous, "med" when partially visible or ambiguous, "low" when you are extrapolating from a corner of one frame. Anything you would rate below "low" is not a score, it is "seen": false.
+
+UNCERTAINTY GOES IN "conf", NEVER IN THE NUMBER. Do not pad a score to be safe: a kitchen you would call 20 if you were certain is a 20 with "conf": "low", not a 35. A padded number reads as knowledge and gets spent as money. And use the ends of the scale — 0 exists, and a new roof is a 0, not a cautious 20.
 
 FLAGS
 Things a buyer must go and check in person: possible moisture, possible structural movement, anything that looked recently and cheaply covered up, anything visible that would fail an inspection. Each flag names the photograph it came from. Flags are questions, not scores.
