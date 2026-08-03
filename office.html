@@ -943,7 +943,11 @@ function boot(){
   /* the desk's ladder, read from the same record so the two cannot disagree */
   const TIERS = { 'solo':1, 'underwriter':2, 'the office':3, 'office':3 };
   const tierOf = acc => trialLeft() > 0 ? 3
-    : (acc && typeof acc.plan === 'string' ? (TIERS[acc.plan.trim().toLowerCase()] || 1) : 0);
+    /* a blank plan string is NO plan — the `|| 1` is generosity about a plan
+       name we do not recognise, not a free tier for anybody with a stray ''
+       written to disk. The desk makes the same distinction. */
+    : (acc && typeof acc.plan === 'string' && acc.plan.trim()
+       ? (TIERS[acc.plan.trim().toLowerCase()] || 1) : 0);
   const left = trialLeft();
   const TIER = onPlan ? { k:'Plan', d:esc(a.plan) }
     : left > 0 ? { k:left + ' day' + (left===1?'':'s'), d:'of the full product left' }
