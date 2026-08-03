@@ -186,7 +186,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  </div>
 <section id="who">
 <h2><span class="n">01</span>Who this is between</h2>
-<p>Negotiation Inc (&ldquo;<b>we</b>&rdquo;, &ldquo;<b>us</b>&rdquo;) makes underwriting software for people buying and selling residential property &mdash; the desk, the comparison workbench, the eight-exits course and the arcade, together the &ldquo;<b>service</b>&rdquo;.</p>
+<p>StormRiver Real Estate LLC, a Georgia limited liability company trading as Negotiation Inc (&ldquo;<b>Negotiation Inc</b>&rdquo;, &ldquo;<b>we</b>&rdquo;, &ldquo;<b>us</b>&rdquo;) makes underwriting software for people buying and selling residential property &mdash; the desk, the comparison workbench, the eight-exits course and the arcade, together the &ldquo;<b>service</b>&rdquo;.</p>
 <p>These terms are the agreement between us and you, whether you use the free desk with no account, hold a free account, or pay for a plan. Using the service means you accept them. If you are using it for a company, you are telling us you are allowed to accept them on that company's behalf.</p>
 <p>You need to be at least 18. The service is not built for, marketed to, or usable by children.</p>
 </section>
@@ -310,7 +310,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 
 <section id="law">
 <h2><span class="n">15</span>Disputes and governing law</h2>
-<p>These terms are governed by the laws of the State of Delaware, without regard to its conflict-of-laws rules. Disputes go to the state and federal courts located in Delaware, and we each agree to that jurisdiction.</p>
+<p>These terms are governed by the laws of the State of Georgia, without regard to its conflict-of-laws rules. Disputes go to the state and federal courts located in Georgia, and we each agree to that jurisdiction.</p>
 <p>Before filing anything, write to <a href="mailto:support@negotiationinc.com">support@negotiationinc.com</a> with what happened and what you want. Most things are a misunderstanding and a refund, and we would rather find that out in an email than in a filing.</p>
 <p>If you are a consumer resident in a country whose law gives you the right to bring proceedings in your own courts, that right is unaffected by this section.</p>
 </section>
@@ -337,4 +337,60 @@ Privacy, exports and deletion &mdash; <a href="mailto:privacy@negotiationinc.com
  <span style="display:block;margin-top:10px">Negotiation Inc — the sheet shows its working.</span>
 </div></footer>
 
+<style>
+.whoami{border:1px solid currentColor!important;border-radius:999px;padding:5px 12px!important;
+ font-weight:650;opacity:.75;transition:opacity .13s;white-space:nowrap}
+.whoami:hover{opacity:1}
+</style>
+<script>
+(function(){
+ var a=null; try{ a=JSON.parse(localStorage.getItem('ni-account-v1')); }catch(e){}
+ if(!a || typeof a.name!=='string' || !a.name.trim()) return;
+ try{
+ var first=a.name.trim().split(/\s+/)[0]||'You';
+ document.body.classList.add('signedin');
+ var hdr=document.querySelector('header')||document.body;
+
+ var m=hdr.querySelector('a.mark,a.marklink');
+ if(m){ m.setAttribute('href','office.html'); m.setAttribute('title','Your desk'); }
+
+ /* "Sign in" is not a thing you do twice */
+ var got=false, ls=hdr.querySelectorAll('a[href="office.html"]');
+ for(var i=0;i<ls.length;i++){
+  var t=(ls[i].textContent||'').trim().toLowerCase().replace(/[\s\u2192]+$/,'');
+  if(t==='sign in'||t==='your desk'||t==='open a workspace'){
+   ls[i].textContent=first+' \u2192'; ls[i].className+=' whoami'; got=true; }
+ }
+ if(!got){
+  var nav=hdr.querySelector('.masknav')||hdr.querySelector('nav');
+  if(nav){ var l=document.createElement('a'); l.href='office.html';
+   l.className='whoami'; l.textContent=first+' \u2192';
+   /* insertBefore wants a CHILD, and querySelector returns a descendant — on a
+      masthead whose primary button is wrapped in a div that is a TypeError and
+      the whole page's script dies with it. Anchor to the button's own parent. */
+   var p=nav.querySelector('.btn');
+   if(p && p.parentNode) p.parentNode.insertBefore(l,p); else nav.appendChild(l); }
+ }
+
+ /* the arcade floor, once it has met you */
+ var eye=document.getElementById('ark-eye');
+ if(eye){
+  var best=0; try{ best=+(localStorage.getItem('ni-drill-best')||0)||0; }catch(e){}
+  var R=[[0,'Door-knocker'],[450,'Bird dog'],[900,'Apprentice'],
+         [1500,'Underwriter'],[2300,'Closer'],[3200,'The Desk']], nm='';
+  for(var j=0;j<R.length;j++) if(best>=R[j][0]) nm=R[j][1];
+  eye.textContent = best
+    ? first+'\u2019s floor \u00b7 '+nm+' \u00b7 best '+best.toLocaleString('en-US')
+    : first+'\u2019s floor \u00b7 nothing played yet';
+ }
+ var out=document.getElementById('ark-out');
+ if(out && out.parentNode){
+  var b=document.createElement('a');
+  b.href='office.html'; b.className='btn p'; b.textContent='Back to your desk \u2192';
+  out.parentNode.insertBefore(b,out);
+  out.textContent='Price a property'; out.href='desk.html#new';
+ }
+ }catch(e){ try{ console.warn('account chrome', e); }catch(_){}}
+})();
+</script>
 </body></html>
