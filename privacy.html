@@ -212,7 +212,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  <tr><td><b>Password hash</b></td><td>To sign you in. We never hold the password itself</td><td>Until you delete the account</td></tr>
  <tr><td><b>Your sheets</b> &mdash; addresses, figures, comps, notes, condition ratings, saved assumptions</td><td>They are the product. Storing them is the feature you signed up for</td><td>Until you delete them, or 30 days after you close the account</td></tr>
  <tr><td><b>Plan, trial dates and billing status</b></td><td>To know what to unlock and what to charge</td><td>Seven years, because tax law says so</td></tr>
- <tr><td><b>Photographs you upload</b></td><td>To read condition from them</td><td>Deleted from our side within 24 hours of the read (section 5)</td></tr>
+ <tr><td><b>Photographs you upload</b></td><td>To read condition from them</td><td><b>Never stored.</b> They exist in memory for the length of one request (section 5)</td></tr>
  <tr><td><b>Server logs</b> &mdash; IP address, browser string, page, timestamp, errors</td><td>To keep the thing running and to notice an attack</td><td>30 days, then deleted</td></tr>
  <tr><td><b>Support email</b></td><td>To answer you, and to remember the answer next time</td><td>Two years</td></tr>
 </table>
@@ -239,9 +239,9 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   <li>The photograph, or the two sheets being compared, is sent to Anthropic to produce the answer, along with the prompt that asks for it.</li>
   <li>Photographs are resized in your browser before they leave it &mdash; partly because it makes the read cheaper, and partly because a smaller image carries less than a full-resolution one.</li>
   <li><b>Anthropic does not use it to train its models.</b> We use their commercial API, where that is the contractual default.</li>
-  <li>We keep the uploaded photograph only as long as it takes to run the read and show you the result, and delete it from our storage within 24 hours. The <em>result</em> &mdash; the condition ratings it produced &mdash; stays on your sheet, because that is what you asked for.</li>
+  <li><b>We never store the photograph.</b> It exists in the memory of one server process for the length of one request &mdash; it is not written to a disk, not written to a log, and not cached anywhere. There is no deletion job because there is nothing to delete. The <em>result</em> &mdash; the condition ratings it produced &mdash; stays on your sheet, because that is what you asked for.</li>
 </ul>
-<div class="note"><p><b>Strip the photograph first if it matters to you.</b> A phone photograph can carry GPS coordinates and a timestamp in its metadata. We remove that metadata before the image leaves your browser, but nothing removes the fact that a photograph of a house is a photograph of a house. Do not upload images containing people, documents or anything else you would not want processed.</p></div>
+<div class="note"><p><b>The metadata is gone before the image leaves your browser.</b> A phone photograph carries GPS coordinates and a timestamp. Every image is resized and re-encoded in your own browser before it is sent &mdash; re-encoding is what removes the metadata, so the file that leaves is not the file you chose and carries none of it. What that does not remove is the fact that a photograph of a house is a photograph of a house: do not upload images containing people, documents, or anything else you would not want processed.</p></div>
 <p>Neither feature runs unless you press the button that runs it. Nothing is sent to a model in the background.</p>
 </section>
 
@@ -333,4 +333,60 @@ Everything else &mdash; <a href="mailto:support@negotiationinc.com">support@nego
  <span style="display:block;margin-top:10px">Negotiation Inc — the sheet shows its working.</span>
 </div></footer>
 
+<style>
+.whoami{border:1px solid currentColor!important;border-radius:999px;padding:5px 12px!important;
+ font-weight:650;opacity:.75;transition:opacity .13s;white-space:nowrap}
+.whoami:hover{opacity:1}
+</style>
+<script>
+(function(){
+ var a=null; try{ a=JSON.parse(localStorage.getItem('ni-account-v1')); }catch(e){}
+ if(!a || typeof a.name!=='string' || !a.name.trim()) return;
+ try{
+ var first=a.name.trim().split(/\s+/)[0]||'You';
+ document.body.classList.add('signedin');
+ var hdr=document.querySelector('header')||document.body;
+
+ var m=hdr.querySelector('a.mark,a.marklink');
+ if(m){ m.setAttribute('href','office.html'); m.setAttribute('title','Your desk'); }
+
+ /* "Sign in" is not a thing you do twice */
+ var got=false, ls=hdr.querySelectorAll('a[href="office.html"]');
+ for(var i=0;i<ls.length;i++){
+  var t=(ls[i].textContent||'').trim().toLowerCase().replace(/[\s\u2192]+$/,'');
+  if(t==='sign in'||t==='your desk'||t==='open a workspace'){
+   ls[i].textContent=first+' \u2192'; ls[i].className+=' whoami'; got=true; }
+ }
+ if(!got){
+  var nav=hdr.querySelector('.masknav')||hdr.querySelector('nav');
+  if(nav){ var l=document.createElement('a'); l.href='office.html';
+   l.className='whoami'; l.textContent=first+' \u2192';
+   /* insertBefore wants a CHILD, and querySelector returns a descendant — on a
+      masthead whose primary button is wrapped in a div that is a TypeError and
+      the whole page's script dies with it. Anchor to the button's own parent. */
+   var p=nav.querySelector('.btn');
+   if(p && p.parentNode) p.parentNode.insertBefore(l,p); else nav.appendChild(l); }
+ }
+
+ /* the arcade floor, once it has met you */
+ var eye=document.getElementById('ark-eye');
+ if(eye){
+  var best=0; try{ best=+(localStorage.getItem('ni-drill-best')||0)||0; }catch(e){}
+  var R=[[0,'Door-knocker'],[450,'Bird dog'],[900,'Apprentice'],
+         [1500,'Underwriter'],[2300,'Closer'],[3200,'The Desk']], nm='';
+  for(var j=0;j<R.length;j++) if(best>=R[j][0]) nm=R[j][1];
+  eye.textContent = best
+    ? first+'\u2019s floor \u00b7 '+nm+' \u00b7 best '+best.toLocaleString('en-US')
+    : first+'\u2019s floor \u00b7 nothing played yet';
+ }
+ var out=document.getElementById('ark-out');
+ if(out && out.parentNode){
+  var b=document.createElement('a');
+  b.href='office.html'; b.className='btn p'; b.textContent='Back to your desk \u2192';
+  out.parentNode.insertBefore(b,out);
+  out.textContent='Price a property'; out.href='desk.html#new';
+ }
+ }catch(e){ try{ console.warn('account chrome', e); }catch(_){}}
+})();
+</script>
 </body></html>
