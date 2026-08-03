@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Plans · Negotiation Inc</title>
+<title>Plans · Negotiation Inc</title><script>window.NI_LIVE=false;</script>
 <meta name="description" content="Free forever to price a deal. Solo $39 unlocks your whole model; Underwriter $99 adds comps pulled, the photo condition read and the letters; The Office $249 runs a shop.">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -279,9 +279,15 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
     exchange we want the thing money cannot buy at this stage: what breaks, what is missing,
     and what you would have paid for instead.</p>
   </div>
-  <a class="btn p" href="office.html">Take a place →</a>
+
+<a class="btn p" href="#waitlist">Claim a place →</a>
  </div>
  </div>
+
+
+ <div id="waitlist" style="max-width:640px;margin:26px auto 0"
+   data-waitlist="Solo, Underwriter and The Office" data-from="plans"></div>
+
 
  <div class="billing"><b>Monthly or yearly</b><span class="save">Two months free on annual</span>
   <span>·</span><span>Cancel in one click — no contract, no call</span></div>
@@ -338,8 +344,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <div class="fair">Everything here runs in your browser. No lookups, no AI, nothing metered —
     which is why it costs what it costs.</div>
   </div>
-  <div class="pf"><a class="btn" href="office.html">Start 14 days free →</a>
-   <span class="under">Card on file, nothing charged for 14 days</span></div>
+  <div class="pf"><a class="btn" href="#waitlist">Tell me when it opens →</a>
+   <span class="under">The free desk works today — this tier is being wired up</span></div>
  </div>
 
  <div class="plan mid">
@@ -367,8 +373,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <div class="fair">Fair use: 200 property lookups and 100 photo reads a month. Nobody working
     normally has ever come close; if you do, we will call you rather than cut you off.</div>
   </div>
-  <div class="pf"><a class="btn p" href="office.html">Start 14 days free →</a>
-   <span class="under">Card on file, nothing charged for 14 days, cancel in one click</span></div>
+  <div class="pf"><a class="btn p" href="#waitlist">Tell me when it opens →</a>
+   <span class="under">The free desk works today — this tier is being wired up</span></div>
  </div>
 
  <div class="plan">
@@ -393,8 +399,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
     <li><i>✓</i><span><b>Three seats included</b>, $29 each after — with roles, an audit trail, API access and webhooks</span></li>
    </ul>
   </div>
-  <div class="pf"><a class="btn q" href="office.html">Talk to us</a>
-   <span class="under">Migration, setup and onboarding included</span></div>
+  <div class="pf"><a class="btn q" href="#waitlist">Tell me when it opens →</a>
+   <span class="under">Migration, setup and onboarding included when it does</span></div>
  </div>
 
 </div>
@@ -873,6 +879,69 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   out.textContent='Price a property'; out.href='desk.html#new';
  }
  }catch(e){ try{ console.warn('account chrome', e); }catch(_){}}
+})();
+</script>
+<style>
+.wl{border:1px solid var(--line-2,#c9d0dc);border-radius:16px;background:#fff;padding:15px 17px;text-align:left}
+.wl .wt{display:block;font-family:var(--serif,Georgia),serif;font-size:17px;font-weight:700;color:var(--ink,#101725)}
+.wl .ws{display:block;font-size:12.5px;line-height:1.55;color:var(--mid,#4a5162);margin-top:5px}
+.wl .ws b{color:var(--ink,#101725)}
+.wl .wf{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:14px;padding:9px 11px;border-radius:10px;
+ border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
+.wl .wf input:focus{outline:none;border-color:var(--blue,#1f5fd0);box-shadow:0 0 0 3px var(--blue-soft,#eaf0fc)}
+.wl .wf button{flex:none;cursor:pointer}
+.wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:var(--soft,#677187)}
+.wl .wn.ok{color:var(--green,#177a4d)} .wl .wn.bad{color:var(--red,#b3372c)}
+.wl.done{border-color:var(--green-line,#bfe0cd);background:var(--green-soft,#eaf6f0)}
+</style>
+<script>
+(function(){
+ var SUPPORT='support@negotiationinc.com', KEY='ni-wait-v1';
+ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+ function sent(){ try{ return localStorage.getItem(KEY)==='1'; }catch(e){ return false; } }
+ function doneHTML(){ return '<div class="wl done"><span class="wt">You are on the list.</span>'+
+   '<span class="ws">You will get one email the day it opens, and nothing else.</span></div>'; }
+ function formHTML(tier){ return '<div class="wl"><span class="wt">'+esc(tier)+' opens soon.</span>'+
+   '<span class="ws">The desk is <b>free and finished</b> \u2014 pricing, the seven exits, the comparison, the print. '+
+   'The paid tiers are being wired to a payment rail. Leave an address and you get <b>one</b> email the day they '+
+   'open, with the founding price on it.</span>'+
+   '<form class="wf"><input type="email" required placeholder="you@example.com" aria-label="Your email" '+
+   'autocomplete="email" spellcheck="false"><button type="submit" class="btn p sm">Tell me when it opens</button></form>'+
+   '<div class="wn" role="status"></div></div>'; }
+ function wire(box, from){
+  var f=box.querySelector('form'), note=box.querySelector('.wn');
+  if(!f) return;
+  function say(t,bad){ if(note){ note.textContent=t; note.className='wn'+(bad?' bad':' ok'); } }
+  f.addEventListener('submit', function(ev){
+   ev.preventDefault();
+   var i=f.querySelector('input'), btn=f.querySelector('button');
+   var email=(i.value||'').trim().slice(0,160);
+   if(!/^[^@\s]+@[^@\s.]+\.[^@\s]{2,}$/.test(email)) return say('That does not look like an email address.',true);
+   btn.disabled=true; say('Adding you\u2026');
+   fetch('/api/list',{method:'POST',headers:{'content-type':'application/json'},
+     body:JSON.stringify({email:email,from:from||'plans'})})
+    .then(function(r){
+      if(r.ok){ try{localStorage.setItem(KEY,'1');}catch(e){} box.outerHTML=doneHTML(); return; }
+      throw new Error('list');
+    })
+    .catch(function(){
+      say('The list is not reachable right now \u2014 email '+SUPPORT+' and you will be added by hand.',true);
+      btn.disabled=false;
+    });
+  });
+ }
+ function paint(){
+  var slots=document.querySelectorAll('[data-waitlist]');
+  for(var k=0;k<slots.length;k++){
+   var el=slots[k], tier=el.getAttribute('data-waitlist')||'Paid plans';
+   var from=el.getAttribute('data-from')||'plans';
+   el.innerHTML = sent() ? doneHTML() : formHTML(tier);
+   if(!sent()) wire(el.firstChild, from);
+  }
+ }
+ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',paint); else paint();
 })();
 </script>
 </body></html>

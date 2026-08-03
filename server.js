@@ -272,6 +272,59 @@ function mockAnswer(){
     usage: { input_tokens: 4200, output_tokens: 900 } };
 }
 
+/* ══ THE WAITLIST ══════════════════════════════════════════════════════════
+   Before the payment rail exists, this is the only thing standing between a
+   month of visitors and nothing at all. Every person the arcade and the drill
+   bring in during pre-launch either lands in this table or is spent and gone,
+   so the one behaviour that matters is that it NEVER SILENTLY SUCCEEDS: with
+   no store configured it returns 503 and the page hands over the mailbox,
+   rather than saying "thanks" into a void and being discovered on launch day
+   with nobody to send to.
+
+   It stores to Supabase, which is the same free tier auth will use — one
+   dependency rather than two — and it has its own rate window so that a
+   signup cannot spend the photo read's allowance or vice versa. */
+const SB_URL = (process.env.SUPABASE_URL || '').replace(/\/+$/, '');
+const SB_KEY = process.env.SUPABASE_SERVICE_KEY || '';
+const LIST_ON = !!(SB_URL && SB_KEY);
+const listHits = new Map();
+function listOk(ip){
+  const now = Date.now(), win = now - 36e5;
+  const a = (listHits.get(ip) || []).filter(t => t > win);
+  if (a.length >= 5) { listHits.set(ip, a); return false; }
+  a.push(now); listHits.set(ip, a);
+  if (listHits.size > 5000) for (const [k, v] of listHits) if (!v.some(t => t > win)) listHits.delete(k);
+  return true;
+}
+app.post('/api/list', express.json({ limit: '4kb' }), async (req, res) => {
+  if (!LIST_ON) { log('list 503 unconfigured'); return res.status(503).json({ ok:false, error:'The list is not open yet.' }); }
+  if (!listOk(req.ip || 'unknown')) return res.status(429).json({ ok:false, error:'Too many, too fast.' });
+  const b2 = req.body || {};
+  const email = String(b2.email || '').trim().slice(0, 160).toLowerCase();
+  if (!/^[^@\s]+@[^@\s.]+\.[^@\s]{2,}$/.test(email))
+    return res.status(400).json({ ok:false, error:'That is not an email address.' });
+  const from = String(b2.from || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 32) || 'plans';
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/waitlist`, {
+      method: 'POST',
+      headers: { 'content-type':'application/json', apikey: SB_KEY,
+                 authorization: `Bearer ${SB_KEY}`,
+                 /* a second signup from the same address is a person pressing
+                    twice, not an error to show them */
+                 Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify([{ email, source: from }]),
+    });
+    if (!r.ok){ log('list upstream', r.status); return res.status(502).json({ ok:false, error:'The list could not be reached.' }); }
+    /* the address itself is never written to a log — the count and the source
+       are all that is needed to know the thing is working */
+    log('list ok', from);
+    res.json({ ok:true });
+  } catch(e){
+    log('list fail', (e && e.name) || 'unknown');
+    res.status(502).json({ ok:false, error:'The list could not be reached.' });
+  }
+});
+
 /* ══ HEALTH ════════════════════════════════════════════════════════════════
    Enough to diagnose a deploy, and nothing that helps anybody attack it: no
    key, no code, no counts by IP. */
@@ -279,6 +332,7 @@ app.get('/api/health', (_req, res) => {
   rollDay();
   res.json({ ok:true, service:'negotiation-inc', mock:MOCK,
     read: (ACCESS && (KEY || MOCK)) ? 'on' : 'off',
+    list: LIST_ON ? 'on' : 'off',
     today: { reads: day.n, capReads: LIM.perDay, capUsd: LIM.dailyUsd },
     limits: { maxImages: LIM.maxImages, maxImageKb: LIM.maxImageKb, perIpHour: LIM.perIpHour } });
 });
@@ -292,7 +346,7 @@ app.get('/api/health', (_req, res) => {
    allowlist of what a browser is ever meant to fetch rather than by handing
    out the directory and hoping. */
 const SERVE = /\.(html|css|js|mjs|json|png|jpe?g|gif|svg|webp|ico|woff2?|txt|xml|webmanifest|map)$/i;
-const NEVER = /^(server\.js|prompt\.js|package(-lock)?\.json|render\.yaml|test-api\.mjs|\.env.*)$/i;
+const NEVER = /^(server\.js|prompt\.js|package(-lock)?\.json|render\.yaml|test-api\.mjs|LAUNCH\.md|\.env.*)$/i;
 app.use((req, res, next) => {
   const p = decodeURIComponent(req.path).replace(/^\/+/, '');
   if (!p || p.endsWith('/')) return next();

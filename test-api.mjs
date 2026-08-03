@@ -13,6 +13,7 @@
      D · the site is still a site, and the server's own files are not part of
          it */
 import assert from 'node:assert';
+import http from 'node:http';
 
 /* A fresh port per boot. The pooled keep-alive socket from a closed server
    gets reused against the next one and dies mid-request otherwise — which
@@ -165,7 +166,62 @@ const OK = { 'x-ni-access':'letmein' };
   await new Promise(d => s.close(d));
 }
 
+/* ── E · the waitlist never silently succeeds ──────────────────────────── */
+{
+  /* unconfigured: a 503 the page can react to, NOT a cheerful 200 into a void.
+     A waitlist that swallows addresses is discovered on launch day, with a
+     month of visitors gone and nobody to send to. */
+  let s = await boot({ NI_MOCK:'1', NI_ACCESS_CODE:'x' });
+  let r = await fetch(base + '/api/list', { method:'POST', headers:{'content-type':'application/json'},
+    body: JSON.stringify({ email:'someone@example.com', from:'plans' }) });
+  out.E_unconfigured = r.status;
+  check(r.status === 503, `E: with no store configured the waitlist answered ${r.status} — an address was accepted and lost`);
+  let h = await (await fetch(base + '/api/health')).json();
+  check(h.list === 'off', 'E: health claims the list is on with no store behind it');
+  await new Promise(d => s.close(d));
+
+  /* configured, against a stub Supabase: a bad address never leaves, a good
+     one does, and the address is never written to a log */
+  const seen = [];
+  const sb = await new Promise(rs => {
+    const srv = http.createServer((q, resp) => {
+      let body = ''; q.on('data', c => body += c);
+      q.on('end', () => { seen.push({ url:q.url, body });
+        resp.writeHead(201, {'content-type':'application/json'}); resp.end('[]'); });
+    }); srv.listen(0, () => rs(srv));
+  });
+  const sbUrl = 'http://127.0.0.1:' + sb.address().port;
+  s = await boot({ NI_MOCK:'1', NI_ACCESS_CODE:'x', SUPABASE_URL: sbUrl, SUPABASE_SERVICE_KEY:'svc' });
+  const post2 = (b2) => fetch(base + '/api/list', { method:'POST',
+    headers:{'content-type':'application/json'}, body: JSON.stringify(b2) });
+
+  r = await post2({ email:'not an email' });
+  out.E_bad = r.status;
+  check(r.status === 400, `E: a malformed address got ${r.status}, not 400`);
+  check(seen.length === 0, 'E: a malformed address was forwarded to the store anyway');
+
+  r = await post2({ email:'Someone@Example.COM ', from:'desk<script>' });
+  out.E_good = { status: r.status, sent: seen.length };
+  check(r.status === 200, `E: a valid address got ${r.status}`);
+  check(seen.length === 1, 'E: a valid address never reached the store');
+  if (seen[0]){
+    check(/someone@example.com/.test(seen[0].body), 'E: the address was not normalised to lower case');
+    check(!/<script>/.test(seen[0].body), `E: the source field was not scrubbed — ${seen[0].body}`);
+  }
+  h = await (await fetch(base + '/api/health')).json();
+  check(h.list === 'on', 'E: health does not report a configured list');
+  check(!JSON.stringify(h).includes('svc'), 'E: health leaks the service key');
+
+  /* and five an hour from one address is enough for a person pressing twice */
+  const codes = [];
+  for (let i = 0; i < 7; i++) codes.push((await post2({ email:`a${i}@example.com` })).status);
+  out.E_rate = codes;
+  check(codes.slice(-1)[0] === 429, `E: the waitlist has no rate limit — ${codes}`);
+  await new Promise(d => s.close(d));
+  await new Promise(d => sb.close(d));
+}
+
 console.log(JSON.stringify(out, null, 1));
 console.log(bad.length ? 'FAIL\n - ' + bad.join('\n - ')
-  : 'PASS — fails closed with nothing configured, refuses to be a free LLM, drops a line that scored what it said it could not see, and never serves its own source');
+  : 'PASS — fails closed with nothing configured, refuses to be a free LLM, drops a line that scored what it said it could not see, never serves its own source, and never accepts a waitlist address it cannot store');
 process.exit(bad.length ? 1 : 0);
