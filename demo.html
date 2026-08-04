@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>See how it works · Negotiation Inc</title>
+<title>See how it works · Negotiation Inc</title><script>window.NI_LIVE=false;window.NI_SUPABASE_URL="https://zfsazgrxhtitxakjvyqq.supabase.co";window.NI_SUPABASE_ANON="sb_publishable_EcC8_XnC_bUVjqx7fpOWxQ_XWo0gu-R";</script>
 <meta name="description" content="Five properties that do not exist, each with a different right answer. Open one and the real software prices every exit against it. No account.">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -600,6 +600,75 @@ document.querySelectorAll('.deal canvas').forEach((cv,i) => draw(cv, DEALS[i]));
   out.textContent='Price a property'; out.href='desk.html#new';
  }
  }catch(e){ try{ console.warn('account chrome', e); }catch(_){}}
+})();
+</script>
+<style>
+.wl{border:1px solid var(--line-2,#c9d0dc);border-radius:16px;background:#fff;padding:15px 17px;text-align:left}
+.wl .wt{display:block;font-family:var(--serif,Georgia),serif;font-size:17px;font-weight:700;color:var(--ink,#101725)}
+.wl .ws{display:block;font-size:12.5px;line-height:1.55;color:var(--mid,#4a5162);margin-top:5px}
+.wl .ws b{color:var(--ink,#101725)}
+.wl .wf{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:14px;padding:9px 11px;border-radius:10px;
+ border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
+.wl .wf input:focus{outline:none;border-color:var(--blue,#1f5fd0);box-shadow:0 0 0 3px var(--blue-soft,#eaf0fc)}
+.wl .wf button{flex:none;cursor:pointer}
+.wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:var(--soft,#677187)}
+.wl .wn.ok{color:var(--green,#177a4d)} .wl .wn.bad{color:var(--red,#b3372c)}
+.wl.done{border-color:var(--green-line,#bfe0cd);background:var(--green-soft,#eaf6f0)}
+</style>
+<script>
+(function(){
+ var SUPPORT='support@negotiationinc.com', KEY='ni-wait-v1';
+ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+ function sent(){ try{ return localStorage.getItem(KEY)==='1'; }catch(e){ return false; } }
+ function doneHTML(){ return '<div class="wl done"><span class="wt">You are on the list.</span>'+
+   '<span class="ws">You will get one email the day it opens, and nothing else.</span></div>'; }
+ /* The default sentence is written for somebody standing on the plans page,
+    who has just read a price. A person who has been playing the arcade for
+    ten minutes has not, and the same paragraph read to them is a non-sequitur
+    that costs the capture. So a slot may carry its own line, and the ones that
+    sit at the end of a game or a lesson do. */
+ var LINE='The desk is <b>free and finished</b> \u2014 pricing, the seven exits, the comparison, the print. '+
+   'The paid tiers are being wired to a payment rail. Leave an address and you get <b>one</b> email the day they '+
+   'open, with the founding price on it.';
+ function formHTML(tier, line){ return '<div class="wl"><span class="wt">'+esc(tier)+' opens soon.</span>'+
+   '<span class="ws">'+(line||LINE)+'</span>'+
+   '<form class="wf"><input type="email" required placeholder="you@example.com" aria-label="Your email" '+
+   'autocomplete="email" spellcheck="false"><button type="submit" class="btn p sm">Tell me when it opens</button></form>'+
+   '<div class="wn" role="status"></div></div>'; }
+ function wire(box, from){
+  var f=box.querySelector('form'), note=box.querySelector('.wn');
+  if(!f) return;
+  function say(t,bad){ if(note){ note.textContent=t; note.className='wn'+(bad?' bad':' ok'); } }
+  f.addEventListener('submit', function(ev){
+   ev.preventDefault();
+   var i=f.querySelector('input'), btn=f.querySelector('button');
+   var email=(i.value||'').trim().slice(0,160);
+   if(!/^[^@\s]+@[^@\s.]+\.[^@\s]{2,}$/.test(email)) return say('That does not look like an email address.',true);
+   btn.disabled=true; say('Adding you\u2026');
+   fetch('/api/list',{method:'POST',headers:{'content-type':'application/json'},
+     body:JSON.stringify({email:email,from:from||'plans'})})
+    .then(function(r){
+      if(r.ok){ try{localStorage.setItem(KEY,'1');}catch(e){} box.outerHTML=doneHTML(); return; }
+      throw new Error('list');
+    })
+    .catch(function(){
+      say('The list is not reachable right now \u2014 email '+SUPPORT+' and you will be added by hand.',true);
+      btn.disabled=false;
+    });
+  });
+ }
+ function paint(){
+  var slots=document.querySelectorAll('[data-waitlist]');
+  for(var k=0;k<slots.length;k++){
+   var el=slots[k], tier=el.getAttribute('data-waitlist')||'Paid plans';
+   var from=el.getAttribute('data-from')||'plans';
+   el.innerHTML = sent() ? doneHTML() : formHTML(tier, el.getAttribute('data-line'));
+   if(!sent()) wire(el.firstChild, from);
+  }
+ }
+ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',paint); else paint();
 })();
 </script>
 </body></html>
