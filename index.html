@@ -269,6 +269,25 @@ img,canvas,svg.art{border-radius:var(--r-card)}
 /* a rounded card cannot let a square child bleed out of its corner */
 .showstage,.hero .art,.arcade,.doors{overflow:hidden}
 
+/* ── ONE CARD, CLIPPED ONCE ───────────────────────────────────────────────
+   The slideshow was FOUR independently rounded rectangles stacked inside one
+   another — the card, the stage, the bar, and the image — because the rules
+   above hand --r-card to `.show`, `.showstage`, `.showbar` and `img` alike,
+   and only the stage clipped anything.
+
+   So the stage's BOTTOM corners curved away from the bar's TOP corners along
+   the seam between them, the image carried its own corners inside the stage's,
+   and the card itself never clipped, letting square children sit proud of the
+   frame. Four radii, none of them agreeing: read as sharp edges showing
+   through a rounded box, which is exactly what it was.
+
+   A card is ONE shape. The outer element owns the radius and does the
+   clipping; everything inside is square and takes its corners from the
+   parent. Scoped to the slideshow so the doors and the hero art, which are
+   single rounded images with nothing stacked on them, are untouched. */
+.show{overflow:hidden}
+.show .showstage,.show .showbar,.show .showstage img{border-radius:0}
+
 </style>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
