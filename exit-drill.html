@@ -37,7 +37,12 @@ a{color:#8fb4ff}
 
 .eyebrow{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#6f7d94}
 header{border-bottom:1px solid var(--edge);background:rgba(13,20,32,.9)}
-.mast{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:14px 0;flex-wrap:wrap}
+/* `.mast` and `.top` are both `class="wrap …"`. The padding SHORTHAND zeroes
+   the page gutter that `.wrap` supplies, so on every phone this game's
+   headline, its explanation and its whole scoreboard sat flush against both
+   edges of the glass. Vertical rhythm on its own axis, always. */
+.mast{display:flex;justify-content:space-between;align-items:center;gap:14px 18px;
+ padding-top:14px;padding-bottom:14px;flex-wrap:wrap}
 .mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:var(--txt)}
 .mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
 .mark .inc{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--gold)}
@@ -50,7 +55,7 @@ header{border-bottom:1px solid var(--edge);background:rgba(13,20,32,.9)}
 .masknav{display:flex;align-items:center;gap:18px;font-size:14px;flex-wrap:wrap}
 .masknav a{display:inline-flex;align-items:center;padding:6px 2px;line-height:1;color:var(--dim);text-decoration:none}.masknav a:hover{color:#fff}
 
-.top{padding:34px 0 6px;display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}
+.top{padding-top:34px;padding-bottom:6px;display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}
 h1{font-size:40px}
 .lede{font-size:15.5px;color:var(--dim);margin-top:8px;max-width:52ch}
 .tally{display:flex;gap:22px;text-align:right}
