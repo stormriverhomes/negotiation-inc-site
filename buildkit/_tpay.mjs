@@ -1,0 +1,264 @@
+/* _tpay — the browser half of the payment rail, against a stub Stripe and a
+   stub Supabase, in a live-stage build.
+
+   The client cannot decide a tier and this harness exists mostly to prove it
+   still cannot. What it actually tests:
+
+     A · with nothing configured the pages are exactly the product they are
+         today — no billing controls, no console errors
+     B · a plan clicked on the plans page survives the door and becomes a
+         checkout, for somebody who had to sign up on the way
+     C · THE RETURN FROM STRIPE WAITS. The webhook lands four seconds after
+         the redirect and the page must not have shown a free account in the
+         meantime
+     D · and when the webhook never lands, the page says so and names the
+         mailbox rather than showing a free account
+     E · the billing portal is one click from the account panel
+     F · the browser cannot promote itself: a plan written into localStorage
+         is gone on the next load, with checkout configured or not
+*/
+import http from 'node:http';
+import { chromium } from 'playwright';
+import fs from 'fs';
+import { execFileSync } from 'child_process';
+
+/* The build refuses a key that is not shaped like a real one — that guard is
+   the thing standing between a browser and a pasted service_role key, so it
+   does not get a test exemption. The stub server does not read the key at all,
+   so the harness simply hands over a correctly-shaped fake. */
+const SB_STUB_KEY = 'sb_publishable_harness_stub_not_a_real_key';
+/* ── ITS OWN dist, NOT THE SHARED ONE ────────────────────────────────────
+   This harness rebuilds the site several times with different environments.
+   So does _tpay. Run them in the same batch and they overwrite each other's
+   dist/ mid-assertion — which is not a flaky test, it is two tests writing to
+   one file. publish.mjs already takes OUT; use it, and the harnesses stop
+   caring what else is running. */
+const OUT = 'dist-tpay-' + process.pid;
+const OUT_ABS = '/home/claude/' + OUT;
+process.on('exit', () => { try { fs.rmSync(OUT_ABS, {recursive:true, force:true}); } catch(e){} });
+
+const bad = [], out = {};
+
+/* ══ stub Supabase ═══════════════════════════════════════════════════════ */
+let PLAN = null;                                   // what the server says, now
+let USERS = {};
+const j = (res, code, o) => { res.writeHead(code, {'content-type':'application/json',
+  'access-control-allow-origin':'*', 'access-control-allow-headers':'*',
+  'access-control-allow-methods':'*'}); res.end(JSON.stringify(o)); };
+const sb = http.createServer((req, res) => {
+  let b=''; req.on('data',d=>b+=d); req.on('end',()=>{
+    if (req.method === 'OPTIONS') return j(res,200,{});
+    const u = new URL(req.url,'http://x'); const body = (()=>{ try{return JSON.parse(b||'{}')}catch(e){return{}} })();
+    const sess = (email,name) => ({ access_token:'at-'+email, refresh_token:'rt-'+email,
+      expires_in:3600, user:{ id:'u-'+email, email, user_metadata:{name} } });
+    if (u.pathname === '/auth/v1/signup'){ USERS[body.email]={pw:body.password,name:(body.data||{}).name||''};
+      return j(res,200,sess(body.email,(body.data||{}).name)); }
+    if (u.pathname === '/auth/v1/token'){ const e=body.email||'';
+      if (u.searchParams.get('grant_type')==='refresh_token') return j(res,200,sess((body.refresh_token||'').slice(3),''));
+      if (!USERS[e] || USERS[e].pw!==body.password) return j(res,400,{msg:'Invalid login credentials'});
+      return j(res,200,sess(e,USERS[e].name)); }
+    if (u.pathname === '/auth/v1/logout') return j(res,204,{});
+    if (u.pathname === '/rest/v1/profiles'){
+      if (req.method === 'PATCH') return j(res,204,{});
+      return j(res,200,[{ name:'Elijah', market:'30310', plan:PLAN, trial:null }]); }
+    if (u.pathname === '/rest/v1/sheets') return j(res,200, req.method==='GET'?[]:{});
+    j(res,404,{});
+  });
+});
+/* ══ stub site + stub /api/checkout|/api/portal ══════════════════════════ */
+let LASTCHECKOUT = null;
+const site = http.createServer((req,res)=>{
+  let b=''; req.on('data',d=>b+=d); req.on('end',()=>{
+    const u = new URL(req.url,'http://x');
+    if (u.pathname === '/api/checkout'){ LASTCHECKOUT = JSON.parse(b||'{}');
+      return j(res,200,{ ok:true, url:'/office.html?paid=1' }); }
+    if (u.pathname === '/api/portal') return j(res,200,{ ok:true, url:'/office.html?portal=1' });
+    const p = u.pathname === '/' ? '/office.html' : u.pathname;
+    const f = OUT_ABS + p;
+    if (fs.existsSync(f) && fs.statSync(f).isFile()){
+      res.writeHead(200,{'content-type': p.endsWith('.js')?'text/javascript':'text/html'});
+      return res.end(fs.readFileSync(f)); }
+    res.writeHead(404); res.end('no');
+  });
+});
+const listen = s => new Promise(r => s.listen(0,'127.0.0.1',()=>r(s.address().port)));
+const sbPort = await listen(sb), sitePort = await listen(site);
+const BASE = `http://127.0.0.1:${sitePort}`;
+
+/* ══ A · unconfigured is today's product ═════════════════════════════════ */
+execFileSync('node', ['publish.mjs'], { cwd:'/home/claude', stdio:'ignore', env:{ ...process.env, OUT } });
+const b0 = await chromium.launch();
+{
+  const p = await b0.newPage(); const errs = [];
+  p.on('pageerror', e => errs.push(e.message));
+  p.on('console', m => { if (m.type()==='error' && !/favicon|ERR_/.test(m.text())) errs.push(m.text()); });
+  await p.goto(BASE + '/office.html'); await p.waitForTimeout(700);
+  out.A = await p.evaluate(() => ({ authOn: !!(window.__authOn && window.__authOn()),
+    payOn: !!(window.__payOn && window.__payOn()),
+    hasCheckout: typeof window.__checkout === 'function',
+    bill: !!document.getElementById('ac-bill') }));
+  out.A_errs = errs;
+  if (out.A.authOn || out.A.payOn || out.A.bill) bad.push('A: an unconfigured build offered billing');
+  if (!out.A.hasCheckout) bad.push('A: the billing module did not load at all');
+  if (errs.length) bad.push('A: console errors on an unconfigured build — ' + errs[0]);
+  await p.close();
+}
+
+/* ══ the live, configured build ══════════════════════════════════════════ */
+execFileSync('node', ['publish.mjs'], { cwd:'/home/claude', stdio:'ignore',
+  env: { ...process.env, OUT, NI_STAGE:'live', NI_ALLOW_LOCAL_SB:'1',
+         NI_SUPABASE_URL:`http://127.0.0.1:${sbPort}`, NI_SUPABASE_ANON:SB_STUB_KEY } });
+
+const page = async () => { const p = await b0.newPage();
+  p.on('pageerror', e => { out.errs = out.errs || []; out.errs.push(e.message); });
+  return p; };
+
+/* ══ B · a tier clicked on the plans page survives the door ══════════════ */
+{
+  PLAN = null;
+  const p = await page();
+  await p.goto(BASE + '/plans.html');
+  out.B_href = await p.evaluate(() => { const a = [...document.querySelectorAll('a.btn')]
+    .find(x => /join=/.test(x.getAttribute('href')||'')); return a ? a.getAttribute('href') : null; });
+  if (!/join=/.test(out.B_href || '')) bad.push('B: the live plans page does not carry the tier through the door');
+
+  await p.goto(BASE + '/office.html?join=underwriter'); await p.waitForTimeout(500);
+  out.B_held = await p.evaluate(() => sessionStorage.getItem('ni-join'));
+  out.B_url  = p.url();
+  if (out.B_held !== 'underwriter') bad.push('B: the chosen tier was lost at the door');
+  if (/join=/.test(out.B_url)) bad.push('B: the tier stayed in the address bar, so a refresh would re-enter it');
+
+  /* sign up, and checkout must start on the far side of it */
+  await p.fill('#g-name','Elijah'); await p.fill('#g-email','e@x.com'); await p.fill('#g-pw','sixchars');
+  await p.click('#g-go'); await p.waitForTimeout(1400);
+  out.B_checkout = LASTCHECKOUT;
+  if (!LASTCHECKOUT || LASTCHECKOUT.plan !== 'underwriter')
+    bad.push('B: signing up on the way to a plan did not start the checkout');
+  await p.close();
+}
+
+/* ══ C · the return from Stripe waits for the webhook ════════════════════ */
+{
+  PLAN = null;                                     // the webhook has NOT landed
+  const p = await page();
+  await p.goto(BASE + '/office.html');
+  await p.evaluate(() => localStorage.setItem('ni-session-v1', JSON.stringify({
+    access_token:'at-e@x.com', refresh_token:'rt-e@x.com',
+    expires_at: Date.now()+3.6e6, user:{ id:'u-e@x.com', email:'e@x.com' } })));
+  await p.goto(BASE + '/office.html?paid=1'); await p.waitForTimeout(900);
+  const early = await p.evaluate(() => ({
+    note: (document.getElementById('paynote')||{}).textContent || null,
+    plan: JSON.parse(localStorage.getItem('ni-account-v1')||'{}').plan || null }));
+  out.C_early = early;
+  if (!early.note || !/putting your subscription in place/i.test(early.note))
+    bad.push('C: somebody back from Stripe was not told the subscription was being set up');
+  if (/paid=1/.test(p.url())) bad.push('C: paid=1 stayed in the address bar');
+
+  setTimeout(() => { PLAN = 'underwriter'; }, 2500);   // the webhook, late
+  await p.waitForTimeout(6000);
+  out.C_late = await p.evaluate(() => ({
+    note: (document.getElementById('paynote')||{}).textContent || null,
+    plan: JSON.parse(localStorage.getItem('ni-account-v1')||'{}').plan || null }));
+  if (out.C_late.plan !== 'underwriter')
+    bad.push('C: the plan never arrived even though the webhook did');
+  await p.close();
+}
+
+/* ══ D · the webhook that never comes ════════════════════════════════════ */
+{
+  PLAN = null;
+  const p = await page();
+  await p.goto(BASE + '/office.html');
+  await p.evaluate(() => localStorage.setItem('ni-session-v1', JSON.stringify({
+    access_token:'at-e@x.com', refresh_token:'rt-e@x.com',
+    expires_at: Date.now()+3.6e6, user:{ id:'u-e@x.com', email:'e@x.com' } })));
+  await p.goto(BASE + '/office.html?paid=1');
+  await p.waitForTimeout(23000);
+  out.D = await p.evaluate(() => ({
+    note: (document.getElementById('paynote')||{}).textContent || null,
+    plan: JSON.parse(localStorage.getItem('ni-account-v1')||'{}').plan || null }));
+  if (!out.D.note || !/support@negotiationinc\.com/.test(out.D.note))
+    bad.push('D: a payment with no confirmation left somebody with nobody to email');
+  if (out.D.plan) bad.push('D: a plan appeared without the server ever saying so');
+  await p.close();
+}
+
+/* ══ E · cancelling is one click from the account panel ══════════════════ */
+{
+  PLAN = 'underwriter';
+  const p = await page();
+  await p.goto(BASE + '/office.html');
+  await p.evaluate(() => localStorage.setItem('ni-session-v1', JSON.stringify({
+    access_token:'at-e@x.com', refresh_token:'rt-e@x.com',
+    expires_at: Date.now()+3.6e6, user:{ id:'u-e@x.com', email:'e@x.com' } })));
+  await p.goto(BASE + '/office.html'); await p.waitForTimeout(1200);
+  out.E_plan = await p.evaluate(() => JSON.parse(localStorage.getItem('ni-account-v1')||'{}').plan);
+  await p.evaluate(() => { const w = document.getElementById('rn-who'); if (w) w.click(); });
+  await p.waitForTimeout(400);
+  out.E_bill = await p.evaluate(() => !!document.getElementById('ac-bill'));
+  if (!out.E_bill) bad.push('E: a paying subscriber has no way to cancel from the account panel');
+  else {
+    await p.click('#ac-bill'); await p.waitForTimeout(900);
+    out.E_went = p.url();
+    if (!/portal=1/.test(p.url())) bad.push('E: the cancel button did not reach the billing portal');
+  }
+  await p.close();
+}
+
+/* ══ F · the browser cannot promote itself ═══════════════════════════════ */
+{
+  PLAN = null;
+  const p = await page();
+  await p.goto(BASE + '/office.html');
+  await p.evaluate(() => {
+    localStorage.setItem('ni-session-v1', JSON.stringify({ access_token:'at-e@x.com',
+      refresh_token:'rt-e@x.com', expires_at: Date.now()+3.6e6, user:{ id:'u-e@x.com', email:'e@x.com' } }));
+    localStorage.setItem('ni-account-v1', JSON.stringify({ name:'Elijah', email:'e@x.com', plan:'the office' }));
+  });
+  await p.goto(BASE + '/desk.html'); await p.waitForTimeout(1400);
+  out.F = await p.evaluate(() => ({
+    plan: JSON.parse(localStorage.getItem('ni-account-v1')||'{}').plan,
+    tier: typeof tierOf === 'function' ? tierOf() : 'n/a' }));
+  if (out.F.plan || out.F.tier > 0)
+    bad.push('F: a plan typed into localStorage survived a page load');
+  await p.close();
+}
+
+/* ══ G · the pre-launch preview does not fight the server ════════════════
+   Before launch the account panel switches tiers locally so the product can
+   be tested at every price. That used to be done by writing a plan onto the
+   account record — which is the same field the server now owns, so the next
+   page load reverted it and the switcher silently stopped working. Since the
+   Supabase project gets set up BEFORE launch, this would have looked exactly
+   like the gating being broken, on the day it most needed to be trusted. */
+{
+  PLAN = null;
+  execFileSync('node', ['publish.mjs'], { cwd:'/home/claude', stdio:'ignore',
+    env: { ...process.env, OUT, NI_ALLOW_LOCAL_SB:'1',
+           NI_SUPABASE_URL:`http://127.0.0.1:${sbPort}`, NI_SUPABASE_ANON:SB_STUB_KEY } });
+  const p = await page();
+  await p.goto(BASE + '/desk.html');
+  await p.evaluate(() => localStorage.setItem('ni-session-v1', JSON.stringify({
+    access_token:'at-e@x.com', refresh_token:'rt-e@x.com',
+    expires_at: Date.now()+3.6e6, user:{ id:'u-e@x.com', email:'e@x.com' } })));
+  await p.goto(BASE + '/desk.html'); await p.waitForTimeout(1200);
+  out.G_before = await p.evaluate(() => tierOf());
+  await p.evaluate(() => localStorage.setItem('ni-preview-plan','Underwriter'));
+  await p.goto(BASE + '/desk.html'); await p.waitForTimeout(1500);   // a full reload, with authBoot
+  out.G_after = await p.evaluate(() => ({ tier: tierOf(),
+    plan: JSON.parse(localStorage.getItem('ni-account-v1')||'{}').plan || null }));
+  if (out.G_before !== 0) bad.push('G: a fresh account was not on the free tier');
+  if (out.G_after.tier !== 2)
+    bad.push('G: the pre-launch preview did not survive the server filling the account cache');
+  if (out.G_after.plan !== null)
+    bad.push('G: previewing a plan wrote one onto the account record');
+  await p.close();
+}
+
+await b0.close(); sb.close(); site.close();
+/* leave the tree the way it was found */
+execFileSync('node', ['publish.mjs'], { cwd:'/home/claude', stdio:'ignore', env:{ ...process.env, OUT } });
+
+console.log(JSON.stringify(out, null, 1));
+if (bad.length){ console.log('FAIL'); bad.forEach(x => console.log(' - ' + x)); process.exit(1); }
+console.log('PASS — unconfigured is unchanged, a chosen tier survives the door, the return from Stripe waits for the webhook and says so if it never comes, cancelling is one click, and a plan typed into localStorage is gone on the next load');
