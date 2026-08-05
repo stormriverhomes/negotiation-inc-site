@@ -122,6 +122,20 @@ h1{font-size:40px}
 .verdict.right .vh{color:var(--green)} .verdict.wrong .vh{color:var(--red)}
 .verdict b{color:var(--txt);font-weight:650}
 .verdict .go{margin-top:8px;font-size:12.5px;color:var(--faint)}
+/* the ledger: every exit in its own units, never averaged, never "fit points" */
+.ldg{margin-top:9px;border-top:1px solid var(--edge)}
+.lr{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:8px 0;border-bottom:1px solid var(--edge);align-items:baseline}
+.lr:last-child{border-bottom:none}
+.ln{font-weight:650;color:var(--txt);font-size:13.5px}
+.lv{font-variant-numeric:tabular-nums;font-weight:700;font-size:14px;color:var(--faint);text-align:right;white-space:nowrap}
+.lv.good{color:var(--green)}
+.lv i{font-style:normal;font-weight:400;font-size:11.5px;color:var(--faint);letter-spacing:.02em}
+.lw{grid-column:1/-1;font-size:12.5px;color:var(--dim);line-height:1.45}
+.lt{display:inline-block;margin-left:7px;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  padding:1px 5px;border:1px solid var(--edge);color:var(--faint);vertical-align:1px}
+.lt.best{color:var(--green);border-color:var(--green)}
+.lt.you{color:var(--txt)}
+.lnone{margin-top:2px;font-size:13px;color:var(--dim)}
 
 .card{padding:34px 26px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
 .card h2{font-size:34px}
@@ -353,43 +367,71 @@ const DIRS = ['','',' SW',' NE',' N',' E'];
 const addressOf = () => (100 + Math.floor(rnd()*8900)) + ' ' +
   STREETS[Math.floor(rnd()*STREETS.length)] + ' ' + SUFFIX[Math.floor(rnd()*SUFFIX.length)] +
   DIRS[Math.floor(rnd()*DIRS.length)];
-const SELLERS = {
- flip:     [['urgent','<b>Needs it gone yesterday.</b> Job starts across the state on the first. The kitchen is from two owners ago.'],
-            ['motivated','<b>Motivated.</b> Already made an offer on the next place. This one has to move first.'],
-            ['urgent','<b>Divorce, and neither of them wants it.</b> Two signatures, one deadline, and a bathroom nobody has touched since 1994.'],
-            ['motivated','<b>Relocating in six weeks.</b> They have priced it to be gone, not to be admired.'],
-            ['urgent','<b>Insurance paid out and they never fixed it.</b> The cheque is spent and the ceiling is still open.'],
-            ['motivated','<b>Tired landlord.</b> The last tenant left it in a state and they have decided they are done.']],
- hold:     [['unknown','<b>Unread.</b> A landlord special — deferred maintenance with a paying tenant. The rent roll says more than the photos do.'],
-            ['nohurry','<b>No hurry.</b> A retiring landlord thinning the portfolio. The tenant pays on the first; the roof explains the price.'],
-            ['unknown','<b>Inherited, and already rented.</b> The tenant has been there nine years and has never once been late.'],
-            ['nohurry','<b>Selling three of eleven.</b> They know exactly what it rents for and will tell you to the dollar.'],
-            ['unknown','<b>Section 8, paid on the first.</b> Cosmetically rough, financially boring, which is the point.']],
- subto:    [['behind','<b>Behind on payments.</b> Three months of arrears, a 2021 loan at a rate nobody is getting back.'],
-            ['behind','<b>Two payments down and the letters have started.</b> A 2020 loan they would not qualify for today.'],
-            ['behind','<b>Lost the job in March.</b> The house is fine; the payment is not. The rate on it is from another era.'],
-            ['behind','<b>Moved for work and could not sell.</b> Renting it out badly, paying the shortfall, done with it.']],
- novation: [['estate','<b>An estate.</b> The executor is two states away and wants a date and a clean wire, not a journey.'],
-            ['nohurry','<b>No hurry.</b> They want retail and will sit until somebody runs the last hundred yards for it.'],
-            ['estate','<b>Probate, three siblings, one number.</b> They will not haggle; they will not do the work either.'],
-            ['nohurry','<b>Already listed once and withdrew it.</b> The agent wanted a price cut; they wanted a plan.'],
-            ['estate','<b>Trustee sale, clean title.</b> The house shows well. Nobody involved wants to manage a renovation.']],
- walk:     [['nohurry','<b>No hurry, and priced like it.</b> They read a headline about the market once and believed it.'],
-            ['unknown','<b>Unread.</b> The ask came from a cousin who watches renovation television.'],
-            ['nohurry','<b>Zillow says.</b> They have said "Zillow says" four times and it is not a negotiation yet.'],
-            ['unknown','<b>Priced off the neighbour\u2019s sale.</b> The neighbour had a new roof and a finished basement.'],
-            ['nohurry','<b>Will wait for the right buyer.</b> They can, and they will, and it will not be you.']],
- wholetail:[['urgent','<b>Estate, and the family wants it closed this quarter.</b> Clean house, dated everything, no structural anything.'],
-            ['estate','<b>An estate that has already been emptied.</b> Carpets, paint, and a lockbox is the whole job.'],
-            ['urgent','<b>Moving into care next month.</b> Immaculate for its age; the kitchen is simply forty years old.']],
- wholesale:[['urgent','<b>Needs it gone yesterday.</b> The furnace is out, the roof is patched, and they cannot afford either.'],
-            ['motivated','<b>Code letter on the door.</b> They want the problem to be somebody else\u2019s by the end of the month.'],
-            ['urgent','<b>Fire in the back bedroom last winter.</b> Boarded, insured, and completely beyond them.'],
-            ['behind','<b>Behind on taxes and the auction date is set.</b> Whoever moves first gets it.']],
- brrrr:    [['motivated','<b>Half-finished flip they ran out of money on.</b> Studs, a permit, and a lot of regret.'],
-            ['unknown','<b>Empty two years.</b> Solid bones, dead systems, and a street full of tenants paying good rent.'],
-            ['motivated','<b>Out-of-state owner who has never seen it.</b> The property manager quit; so have they.']],
+/* ── the seller, decoupled from the answer ──────────────────────────────────
+   This used to be one bucket of lines PER ANSWER. Every "behind on payments"
+   line lived in the subject-to bucket and nowhere else, so the drill quietly
+   became a lookup table: read the adjective, press the matching button, never
+   look at a number. That is not reading a deal, it is matching a word.
+
+   Now the seller line is built from two independent halves:
+     · WHY they are selling — keyed to the situation, which the arithmetic
+       already prices through SIT_MOD, and which is now drawn freely;
+     · WHAT the house is — keyed to the repair figure the generator actually
+       dealt, so the prose can never describe a wreck the numbers call pristine.
+
+   The 12-point margin in deal() still guarantees exactly one right answer.
+   What changed is that "behind on payments" can now sit on a flip, a walk or
+   a wholesale, and the player has to look at the money to know which. */
+const SIT_LINES = {
+ urgent: ['<b>Needs it gone yesterday.</b> A job starts across the state on the first.',
+          '<b>Divorce, and neither of them wants it.</b> Two signatures and one deadline.',
+          '<b>Moving into care next month.</b> The family wants it closed this quarter.',
+          '<b>Relocating in six weeks.</b> Priced to be gone, not to be admired.'],
+ motivated:['<b>Motivated.</b> They have already made an offer on the next place.',
+          '<b>Code letter on the door.</b> They want it to be somebody else’s problem by month end.',
+          '<b>Tired landlord.</b> The last tenant left and they have decided they are done.',
+          '<b>Out-of-state owner who has never seen it.</b> The property manager quit; so have they.'],
+ nohurry:['<b>No hurry, and priced like it.</b> They read a headline about the market once.',
+          '<b>Zillow says.</b> They have said “Zillow says” four times and it is not a negotiation yet.',
+          '<b>Selling three of eleven.</b> They know their numbers to the dollar and will wait.',
+          '<b>Already listed once and withdrew it.</b> The agent wanted a price cut; they wanted a plan.',
+          '<b>Will wait for the right buyer.</b> They can, and they will.'],
+ behind: ['<b>Behind on payments.</b> Three months of arrears on a loan at a rate nobody is getting back.',
+          '<b>Two payments down and the letters have started.</b> A 2020 loan they would not qualify for today.',
+          '<b>Lost the job in March.</b> The payment is the problem, not the plan.',
+          '<b>Behind on taxes and the auction date is set.</b> Whoever moves first gets it.',
+          '<b>Moved for work and could not sell.</b> Paying the shortfall every month, and done with it.'],
+ estate: ['<b>An estate.</b> The executor is two states away and wants a date and a clean wire.',
+          '<b>Probate, three siblings, one number.</b> They will not haggle and will not do the work.',
+          '<b>Trustee sale, clean title.</b> Nobody involved wants to manage a renovation.',
+          '<b>An estate that has already been emptied.</b> Every decision now is a money decision.'],
+ unknown:['<b>Unread.</b> Nobody has said why, and nobody has said no.',
+          '<b>Empty two years.</b> The mail was forwarded and never chased.',
+          '<b>Inherited, and already rented.</b> The tenant has been there nine years.',
+          '<b>Priced off the neighbour’s sale.</b> They have not said what they will take.'],
 };
+/* What the house IS — chosen by the repair figure the generator dealt, so the
+   description and the arithmetic can never disagree. */
+const COND_LINES = [
+ [0.030,['Shows well; the kitchen is simply forty years old.','Immaculate for its age and dated in every direction.',
+         'Carpets, paint and a lockbox is close to the whole job.','Clean house, dated everything, no structural anything.']],
+ [0.080,['Dated but sound — a weekend of paint and a long list of small things.',
+         'Cosmetically tired, mechanically fine.','A tidy house with an ugly bathroom.',
+         'Nothing broken, and nothing new either.']],
+ [0.140,['Deferred maintenance with a paying tenant; the rent roll says more than the photos.',
+         'The roof explains the price.','Solid bones, dead systems.',
+         'A landlord special — everything works, nothing is nice.']],
+ [9.999,['The furnace is out and the roof is patched.',
+         'Insurance paid out and they never fixed it; the ceiling is still open.',
+         'Fire in the back bedroom last winter — boarded, insured, and beyond them.',
+         'Half-finished: studs, a permit, and a lot of regret.']],
+];
+const SITS = Object.keys(SIT_LINES);
+function sellerFor(d){
+  const why = SIT_LINES[d.sit][Math.floor(rnd()*SIT_LINES[d.sit].length)];
+  const band = COND_LINES.find(x => d.rep / d.arv <= x[0]) || COND_LINES[COND_LINES.length-1];
+  return why + ' ' + band[1][Math.floor(rnd()*band[1].length)];
+}
 function candidate(shape){
   const arv = r500(150000 + rnd()*330000);
   const d = { arv, sit:'unknown', piti:null };
@@ -417,14 +459,18 @@ function candidate(shape){
     d.rent=r25(arv*(0.0040+rnd()*0.0012)); d.pos='nocash'; }
   if (shape==='brrrr'){ d.rep=r500(arv*(0.10+rnd()*0.08)); d.ask=r500(arv*(0.44+rnd()*0.10));
     d.rent=r25(arv*(0.0040+rnd()*0.0010)); d.pos='keeper'; }
-  const opts = SELLERS[shape]; const pick = opts[Math.floor(rnd()*opts.length)];
-  d.sit = pick[0]; d.sellerHtml = pick[1]; d.shape = shape;
+  /* The situation is drawn FREELY, not from the answer's own bucket. Most
+     draws will be rejected by the margin check below — which is the point:
+     what survives is a house where the numbers, not the adjective, decide. */
+  d.sit = SITS[Math.floor(rnd()*SITS.length)];
+  d.sellerHtml = sellerFor(d);
+  d.shape = shape;
   d.pos = d.pos || 'funded';
   d.addr = addressOf();
   return d;
 }
 function deal(shape){
-  for (let t=0;t<300;t++){
+  for (let t=0;t<900;t++){
     const d = candidate(shape);
     const allow = allowsOf(d);
     const R = rank(d).filter(x => !allow || allow.indexOf(x.id) >= 0);
@@ -432,7 +478,7 @@ function deal(shape){
     if (shape==='walk'){ if (top && top.fit <= WALK_UNDER-6) { d.rank=R; return d; } continue; }
     if (top && top.id===shape && top.fit>=WALK_UNDER+10 && (top.fit-(second?second.fit:0))>=12){ d.rank=R; return d; }
   }
-  if (window.__strict) throw new Error('generator exhausted 300 tries for '+shape);
+  if (window.__strict) throw new Error('generator exhausted 900 tries for '+shape);
   return deal(SHAPES[Math.floor(rnd()*4)]);   // a stubborn shape yields to a workable one
 }
 
@@ -512,14 +558,90 @@ const TIERS = [
 ];
 const tierFor = n => TIERS.filter(t => n >= t.from).pop() || TIERS[0];
 
-function working(d){
-  const R=rank(d), by=Object.fromEntries(R.map(x=>[x.id,x]));
-  const w=[];
-  if (by.flip) w.push(`flip ceiling ${fmt(by.flip.ceil)} vs ask ${fmt(d.ask)} — fit ${by.flip.fit}`);
-  if (by.hold) w.push(`DSCR price ${fmt(by.hold.ceil)} vs ask ${fmt(d.ask)} — fit ${by.hold.fit}`);
-  if (by.subto) w.push(`spread ${fmt(by.subto.spread)}/mo — fit ${by.subto.fit}`);
-  if (by.novation) w.push(`novation check ${fmt(by.novation.check)} — fit ${by.novation.fit}`);
-  return w.join(' · ');
+/* ── the ledger ────────────────────────────────────────────────────────────
+   This used to print "fit 78" — a unit that exists nowhere in real estate,
+   invented for this game. rank() has always computed the real numbers: a
+   purchase ceiling for the exits you buy into, a monthly spread for the
+   subject-to, a cheque for the novation. Those are what a player should be
+   shown, in their own units, never averaged into one another.
+
+   The unit trap: a purchase CEILING is not a payout. The first cut of this
+   ledger put "$285,132" (a price you may pay) in the same green column as
+   "$54,428" (a cheque you keep) and invited a comparison that means nothing —
+   the wholetail looked five times better than the answer the desk had just
+   crowned. That is the same defect as a worksheet whose panels argue.
+
+   So the headline figure on every row is MONEY THE DEAL HAS IN IT, one unit:
+     · exits you buy into  → the room between their ask and your ceiling
+     · the novation        → the cheque at the closing
+     · the subject-to      → a monthly spread, which is honestly NOT a lump,
+                             so it is labelled and never ranked against one
+   The ceiling itself moves to the explanation line, where it belongs.
+   Green stays reserved for money that actually pays. */
+function payLine(x, d){
+  if (x.id === 'subto'){
+    const ok = x.spread > 0;
+    return { id:x.id, ok, lump:null, n:fmt(x.spread), unit:'a month',
+      what: ok ? 'the rent covers their payment and leaves '+fmt(x.spread)+' a month. A monthly spread is not a cheque — it is why this one is judged on its own terms.'
+               : 'the rent does not cover the payment already on the house — it bleeds '+fmt(-x.spread)+' a month.' };
+  }
+  if (x.id === 'novation'){
+    const ok = x.check > 0;
+    return { id:x.id, ok, lump:x.check, n:fmt(x.check), unit:'at the closing',
+      what: ok ? 'you never buy it — you hand them their number, sell it at retail, and keep '+fmt(x.check)+'.'
+               : 'after their number and the selling costs there is nothing left to keep.' };
+  }
+  const room = x.ceil - d.ask, ok = room >= 0;
+  return { id:x.id, ok, lump:room, n:fmt(room), unit: ok ? 'of room' : 'short',
+    what: 'you can pay up to '+fmt(x.ceil)+'; they ask '+fmt(d.ask)+
+      (ok ? '.' : ', so you would have to talk them down '+fmt(-room)+' before it works.') };
+}
+const WALKROW = { id:'walk', ok:false, lump:null, n:'—', unit:'',
+  what:'nothing here pays at what they are asking.' };
+/* four rows carry the lesson: what the desk said, what YOU said, and the two
+   nearest misses — never the whole table, which nobody reads at speed */
+function working(d, chose, correct){
+  const R = rank(d), allow = allowsOf(d);
+  const seen = new Set(), rows = [];
+  const push = id => {
+    if (seen.has(id)) return;
+    if (id === 'walk'){ seen.add(id); rows.push(WALKROW); return; }
+    const x = R.find(y=>y.id===id); if (!x) return;
+    seen.add(id); rows.push(payLine(x, d));
+  };
+  push(correct); push(chose);
+  for (const x of R){ if (rows.length >= 4) break; push(x.id); }
+
+  /* If the desk's answer is not the biggest lump on the page, say why out
+     loud. It is the seller's situation — that is the whole reason the drill
+     shows you a seller at all — and an unexplained crown reads as a bug. */
+  const lumps = rows.filter(r => r.lump != null);
+  const deskRow = rows.find(r => r.id === correct);
+  const biggest = lumps.length ? lumps.reduce((a,b)=> b.lump > a.lump ? b : a) : null;
+  const needsWhy = deskRow && biggest && deskRow.id !== biggest.id && correct !== 'walk';
+
+  /* The drill asks which exit FITS BEST, and best can still be short. The desk
+     itself has this third state — closest fit, not a recommendation — and if
+     the drill crowns an exit while the ledger underneath it says "$1,700 short
+     of their ask", the two are arguing in front of the player. Say it once, at
+     the top, in plain words. */
+  const shortfall = (deskRow && !deskRow.ok && correct !== 'walk')
+    ? '<div class="lnone">Closest fit — and still short. Nothing here reaches their ask as it stands, '+
+      'so this is a number to negotiate toward, not a cheque to write.</div>' : '';
+
+  return shortfall + '<div class="ldg">' + rows.map(r => {
+    const shut = allow && allow.indexOf(r.id) < 0 && r.id !== 'walk';
+    const pays = r.ok && !shut;
+    const tag = r.id===correct ? '<span class="lt best">the desk</span>'
+              : r.id===chose   ? '<span class="lt you">you said</span>'
+              : shut           ? '<span class="lt off">closed to you</span>' : '';
+    const why = (needsWhy && r.id===correct)
+      ? ' <b>The seller decides this one</b> — read the line at the top of the house again.' : '';
+    return '<div class="lr'+(pays?' pays':'')+'">' +
+      '<span class="ln">'+NAME[r.id]+tag+'</span>' +
+      '<span class="lv'+(pays?' good':'')+'">'+r.n+(r.unit?'<i> '+r.unit+'</i>':'')+'</span>' +
+      '<span class="lw">'+r.what+why+(shut ? ' It is closed to you here.' : '')+'</span></div>';
+  }).join('') + '</div>';
 }
 function next(){
   G.house++;
@@ -566,12 +688,14 @@ function answer(a){
     G.score += 100+bonus+chain;
     v.className='verdict right';
     v.innerHTML=`<div class="vh">Right — ${NAME[correct]||'the walk'} · +${100+bonus}${chain?' +50 streak':''}</div>
-      ${working(G.cur)}<div class="go">Space or click for the next house.</div>`;
+      ${correct==='walk' ? '<div class="lnone">Nothing on this house pays at what they are asking. Walking away IS the read.</div>' : ''}
+      ${working(G.cur, a, correct)}<div class="go">Space or click for the next house.</div>`;
   } else {
     G.streak=0; G.t=Math.max(0,G.t-5);
     v.className='verdict wrong';
     v.innerHTML=`<div class="vh">The desk says ${NAME[correct]||'walk away'} · −5 seconds</div>
-      ${working(G.cur)}${correct==='walk'?` · every fit under ${WALK_UNDER} — nothing pays at this ask`:''}
+      ${correct==='walk' ? '<div class="lnone">Nothing on this house pays at what they are asking.</div>' : ''}
+      ${working(G.cur, a, correct)}
       <div class="go">Space or click for the next house.</div>`;
   }
   G.last=G.cur;

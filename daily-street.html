@@ -207,11 +207,36 @@
     font-size:12px;letter-spacing:.14em;text-transform:uppercase}
   .said{padding:14px 15px;font-size:16px;font-style:italic;color:var(--carbon-soft);border-top:1px solid var(--rule)}
 
+  /* THE READ — the counterfactual, in dollars.
+     The board has always known which house was the play and what it was worth;
+     it just never said. A round that ends in "wrong" teaches nothing. A round
+     that ends in "the play was the brick one on the corner and it had $19,000
+     in it — you found $6,200" teaches the whole trade.
+     The gold is deliberate: this money did not pay, it is what was ON THE TABLE.
+     Green here would be a lie. */
+  .read{margin:15px;border:1px solid var(--carbon);background:var(--stock-2)}
+  .read .rh{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+    padding:10px 14px;border-bottom:1px solid var(--rule);color:var(--carbon-faint)}
+  .read .rb{padding:13px 14px}
+  .read .hl{font-size:17px;line-height:1.45}
+  .read .hl b{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:700}
+  .read .left{margin-top:11px;padding-top:11px;border-top:1px solid var(--rule-soft);
+    display:grid;grid-template-columns:1fr auto;gap:12px;align-items:baseline}
+  .read .left .l{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--carbon-faint)}
+  .read .left .n{font-family:var(--mono);font-size:26px;font-variant-numeric:tabular-nums;font-weight:700;color:var(--amber)}
+  .read.perfect .left .n{color:var(--green)}
+  .read .note{margin-top:9px;font-size:14px;color:var(--carbon-soft)}
+
   .grid7{font-family:var(--mono);font-size:25px;line-height:1.4;letter-spacing:.08em;text-align:center;padding:16px;white-space:pre-line}
   .runtot{text-align:center;padding:4px 15px 16px}
   .runtot .big{font-family:var(--mono);font-size:45px;font-variant-numeric:tabular-nums;line-height:1}
   .runtot .big.up{color:var(--green)} .runtot .big.dn{color:var(--red)}
   .runtot .cap{font-size:15px;color:var(--carbon-soft);margin-top:6px}
+  .runtot .cap.rl{margin-top:9px;padding-top:9px;border-top:1px solid var(--rule-soft);font-size:14px}
+  .rec{margin:0 18px 16px;padding:10px 13px;border:1px solid var(--rule);background:var(--stock-2);
+    font-size:14px;color:var(--carbon-soft);text-align:center}
+  .rec b{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--carbon)}
+  .rec .done{margin-top:6px;padding-top:6px;border-top:1px solid var(--rule-soft);font-size:13px;color:var(--carbon-faint)}
   .ledger{margin:0 15px}
   .lrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule-soft);font-size:14px;align-items:baseline}
   .lrow .g{font-family:var(--mono);font-size:15px;letter-spacing:.05em}
@@ -256,6 +281,45 @@ const TIER_OF = (() => { const m={}; for (const k of Object.keys(B.ASK_SIGNALS))
 const TIER_WORD = { high:'Wants out badly', medium:'Would move for the right number', low:'In no hurry at all' };
 
 let run, board, state, timer;
+
+/* ── the record ────────────────────────────────────────────────────────────
+   This game had no localStorage in it anywhere. You could finish three
+   streets, close the tab, and the run had never happened — which is a strange
+   thing to do to a game whose whole premise is "come back tomorrow."
+
+   What persists is the RECORD, not the run in progress. A half-played timed
+   round restored from disk is a worse experience than starting it again, and
+   restoring one would also hand a player a way to stop the clock. So: you may
+   replay today as often as you like, and the record keeps the FIRST finish of
+   the day. That is the daily-puzzle convention and people already know it. */
+const REC_KEY = 'ni.street.v1';
+const FRESH_REC = () => ({ v:1, days:{}, streak:0, best:null, bestDay:null, played:0, last:null });
+function loadRec(){
+  try {
+    const r = JSON.parse(localStorage.getItem(REC_KEY) || 'null');
+    if (!r || r.v !== 1 || typeof r.days !== 'object' || !r.days) return FRESH_REC();
+    return Object.assign(FRESH_REC(), r);
+  } catch(e){ return FRESH_REC(); }
+}
+function saveRec(r){ try { localStorage.setItem(REC_KEY, JSON.stringify(r)); } catch(e){} }
+function prevISO(iso){
+  const [y,m,d] = iso.split('-').map(Number);
+  const t = new Date(Date.UTC(y, m-1, d) - 86400000);
+  return t.getUTCFullYear()+'-'+String(t.getUTCMonth()+1).padStart(2,'0')+'-'+String(t.getUTCDate()).padStart(2,'0');
+}
+/* Returns the record as it stood BEFORE today, so the summary can say
+   "your best" without today's run silently becoming the thing it beat. */
+function recordFinish(iso, capital, bought){
+  const r = loadRec();
+  if (r.days[iso]) return r;                       // first finish of the day is the one that counts
+  r.days[iso] = { capital: Math.round(capital), bought };
+  r.played = Object.keys(r.days).length;
+  r.streak = r.last === prevISO(iso) ? (r.streak || 0) + 1 : 1;
+  r.last = iso;
+  if (r.best == null || capital > r.best){ r.best = Math.round(capital); r.bestDay = iso; }
+  saveRec(r);
+  return r;
+}
 
 /* ── lifecycle ─────────────────────────────────────────────────────────── */
 
@@ -431,7 +495,15 @@ function nextRound(){
   run.ledger.push({ grid: R.grid.join(''), profit, outcome: R.outcome,
                     where: state.bid ? board.cards[state.bid.idx].address : null });
   run.round++;
-  if (run.round >= B.ROUNDS){ run.screen='summary'; clearInterval(timer); render(); return; }
+  if (run.round >= B.ROUNDS){
+    /* read the record BEFORE filing today's, so "you beat your best" can
+       compare against something today has not already overwritten */
+    const before = loadRec();
+    run.before = { best: before.best, streak: before.streak, played: before.played,
+                   already: !!before.days[run.iso] };
+    run.rec = recordFinish(run.iso, run.capital, run.ledger.filter(l=>l.outcome==='won').length);
+    run.screen='summary'; clearInterval(timer); render(); return;
+  }
   run.screen='card'; render();
 }
 
@@ -448,11 +520,25 @@ function render(){
 }
 
 function heroHTML(){
+  const r = loadRec();
+  /* A returning player should be met by their own history, not by the same
+     blank door they saw yesterday. A first-timer sees nothing extra. */
+  let bar = '';
+  if (r.played > 0){
+    const bits = [];
+    if (r.streak > 1) bits.push('<b>'+r.streak+'</b> days running');
+    bits.push('<b>'+r.played+'</b> street'+(r.played===1?'':'s')+' walked');
+    if (r.best != null) bits.push('best finish <b>'+M(r.best)+'</b>');
+    bar = '<div class="rec">'+bits.join(' · ')+
+      (r.days[todayISO()] ? '<div class="done">Today is already on the board at '+M(r.days[todayISO()].capital)+
+        ' — you can play it again, the record keeps the first run.</div>' : '')+'</div>';
+  }
   return '<div class="hero"><div class="mark">The Daily Street</div>' +
     '<h1>Buy a house for<br>less than it is <b>worth</b>.</h1>' +
     '<div class="sub">Fix what is worth fixing. Keep the difference.</div>' +
-    '<div class="meta">3 streets · 3 minutes · new houses every day</div></div>' +
-    '<div style="padding:0 18px 20px"><button class="btn go" onclick="beginRound()">Play</button>' +
+    '<div class="meta">3 streets · 3 minutes · new houses every day</div></div>' + bar +
+    '<div style="padding:0 18px 20px"><button class="btn go" onclick="beginRound()">'+
+    (r.days[todayISO()] ? 'Play again' : 'Play')+'</button>' +
     '<a class="back" href="arcade.html">← the arcade</a></div>' + helpHTML();
 }
 
@@ -701,10 +787,55 @@ function resolveHTML(){
   });
   if (state.phase!=='settle') return h;
   const streak = run.streak>=2 ? '<div class="streak">'+STREAK[Math.min(run.streak,3)]+'</div>' : '';
-  return h + settlementHTML() + streak + '<div class="said">'+ACHE[R.outcome]+'</div>' +
+  return h + settlementHTML() + theReadHTML() + streak + '<div class="said">'+ACHE[R.outcome]+'</div>' +
     '<div style="padding:14px 15px;border-top:1px solid var(--rule)">' +
     '<button class="btn go" style="margin:0" onclick="nextRound()">' +
     (run.round+1>=B.ROUNDS ? 'See how the run went →' : 'Next street →')+'</button></div>';
+}
+
+/* ── the read: what the street was actually worth ──────────────────────────
+   scoreRound() has always returned best_index, best_spread and achievable[].
+   Nothing rendered them, so every round ended in a verb ("outbid", "refused")
+   instead of a number. This is the teaching moment: the same units on both
+   sides — room at the buy, walk-away minus what it took to win — so the two
+   figures are honestly comparable. Renovation profit is a different quantity
+   and lives in the settlement above; it is never mixed in here. */
+function theReadHTML(){
+  const R = state.result;
+  const bi = R.best_index, best = R.best_spread;
+  if (bi == null || !(best > 0)) return '';
+  const where = esc(board.cards[bi].address);
+  const tookIt = state.bid && state.bid.idx === bi && R.outcome === 'won';
+  const mine = R.outcome === 'won' ? R.your_spread : 0;
+  const left = Math.max(0, best - mine);
+
+  let hl, note;
+  if (tookIt){
+    hl = 'The play on this street was <b>'+where+'</b>. You took it.';
+    note = mine >= best
+      ? 'You bought it at or under the price it would have taken. That is the whole job.'
+      : 'You had the right house. You paid '+M(best - mine)+' more than it would have taken to win it.';
+  } else if (R.outcome === 'won'){
+    hl = 'You bought <b>'+esc(board.cards[state.bid.idx].address)+'</b>. The play was <b>'+where+'</b>.';
+    note = 'Not a wasted round — you own a house. But the money was on the other one.';
+  } else if (R.outcome === 'no_bid'){
+    hl = 'The play was <b>'+where+'</b>, and you never made an offer on it.';
+    note = R.looks ? 'You looked at '+R.looks+' thing'+(R.looks===1?'':'s')+' and walked. Sometimes right. Not today.'
+                   : 'You cannot buy what you did not look at.';
+  } else {
+    hl = 'The play was <b>'+where+'</b>.';
+    note = state.bid && state.bid.idx === bi
+      ? 'You were on the right house. You were '+M(R.needed - state.bid.amount)+' short of owning it.'
+      : 'You were bidding on a different house.';
+  }
+  return '<div class="read'+(tookIt && mine >= best ? ' perfect' : '')+'">' +
+    '<div class="rh">The read</div><div class="rb">' +
+    '<div class="hl">'+hl+'</div>' +
+    '<div class="left"><span class="l">'+(left > 0 ? 'Left on the table' : 'Room you captured')+'</span>' +
+      '<span class="n">'+M(left > 0 ? left : best)+'</span></div>' +
+    '<div class="note">There was '+M(best)+' of room in '+where+' at the price it would have taken to win it'+
+      (R.outcome === 'won' ? ', and '+M(mine)+' in the one you bought.' : '.') + ' ' + note + '</div>' +
+    '</div></div>';
 }
 
 function settlementHTML(){
@@ -744,11 +875,27 @@ function summaryHTML(){
   const ledger = run.ledger.map(l=>'<div class="lrow"><span class="g">'+l.grid+'</span>' +
     '<span>'+(l.outcome==='won'?esc(l.where):l.outcome==='outbid'?'outbid':l.outcome==='refused'?'refused':'no offer')+'</span>' +
     '<span class="m '+(l.profit>0?'up':l.profit<0?'dn':'')+'">'+(l.profit?MP(l.profit):'—')+'</span></div>').join('');
+  /* The record line. run.before is the record as it stood before today was
+     filed, so "you beat it" is measured against something real. */
+  const bf = run.before || {}, rc = run.rec || loadRec();
+  let recline = '';
+  if (bf.already){
+    recline = 'Today was already on the board at '+M(rc.days[run.iso].capital)+'. The record keeps the first run.';
+  } else if (bf.best != null && end > bf.best){
+    recline = 'Your best finish was '+M(bf.best)+'. This one beats it.';
+  } else if (bf.best != null){
+    recline = 'Your best finish is still '+M(bf.best)+'.';
+  } else {
+    recline = 'That is your first street on the board. Come back tomorrow — new houses, same questions.';
+  }
+  if (rc.streak > 1) recline += ' <b>'+rc.streak+' days running.</b>';
+
   return '<div class="rhead">Run '+run.plan.number+' — three streets</div>' +
     '<div class="runtot"><div class="grid7">'+grid+'</div>' +
       '<div class="big '+(delta>0?'up':delta<0?'dn':'')+'">'+M(end)+'</div>' +
       '<div class="cap">Started with '+M(start)+', finished with '+M(end)+' — '+(delta>=0?'up':'down')+
-      ' <b>'+M(delta)+'</b> across '+bought+' flip'+(bought===1?'':'s')+'.</div></div>' +
+      ' <b>'+M(delta)+'</b> across '+bought+' flip'+(bought===1?'':'s')+'.</div>' +
+      '<div class="cap rl">'+recline+'</div></div>' +
     '<div class="ledger">'+ledger+'</div>' +
     '<div class="legend"><span><b>🟩</b> you bought it</span><span><b>🟥</b> you offered and lost</span>' +
       '<span><b>🟨</b> you looked</span><span><b>⬜</b> you never looked</span></div>' +
