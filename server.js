@@ -597,6 +597,8 @@ app.post('/api/street', express.json({ limit: '8kb' }), async (req, res) => {
     res.json({ ok:true, address: g.matched, tract: g.tractName, county: g.countyName,
       place: g.placeName, census: facts.census, flood: facts.flood,
       paragraphs: paras, dropped: A.dropped.length, searches,
+      /* how much of this brief is standing on a page somebody can open */
+      sourced: A.sourced ?? 0, unsourced: A.unsourced ?? 0,
       model: MOCK ? 'mock' : ST.MODEL,
       ...(month ? { month:{ used: month.used, cap: month.cap, left: month.remaining } } : {}),
       usage: { in: usage.input_tokens || 0, out: usage.output_tokens || 0 } });
@@ -885,10 +887,39 @@ app.post('/api/list', express.json({ limit: '4kb' }), async (req, res) => {
 const TILES_KEY = process.env.GOOGLE_TILES_KEY || '';
 const TILES_CAP = N('NI_TILES_DAY_CAP', 150);
 let tiles = { day: new Date().toISOString().slice(0, 10), n: 0 };
-app.get('/api/land/config', (_req, res) => {
+/* ── THE ONE ENDPOINT THAT HANDS OUT A KEY ────────────────────────────────
+   This had no per-IP limit while /api/land/geo directly below it did, which is
+   the wrong way round: the geocoder is free and this one costs $6 per thousand
+   sessions. A loop from a single address could take the whole daily allowance
+   in a few seconds — the map goes flat for every real visitor for the rest of
+   the day — and collect the key on every pass. The referrer restriction in the
+   Google console is what stops the key being USED elsewhere; it does nothing
+   about the drain, and a key you can harvest at will is a key you will
+   eventually have to rotate.
+
+   A real visitor asks once per page load and gets a session that lasts three
+   hours or more. Six an hour is generous for a person reloading, and nothing
+   at all for a script. */
+const tileHits = new Map();
+function tileOk(ip){
+  const now = Date.now(), win = now - 36e5;
+  const a = (tileHits.get(ip) || []).filter(t => t > win);
+  if (a.length >= 6){ tileHits.set(ip, a); return false; }
+  a.push(now); tileHits.set(ip, a);
+  if (tileHits.size > 5000) for (const [k, v] of tileHits) if (!v.some(t => t > win)) tileHits.delete(k);
+  return true;
+}
+app.get('/api/land/config', (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
   if (tiles.day !== today) tiles = { day: today, n: 0 };
   if (!TILES_KEY) return res.json({ ok:false, why:'unconfigured' });
+  /* checked BEFORE the counter moves, so a blocked caller cannot spend the
+     allowance it is being refused */
+  if (!tileOk(req.ip || 'unknown')){
+    log('land config 429 per-ip');
+    return res.status(429).json({ ok:false, why:'rate',
+      error:'That is a lot of map in one hour from one place. The flat drawing still works.' });
+  }
   if (tiles.n >= TILES_CAP){ log('land config 429 quota', tiles.n); return res.json({ ok:false, why:'quota' }); }
   tiles.n++;
   log('land config ok', tiles.n + '/' + TILES_CAP);
@@ -932,11 +963,51 @@ app.get('/api/land/geo', async (req, res) => {
    computed over. */
 mountBilling(app);
 
+/* ══ IS THE CAGE ACTUALLY LOCKED? ══════════════════════════════════════════
+   Migration 004 took table-level UPDATE on `profiles` away from the browser
+   and granted back two harmless columns, which is what stops a user PATCHing
+   their own `trial` date or zeroing their own `comp_used`. That protection is
+   a fact about the live database, not about this repository — a migration in
+   git that nobody ran protects nothing, and it fails SILENTLY. That is exactly
+   how 002 and 003 looked successful while doing nothing.
+
+   So the server asks, on a schedule, and /api/health says the answer out loud.
+   Three states and no comforting default: `locked` means we looked and the
+   only writable columns are name and market; `OPEN` means we looked and found
+   a money column writable, and it names them; `unknown` means migration 005
+   has not been run and nobody has checked — which is not the same as fine.
+
+   Cached for an hour: the grant state changes when somebody runs SQL, not
+   between requests, and health should not be a way to make the database work. */
+const WRITABLE_OK = new Set(['name', 'market']);
+let grantState = { v:'unknown', at:0, open:[] };
+async function checkGrants(){
+  if (!(SB_URL && SB_KEY)) return grantState;
+  if (Date.now() - grantState.at < 36e5 && grantState.v !== 'unknown') return grantState;
+  try {
+    const r = await fetch(SB_URL + '/rest/v1/entitlement_grants?select=role,col,priv',
+      { headers:{ apikey:SB_KEY, authorization:'Bearer ' + SB_KEY } });
+    if (!r.ok){ grantState = { v:'unknown', at:Date.now(), open:[] }; return grantState; }
+    const rows = await r.json();
+    if (!Array.isArray(rows)){ grantState = { v:'unknown', at:Date.now(), open:[] }; return grantState; }
+    const open = [...new Set(rows.filter(x => !WRITABLE_OK.has(x.col)).map(x => x.col))].sort();
+    grantState = { v: open.length ? 'OPEN' : 'locked', at:Date.now(), open };
+  } catch(e){ grantState = { v:'unknown', at:Date.now(), open:[] }; }
+  return grantState;
+}
+/* one probe at boot, so a bad deploy is visible before a customer finds it */
+if (SB_URL && SB_KEY) setTimeout(() => { checkGrants().then(g => {
+  if (g.v === 'OPEN') console.error('[grants] WRITABLE FROM THE BROWSER: ' + g.open.join(', ') + ' — run srv/sql/004-column-grants.sql');
+  else if (g.v === 'unknown') console.warn('[grants] not checked — run srv/sql/005-grant-audit.sql');
+  else console.log('[grants] locked');
+}); }, 4000).unref?.();
+
 /* ══ HEALTH ════════════════════════════════════════════════════════════════
    Enough to diagnose a deploy, and nothing that helps anybody attack it: no
    key, no code, no counts by IP. */
 app.get('/api/health', (_req, res) => {
   rollDay();
+  checkGrants();                      // refreshes in the background; never blocks
   res.json({ ok:true, service:'negotiation-inc', mock:MOCK,
     read:    ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
     compare: ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
@@ -947,6 +1018,9 @@ app.get('/api/health', (_req, res) => {
     land: TILES_KEY ? (tiles.n >= TILES_CAP ? 'quota' : 'on') : 'flat',
     gate: ACCESS ? 'code+account' : ACCOUNTS_ON() ? 'account' : 'none',
     list: LIST_ON ? 'on' : 'off',
+    /* named columns only when something IS open — a health endpoint that lists
+       the writable columns on a locked database is a menu */
+    grants: grantState.v === 'OPEN' ? { state:'OPEN', writable:grantState.open } : grantState.v,
     billing: billingState(),
     today: { reads: day.n, capReads: LIM.perDay, capUsd: LIM.dailyUsd },
     limits: { maxImages: LIM.maxImages, maxImageKb: LIM.maxImageKb, perIpHour: LIM.perIpHour } });

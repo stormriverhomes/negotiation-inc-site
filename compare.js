@@ -64,6 +64,15 @@ export function factsFrom(body){
     name:    String(s.name || '').slice(0, 80),
     bestExit: String(s.bestExit || '').slice(0, 40),
     ceiling: num(s.ceiling), asking: num(s.asking), room: num(s.room),
+    /* Which exit the ceiling — and therefore the room — actually belongs to.
+       A subject-to and a novation have no purchase ceiling at all, so on those
+       sheets `room` describes a DIFFERENT exit, and prose that reads it as the
+       best exit falling short turns a live deal into a walk-away in a document
+       somebody forwards. The desk sends the attribution; this carries it, and
+       the note below tells the model in words what it may not conclude. */
+    ceilingExit: String(s.ceilingExit || '').slice(0, 40),
+    roomBelongsToBestExit: s.roomBelongsToBestExit !== false,
+    ...(typeof s.note === 'string' && s.note ? { note: s.note.slice(0, 400) } : {}),
     spread:  num(s.spread), repairs: num(s.repairs), arv: num(s.arv),
     fit:     num(s.fit),
     confidence: ['high','medium','low','none'].includes(String(s.confidence)) ? s.confidence : 'none',
@@ -98,7 +107,11 @@ export function factsFrom(body){
 
   return { sheets: rows, winner, runner, diffs: diffs.slice(0, 40), flip,
            note: 'Room is the ceiling less the asking price. A negative room means '
-               + 'the seller wants more than any exit on that sheet can pay.' };
+               + 'the seller wants more than any exit on that sheet can pay OUTRIGHT. '
+               + 'Where a sheet has roomBelongsToBestExit:false, the ceiling and the room '
+               + 'belong to ceilingExit and NOT to bestExit — that sheet\'s best exit does not '
+               + 'buy the house outright, so a negative room there is not that exit falling '
+               + 'short and must never be written as a reason to walk away from it.' };
 }
 const num = v => (typeof v === 'number' && Number.isFinite(v)) ? Math.round(v) : null;
 

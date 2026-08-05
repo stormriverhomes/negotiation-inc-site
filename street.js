@@ -217,9 +217,21 @@ export function assemble(content, facts){
     if (b.type !== 'text') continue;
     const text = String(b.text || '').trim();
     if (!text) continue;
+    /* A citation URL goes straight into an href on the desk, where esc() makes
+       it safe as MARKUP and does nothing at all about the SCHEME —
+       `javascript:` and `data:text/html` contain no characters esc() touches,
+       so they arrive intact and become a live link the reader is invited to
+       click. These URLs come from the search tool rather than from a user,
+       which makes this unlikely, not impossible: the model chooses what to
+       cite, and a fetched page is content we do not control. Two schemes are
+       ever legitimate here; anything else is dropped rather than sanitised,
+       because a link we had to repair is a link we should not print. */
     const cites = (b.citations || [])
-      .filter(c => c && c.url)
-      .map(c => ({ url: String(c.url).slice(0, 400), title: String(c.title || '').slice(0, 160) }));
+      .filter(c => c && c.url && /^https?:\/\/[^\s]/i.test(String(c.url).trim()))
+      .filter(c => { try { const u = new URL(String(c.url).trim());
+                           return u.protocol === 'http:' || u.protocol === 'https:'; }
+                     catch(e){ return false; } })
+      .map(c => ({ url: String(c.url).trim().slice(0, 400), title: String(c.title || '').slice(0, 160) }));
 
     /* rule 1 · money and percentages have to be ours */
     let bad = false;
@@ -234,7 +246,15 @@ export function assemble(content, facts){
     if (bad){ dropped.push({ why:'figure', text: text.slice(0, 90) }); continue; }
     kept.push({ text, cites });
   }
-  return { paragraphs: kept, dropped, invented: [...new Set(invented)].slice(0, 6) };
+  /* The brief mixes two kinds of sentence: what the supplied data says, and
+     what the model found on the web. Only the second kind can carry a source,
+     and until now the page gave a reader no way to tell them apart — a
+     paragraph with no chip looked identical whether it was restating a Census
+     figure we handed over or repeating something unverifiable. So the count
+     travels with the brief and the foot says it out loud. */
+  const sourced = kept.filter(p => p.cites.length).length;
+  return { paragraphs: kept, dropped, sourced, unsourced: kept.length - sourced,
+           invented: [...new Set(invented)].slice(0, 6) };
 }
 
 /* Split on blank lines so the page can render one paragraph per block while

@@ -166,10 +166,46 @@ export function sheetFrom(body){
 /* ── the join ───────────────────────────────────────────────────────────────
    All of the arithmetic in this feature happens in this function, and none of
    it anywhere else. */
+/* ── THE RAIL HAS TO COVER THE PROSE TOO ────────────────────────────────────
+   Only the structured `amount` field was ever checked against the bid. Three
+   free-text fields — an item's `note`, the `exclusions` list and `unreadable`
+   — went out with nothing but a length slice, and all three are printed on a
+   page a person reads as findings. "Excludes permits, roughly $4,200" is a
+   figure the reader will treat exactly like a line item, and until now it was
+   never checked against anything.
+
+   Money-shaped tokens only: a bid's prose is full of "8 doors" and "R-38" and
+   "two coats", and treating those as prices would drop honest sentences. What
+   is checked is anything a reader would read as money — $12,400, 12,400,
+   12.4k — against the same allowed set the amounts use. A sentence carrying an
+   invented figure is DROPPED, not repaired, for the same reason the line items
+   are: a sentence we had to correct is a sentence we should not print. */
+const MONEYISH = /[$£€]\s?\d[\d,]*(?:\.\d{1,2})?|\b\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?\b|\b\d+(?:\.\d+)?\s?k\b/gi;
+function proseFigures(text){
+  const out = [];
+  for (const m of String(text || '').matchAll(MONEYISH)){
+    const t = m[0];
+    const k = /k$/i.test(t.trim());
+    const n = Number(t.replace(/[^0-9.]/g, ''));
+    if (!Number.isFinite(n)) continue;
+    out.push({ token: t.trim(), value: k ? n * 1000 : n });
+  }
+  return out;
+}
+/** null when the prose is clean; the offending token when it is not. */
+function proseInvents(text, allowed){
+  for (const f of proseFigures(text)){
+    if (allowed.has(f.value) || allowed.has(Math.round(f.value))) continue;
+    return f.token;
+  }
+  return null;
+}
+
 export function reconcile(data, sheetIn, bidText){
   const { sheet, total: sheetTotal } = sheetIn;
   const allowed = figuresIn(bidText);
   const raw = Array.isArray(data && data.items) ? data.items : [];
+  const proseDropped = [];
 
   const items = [], dropped = [];
   for (const it of raw.slice(0, 200)){
@@ -186,7 +222,15 @@ export function reconcile(data, sheetIn, bidText){
         continue;
       }
     }
-    items.push({ text, amount, line, note: it.note ? String(it.note).slice(0, 160) : undefined });
+    /* the note rides beside a price on the page, so it is held to the price's
+       standard — a note that invents a figure is dropped and the line keeps
+       its (already validated) amount */
+    let note = it.note ? String(it.note).slice(0, 160) : undefined;
+    if (note){
+      const bad = proseInvents(note, allowed);
+      if (bad){ proseDropped.push({ where:'note', token:bad, text: note.slice(0,90) }); note = undefined; }
+    }
+    items.push({ text, amount, line, note });
   }
 
   /* per system: what the bid prices against what the sheet expected */
@@ -265,9 +309,21 @@ export function reconcile(data, sheetIn, bidText){
       systemsOnSheet: rows.filter(r => r.est > 0).length,
     },
     dropped,
-    exclusions: Array.isArray(data?.exclusions)
-      ? data.exclusions.slice(0, 12).map(s => String(s).slice(0, 200)) : [],
-    unreadable: data?.unreadable ? String(data.unreadable).slice(0, 240) : null,
+    exclusions: (Array.isArray(data?.exclusions) ? data.exclusions : [])
+      .slice(0, 12).map(s => String(s).slice(0, 200))
+      .filter(s => { const bad = proseInvents(s, allowed);
+                     if (bad) proseDropped.push({ where:'exclusion', token:bad, text:s.slice(0,90) });
+                     return !bad; }),
+    unreadable: (() => {
+      if (!data?.unreadable) return null;
+      const s = String(data.unreadable).slice(0, 240);
+      const bad = proseInvents(s, allowed);
+      if (bad){ proseDropped.push({ where:'unreadable', token:bad, text:s.slice(0,90) }); return null; }
+      return s;
+    })(),
+    /* said out loud rather than swallowed: the page can tell a reader that a
+       sentence was withheld, which is the same courtesy the line items get */
+    proseDropped,
   };
 }
 
