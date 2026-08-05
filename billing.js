@@ -18,8 +18,8 @@
    ── THE TWO TRAPS ─────────────────────────────────────────────────────────
 
    1 · THE PLAN MUST NOT BE DERIVED FROM THE PRICE ID.
-       Billing §6 promises every subscriber keeps the price they joined at ($99
-       pre-rise, $129 since the read shipped) and the founding
+       Billing §6 promises every subscriber keeps the price they joined at
+       and the founding
        hundred keep $49, permanently — which means grandfathered subscribers
        sit on price objects that are no longer the current ones. Map price →
        plan and the day you raise the price, every founding member's webhook

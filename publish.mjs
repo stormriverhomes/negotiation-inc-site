@@ -775,8 +775,7 @@ for (const must of ['desk.html#new', 'class="spot"',
                     'id="bid"', 'id="objections"', 'The other side of the table',
                     'class="founding"', '>Solo<', '$39', '$129', '$249',
                     '<th>Solo</th>', 'Two months free on annual',
-                    /* the price rise HAPPENED — the pin is now the receipt */
-                    'class="rise"', 'until the photo read shipped'])
+                    '$1,290 a year'])
   if (!plans.includes(must)) throw new Error('plans.html lost: ' + must);
 /* The desk prices SEVEN exits and tells you on the sheet that the eighth needs
    land. A plans page claiming eight is the marketing contradicting the product,
@@ -791,12 +790,16 @@ if (/\$29 <small>/.test(plans) || /the plan is\s+twenty-nine/.test(plans))
   throw new Error('plans.html still quotes the retired $29 price');
 if (/class="tier">in build/i.test(plans) || /s-soon/.test(plans))
   throw new Error('plans.html went back to hedging on every row');
-/* The read shipped on 5 August 2026 and the price moved with it, exactly as
-   the page had promised. Copy that says "until the photo read ships" or "not
-   shipped yet" after that date is not a hedge, it is a false statement on the
-   page that asks for money. */
-if (/photo (condition )?read ships\b/.test(plans) || /not shipped yet/.test(plans))
-  throw new Error('plans.html says the photo read has not shipped. It shipped, and the price moved — this copy is now false.');
+/* The read shipped on 5 August 2026, pre-launch, and the price is simply
+   $129. Two kinds of copy are banned here for the same reason: both narrate a
+   history no customer lived through. "Until the photo read ships" claims the
+   read does not exist (it does, it is metered and live). "It was $99" performs
+   a price rise at people who never saw $99 (nobody did; the product had not
+   launched). A page that asks for money states the price. It does not
+   dramatise it. */
+if (/photo (condition )?read ships\b/.test(plans) || /not shipped yet/.test(plans)
+    || /It was \$99/.test(plans) || /then \$129/.test(plans))
+  throw new Error('plans.html is narrating price history again — pre-launch there is none. The price is $129; say so and stop.');
 /* ══ THE PLANS PAGE'S HEADLINE IS A NUMBER, SO IT IS COUNTED ═══════════════
    "Seventy-six fields decide what a house is worth" is a factual claim about
    the product, printed on the page that asks for money, on a site whose whole
@@ -923,7 +926,7 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
      ['no analytics', 'never train']],
     ['refunds.html', 'Billing & refunds · Negotiation Inc',
      'Fourteen days free. Thirty days money back. Cancel in two clicks and keep working to the end of the period you paid for.',
-     ['thirty days', 'cancel', 'a month for new subscribers', 'price they joined at']],
+     ['thirty days', 'cancel', 'price they joined at']],
   ];
   for (const [file, title, desc, promises] of LEGAL){
     let doc = fs.readFileSync(file, 'utf8');

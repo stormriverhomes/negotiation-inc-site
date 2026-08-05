@@ -36,7 +36,7 @@ Three products, one recurring monthly price each. **Write the price IDs down.**
 | Product | Price now | What it is |
 |---|---|---|
 | Negotiation Inc · Solo | $49/mo | `STRIPE_PRICE_SOLO` |
-| Negotiation Inc · Underwriter | $129/mo — new subscribers; pre-rise joiners keep $99 | `STRIPE_PRICE_UNDERWRITER` |
+| Negotiation Inc · Underwriter | $129/mo | `STRIPE_PRICE_UNDERWRITER` |
 | Negotiation Inc · The Office | $249/mo | `STRIPE_PRICE_OFFICE` |
 
 > ### The price lock, and why it is not a discount
