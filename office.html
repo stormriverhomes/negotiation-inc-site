@@ -1619,6 +1619,30 @@ async function pushSheets(rows){
     return r.ok;
   } catch(e){ return false; }
 }
+/* ── A DELETE THAT DELETES ─────────────────────────────────────────────────
+   There was no DELETE anywhere in this layer — only POST, PATCH and GET. So
+   removing a property spliced it out of localStorage and left the row on the
+   server, and the very next visit had mergeSheets find a remote pid with no
+   local twin, decide it was a sheet from another device, and put it back. A
+   deleted property came back on every load, and the same mechanism quietly
+   undid "delete everything".
+
+   Failure is soft on purpose: a delete that could not reach the network must
+   not block the local one, because the local one is what the person just
+   watched happen. A row that outlives its property is a far smaller problem
+   than a UI that refuses to respond. */
+async function deleteSheets(pids){
+  const t = await token(); if (!t || !pids || !pids.length) return false;
+  try {
+    const list = pids.filter(x => typeof x === 'string' && /^[A-Za-z0-9_-]{1,24}$/.test(x));
+    if (!list.length) return false;
+    const q = 'pid=in.(' + list.map(encodeURIComponent).join(',') + ')';
+    const r = await fetch(`${SB.url}/rest/v1/sheets?${q}`, { method:'DELETE',
+      headers:{ ...sbHead(t), Prefer:'return=minimal' } });
+    return r.ok;
+  } catch(e){ return false; }
+}
+window.__deleteSheets = deleteSheets;
 
 /* ── LAST WRITE WINS, PER PROPERTY ─────────────────────────────────────────
    Not per workspace. A person who edits one sheet on a phone and a different
@@ -1696,8 +1720,21 @@ async function syncSheets(){
 }
 async function pushLocal(){
   if (!SB_ON || typeof P === 'undefined' || !SESS) return;
+  /* ── THROUGH THE DESK'S OWN SERIALISER ───────────────────────────────────
+     This sent `blob: p` — the raw in-memory prop — while the loader on the
+     other end restored figures only from the `f` map that save() builds. The
+     prop has no `f`, so every money field arrived as NOTHING: sign in on a
+     second device and the sheet came back with its name, address, comps and
+     sliders, and asking, ARV, repairs, rent, balance, PITI and arrears all
+     reading NEEDED. Then that device pushed the gutted blob back over the good
+     row and both were ruined, silently, with no error.
+
+     propWire is the one serialiser save() and the file export also use, so the
+     shape we store and the shape we send cannot drift apart again — which is
+     the only reason this was possible. */
+  const wire = (typeof window !== 'undefined' && window.__propWire) || (x => x);
   const rows = P.props.map(p => ({ pid: p.id, updated: new Date(+(p.updated || Date.now())).toISOString(),
-    blob: p }));
+    blob: wire(p) }));
   await pushSheets(rows);
 }
 /* saving is a keystroke away from constant, so the push is debounced hard —
