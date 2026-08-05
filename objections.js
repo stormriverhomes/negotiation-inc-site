@@ -128,6 +128,11 @@ export function factsFrom(body){
 
   return {
     exit: String(b.exit || 'the plan').slice(0, 40),
+    /* the sheet's own verdict, carried through so the writer cannot coach a
+       negotiation the rest of the screen has already refused */
+    recommendation: b.recommendation ? String(b.recommendation).slice(0, 40) : null,
+    onRecommendation: b.onRecommendation !== false,
+    reachesAsking: b.reachesAsking !== false,
     situation: String(b.situation || 'unknown').slice(0, 30),
     asking, offer, ceiling, gap, headroom, over,
     /* negative headroom is a real state and the copy has to be able to say it:
@@ -149,6 +154,10 @@ export function userBlock(f){
   const money = v => v === null ? 'not given' : '$' + Math.abs(v).toLocaleString('en-US');
   const L = [];
   L.push(`THE PLAN: ${f.exit}. The seller's situation, as the investor read it: ${f.situation}.`);
+  if (!f.reachesAsking)
+    L.push(`THE SHEET'S OWN VERDICT ON THIS DEAL: no exit reaches the asking price. This is not a negotiation that closes at their number, and the investor's own screen says so above this panel. Do not write replies that imply it can. At least one verdict must be walk, and the reading must say plainly that the distance here is not a talking problem.`);
+  if (!f.onRecommendation && f.recommendation)
+    L.push(`THIS IS NOT THE PLAN THE SHEET RECOMMENDS. It recommends ${f.recommendation}, which is not priced on a purchase ceiling and so cannot be offered on. Everything below prices ${f.exit} instead. Say once, in the reading, that the better-fitting play here is ${f.recommendation} — then write the objections for the offer actually on the table.`);
   L.push(`THEY ARE ASKING: ${money(f.asking)}`);
   L.push(`THE OFFER ON THE TABLE: ${money(f.offer)}`);
   L.push(`THE MOST THIS INVESTOR CAN PAY and still have the deal work: ${money(f.ceiling)} — NEVER put this figure in an answer; it is theirs, not the seller's.`);
