@@ -122,6 +122,13 @@ h1{font-size:40px}
 .verdict.right .vh{color:var(--green)} .verdict.wrong .vh{color:var(--red)}
 .verdict b{color:var(--txt);font-weight:650}
 .verdict .go{margin-top:8px;font-size:12.5px;color:var(--faint)}
+/* the fee rides in the verdict header, beside the points, because points are
+   a game and the fee is the part that follows you out of the cabinet */
+.feetag{float:right;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:none;
+  color:var(--green);border:1px solid var(--green);padding:1px 6px;margin-left:10px}
+.feetag.dn{color:var(--red);border-color:var(--red)}
+.tally .v.m{font-size:21px} .tally .v.up{color:var(--green)} .tally .v.dn{color:var(--red)}
+.statrow .v.up{color:var(--green)} .statrow .v.dn{color:var(--red)}
 /* the ledger: every exit in its own units, never averaged, never "fit points" */
 .ldg{margin-top:9px;border-top:1px solid var(--edge)}
 .lr{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:8px 0;border-bottom:1px solid var(--edge);align-items:baseline}
@@ -239,6 +246,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   <div><div class="t">Score</div><div class="v" id="score">0</div></div>
   <div><div class="t">Streak</div><div class="v" id="streak">0</div></div>
   <div><div class="t">Best</div><div class="v" id="best">—</div></div>
+  <div><div class="t">Bankroll</div><div class="v m" id="bank">—</div></div>
  </div>
 </div>
 
@@ -514,6 +522,239 @@ function drawHouse(cv,d){
    because punishing the player for learning would be a strange curriculum. */
 const $=id=>document.getElementById(id);
 const fmt=v=>(v<0?'−$':'$')+Math.abs(Math.round(v)).toLocaleString('en-US');
+
+/* ══ THE BANKROLL ══════════════════════════════════════════════════════════
+   One number, three cabinets, and it can go down.
+
+   Until now the arcade had three incompatible currencies and not one of them
+   could fall. The Exit Drill had no money at all — it scored in points and
+   explained itself in "fit", a unit that exists nowhere in real estate. Daily
+   Street handed you $150,000 that evaporated on refresh. Comp Run has a real
+   save and offline earnings, but its bank only ever rises. A quiz that costs
+   nothing is a quiz; nobody has ever felt they were learning a trade from a
+   multiple-choice question with no stake.
+
+   THE THING THE OBVIOUS DESIGN GETS WRONG. "One bankroll shared by all three"
+   sounds right and breaks immediately on contact with the code. Comp Run's
+   cash starts at $12, grows exponentially up an eight-rung ladder, and is
+   RESET TO $12 on every prestige. Daily Street's houses cost $80,000 to
+   $260,000. Wire those to the same variable and either Comp Run's first hour
+   is trivial or Daily Street is unplayable. They are not the same kind of
+   number and pretending otherwise would be the sort of tidy lie this product
+   is built to avoid.
+
+   SO: the bankroll is what you have taken OUT of the arcade, not what is in
+   play inside it.
+
+     · Daily Street plays WITH it. The street is where the money is at risk,
+       because the street is the cabinet whose currency was already real-estate
+       money. Win and it is yours; lose and it is gone, permanently.
+     · The Exit Drill earns INTO it. A right read pays a finder's fee out of
+       the room that exit actually had — you did not buy anything, you read it
+       correctly, and reading correctly is worth a fee. Small, fast, capped
+       daily. This is the lane you rebuild on after a bad street.
+     · Comp Run pays INTO it at a prestige. A prestige is the moment an era's
+       work is already being cashed out and reset — the natural seam, and
+       taking the conversion there disturbs its balance not at all.
+
+   Each cabinet keeps its own physics. There is still one number to care about.
+
+   NO LOCKOUT. A player who tanks is not shut out: Daily Street already models
+   leverage (bid above your capital and you pay points on the borrowed part),
+   so a thin bankroll makes every deal more expensive rather than impossible.
+   That is both kinder and truer than a velvet rope. The floor is zero — a
+   negative bankroll is a number nobody can act on. */
+
+const BANK_KEY   = 'ni.bank.v1';
+const START      = 150000;   // what Daily Street always started a run with
+const DRILL_DAY_CAP = 12000; // the rebuild lane is a lane, not a printer
+const LEDGER_MAX = 40;
+
+/* Comp Run's cash is exponential idle-game currency; its `rep` is the career
+   figure that survives a prestige, and `bankable()` hands it a FRACTION —
+   about 0.85 for a full climb to the top of an era, less for a quick one.
+
+   So the rate is per unit of that fraction, pinned against the street: a full
+   era banks about $42,500, which is a good street's work, and a hurried
+   crossing banks proportionally less. An era of Comp Run should be worth
+   roughly a good day on the street — neither cabinet should be the obvious
+   way to farm the other. */
+const REP_TO_CASH = 50000;
+
+const GAMES = ['street', 'drill', 'comprun'];
+
+const num = (v, d = 0) =>
+  (typeof v === 'number' && Number.isFinite(v)) ? v : d;
+const int = (v, d = 0) => Math.round(num(v, d));
+const str = (v, n) => typeof v === 'string' ? v.slice(0, n) : '';
+
+function fresh(){
+  return { v:1, cash: START, best: START, low: START, staked: 0, earned: 0,
+           ledger: [], runs: { street:0, drill:0, comprun:0 },
+           drillDay: '', drillToday: 0, opened: 0 };
+}
+
+/* Everything typed on the way in. localStorage is writable by anything that
+   ever ran on this origin — including the player with a console open — and a
+   bankroll is exactly what somebody would edit. Typing it here does not stop
+   a determined cheat (nothing client-side can), but it does stop a corrupt or
+   hand-edited value from crashing a cabinet or minting Infinity. */
+function clean(d){
+  const b = fresh();
+  if (!d || typeof d !== 'object') return b;
+  b.cash    = Math.max(0, Math.min(1e12, int(d.cash, START)));
+  b.best    = Math.max(b.cash, Math.min(1e12, int(d.best, b.cash)));
+  b.low     = Math.max(0, Math.min(b.best, int(d.low, b.cash)));
+  b.staked  = Math.max(0, Math.min(1e12, int(d.staked, 0)));
+  b.earned  = Math.max(0, Math.min(1e12, int(d.earned, 0)));
+  b.opened  = Math.max(0, Math.min(1e6,  int(d.opened, 0)));
+  b.drillDay   = str(d.drillDay, 10);
+  b.drillToday = Math.max(0, Math.min(DRILL_DAY_CAP, int(d.drillToday, 0)));
+  if (d.runs && typeof d.runs === 'object')
+    for (const g of GAMES) b.runs[g] = Math.max(0, Math.min(1e6, int(d.runs[g], 0)));
+  if (Array.isArray(d.ledger))
+    b.ledger = d.ledger.slice(-LEDGER_MAX).filter(x => x && typeof x === 'object')
+      .map(x => ({ g: GAMES.includes(x.g) ? x.g : 'street',
+                   d: int(x.d, 0), t: int(x.t, 0), n: str(x.n, 90) }));
+  return b;
+}
+
+/* ── the one mutation ──────────────────────────────────────────────────────
+   Every change to the money goes through here, so there is exactly one place
+   that can move it and exactly one place to read to know what may. Returns a
+   NEW bank plus what actually happened — `applied` can differ from `delta`
+   when the floor or the daily cap bites, and the caller is told rather than
+   quietly given a different number than it asked for. */
+function settle(bank, { game, delta, note, day, at }){
+  const b = clean(bank);
+  const g = GAMES.includes(game) ? game : 'street';
+  let d = int(delta, 0);
+  let capped = false;
+
+  /* the drill's daily cap. It pays out, so it is the one that could be farmed
+     — sixty seconds a go, all night. It stays playable and stops paying. */
+  if (g === 'drill' && d > 0){
+    const key = str(day, 10);
+    if (b.drillDay !== key){ b.drillDay = key; b.drillToday = 0; }
+    const room = Math.max(0, DRILL_DAY_CAP - b.drillToday);
+    if (d > room){ d = room; capped = true; }
+    b.drillToday += d;
+  }
+
+  /* the floor. A bankroll below zero is a number nobody can act on. */
+  const before = b.cash;
+  b.cash = Math.max(0, before + d);
+  const applied = b.cash - before;
+
+  if (applied > 0) b.earned += applied; else b.staked += -applied;
+  b.best = Math.max(b.best, b.cash);
+  b.low  = Math.min(b.low,  b.cash);
+  if (applied !== 0 || note)
+    b.ledger = [...b.ledger, { g, d: applied, t: int(at, 0), n: str(note, 90) }].slice(-LEDGER_MAX);
+  return { bank: b, applied, capped, floored: applied !== d };
+}
+
+function noteRun(bank, game){
+  const b = clean(bank);
+  const g = GAMES.includes(game) ? game : 'street';
+  b.runs[g] += 1;
+  return b;
+}
+
+/* ── what the drill pays ───────────────────────────────────────────────────
+   A right read is worth a fee, not a profit: you did not buy the house, you
+   said what it was for. So the fee is a slice of the room that exit actually
+   had, floored so a thin deal still pays something for being read right and
+   capped so one fat deal is not the whole session.
+
+   A wrong read costs. It costs LESS than the fee a right one pays, because
+   being wrong on paper is cheap and being wrong with a cheque is not — the
+   drill is where you are supposed to be wrong. */
+const DRILL_FEE_PC  = 0.03;
+const DRILL_FEE_MIN = 250;
+const DRILL_FEE_MAX = 3000;
+const DRILL_MISS    = 400;
+
+function drillFee(room){
+  const r = num(room, 0);
+  if (!(r > 0)) return DRILL_FEE_MIN;
+  return Math.round(Math.max(DRILL_FEE_MIN, Math.min(DRILL_FEE_MAX, r * DRILL_FEE_PC)) / 50) * 50;
+}
+
+/** What a Comp Run prestige is worth banked. `rep` is the run's contribution
+ *  to the career figure, which is already what that cabinet counts as an era's
+ *  work — so this converts rather than invents. */
+function prestigeValue(rep){
+  return Math.max(0, Math.round(num(rep, 0) * REP_TO_CASH));
+}
+
+/* ── how the number reads ──────────────────────────────────────────────────
+   The arcade earns the right to mention the desk only once there is a figure
+   worth mentioning. Under that, the line would be a sales pitch attached to
+   nothing, which is the kind of thing that makes a person stop trusting a
+   page. */
+const FUNNEL_AT = 400000;
+
+function standing(bank){
+  const b = clean(bank);
+  const up = b.cash - START;
+  return {
+    cash: b.cash, best: b.best, low: b.low, up,
+    /* "through the arcade" is gross, not net — it is the honest way to say
+       how much of this you have actually handled */
+    through: b.earned,
+    runs: b.runs.street + b.runs.drill + b.runs.comprun,
+    broke: b.cash <= 0,
+    thin: b.cash > 0 && b.cash < START * 0.25,
+    /* earned the mention: you are up, and you are up by something real */
+    funnel: b.cash >= FUNNEL_AT && up > 0,
+  };
+}
+
+/* ── the only thing that touches disk ──────────────────────────────────────
+   Everything above is pure, so it runs under node and is unit-tested. This is
+   the browser half, guarded so the tests never reach it. One reader, one
+   writer, and no cabinet is allowed its own: three games writing a shared key
+   by three different routes is how a shared number stops being shared. */
+const BANK = {
+  read(){
+    if (typeof localStorage === 'undefined') return fresh();
+    let raw = null; try { raw = localStorage.getItem(BANK_KEY); } catch(e){ return fresh(); }
+    if (!raw) return fresh();
+    try { return clean(JSON.parse(raw)); } catch(e){ return fresh(); }
+  },
+  write(b){
+    if (typeof localStorage !== 'undefined')
+      try { localStorage.setItem(BANK_KEY, JSON.stringify(b)); } catch(e){}
+    return b;
+  },
+  /** Move the money and persist it. Returns the same shape settle() does, so a
+   *  caller can tell the player when the floor or the daily cap bit. */
+  move(o){
+    const r = settle(this.read(), { at: Date.now(), day: today(), ...o });
+    this.write(r.bank);
+    return r;
+  },
+  run(game){ return this.write(noteRun(this.read(), game)); },
+  standing(){ return standing(this.read()); },
+  /** Opening a cabinet is not a run, but it is worth knowing somebody looked. */
+  opened(){ const b = this.read(); b.opened += 1; return this.write(b); },
+};
+function today(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function money(n){
+  const v = Math.round(Math.abs(num(n, 0)));
+  return (num(n,0) < 0 ? '−$' : '$') + v.toLocaleString('en-US');
+}
+function signed(n){
+  const v = num(n, 0);
+  return (v > 0 ? '+' : v < 0 ? '−' : '') + '$' + Math.round(Math.abs(v)).toLocaleString('en-US');
+}
+
+
 const LS={ get(k){try{return localStorage.getItem(k)}catch(e){return null}},
            set(k,v){try{localStorage.setItem(k,v)}catch(e){}} };
 const ANSWERS=[['wholesale','The wholesale','sell the contract, never own it'],
@@ -677,6 +918,29 @@ function answer(a){
     lastTick=performance.now(); requestAnimationFrame(tick); }
   const correct = answerFor(G.cur); G.reads++;
   const took = G.askedAt-G.t;
+
+  /* ── THE MONEY MOVES ON EVERY ANSWER ────────────────────────────────────
+     Not at the end of the run. If the drill settled up only when the clock
+     expired, a player having a bad minute could close the tab and keep their
+     bankroll — and a game you can quit out of losing is a game with no stake
+     in it, which is exactly what this cabinet was before today.
+
+     The fee is a FINDER'S FEE, and the copy says so: you did not buy the
+     house, you said what it was for, and saying what it is for is worth
+     paying somebody. It scales with the size of the deal you read, floored so
+     a thin one still pays and capped so one fat one is not the session. */
+  const cx = rank(G.cur).find(x => x.id === correct);
+  const size = !cx ? 0
+    : cx.id === 'subto'    ? Math.max(0, (cx.spread || 0) * 12)
+    : cx.id === 'novation' ? Math.max(0, cx.check || 0)
+    : Math.max(0, (cx.ceil || 0) - G.cur.ask);
+  const fee  = drillFee(size);
+  const paid = (a === correct) ? fee : -DRILL_MISS;
+  const mv   = BANK.move({ game:'drill', delta: paid,
+    note: (a === correct ? 'read ' + (NAME[correct]||'the walk') : 'called it wrong') + ' on ' + (G.cur.addr || 'a house') });
+  G.take += mv.applied;
+  G.capped = G.capped || mv.capped;
+  paintBank();
   document.querySelectorAll('.ans').forEach(b=>{ b.disabled=true;
     if(b.dataset.a===correct) b.classList.add('right');
     else if(b.dataset.a===a) b.classList.add('wrong'); });
@@ -687,13 +951,16 @@ function answer(a){
     const chain = (G.streak>0 && G.streak%3===0) ? 50 : 0;
     G.score += 100+bonus+chain;
     v.className='verdict right';
-    v.innerHTML=`<div class="vh">Right — ${NAME[correct]||'the walk'} · +${100+bonus}${chain?' +50 streak':''}</div>
+    v.innerHTML=`<div class="vh">Right — ${NAME[correct]||'the walk'} · +${100+bonus}${chain?' +50 streak':''}
+      <span class="feetag">${mv.applied > 0 ? 'finder’s fee ' + fmt(mv.applied)
+        : mv.capped ? 'day’s fees are capped' : 'no fee'}</span></div>
       ${correct==='walk' ? '<div class="lnone">Nothing on this house pays at what they are asking. Walking away IS the read.</div>' : ''}
       ${working(G.cur, a, correct)}<div class="go">Space or click for the next house.</div>`;
   } else {
     G.streak=0; G.t=Math.max(0,G.t-5);
     v.className='verdict wrong';
-    v.innerHTML=`<div class="vh">The desk says ${NAME[correct]||'walk away'} · −5 seconds</div>
+    v.innerHTML=`<div class="vh">The desk says ${NAME[correct]||'walk away'} · −5 seconds
+      <span class="feetag dn">${fmt(DRILL_MISS)} out of your bankroll</span></div>
       ${correct==='walk' ? '<div class="lnone">Nothing on this house pays at what they are asking.</div>' : ''}
       ${working(G.cur, a, correct)}
       <div class="go">Space or click for the next house.</div>`;
@@ -701,6 +968,14 @@ function answer(a){
   G.last=G.cur;
   $('score').textContent=G.score; $('streak').textContent=G.streak;
   if (G.t<=0) end();
+}
+function paintBank(){
+  const el = $('bank'); if (!el) return;
+  const b = BANK.standing();
+  el.textContent = fmt(b.cash);
+  el.className = 'v m' + (G.take > 0 ? ' up' : G.take < 0 ? ' dn' : '');
+  const t = $('banktake');
+  if (t) t.textContent = G.take === 0 ? '' : (G.take > 0 ? '+' : '−') + fmt(Math.abs(G.take)).replace('$','$');
 }
 function advance(){ if(G.over||G.teaching||!G.started) return; if(!G.open && G.t>0) next(); }
 document.addEventListener('keydown',e=>{
@@ -761,7 +1036,9 @@ function renderBelow(){
 }
 function beginRun(){
   Object.assign(G,{t:60,score:0,streak:0,reads:0,right:0,over:false,open:false,last:null,
-                   house:0,teaching:false,started:true,running:false});
+                   house:0,teaching:false,started:true,running:false,take:0,capped:false});
+  BANK.run('drill');
+  paintBank();
   /* zeros before anybody has played are not a scoreboard, they are a shrug */
   $('score').textContent='\u2014'; $('streak').textContent='\u2014';
   $('card').classList.add('hidden');
@@ -788,7 +1065,13 @@ function end(){
    <div class="big">${G.score}</div>
    <div class="statrow"><div class="s"><div class="t">Houses read</div><div class="v">${G.reads}</div></div>
     <div class="s"><div class="t">Called right</div><div class="v">${acc}%</div></div>
-    <div class="s"><div class="t">Best</div><div class="v">${best}</div></div></div>
+    <div class="s"><div class="t">Best</div><div class="v">${best}</div></div>
+    <div class="s"><div class="t">This run paid</div>
+      <div class="v ${G.take>0?'up':G.take<0?'dn':''}">${(G.take>0?'+':G.take<0?'−':'')+fmt(Math.abs(G.take)).replace(/^−/,'')}</div></div></div>
+   <div class="grade">Your bankroll is <b>${fmt(BANK.read().cash)}</b>. ${
+     G.capped ? 'You have taken the day’s full fees out of the drill — it still plays, it stops paying until tomorrow.'
+     : G.take < 0 ? 'A bad minute costs less here than a bad offer does on a real house. That is what the drill is for.'
+     : 'Reading them right is worth a fee. Buying them right is worth a great deal more — that is the street.'}</div>
    <div class="grade">${grade[1]}</div>
    ${nextRk ? `<div class="grade" style="color:#e8cf72">
      <b>${(nextRk.at-G.score).toLocaleString('en-US')}</b> more and you are a ${nextRk.n}.</div>` : ''}
