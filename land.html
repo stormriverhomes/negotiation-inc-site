@@ -111,6 +111,12 @@ a{color:var(--blue)}
 .sheet .k{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--soft)}
 .ask .big{font-family:var(--serif);font-size:31px;font-weight:700;letter-spacing:-.02em;display:flex;
  align-items:center;gap:10px}
+/* the ask is the headline and it is typed in place — it wears the headline's
+   own type, not a browser-default 13px box (which iOS would also zoom) */
+.ask .big input{font:inherit;font-size:24px;width:9ch;border:1px solid transparent;border-radius:9px;
+ padding:2px 7px;background:transparent;font-variant-numeric:tabular-nums;box-sizing:content-box}
+.ask .big input:hover{border-color:var(--line-ink);background:var(--wash)}
+.ask .big input:focus{outline:none;border-color:var(--blue);background:#fff}
 .ask .sub{font-size:12px;color:var(--soft);margin-top:2px}
 .play{border-top:1px solid var(--line);margin-top:14px;padding-top:13px}
 .clears{font-family:var(--serif);font-size:42px;font-weight:700;letter-spacing:-.02em;color:var(--green);line-height:1.05}
@@ -156,7 +162,11 @@ a{color:var(--blue)}
  .hcard{top:12px;left:12px;padding:10px 13px 9px;border-radius:14px}
  .hcard h1{font-size:16.5px}
  .hcard .sub{font-size:10.5px;gap:6px}
- .hcard input{font-size:12px;padding:5px 8px;margin-top:6px}
+ /* every input holds 16px on a phone — one pixel under it and iOS Safari
+    zooms the page on focus, which reads as the layout breaking */
+ .hcard input,.lrow input,.conc input,.facts input,.facts select{font-size:16px}
+ .hcard input{padding:5px 8px;margin-top:6px}
+ .lrow input[data-k="months"]{width:38px}
  #ground{position:relative;inset:auto;height:46vh;min-height:300px}
  .floor{position:static;height:auto;padding:8px 14px}
  .sheet{position:static;width:auto;margin:0;border-radius:0;box-shadow:none;border-left:none;border-right:none}
