@@ -611,12 +611,28 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   </div>
   <div class="show" id="show">
    <div class="showstage" id="stage">
-    <img class="on" src="art/demo-condition.jpg" alt="The condition panel: five system sliders pricing a repair estimate" width="1400" height="736">
-    <img src="art/demo-exits.jpg" alt="Seven exits ranked by fit with the arithmetic shown" width="1400" height="831" loading="lazy">
-    <img src="art/demo-advanced.jpg" alt="Advanced mode: the assumptions the arithmetic runs on" width="1400" height="664" loading="lazy">
-    <img src="art/demo-sensitivity.jpg" alt="The sensitivity grid: profit when ARV and repairs are wrong" width="1400" height="546" loading="lazy">
-    <img src="art/demo-offer.jpg" alt="The offer view: six levers, your cost and how it reads to the seller" width="1400" height="780" loading="lazy">
-    <img src="art/demo-hub.jpg" alt="The workspace hub: properties, market, course and arcade" width="1400" height="831" loading="lazy">
+    <!-- ══ SIX SCREENSHOTS, ONE AT A TIME, AND ONLY WHEN NEEDED ═══════════
+         These carry `loading="lazy"` and it did nothing. Lazy loading defers
+         images OUTSIDE the viewport; these are stacked on top of each other
+         at opacity 0, which is geometrically inside it — so a phone opening
+         the front page downloaded all six before it painted anything. 1.25
+         megabytes to show one picture, over cellular, before the headline.
+
+         They are PNG now, not JPEG, and that is not a preference: these are
+         screenshots of an interface — flat fills, hairlines, small type —
+         which an indexed palette encodes in about half the bytes AND without
+         the ringing JPEG puts around every letter. demo-offer alone goes
+         from 275KB to 130KB and comes out sharper.
+
+         And the src is held in `data-src` until the frame is actually shown
+         (see the loader below), so what a first visit pays for is the first
+         frame. The rest arrive one ahead of the reader. ═══════════════════ -->
+    <img class="on" src="art/demo-condition.png" alt="The condition panel: five system sliders pricing a repair estimate" width="1400" height="736" fetchpriority="high">
+    <img data-src="art/demo-exits.png" alt="Seven exits ranked by fit with the arithmetic shown" width="1400" height="831">
+    <img data-src="art/demo-advanced.png" alt="Advanced mode: the assumptions the arithmetic runs on" width="1400" height="664">
+    <img data-src="art/demo-sensitivity.png" alt="The sensitivity grid: profit when ARV and repairs are wrong" width="1400" height="546">
+    <img data-src="art/demo-offer.png" alt="The offer view: six levers, your cost and how it reads to the seller" width="1400" height="780">
+    <img data-src="art/demo-hub.png" alt="The workspace hub: properties, market, course and arcade" width="1400" height="831">
    </div>
    <div class="showbar">
     <div class="showcap" id="showcap"></div>
@@ -828,12 +844,24 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  var stage = document.getElementById('stage'), imgs = stage.querySelectorAll('img');
  var tabs = document.getElementById('showtabs'), cap = document.getElementById('showcap');
  var i = 0, timer = null, stopped = false;
+ /* declared up here because `go(0)` runs before the autoplay decision and
+    needs to know whether to warm the next frame — on a phone it must not. */
+ var small = window.matchMedia && matchMedia('(max-width:700px)').matches;
  tabs.innerHTML = FRAMES.map(function(f, n){
    return '<button type="button" data-i="' + n + '"><span class="live"></span>' + f[0] + '</button>';
  }).join('');
  var btns = tabs.querySelectorAll('button');
+ /* a frame is fetched when it is about to be looked at, and the one after
+    it is warmed so a tab press is still instant. Nothing else is downloaded. */
+ function load(n){
+   var el = imgs[(n + FRAMES.length) % FRAMES.length];
+   if (el && !el.src && el.dataset.src) el.src = el.dataset.src;
+ }
  function go(n){
    i = (n + FRAMES.length) % FRAMES.length;
+   /* one ahead on a desktop so a tab press is instant; on a phone, only what
+      is actually being looked at — a frame nobody taps is pure cellular cost */
+   load(i); if (!small) load(i + 1);
    for (var k = 0; k < imgs.length; k++) imgs[k].className = (k === i ? 'on' : '');
    for (var j = 0; j < btns.length; j++) btns[j].className = (j === i ? 'on' : '');
    cap.innerHTML = '<div class="t">' + FRAMES[i][0] + '</div><div class="d">' + FRAMES[i][1] + '</div>';
@@ -847,7 +875,14 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  document.getElementById('show').addEventListener('mouseenter', pause);
  document.getElementById('show').addEventListener('mouseleave', start);
  go(0);
- if (!window.matchMedia || !matchMedia('(prefers-reduced-motion: reduce)').matches) start();
+ /* ── A PHONE DID NOT ASK FOR A SLIDESHOW ──────────────────────────────────
+    Auto-advance is a good idea on a desktop, where the stage is large, the
+    connection is usually free and a reader's eye is already on it. On a
+    phone it is a carousel spending somebody's data on frames they did not
+    ask to see, while they are trying to read the sentence above it. The
+    tabs still work; it just waits to be asked. */
+ var motionOK = !window.matchMedia || !matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if (motionOK && !small) start();
 })();
 </script>
 <style>
