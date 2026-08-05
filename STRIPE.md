@@ -36,12 +36,12 @@ Three products, one recurring monthly price each. **Write the price IDs down.**
 | Product | Price now | What it is |
 |---|---|---|
 | Negotiation Inc · Solo | $49/mo | `STRIPE_PRICE_SOLO` |
-| Negotiation Inc · Underwriter | $99/mo | `STRIPE_PRICE_UNDERWRITER` |
+| Negotiation Inc · Underwriter | $129/mo — new subscribers; pre-rise joiners keep $99 | `STRIPE_PRICE_UNDERWRITER` |
 | Negotiation Inc · The Office | $249/mo | `STRIPE_PRICE_OFFICE` |
 
 > ### The price lock, and why it is not a discount
 >
-> Billing §6 promises the $99 subscribers keep $99 and the founding hundred
+> Billing §6 promises every subscriber keeps the price they joined at and the founding hundred
 > keep $49, permanently. **Never do that with a coupon.** A coupon does not
 > survive a price change; a separate price object does. When you raise the
 > price, you make a NEW price object and point the environment variable at it.
@@ -58,7 +58,7 @@ Three products, one recurring monthly price each. **Write the price IDs down.**
 
 **The founding hundred:** make a fourth price object at $49 on the Underwriter
 product, point `STRIPE_PRICE_UNDERWRITER` at it, and when the hundredth
-subscriber lands, point the variable back at the $99 price. Nothing else
+subscriber lands, point the variable back at the $129 price. Nothing else
 changes and nobody's bill moves.
 
 ## 3 · The customer portal
