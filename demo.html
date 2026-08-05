@@ -117,7 +117,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 </style>
 <meta property="og:type" content="website">
 <meta property="og:title" content="See how it works · Negotiation Inc">
-<meta property="og:description" content="Five properties that do not exist, each with a different right answer. Open one and the real software prices every exit against it.">
+<meta property="og:description" content="Six properties that do not exist, each with a different right answer — five houses and one piece of dirt. Open one and the real software prices it.">
 <meta name="twitter:card" content="summary">
 </head><body>
 <div class="wrap">
@@ -134,7 +134,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  </nav>
 </header>
 
-<h1>Five houses. Five different right answers.</h1>
+<h1>Five houses, and one piece of dirt.</h1>
 <p class="lede">Each one opens the real software with the work already done — comparable sales
  scored, condition read, seller placed. <b>Nothing here is a mock-up.</b> Move any slider and it
  re-prices, because it is the same arithmetic a paying customer runs. The only fiction is the
@@ -148,13 +148,18 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 <div class="floor" id="floor"></div>
 
 <div class="note">
- <div class="t">Why five</div>
+ <div class="t">Why six</div>
  <p>Because the whole argument of this product is in the difference between them. The same
   house is worth a different maximum under every exit, and the gap between the best exit and
   the obvious one is usually the entire margin. A calculator that answers <b>one</b> of these
-  questions will confidently give you the wrong number on four of these five properties —
+  questions will confidently give you the wrong number on four of these five houses —
   not because its arithmetic is wrong, but because it was answering a question you had not
   established was the right one.</p>
+ <p>The sixth is not a house. The desk prices seven exits on a building and <b>refuses the
+  eighth</b> — the land play — because it needs dirt and a building is not dirt. That refusal
+  used to be the end of the sentence. It now opens a room: the Land Desk, where what a parcel
+  is worth is what the finished lot sells for, minus what it costs to get there, with an
+  unconfirmed septic named on the line it is hiding inside.</p>
  <div class="cta">
   <a class="btn p" href="desk.html#new">Price your own property →</a>
   <a class="btn" href="plans.html">What a workspace adds</a>
@@ -191,6 +196,17 @@ const DEALS = [
  { key:'walk', tag:'A walk-away', name:'The one to leave', addr:'14 Hopkins Street',
    ask:329000, arv:300500, style:'wreck', wear:0.95, hour:'overcast',
    p:'Priced above what the comps support, needing more work than any of them. Two exits refuse outright and the closest of the rest cannot get near the asking price. Knowing that in ninety seconds is the feature.' },
+ /* ── AND THE ONE WITH NO HOUSE ON IT ──────────────────────────────────────
+    The desk prices seven exits on a building and refuses the eighth with
+    "it needs dirt". This card is the dirt, and it is the only one that opens
+    a different room — so it says so on its face rather than surprising you
+    with a screen you did not ask for. Its second figure is not "comps say":
+    land has no comparable to a house, it has a FINISHED LOT, which is the
+    whole conceptual move the Land Desk exists to make. */
+ { key:'land', tag:'A land play', name:'The lot that isn’t one yet', addr:'1847 Saddleback Pass',
+   ask:214000, arv:298000, style:'dirt', wear:0, hour:'dawn', to:'land.html#demo=land',
+   figs:['They ask','Finished lot'],
+   p:'Two and a half treed acres on a slope, no sewer on record, and road access nobody has verified. There is nothing to walk through and no comparable sale of a house — what it is worth is what the finished lot sells for, minus what it costs to get there. The eighth exit needs dirt. This is the dirt.' },
 ];
 const money = v => '$' + Math.round(v).toLocaleString('en-US');
 
@@ -271,6 +287,66 @@ function draw(cv, d){
  };
  const door = (x,y,ww,hh,c) => { px(x-1,y-1,ww+2,hh+1,trim); px(x,y,ww,hh,c||dark);
    px(x+ww-3,y+Math.floor(hh/2),1,1,'#d8c48a'); };
+
+ /* ══ THE ONE WITH NOTHING ON IT ═══════════════════════════════════════════
+    Every other card draws a building and tells its story in the props. This
+    one has to tell the opposite story — that there is nothing to walk
+    through — and the temptation is to draw an empty rectangle, which reads
+    as a card that failed to load. So the subject moves: the SLOPE is the
+    subject, the trees are the site work nobody has priced, the culvert and
+    the power pole at the road are the two facts that decide whether this is
+    a lot at all, and the survey stakes say somebody has been out here. The
+    only thing missing is the house, and its absence is the point. ═══════ */
+ if (d.style === 'dirt'){
+   const skyline = GROUND;
+   /* the shared setup already laid a flat shelf and a silhouette treeline at
+      GROUND. A hillside that falls BELOW that line leaves both showing along
+      the right-hand edge, where they read as a distant city — on a card whose
+      entire claim is that there is nothing out here. Wiped back to sky first;
+      the stars and the moon sit above it and survive. */
+   px(0, GROUND-27, W, H-(GROUND-27), S[1]);
+   /* the ground is re-drawn as a hillside falling to the road — the 11%
+      slope on the sheet, in the picture, rather than beside it */
+   for (let x=0;x<W;x++){
+     const t = x/W;
+     const top = Math.round(skyline - 26 + 30*t*t);            // falls to the NE
+     px(x, top, 1, H-top, '#3b3a2b');
+     px(x, top, 1, 2, '#4e5238');
+     if ((x+Math.floor(t*9))%7===0) px(x, top+3+Math.floor(rnd()*7), 1, 2, '#4a4a35');
+   }
+   px(0,H-5,W,5,'#1f1c17');                                    // the road at the bottom
+   px(0,H-6,W,1,'#39332a');
+   const gy = x => Math.round(skyline - 26 + 30*(x/W)*(x/W));
+   /* the trees: a stand of cedar and oak, which on a lot is not scenery —
+      it is clearing, and clearing is the biggest line in site work */
+   const tree = (x,h,c1,c2) => {
+     const base = gy(x);
+     px(x, base-h, 2, h, '#3a2f24');
+     for (let i=0;i<5;i++){
+       const w2 = Math.round((h*0.62) * (1 - i/6));
+       px(x-Math.floor(w2/2)+1, base-h-2+i*Math.round(h*0.13), w2, Math.round(h*0.2), i%2 ? c1 : c2);
+     }
+   };
+   for (const [tx,th] of [[26,30],[44,22],[62,34],[88,25],[150,28],[176,20],[206,33],[232,24]])
+     tree(tx, th, '#2e4029', '#26361f');
+   /* the survey stakes, and the dashed line a surveyor left between them —
+      the same dashed boundary the Land Desk draws, in eight-bit */
+   const stake = x => { const b = gy(x); px(x, b-9, 1, 9, '#b8a274'); px(x-1, b-11, 3, 3, '#e05a4a'); };
+   for (const sxp of [70, 120, 172]) stake(sxp);
+   for (let x=70;x<172;x+=6) px(x, gy(x)-1, 3, 1, 'rgba(232,237,245,.55)');
+   /* electric at the street: the one utility that IS on record here */
+   px(W-20, gy(W-20)-40, 2, 40, '#4a4238');
+   px(W-27, gy(W-20)-40, 16, 2, '#4a4238');
+   px(W-30, gy(W-20)-38, 3, 2, '#6b6153');
+   for (let x=0;x<W-28;x+=1) px(x, gy(W-20)-38 + Math.round(3*Math.sin(x/26)), 1, 1, 'rgba(0,0,0,.45)');
+   /* and the culvert at the frontage — where a driveway would have to cross */
+   px(96, H-8, 22, 3, '#4d453a'); px(99, H-7, 16, 1, '#20201a');
+   /* the sign: a land listing, plain and square, no photograph on it */
+   px(40, gy(40)-16, 2, 16, '#8b98ac');
+   px(33, gy(40)-25, 16, 9, '#eee8da'); px(33, gy(40)-25, 16, 1, '#ffffff');
+   px(35, gy(40)-22, 12, 1, '#6b6153'); px(35, gy(40)-20, 8, 1, '#6b6153');
+   return;
+ }
 
  if (d.style === 'ranch'){
    /* long and low, a carport on the left, a skip in the drive */
@@ -530,7 +606,7 @@ function draw(cv, d){
 }
 
 document.getElementById('floor').innerHTML = DEALS.map((d,i) => `
- <a class="deal" href="desk.html#demo=${d.key}">
+ <a class="deal" href="${d.to || ('desk.html#demo=' + d.key)}">
   <canvas width="256" height="120" aria-label="A pixel drawing of ${d.name}"></canvas>
   <div class="b">
    <div class="tag">${d.tag}</div>
@@ -538,10 +614,10 @@ document.getElementById('floor').innerHTML = DEALS.map((d,i) => `
    <div class="ad">${d.addr}</div>
    <p>${d.p}</p>
    <div class="fig">
-    <div>They ask<b>${money(d.ask)}</b></div>
-    <div>Comps say<b>${money(d.arv)}</b></div>
+    <div>${(d.figs||['They ask','Comps say'])[0]}<b>${money(d.ask)}</b></div>
+    <div>${(d.figs||['They ask','Comps say'])[1]}<b>${money(d.arv)}</b></div>
    </div>
-   <div class="go">Open this deal →</div>
+   <div class="go">${d.to ? 'Open the Land Desk →' : 'Open this deal →'}</div>
   </div>
  </a>`).join('');
 document.querySelectorAll('.deal canvas').forEach((cv,i) => draw(cv, DEALS[i]));
