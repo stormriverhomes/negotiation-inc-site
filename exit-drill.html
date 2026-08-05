@@ -71,6 +71,17 @@ h1{font-size:40px}
 
 .house{border-right:1px solid var(--edge);padding:22px;display:flex;flex-direction:column;gap:14px;background:var(--well)}
 @media (max-width:840px){ .house{border-right:0;border-bottom:1px solid var(--edge)} }
+/* on a phone the picture is flavour and the buttons are the game — the art
+   shrinks so the first decision is one thumb-flick away, not two */
+@media (max-width:700px){
+  .top{padding-top:18px}
+  h1{font-size:34px}
+  .house{padding:14px 16px;gap:9px}
+  .house canvas{max-width:200px}
+  .sellerline{min-height:0}
+  .fig .fv{font-size:18px}
+  .play{padding:14px 16px}
+}
 .house canvas{width:100%;max-width:340px;margin:0 auto;image-rendering:pixelated;border:1px solid var(--edge);background:#0f1622}
 .sellerline{font-size:14.5px;color:var(--dim);line-height:1.5;min-height:3.2em}
 .sellerline b{color:var(--txt);font-weight:650}
@@ -91,6 +102,15 @@ h1{font-size:40px}
 .ans .key{display:inline-grid;place-items:center;width:24px;height:24px;border:1px solid #39435a;
  font-size:12px;color:var(--faint)}
 .ans .hint{font-size:12px;font-weight:400;color:var(--faint)}
+/* a phone has no number row and no hover: the key chips are desk furniture,
+   and a thumb needs 48px of button, not 41 */
+@media (hover:none){
+  .ans{grid-template-columns:1fr auto;min-height:52px}
+  .ans .key{display:none}
+}
+.ans{min-height:48px}
+.below{margin-top:26px}
+.below .btnrow{margin-top:14px}
 .ans[disabled]{opacity:.55;cursor:default}
 .ans.shut{opacity:.4;border-style:dashed;border-color:#39435a}
 .ans.shut .hint{color:#e8cf72;opacity:.8}
@@ -198,9 +218,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  <div>
   <div class="eyebrow">Cabinet 03 · sixty seconds</div>
   <h1>Exit Drill</h1>
-  <p class="lede">One house at a time, and every exit the desk knows. It starts at five doors and
-   ends at eight — with a line about <b>your</b> position that closes some of them, which is how
-   the choice is actually made.</p>
+  <p class="lede">Five doors at first, eight by the end — and a line about <b>your</b> position
+   that closes some of them.</p>
  </div>
  <div class="tally">
   <div><div class="t">Score</div><div class="v" id="score">0</div></div>
@@ -213,7 +232,6 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  <div class="stage">
   <div class="clockrail hidden" id="rail"><i id="clock"></i></div>
 
-  <div class="start" id="start"></div>
 
   <div class="deck hidden" id="deck">
    <div class="house">
@@ -224,13 +242,15 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
     <div class="figs" id="figs"></div>
    </div>
    <div class="play">
-    <div class="prompt" id="prompt"><b>Which exit fits?</b> Keys 1–5 answer. Wrong costs five seconds.</div>
+    <div class="prompt" id="prompt"><b>Pick the exit that pays.</b></div>
     <div class="answers" id="answers"></div>
     <div class="verdict hidden" id="verdict"></div>
    </div>
   </div>
 
   <div class="card hidden" id="card"></div>
+
+  <div class="below" id="below"></div>
 
   <div class="finefoot">Same arithmetic as the desk, dials at their defaults — a 7.1% rate, 75% LTV,
    a 1.25 DSCR floor, 8% selling costs. <b>All eight exits are in here now</b>, and three of them —
@@ -246,6 +266,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    sell 8, hold 6mo, profit 8%, opex 40%). drill-verify.mjs feeds identical
    deals to the real desk and to this file and fails the build if the two ever
    rank differently — that is the enforcement behind "same arithmetic". */
+/* the prompt mentions number keys only where number keys exist */
+const FINEPOINTER = !!(window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches);
 const MPD = (r => { const m=r/12, k=Math.pow(1+m,360); return m*k/(k-1); })(0.071);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const SIT_MOD = {   // identical to the desk's, line for line
@@ -520,13 +542,17 @@ function next(){
       <span class="hint">${shut ? 'closed to you here' : (T.hints ? HINT[id] : '')}</span></button>`;
   }).join('');
   document.querySelectorAll('.ans:not([disabled])').forEach(b=>b.onclick=()=>answer(b.dataset.a));
-  $('prompt').innerHTML = `<b>Which exit fits?</b> Keys 1–${T.answers.length} answer. Wrong costs five seconds.
+  $('prompt').innerHTML = `<b>Which exit fits?</b> ${FINEPOINTER ? `Keys 1–${T.answers.length} answer. ` : ''}Wrong costs five seconds.
     <span class="tierpip"> · ${T.pip}</span>`;
   $('verdict').className='verdict hidden';
   G.open=true; G.askedAt=G.t;
 }
 function answer(a){
   if(!G.open||G.over) return; G.open=false;
+  /* the sixty seconds begin HERE, on the first answer — not on page load,
+     and not behind a start button that no longer exists */
+  if(!G.running){ G.running=true; $('score').textContent=G.score; $('streak').textContent=G.streak;
+    lastTick=performance.now(); requestAnimationFrame(tick); }
   const correct = answerFor(G.cur); G.reads++;
   const took = G.askedAt-G.t;
   document.querySelectorAll('.ans').forEach(b=>{ b.disabled=true;
@@ -549,12 +575,6 @@ function answer(a){
       <div class="go">Space or click for the next house.</div>`;
   }
   G.last=G.cur;
-  if (G.teaching){
-    G.score=0; G.streak=0; G.t=60;
-    $('verdict').innerHTML += `<div class="go" style="color:#e8cf72">That is the whole game.
-      <button class="btn p" id="tgo" style="margin-left:10px;padding:6px 13px;font-size:13px">Start the drill →</button></div>`;
-    const tg=$('tgo'); if (tg) tg.onclick=()=>beginRun();
-  }
   $('score').textContent=G.score; $('streak').textContent=G.streak;
   if (G.t<=0) end();
 }
@@ -588,20 +608,20 @@ function ladderHTML(best){
      <span class="sc">${r.at ? r.at.toLocaleString('en-US')+'+' : '—'}</span>
      <span class="nm">${r.n}</span><span class="lo">${r.lore}</span></div>`).join('')}</div>`;
 }
-function showStart(){
+/* ══ PLAY FIRST, EXPLAIN NEVER ═════════════════════════════════════════════
+   This cabinet used to open on a start screen: rules, a six-rank ladder with
+   lore, three buttons — 1,705 pixels of prose on a phone before the first
+   pressable thing. That is a briefing, and a briefing is a joke at a
+   sixty-second game's expense (its own comment said so, and then briefed).
+
+   Now the door IS the first house: it is on screen, the answers are live,
+   and the clock is FULL AND FROZEN until the first answer — so a stranger
+   is never dropped into a countdown, and never reads a rulebook either. The
+   rules and the ladder still exist, in full, BELOW the game, where somebody
+   who has already played one house can read them with a reason to care. */
+function renderBelow(){
   const best = Math.max(best0, +(LS.get('ni-drill-best')||0));
-  const you = rankFor(best);
-  $('deck').classList.add('hidden'); $('card').classList.add('hidden');
-  $('rail').classList.add('hidden');
-  $('start').classList.remove('hidden');
-  $('start').innerHTML = `
-   <div class="sh">
-    <div class="eyebrow">${best ? 'You are a ' + you.n : 'Cabinet 03'}</div>
-    <h2>Sixty seconds. One house at a time.</h2>
-    <p class="sub">You get the address, the seller in one line, and four numbers. Pick the exit
-     that pays. <b>The desk's own arithmetic decides who was right</b> — the same code that
-     prices your real deals, with the dials at their defaults.</p>
-   </div>
+  $('below').innerHTML = `
    <div class="rules">
     <div class="rule"><div class="n">Scoring</div><div class="t">100 a house, plus speed</div>
      <div class="d">Up to 40 more for answering inside twelve seconds, and 50 every third right in a row.</div></div>
@@ -612,30 +632,19 @@ function showStart(){
    </div>
    ${ladderHTML(best)}
    <div class="btnrow" style="justify-content:flex-start">
-    <button class="btn p" id="go">Start the drill →</button>
-    <button class="btn" id="teach">Show me one house first</button>
     <a class="btn" href="exits.html">Learn the eight exits</a>
    </div>`;
-  $('go').onclick = () => beginRun();
-  $('teach').onclick = () => tutorial();
-}
-/* One house, no clock, the answer explained rather than scored. */
-function tutorial(){
-  G.teaching = true; G.started = true; G.house = 3;   // the six-door tier, so the wholetail is visible
-  $('start').classList.add('hidden'); $('deck').classList.remove('hidden');
-  $('rail').classList.remove('hidden');
-  $('clock').style.transform='scaleX(1)';
-  next();
-  $('prompt').innerHTML = `<b>A practice house — no clock.</b> Pick any answer and the sheet will
-    show you its working.`;
 }
 function beginRun(){
   Object.assign(G,{t:60,score:0,streak:0,reads:0,right:0,over:false,open:false,last:null,
-                   house:0,teaching:false,started:true});
-  $('score').textContent=0; $('streak').textContent=0;
-  $('start').classList.add('hidden'); $('card').classList.add('hidden');
+                   house:0,teaching:false,started:true,running:false});
+  /* zeros before anybody has played are not a scoreboard, they are a shrug */
+  $('score').textContent='\u2014'; $('streak').textContent='\u2014';
+  $('card').classList.add('hidden');
   $('deck').classList.remove('hidden'); $('rail').classList.remove('hidden');
-  lastTick=performance.now(); next(); requestAnimationFrame(tick);
+  $('clock').style.transform='scaleX(1)';
+  next();
+  $('prompt').innerHTML = `<b>Pick the exit that pays.</b> The clock starts with your first answer.`;
 }
 function end(){
   G.over=true;
@@ -663,10 +672,15 @@ function end(){
     ${d?`<a class="btn" href="${handoff}">Take the last house to the desk →</a>`:''}
     <button class="btn" id="ladder">The ladder</button>
     <a class="btn" href="arcade.html">Back to the floor</a></div>`;
+  renderBelow();          // the ladder below now marks the new best
   $('again').onclick=()=>beginRun();
-  const lb=$('ladder'); if (lb) lb.onclick=()=>showStart();
+  const lb=$('ladder'); if (lb) lb.onclick=()=>{ renderBelow();
+    document.getElementById('below').scrollIntoView({behavior:'smooth',block:'start'}); };
 }
-showStart();
+renderBelow();
+{ const b0 = Math.max(best0, +(LS.get('ni-drill-best')||0));
+  $('best').textContent = b0 > 0 ? b0.toLocaleString('en-US') : '\u2014'; }
+beginRun();
 </script>
 
 <footer class="ftlegal"><div class="wrap" style="font-size:12.5px">
