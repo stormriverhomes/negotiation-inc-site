@@ -677,6 +677,49 @@ if (fs.existsSync('priors.js')) {
   fs.writeFileSync(path.join(out, 'desk.html'), desk);
 }
 
+// ── the land desk ──────────────────────────────────────────────────────────
+/* The eighth exit's room. The engine is INJECTED from land/engine.mjs — the
+   same bytes the test suite runs — so the page, the module and the design
+   doc's ledger cannot drift apart. Then the build proves it: the module is
+   imported right here and run on the page's own worked example, and the
+   figures the design was approved on are asserted to the dollar. */
+{
+  let land = fs.readFileSync('land.html', 'utf8');
+  const engineSrc = fs.readFileSync('land/engine.mjs', 'utf8').replace(/^export /gm, '');
+  if (!land.includes('/*__LAND_ENGINE__*/')) throw new Error('land.html lost the engine marker');
+  land = land.replace('/*__LAND_ENGINE__*/', () => engineSrc);
+  if (/^export /m.test(land)) throw new Error('land.html: an export survived the injection');
+
+  const { landModel } = await import('./land/engine.mjs');
+  const wim = landModel({
+    asking:{ v:214000, prov:'entered' }, acres:{ v:2.61, prov:'entered' },
+    finished:{ v:298000, prov:'estimate' }, siteLump:{ v:41500, prov:'estimate' },
+    sewer:'unknown',
+  });
+  for (const [got, want, name] of [
+    [wim.clears, 21640, 'clears'], [wim.ceiling, 200640, 'ceiling'],
+    [wim.target, 35000, 'target'], [wim.perAcre, 81992, 'per-acre'],
+    [wim.saleCost, 20860, 'cost of sale'],
+  ]) if (got !== want) throw new Error(`land engine: ${name} is ${got}, the approved ledger says ${want}`);
+  /* and the page's demo fixture is the same parcel the engine was proven on */
+  for (const must of ["asking:'214,000'", "acres:'2.61'", "finished:'298,000'", "lump:'41,500'",
+                      'sewer:\'unknown\'', '1847 Saddleback Pass'])
+    if (!land.includes(must)) throw new Error('land.html demo fixture lost: ' + must);
+  /* the floor rule: no Google credit without Google imagery. The word may
+     live in an HTML comment (the file explains itself); it may not be VISIBLE
+     — so the check runs on the document with comments stripped. */
+  if (/Google|gstatic|googleapis/i.test(land.replace(/<!--[\s\S]*?-->/g, '')))
+    throw new Error('land.html shows Google credit with no Google imagery on the page');
+  if (!land.includes('--ground:#0A0F18')) throw new Error('land.html lost the dark-surface tokens');
+
+  land = land.replace('</head>', `<link rel="icon" href="${icon}">\n</head>`);
+  land = land.replace('</head>', FONTS + '</head>');
+  land = land.replace('</head>', OG('The Land Desk · Negotiation Inc',
+    'The eighth exit needs dirt. Price the dirt: what the finished lot sells for, what it costs to get there, and the most you can pay — with the working shown.') + '</head>');
+  land = await minifyInline(land, 'land');
+  fs.writeFileSync(path.join(out, 'land.html'), land);
+}
+
 // ── the landing ────────────────────────────────────────────────────────────
 // The front door: ships as index.html, the game lives at /arcade.html.
 let landing = fs.readFileSync('ni-landing-v3.html', 'utf8');
@@ -697,7 +740,9 @@ for (const must of ['Know what to pay', 'href="demo.html"', 'href="arcade.html"'
                     'art/demo-condition.jpg', 'getElementById(\'stage\')', 'Fraunces',
                     'Four jobs, one sheet', 'What it replaces',
                     /* the last word, and the doors that are finally links */
-                    'class="finish"', 'class="ways"', '<figure><a href="arcade.html">'])
+                    'class="finish"', 'class="ways"', '<figure><a href="arcade.html">',
+                    /* the front page has to say what a plan adds, not just link to it */
+                    'class="adds"', 'plans.html#bid', 'plans.html#objections'])
   if (!landing.includes(must)) throw new Error('index.html lost: ' + must);
 /* ══ THE HERO IS A SCREENSHOT OF THE DESK, IN MARKUP ═══════════════════════
    It says so in its own comment, which is the problem: a comment cannot fail.
@@ -769,10 +814,11 @@ for (const must of ['desk.html#new', 'class="spot"',
                     /* the picture that answers "why would I pay" before the
                        prices, and the three doors that replaced two buttons */
                     'class="worth"', 'Seventy-six fields', 'class="ways"',
-                    'class="founding"', '>Solo<', '$39', '$99', '$249',
+                    /* the two that shipped built and unadvertised */
+                    'id="bid"', 'id="objections"', 'The other side of the table',
+                    'class="founding"', '>Solo<', '$39', '$129', '$249',
                     '<th>Solo</th>', 'Two months free on annual',
-                    /* the published price rise, and the reason it is honest */
-                    'class="rise"', 'then $129 for new'])
+                    '$1,290 a year'])
   if (!plans.includes(must)) throw new Error('plans.html lost: ' + must);
 /* The desk prices SEVEN exits and tells you on the sheet that the eighth needs
    land. A plans page claiming eight is the marketing contradicting the product,
@@ -787,6 +833,16 @@ if (/\$29 <small>/.test(plans) || /the plan is\s+twenty-nine/.test(plans))
   throw new Error('plans.html still quotes the retired $29 price');
 if (/class="tier">in build/i.test(plans) || /s-soon/.test(plans))
   throw new Error('plans.html went back to hedging on every row');
+/* The read shipped on 5 August 2026, pre-launch, and the price is simply
+   $129. Two kinds of copy are banned here for the same reason: both narrate a
+   history no customer lived through. "Until the photo read ships" claims the
+   read does not exist (it does, it is metered and live). "It was $99" performs
+   a price rise at people who never saw $99 (nobody did; the product had not
+   launched). A page that asks for money states the price. It does not
+   dramatise it. */
+if (/photo (condition )?read ships\b/.test(plans) || /not shipped yet/.test(plans)
+    || /It was \$99/.test(plans) || /then \$129/.test(plans))
+  throw new Error('plans.html is narrating price history again — pre-launch there is none. The price is $129; say so and stop.');
 /* ══ THE PLANS PAGE'S HEADLINE IS A NUMBER, SO IT IS COUNTED ═══════════════
    "Seventy-six fields decide what a house is worth" is a factual claim about
    the product, printed on the page that asks for money, on a site whose whole
@@ -833,6 +889,62 @@ if (/class="tier">in build/i.test(plans) || /s-soon/.test(plans))
   const left = wr.slice(0, 4).reduce((a, r) => a + r.n, 0);
   if (left !== TOTAL) throw new Error('plans.html: the left column draws ' + left + ' boxes, not ' + TOTAL);
 }
+/* ══ EVERY METERED FEATURE HAS TO BE ON THE PAGE THAT ASKS FOR MONEY ═══════
+   The bid check and the objections panel shipped built, tested, metered and
+   completely unadvertised: two of the five things a subscription buys were
+   invisible on the only page where somebody decides whether to buy one. That
+   is not a marketing oversight, it is revenue left on the floor, and it
+   happened because "add it to the plans page" was a thing to remember.
+
+   So it is a thing the build knows. billing.js is the register of what a plan
+   includes; this reads it and refuses to ship a plans page that does not name
+   every entry, at the right monthly number, for both tiers that get one.
+
+   Adding a sixth feature now fails the build until the page sells it. */
+{
+  const bill = fs.readFileSync('srv/billing.js', 'utf8');
+  const i0 = bill.indexOf('const CAP_DEFAULT = {');
+  const block = bill.slice(i0, bill.indexOf('};', i0));
+  const caps = {};
+  for (const m of block.matchAll(/^\s*(\w+):\s*(\d+),/gm)) caps[m[1]] = Number(m[2]);
+  if (Object.keys(caps).length < 3)
+    throw new Error('plans.html: could not read CAP_DEFAULT out of billing.js — the register moved');
+
+  /* the row on the page that sells each one. If a feature is added to
+     billing.js and not to this map, the build says so rather than the page
+     quietly not mentioning it. */
+  const SOLD = {
+    airead:    'Photo condition reads a month',
+    aistreet:  'Street briefs a month',
+    aicompare: 'Written comparisons a month',
+    aibid:     'Bid checks a month',
+    ailetter:  'The other side of the table, a month',
+  };
+  for (const feat of Object.keys(caps)){
+    const label = SOLD[feat];
+    if (!label) throw new Error(
+      `billing.js meters "${feat}" and plans.html has no row for it. A feature nobody can see is `
+      + 'a feature nobody buys — add the row, then add it here.');
+    const i = plans.indexOf('<b>' + label + '</b>');
+    if (i < 0) throw new Error(`plans.html lost the row that sells ${feat}: "${label}"`);
+    const row = plans.slice(i, plans.indexOf('</tr>', i));
+    /* Underwriter gets the base number, The Office three times it — the same
+       arithmetic capFor() does, asserted against what the page prints */
+    for (const [tier, n] of [['Underwriter', caps[feat]], ['The Office', caps[feat] * 3]])
+      if (!new RegExp('>' + n + '<').test(row))
+        throw new Error(`plans.html: ${feat} is metered at ${caps[feat]} a month, so ${tier} should `
+          + `read ${n} — the row says "${row.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()}"`);
+  }
+
+  /* and the number in the headline is counted rather than remembered */
+  const spots = (plans.match(/class="spot"/g) || []).length;
+  const WORD = { 5:'Five', 6:'Six', 7:'Seven', 8:'Eight', 9:'Nine', 10:'Ten', 11:'Eleven', 12:'Twelve' };
+  const said = (plans.match(/<h2>(\w+) things that give you the afternoon back\.<\/h2>/) || [])[1];
+  if (said !== WORD[spots])
+    throw new Error(`plans.html says "${said} things that give you the afternoon back" and draws `
+      + `${spots} of them. It said "Six" while drawing seven for a while, which is the kind of small `
+      + 'wrongness this whole product is selling against.');
+}
 fs.writeFileSync(path.join(out, 'plans.html'), plans);
 
 // ── the three legal pages ─────────────────────────────────────────────────
@@ -857,7 +969,7 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
      ['no analytics', 'never train']],
     ['refunds.html', 'Billing & refunds · Negotiation Inc',
      'Fourteen days free. Thirty days money back. Cancel in two clicks and keep working to the end of the period you paid for.',
-     ['thirty days', 'cancel']],
+     ['thirty days', 'cancel', 'price they joined at']],
   ];
   for (const [file, title, desc, promises] of LEGAL){
     let doc = fs.readFileSync(file, 'utf8');

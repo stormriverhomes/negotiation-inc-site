@@ -19,6 +19,14 @@ const NAMES = [
   '_tsign','_tdemos',
   // the first ninety seconds of the arcade
   '_tarcade','_tcompare','_tstreet',
+  // S3: the bid check, both halves
+  '_tbid','_tobj',
+  /* one sheet, one verdict: every panel that names an exit or states a verdict
+     must name the same one, on all five demos — and the two artefacts that
+     leave the building (the letter, the printout) must carry it too */
+  '_taudit','_tlock',
+  // S5: the land desk — the page held to the approved ledger at both widths
+  '_tland',
 ];
 /* srv/test-api.mjs and srv/test-pay.mjs run from their own directory and are
    not in this list — `cd srv && node test-api.mjs && node test-pay.mjs`. */
