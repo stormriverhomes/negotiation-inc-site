@@ -857,6 +857,71 @@ app.post('/api/list', express.json({ limit: '4kb' }), async (req, res) => {
   }
 });
 
+/* ══ THE LAND DESK'S TWO SMALL SERVICES ════════════════════════════════════
+   No model, no billing — the land arithmetic runs in the page. What the page
+   cannot do alone is (1) hold the Google Map Tiles key and say when the
+   ground is open, and (2) turn an address into a coordinate.
+
+   THE KEY IS HANDED, NOT SHIPPED. A Map Tiles key is built to live in a
+   browser — Google's own docs put it in the tileset URL — and its real
+   protection is the referrer restriction set in the Google console, not
+   secrecy. But a key baked into a static page is a key in every mirror and
+   cache forever, with no off switch. Served from here it can be rotated,
+   capped and refused in one place, and the day's budget is OURS to enforce
+   before Google's meter starts running:
+
+     · 1,000 root-tile sessions a month are free; $6 per 1,000 after.
+     · One session lasts 3+ hours, so a visit is ONE root request — the page
+       never re-fetches the root on a re-render.
+     · NI_TILES_DAY_CAP (default 150) is the wallet guard. In-memory, resets
+       with the process — Google's own 10k/day ceiling is the backstop, and
+       an undercounted day costs cents, not dollars.
+
+   THE GEOCODER IS THE CENSUS BUREAU'S, because it is free, keyless, public
+   infrastructure, and this product already stands on Census data for its
+   priors. Proxied rather than called from the page so the address never
+   picks up a third-party key requirement, and so the FEMA read can join the
+   same answer later — the server is where facts get computed. */
+const TILES_KEY = process.env.GOOGLE_TILES_KEY || '';
+const TILES_CAP = N('NI_TILES_DAY_CAP', 150);
+let tiles = { day: new Date().toISOString().slice(0, 10), n: 0 };
+app.get('/api/land/config', (_req, res) => {
+  const today = new Date().toISOString().slice(0, 10);
+  if (tiles.day !== today) tiles = { day: today, n: 0 };
+  if (!TILES_KEY) return res.json({ ok:false, why:'unconfigured' });
+  if (tiles.n >= TILES_CAP){ log('land config 429 quota', tiles.n); return res.json({ ok:false, why:'quota' }); }
+  tiles.n++;
+  log('land config ok', tiles.n + '/' + TILES_CAP);
+  res.json({ ok:true, key: TILES_KEY });
+});
+app.get('/api/land/geo', async (req, res) => {
+  if (!ipOk(req.ip || 'unknown'))
+    return res.status(429).json({ ok:false, error:`That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.` });
+  const q = String(req.query.q || '').trim().slice(0, 160);
+  if (q.length < 6) return res.status(400).json({ ok:false, error:'That is not enough address to place.' });
+  /* "lat, lng" pasted straight in skips the geocoder — rural parcels are
+     exactly where address files run out, and a pin is already an answer */
+  const m = q.match(/^(-?\d{1,2}(?:\.\d+)?)[,\s]+(-?\d{1,3}(?:\.\d+)?)$/);
+  if (m){ const lat = +m[1], lon = +m[2];
+    if (lat >= 18 && lat <= 72 && lon >= -180 && lon <= -60)
+      return res.json({ ok:true, lat, lon, matched: q, how:'pin' }); }
+  try {
+    const u = 'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?benchmark=Public_AR_Current&format=json&address=' + encodeURIComponent(q);
+    const r = await fetch(u, { signal: AbortSignal.timeout(8000) });
+    if (!r.ok){ log('land geo upstream', r.status); return res.status(502).json({ ok:false, error:'The geocoder could not be reached.' }); }
+    const j = await r.json();
+    const hit = j && j.result && j.result.addressMatches && j.result.addressMatches[0];
+    if (!hit) return res.json({ ok:false, error:'No match in the Census address file. Paste "lat, lng" from any map and the pin does the same job.' });
+    /* the address itself is never logged — same rule as the waitlist */
+    log('land geo ok');
+    res.json({ ok:true, lat: hit.coordinates.y, lon: hit.coordinates.x,
+               matched: String(hit.matchedAddress || '').slice(0, 160), how:'census' });
+  } catch(e){
+    log('land geo fail', (e && e.name) || 'unknown');
+    res.status(502).json({ ok:false, error:'The geocoder could not be reached.' });
+  }
+});
+
 /* ══ BILLING ═══════════════════════════════════════════════════════════════
    Three routes in their own file, because the rule they exist to protect is
    worth stating in one place: the only thing that decides what somebody gets
@@ -879,6 +944,7 @@ app.get('/api/health', (_req, res) => {
                ? (process.env.CENSUS_KEY ? 'on' : 'partial') : 'off',
     bid:     ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
     object:  ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
+    land: TILES_KEY ? (tiles.n >= TILES_CAP ? 'quota' : 'on') : 'flat',
     gate: ACCESS ? 'code+account' : ACCOUNTS_ON() ? 'account' : 'none',
     list: LIST_ON ? 'on' : 'off',
     billing: billingState(),
