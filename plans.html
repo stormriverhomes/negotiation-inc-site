@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Plans · Negotiation Inc</title><script>window.NI_LIVE=false;window.NI_SUPABASE_URL="https://zfsazgrxhtitxakjvyqq.supabase.co";window.NI_SUPABASE_ANON="sb_publishable_EcC8_XnC_bUVjqx7fpOWxQ_XWo0gu-R";</script>
+<title>Plans · Negotiation Inc</title><script>window.NI_LIVE=false;</script>
 <meta name="description" content="Free forever to price a deal. Solo $39 unlocks your whole model; Underwriter $99 adds comps pulled, the photo condition read and the letters; The Office $249 runs a shop.">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -25,7 +25,7 @@
      4 · the objections               (five of them, answered short)
    ═══════════════════════════════════════════════════════════════════════════ */
 :root{
-  --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --faint:#9aa3b2;
+  --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --faint:#6f7681;
   --line:#e4e8ef; --line-2:#c9d0dc; --wash:#f6f8fb;
   --blue:#1f5fd0; --blue-deep:#153872; --blue-soft:#eaf0fc; --blue-line:#c3d4f5;
   --green:#177a4d; --green-soft:#eaf6f0; --green-line:#bfe0cd;
@@ -150,6 +150,53 @@ h1 em{font-style:normal;color:var(--blue)}
 .plan .pf .btn{width:100%}
 .plan .pf .under{display:block;text-align:center;font-size:12px;color:var(--soft);margin-top:9px}
 
+
+/* ── the half hour, drawn ───────────────────────────────────────────────────
+   The page answered "why would I pay for this" in prose, six times, in six
+   cards — and a person deciding whether to spend $99 a month does not read six
+   cards. This answers it once, in a picture you can count: every field a full
+   underwrite needs, then the three you still type, then the same sheet at the
+   bottom of both columns.
+
+   The counts are not decoration. publish.mjs reads LINES, A_SPEC and FIELDS
+   out of desk.html and refuses to build if any number here drifts from what
+   the product actually asks a person to fill in. */
+.worth{margin:34px 0 0;border:1px solid var(--line-2);border-radius:var(--r-card);
+ background:linear-gradient(180deg,var(--wash),#fff);overflow:hidden}
+.worthh{padding:24px 26px 0;max-width:72ch}
+.worthh h2{font-size:29px;margin-top:5px}
+.worthh p{font-size:15.5px;color:var(--mid);margin-top:9px}
+.worthh p b{color:var(--ink);font-weight:650}
+.wgrid{display:grid;grid-template-columns:1fr 30px 1fr;gap:16px;align-items:stretch;padding:22px 26px 0}
+@media(max-width:860px){ .wgrid{grid-template-columns:1fr;gap:12px} }
+.wcol{border:1px solid var(--line-2);border-radius:14px;background:#fff;padding:15px 16px 14px;
+ display:flex;flex-direction:column}
+.wcol.on{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.wtop{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.wtag{font-size:9.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;
+ border-radius:var(--r-pill);padding:3px 9px;white-space:nowrap}
+.wtag.free{color:var(--green);background:var(--green-soft);border:1px solid var(--green-line)}
+.wtag.paid{color:#fff;background:var(--blue);border:1px solid var(--blue)}
+.wtop b{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:-.021em}
+.wg{margin-top:13px}
+.wgl{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:11px;
+ font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--soft)}
+.wgl em{font-style:normal;color:var(--faint);letter-spacing:.02em;text-transform:none;
+ font-weight:600;text-align:right;flex:none}
+/* one box, one field of the real sheet. Empty is a thing you type. */
+.wr{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
+.wr i{width:13px;height:9px;border-radius:2px;border:1px solid var(--line-2);background:#fff}
+.wr.done i{border-color:var(--green-line);background:var(--green-soft)}
+.wr.you i{border-color:var(--blue);background:var(--blue-soft);width:30px}
+.wfoot{margin-top:auto;padding-top:14px;font-size:12.5px;color:var(--soft);line-height:1.5}
+.wfoot b{color:var(--ink);font-weight:650}
+.warrow{align-self:center;justify-self:center;color:var(--line-2);line-height:0}
+@media(max-width:860px){ .warrow{transform:rotate(90deg)} }
+.wsame{margin-top:20px;padding:17px 26px 22px;border-top:1px solid var(--line);
+ font-size:15px;color:var(--mid);line-height:1.6}
+.wsame b{color:var(--ink);font-weight:650}
+.wsame b.m{color:var(--green)}
+
 /* ── the spotlights ── */
 .sec-h{margin:74px 0 0;max-width:64ch}
 .sec-h h2{font-size:33px}
@@ -205,6 +252,33 @@ td:first-child b{font-weight:650;color:var(--ink)}
 .close p{font-size:16.5px;color:var(--mid);margin:10px auto 0;max-width:58ch}
 .close .row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px}
 
+/* ── the three doors ────────────────────────────────────────────────────────
+   This page used to end on two text buttons side by side, which is a link
+   rather than an invitation, and on a phone it is a 14px target sitting under
+   a 31px headline. The whole card is the target now. Each one names what
+   happens after the click instead of naming the page it goes to. */
+.ways{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px;text-align:left}
+@media(max-width:900px){ .ways{grid-template-columns:1fr} }
+.way{display:flex;flex-direction:column;gap:7px;padding:20px;background:#fff;
+ border:1.5px solid var(--line-2);border-radius:var(--r-card);text-decoration:none;color:var(--ink);
+ transition:border-color .14s,box-shadow .14s,transform .14s}
+.way:hover,.way:focus-visible{border-color:var(--blue);transform:translateY(-3px);
+ box-shadow:0 12px 32px rgba(13,20,32,.10);outline:none}
+.way:focus-visible{box-shadow:0 0 0 3px var(--blue-soft),0 12px 32px rgba(13,20,32,.10)}
+.way .wi{color:var(--soft);line-height:0;margin-bottom:2px}
+.way .wk{font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--soft)}
+.way .wt{font-family:var(--serif);font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.way .wd{font-size:14px;color:var(--mid);line-height:1.5;flex:1}
+.way .wd b{color:var(--ink);font-weight:650}
+.way .wgo{margin-top:5px;font-size:13.5px;font-weight:650;color:var(--blue);display:inline-flex;
+ align-items:center;gap:7px}
+.way .wgo em{font-style:normal;transition:transform .14s}
+.way:hover .wgo em{transform:translateX(4px)}
+.way.lead{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.way.lead .wi,.way.lead .wk{color:var(--blue)}
+.way.lead:hover,.way.lead:focus-visible{box-shadow:0 0 0 3px var(--blue-soft),0 14px 36px rgba(31,95,208,.20)}
+
+
 footer{border-top:1px solid var(--line);margin-top:64px;padding:24px 0 46px;font-size:13.5px;color:var(--soft)}
 footer a{color:var(--mid);text-decoration:none;margin-right:18px}
 footer a:hover{color:var(--ink)}
@@ -214,6 +288,13 @@ footer a:hover{color:var(--ink)}
   th:first-child,td:first-child{width:40%}
   th,td{padding:10px 11px;font-size:13.5px}
 }
+/* "in build" is a different fact from "—", and the table has to be able to say
+   it. Grey and small: it is a plan for later, not a feature being advertised. */
+.soon{display:inline-block;font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:.1em;
+ text-transform:uppercase;color:var(--soft);border:1px solid var(--line-2);border-radius:999px;
+ padding:2px 7px;white-space:nowrap}
+tr.soonrow td{color:var(--soft)}
+tr.soonrow td b{font-weight:650}
 </style>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
@@ -239,7 +320,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 </style>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Plans · Negotiation Inc">
-<meta property="og:description" content="Pricing a property is free forever. A plan buys the twenty minutes: the photo condition read, comps pulled and scored, the lender packet, and a portfolio that remembers.">
+<meta property="og:description" content="Pricing a property is free forever. A plan buys back the half hour: the photo condition read, comps pulled and scored, the lender packet, and a portfolio that remembers.">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -264,7 +345,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  <div class="topgrid">
  <div>
  <div class="eyebrow">Plans</div>
- <h1>Pricing a property is free. A plan buys back <em>the twenty minutes</em>.</h1>
+ <h1>Pricing a property is free. A plan buys back <em>the half hour</em>.</h1>
  <p class="lede">Every exit, every band, every piece of the arithmetic — free, unlimited, no account.
   What you pay for is the part of underwriting that is <b>typing rather than thinking</b>: reading the
   condition off your photos, pulling the comps, formatting the packet, and remembering the eleven
@@ -293,6 +374,60 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   <span>·</span><span>Cancel in one click — no contract, no call</span></div>
 </div>
 
+<!-- ══ the half hour, drawn ═════════════════════════════════════════════════
+     Seventy-six boxes. Four for the house, seventeen for the condition, seven
+     assumptions, and eight on each of six comps — the real shape of the real
+     sheet, counted out of desk.html by the build. ═══════════════════════ -->
+<div class="worth">
+ <div class="worthh">
+  <div class="eyebrow">What a plan actually removes</div>
+  <h2>Seventy-six fields decide what a house is worth.</h2>
+  <p>Four for the house, seventeen for its condition, seven assumptions, and eight on every comp you
+   score. <b>The desk prices all of it, free, forever, with no account.</b> What a plan buys is not
+   the answer &mdash; it is not having to type the question.</p>
+ </div>
+
+ <div class="wgrid">
+  <div class="wcol">
+   <div class="wtop"><span class="wtag free">On the free desk</span><b>You fill seventy&#8209;six</b></div>
+   <div class="wg"><div class="wgl"><span>The house</span><em>asking, ARV, repairs, rent</em></div>
+    <div class="wr"><i></i><i></i><i></i><i></i></div></div>
+   <div class="wg"><div class="wgl"><span>Its condition, line by line</span><em>roof to permits</em></div>
+    <div class="wr"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+   <div class="wg"><div class="wgl"><span>Your assumptions</span><em>rate, LTV, DSCR, costs</em></div>
+    <div class="wr"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+   <div class="wg"><div class="wgl"><span>Six comps you score yourself</span><em>eight fields each</em></div>
+    <div class="wr"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+   <div class="wfoot"><b>About forty minutes</b> &mdash; and thirty-two of them are transcription.</div>
+  </div>
+
+  <div class="warrow"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+   <path d="M3 12h17M14 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4"
+    stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+  <div class="wcol on">
+   <div class="wtop"><span class="wtag paid">With Underwriter</span><b>You fill three</b></div>
+   <div class="wg"><div class="wgl"><span>You type</span><em>the address, their asking price, the rent</em></div>
+    <div class="wr you"><i></i><i></i><i></i></div></div>
+   <div class="wg"><div class="wgl"><span>Your photos read the condition</span><em>all 17, each with the picture it came from</em></div>
+    <div class="wr done"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+   <div class="wg"><div class="wgl"><span>The comps arrive pulled and scored</span><em>all 48, adjusted and explained</em></div>
+    <div class="wr done"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+   <div class="wg"><div class="wgl"><span>The assumptions start where normal is</span><em>all 7, yours to move</em></div>
+    <div class="wr done"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+   <div class="wfoot"><b>About ten minutes</b> &mdash; and two of those are you correcting the two or
+    three lines the photos read wrong.</div>
+  </div>
+ </div>
+
+ <div class="wsame">Both columns end on the same sheet. <b>1128 Marrow Lane</b> &mdash; asking
+  $184,500, worth $291,000 repaired, $41,300 of work &mdash; pays <b class="m">$23,280</b> as the fix
+  and flip and <b class="m">$14,000</b> as a wholesale you never own, and refuses the wholetail and
+  the novation outright rather than finding you a number.
+  <b>The nine thousand dollars between those two right answers is the entire reason to price it
+  properly.</b> Only one of the two columns took forty minutes to get there.</div>
+</div>
+
 <div class="cards">
 
  <div class="plan free">
@@ -309,7 +444,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <ul>
     <li><i>✓</i><span>Every exit a house can take &mdash; seven of them &mdash; priced and ranked against the seller</span></li>
     <li><i>✓</i><span>The offer, with <b>the terms priced in dollars</b> and the words to say</span></li>
-    <li><i>✓</i><span>The comp workbench — score sales yourself, up to three at a time</span></li>
+    <li><i>✓</i><span>The comp workbench — score sales yourself. <b>Three in this browser, twelve a week with a free account</b></span></li>
     <li><i>✓</i><span>Light, medium and heavy rehab profiles across seventeen line items</span></li>
     <li><i>✓</i><span>Every number shows its arithmetic, and says when it is estimating</span></li>
     <li><i>✓</i><span>Print the offer sheet, and the whole eight-lesson walk-through</span></li>
@@ -364,11 +499,11 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <div class="pbh">Everything in Solo, plus</div>
    <ul>
     <li><i>✓</i><span><b>The photo condition read</b> — drop the walk-through pictures, get seventeen line items back with a number on each</span></li>
-    <li><i>✓</i><span><b>Comps pulled and scored</b> for the address, already adjusted, in one click</span></li>
-    <li><i>✓</i><span>Address-level values and rents — from the feed, not the ZIP average</span></li>
-    <li><i>✓</i><span>Street view and satellite on every comp card and on the subject</span></li>
+    <li><i>✓</i><span><b>Comps pulled and scored</b> for the address in one click, already adjusted — on your own RentCast key, which you paste in once and we never see</span></li>
+    <li><i>✓</i><span>Address-level values and rents from that same key — an address, not a ZIP average</span></li>
     <li><i>✓</i><span><b>Offer letters and the text message</b>, written from the winning exit in the seller's language</span></li>
-    <li><i>✓</i><span>The written comparison — the case for each deal, in prose you can forward</span></li>
+    <li><i>✓</i><span><b>The written comparison</b> — the case for each deal in prose you can forward. Every figure in it is one from your own table; a draft carrying anything else is refused rather than shown to you</span></li>
+    <li><i>✓</i><span><b>The street brief</b> — what the block is actually doing. Tract-level income, tenure and vacancy from the census, the FEMA flood zone at the exact coordinates, and what has been permitted or planned nearby, <b>each claim carrying the page it came from</b>. The forty minutes of browser tabs, in about fifteen seconds</span></li>
    </ul>
    <div class="fair">Fair use: 200 property lookups and 100 photo reads a month. Nobody working
     normally has ever come close; if you do, we will call you rather than cut you off.</div>
@@ -390,8 +525,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   <div class="pb">
    <div class="pbh">Everything in Underwriter, plus</div>
    <ul>
-    <li><i>✓</i><span><b>Shared assumption sets</b> — one model, so two people cannot quietly disagree about a rate</span></li>
-    <li><i>✓</i><span>The pipeline: every property in the office on one board, by stage and by spread</span></li>
+    <li><i>✓</i><span><b>Bulk underwriting</b> — paste a whole week of leads and price every one of them at once</span></li>
     <li><i>✓</i><span><b>Buy-box rules</b> that flag a deal the moment it fits, or refuse it before anyone drives out</span></li>
     <li><i>✓</i><span>Compare a whole week of leads, not just two, in one table</span></li>
     <li><i>✓</i><span>Your branding on every packet and letter that leaves the office</span></li>
@@ -411,7 +545,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      images to load and nothing to go stale. ═══════════════════════════════ -->
 <div class="sec-h">
  <div class="eyebrow">What the plan actually buys</div>
- <h2>Six things that give you the afternoon back.</h2>
+ <h2>Nine things that give you the afternoon back.</h2>
  <p>Underwriting a house takes about forty minutes, and roughly thirty-two of them are typing
   things a computer already knows. These are the thirty-two.</p>
 </div>
@@ -476,9 +610,10 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <span class="tier">Underwriter</span>
    <h3>Comps pulled, scored and adjusted</h3>
    <p>Type the address; recent sales arrive on the workbench already adjusted for size, beds, baths,
-    time and condition, each with a comparability score and the reasons for it. <b>Street view and
-    satellite on every card</b>, so you can judge the block without driving it. It is still not an
-    AVM — the range is drawn from the sales you keep, and the ARV is the one you set.</p>
+    time and condition, each with a comparability score and the reasons for it. It runs on
+    <b>your own RentCast key</b> — pasted in once, kept in your browser, never sent to us — so the
+    data is billed to you at their price rather than resold to you at ours. It is still not an
+    AVM: the range is drawn from the sales you keep, and the ARV is the one you set.</p>
    <div class="saves"><b>Saves ~10 minutes</b>, and the band gets narrower with every comp</div>
   </div>
  </div>
@@ -603,6 +738,66 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   </div>
  </div>
 
+
+ <div class="spot" id="bid">
+  <div class="art" style="background:linear-gradient(135deg,#2b2419,#5a4a2c)">
+   <svg viewBox="0 0 320 120" width="100%" height="120" aria-hidden="true">
+    <rect x="26" y="14" width="118" height="96" rx="4" fill="#f6f1e3"/>
+    <g fill="#b3a98f"><rect x="38" y="28" width="70" height="4" rx="2"/>
+     <rect x="38" y="42" width="58" height="4" rx="2"/><rect x="38" y="56" width="66" height="4" rx="2"/>
+     <rect x="38" y="70" width="46" height="4" rx="2"/><rect x="38" y="84" width="62" height="4" rx="2"/></g>
+    <g fill="#8a6612"><rect x="116" y="28" width="18" height="4" rx="2"/>
+     <rect x="116" y="42" width="18" height="4" rx="2"/><rect x="116" y="56" width="18" height="4" rx="2"/></g>
+    <g stroke="#c9bfa6" stroke-width="2" fill="none"><path d="M158 60 h26 M176 52 l8 8 -8 8"/></g>
+    <rect x="196" y="14" width="98" height="96" rx="4" fill="#fff"/>
+    <g fill="#dfe4ec"><rect x="208" y="28" width="52" height="4" rx="2"/>
+     <rect x="208" y="42" width="44" height="4" rx="2"/></g>
+    <g fill="#f0d2ce"><rect x="208" y="58" width="74" height="14" rx="3"/></g>
+    <g fill="#b3372c"><rect x="214" y="63" width="34" height="4" rx="2"/></g>
+    <g fill="#f0d2ce"><rect x="208" y="78" width="58" height="14" rx="3"/></g>
+    <g fill="#b3372c"><rect x="214" y="83" width="26" height="4" rx="2"/></g>
+   </svg>
+  </div>
+  <div class="sb">
+   <span class="tier">Underwriter</span>
+   <h3>Read the bid they sent you</h3>
+   <p>Paste the contractor&rsquo;s schedule of works. It comes back line by line against the estimate
+    you already built &mdash; and, the part worth having, <b>what is on your sheet that the bid never
+    mentions</b>, priced at your own figures. A bid that lands eleven thousand under because it does
+    not mention the panel is not eleven thousand cheaper; it is the same job with a change order in it.</p>
+   <div class="saves"><b>The line that becomes a change order</b> &mdash; found before you own the house</div>
+  </div>
+ </div>
+
+ <div class="spot" id="objections">
+  <div class="art" style="background:linear-gradient(135deg,#1a2436,#37507a)">
+   <svg viewBox="0 0 320 120" width="100%" height="120" aria-hidden="true">
+    <rect x="24" y="22" width="122" height="42" rx="10" fill="#fff"/>
+    <path d="M44 64 L44 78 L60 64 Z" fill="#fff"/>
+    <g fill="#c3d4f2"><rect x="38" y="34" width="80" height="5" rx="2.5"/>
+     <rect x="38" y="47" width="58" height="5" rx="2.5"/></g>
+    <rect x="174" y="56" width="122" height="42" rx="10" fill="#1f5fd0"/>
+    <path d="M276 98 L276 112 L260 98 Z" fill="#1f5fd0"/>
+    <g fill="#9dbdf0"><rect x="188" y="68" width="88" height="5" rx="2.5"/>
+     <rect x="188" y="81" width="64" height="5" rx="2.5"/></g>
+    <g stroke="#8fe0b4" stroke-width="2.5" fill="none" stroke-linecap="round">
+     <path d="M156 22 v76"/></g>
+    <circle cx="156" cy="42" r="5" fill="#8fe0b4"/>
+    <circle cx="156" cy="78" r="5" fill="#e8cf72"/>
+   </svg>
+  </div>
+  <div class="sb">
+   <span class="tier">Underwriter</span>
+   <h3>What they say back</h3>
+   <p>The four or five things <b>this</b> seller is most likely to say when they hear your number,
+    what is actually being asked underneath each one, and the reply that is true on your own
+    arithmetic &mdash; each marked hold, trade or walk. It is the one thing here built on
+    <b>your ceiling</b>, so &ldquo;can you come up five?&rdquo; has an answer before you are asked it.
+    That is also why it never leaves your screen and never reaches the letter.</p>
+   <div class="saves"><b>The ninety seconds</b> where the deal is actually lost</div>
+  </div>
+ </div>
+
  <div class="spot" id="office">
   <div class="art" style="background:linear-gradient(135deg,#14202e,#274a5e)">
    <svg viewBox="0 0 320 120" width="100%" height="120" aria-hidden="true">
@@ -627,12 +822,15 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   </div>
   <div class="sb">
    <span class="tier">The Office</span>
-   <h3>One model, however many people</h3>
-   <p>Shared assumption sets mean two underwriters cannot quietly disagree about a rate and produce
-    two different maximums for the same house. The pipeline puts every property the office is
-    working on one board. Buy-box rules flag a fit the moment it appears —
-    <b>and refuse the ones nobody should be driving out to see</b>.</p>
-   <div class="saves"><b>The argument you stop having</b> at every Monday meeting</div>
+   <h3>A week of leads, priced before Monday</h3>
+   <p>Paste the whole list. Every property is underwritten on the same engine, ranked by the room
+    between what it can carry and what they are asking, in one table. Buy-box rules flag a fit the
+    moment it appears — <b>and refuse the ones nobody should be driving out to see</b>. Your name and
+    your masthead on every packet and every letter that leaves.</p>
+   <p class="fine" style="margin-top:10px">Seats, shared assumption sets, a pipeline board and an API
+    are in build and are <b>not</b> part of this plan yet. They are listed in the table below, marked,
+    and the price here is for what exists today.</p>
+   <div class="saves"><b>The Monday morning</b> you get back</div>
   </div>
  </div>
 
@@ -662,13 +860,13 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 
    <tr class="sec"><td colspan="5">What it is worth</td></tr>
    <tr><td><b>The comp workbench</b><small>score sales yourself, adjusted and weighted</small></td>
-     <td><span class="y">✓</span><small>3 comps</small></td><td><span class="y">✓</span><small>unlimited</small></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>Comps pulled for the address</b><small>recent sales, already adjusted, in one click</small></td>
+     <td><span class="y">✓</span><small>3 in a browser · 12 a week with a free account</small></td><td><span class="y">✓</span><small>unlimited</small></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td><b>Comps pulled for the address</b><small>your own RentCast key, wired in — the sheet reads them, scores them and adjusts them</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>Address-level values and rents</b><small>from the feed, not the ZIP average</small></td>
+   <tr><td><b>Address-level values and rents</b><small>the same key, the same panel — an address, not a ZIP average</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>Street view and satellite</b><small>on every comp card and the subject</small></td>
-     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td><b>The street brief</b><small>the census tract — not the ZIP — the FEMA flood zone at the exact coordinates, and what has been permitted or planned nearby, each with the page it came from</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span><small>40 a month</small></td><td><span class="y">✓</span><small>120 a month</small></td></tr>
    <tr><td><b>ZIP-level market priors</b><small>values and rents where the census reaches</small></td>
      <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr class="sec"><td colspan="5">What it needs</td></tr>
@@ -679,6 +877,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <tr><td><b>Every line on its own slider</b><small>roof, panel, each bath, priced separately</small></td>
      <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>The photo condition read</b><small>drop the walk-through, get the lines back</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td><b>The contractor bid check</b><small>paste what they sent &mdash; line by line against your own estimate, and what the bid never mentions, priced at your figures</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr class="sec"><td colspan="5">The deal</td></tr>
    <tr><td><b>Seven exits priced and ranked</b><small>against this seller, not in general. The eighth is the land play &mdash; it needs dirt, so it is taught in the course and not priced on a house</small></td>
@@ -695,12 +895,14 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Where the answer flips</b><small>the rate or the hold that changes the winner</small></td>
      <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>The written comparison</b><small>the case for each, in prose you can forward</small></td>
-     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td><b>The written comparison</b><small>the case for each deal in prose you can forward — and every figure in it is one from your own table, checked, or the draft is refused rather than shown to you</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span><small>30 a month</small></td><td><span class="y">✓</span><small>90 a month</small></td></tr>
    <tr><td><b>Compare a whole week of leads</b><small>not two — the table, sorted by room</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Buy-box rules</b><small>flag a fit, refuse the drive-out</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
+   <tr><td><b>The other side of the table</b><small>what this seller says back, what is underneath it, and the reply that is true on your numbers &mdash; built on your ceiling, which is why it stays on your screen</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr class="sec"><td colspan="5">What leaves the building</td></tr>
    <tr><td><b>Print the offer sheet</b><small>the page, cleanly, on paper</small></td>
      <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
@@ -717,21 +919,37 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      <td>1</td><td>Up to 40</td><td class="hi">Up to 40</td><td>Up to 40</td></tr>
    <tr><td><b>The portfolio, on every device</b><small>the driveway and the desk, same sheet</small></td>
      <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>Shared assumption sets</b><small>one model for the whole desk</small></td>
-     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>Pipeline across the office</b><small>by stage and by spread</small></td>
-     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Bulk underwriting</b><small>paste a list, price all of them</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>Seats, roles and an audit trail</b></td>
-     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td>3, then $29</td></tr>
-   <tr><td><b>API and webhooks</b><small>into the CRM you already pay for</small></td>
-     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="y">✓</span></td></tr>
+   <!-- ── WHAT IS NOT BUILT YET, SAID HERE RATHER THAN DISCOVERED LATER ─────
+        Seats, shared assumption sets, a pipeline view and an API were all
+        printed above as ✓ against The Office. None of them exist. Selling a
+        team tier on four features that do not exist is the fastest route to a
+        chargeback, and the Billing page already promises a refund when we
+        remove something material from a plan — so shipping them as ticks
+        would have been a promise written next to the promise that undoes it.
+        They are listed, marked, and dated to nothing. ─────────────────────-->
+   <tr class="soonrow"><td><b>Seats and roles</b><small>in build — The Office is one person running volume until it lands, and the price says so</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="soon">in build</span></td></tr>
+   <tr class="soonrow"><td><b>Shared assumption sets</b><small>in build — one model for the whole desk</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="soon">in build</span></td></tr>
+   <tr class="soonrow"><td><b>Pipeline across the office</b><small>in build — by stage and by spread</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="soon">in build</span></td></tr>
+   <tr class="soonrow"><td><b>API and webhooks</b><small>in build — into the CRM you already pay for</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="soon">in build</span></td></tr>
    <tr class="sec"><td colspan="5">What the data costs</td></tr>
-   <tr><td><b>Property lookups a month</b><small>comps, records, rents</small></td>
-     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">200</td><td>Pooled, 600</td></tr>
-   <tr><td><b>Photo condition reads a month</b></td>
-     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">100</td><td>Pooled, 300</td></tr>
+   <tr><td><b>Property lookups a month</b><small>on your own RentCast key, billed by them, not by us — their free tier is 50 a month and we never see the key</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">Your key</td><td>Your key</td></tr>
+   <tr><td><b>Photo condition reads a month</b><small>on our key, counted per account</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">100</td><td>300</td></tr>
+   <tr><td><b>Street briefs a month</b><small>the census, FEMA and the permits, with their sources</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">40</td><td>120</td></tr>
+   <tr><td><b>Written comparisons a month</b><small>the case for a deal, in prose you can forward</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">30</td><td>90</td></tr>
+   <tr><td><b>Bid checks a month</b><small>a contractor&rsquo;s schedule against your estimate</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">20</td><td>60</td></tr>
+   <tr><td><b>The other side of the table, a month</b><small>what they say back, and what is true</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">60</td><td>180</td></tr>
    <tr class="sec"><td colspan="5">The walk-through and the arcade</td></tr>
    <tr><td><b>The eight lessons, with live controls</b><small>free forever, no account</small></td>
      <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
@@ -811,9 +1029,43 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  <h2>Price one, and decide after.</h2>
  <p>The desk is open, free, and needs nothing from you — no card, no account, no expiry. Price a
   house on it first. If it gives you the afternoon back, the plans will still be here.</p>
- <div class="row">
-  <a class="btn p" href="desk.html#new">Price a property →</a>
-  <a class="btn" href="demo.html">See how it works</a>
+ <div class="ways">
+  <a class="way" href="demo.html">
+   <span class="wi"><svg viewBox="0 0 40 52" width="32" height="42" aria-hidden="true" focusable="false">
+     <rect x="1.6" y="1.6" width="36.8" height="48.8" rx="3" fill="none" stroke="currentColor" stroke-width="2.4"/>
+     <rect x="8" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
+     <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
+   <span class="wk">Ninety seconds</span>
+   <span class="wt">See one already done</span>
+   <span class="wd">A finished sheet on 1128 Marrow Lane &mdash; every exit priced or refused, every number showing its working. Nothing to fill in.</span>
+   <span class="wgo">Open the worked example <em>&rarr;</em></span>
+  </a>
+  <a class="way lead" href="desk.html#new">
+   <span class="wi"><svg viewBox="0 0 40 52" width="32" height="42" aria-hidden="true" focusable="false">
+     <rect x="1.6" y="1.6" width="36.8" height="48.8" rx="3" fill="none" stroke="currentColor" stroke-width="2.4"/>
+     <rect x="8" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
+     <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
+   <span class="wk">Free &middot; no account &middot; no card</span>
+   <span class="wt">Price your own house</span>
+   <span class="wd">Your address and their asking price. Seven exits ranked against <b>this</b> seller, the repair estimate built line by line, and the words to say.</span>
+   <span class="wgo">Open a blank worksheet <em>&rarr;</em></span>
+  </a>
+  <a class="way" href="office.html?join=underwriter">
+   <span class="wi"><svg viewBox="0 0 40 52" width="32" height="42" aria-hidden="true" focusable="false">
+     <rect x="1.6" y="1.6" width="36.8" height="48.8" rx="3" fill="none" stroke="currentColor" stroke-width="2.4"/>
+     <rect x="8" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
+     <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
+   <span class="wk">One hundred places</span>
+   <span class="wt">Take a founding place</span>
+   <span class="wd">$49 a month for Underwriter, held for as long as you stay &mdash; and the price never moves, whatever it becomes later.</span>
+   <span class="wgo">Take a place <em>&rarr;</em></span>
+  </a>
  </div>
 </div>
 
@@ -887,10 +1139,17 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 .wl .ws{display:block;font-size:12.5px;line-height:1.55;color:var(--mid,#4a5162);margin-top:5px}
 .wl .ws b{color:var(--ink,#101725)}
 .wl .wf{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
-.wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:14px;padding:9px 11px;border-radius:10px;
- border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
+/* 16px, not 14 — under 16px iOS Safari zooms the whole page the moment the
+   field takes focus, which on the one form that is the entire pre-launch
+   funnel is a real cost. And 44px of height because this was a 30px target
+   on a phone, which is smaller than a fingertip. */
+.wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;
+ min-height:44px;border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
 .wl .wf input:focus{outline:none;border-color:var(--blue,#1f5fd0);box-shadow:0 0 0 3px var(--blue-soft,#eaf0fc)}
-.wl .wf button{flex:none;cursor:pointer}
+.wl .wf button{flex:none;cursor:pointer;min-height:44px;padding-left:18px;padding-right:18px}
+/* side by side, a phone gives the address field about nine characters. Stack. */
+@media(max-width:560px){.wl .wf{flex-direction:column;align-items:stretch}
+ .wl .wf input,.wl .wf button{width:100%}}
 .wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:var(--soft,#677187)}
 .wl .wn.ok{color:var(--green,#177a4d)} .wl .wn.bad{color:var(--red,#b3372c)}
 .wl.done{border-color:var(--green-line,#bfe0cd);background:var(--green-soft,#eaf6f0)}

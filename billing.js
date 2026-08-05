@@ -41,6 +41,23 @@ import crypto from 'node:crypto';
 
 const SK      = process.env.STRIPE_SECRET || '';
 const WHSEC   = process.env.STRIPE_WEBHOOK_SECRET || '';
+/* ── READ AT CALL TIME, NOT AT IMPORT ─────────────────────────────────────
+   These were captured once when the module loaded. That is fine right up
+   until you try to prove the fail-closed path works: a harness that boots the
+   service twice, once unconfigured and once configured, gets the FIRST boot's
+   configuration both times, because Node caches a module by its URL and the
+   second import of server.js resolves to the same billing.js. The second boot
+   silently ran with no account layer and answered "not switched on" — which
+   looks exactly like the gate working, and is the gate not being tested.
+
+   An untested fail-closed path is the one that turns out to fail open. So the
+   configuration is read where it is used. It is three env lookups on a route
+   that is about to make an HTTPS call to a model; the cost is not measurable
+   and the property — that this can be reconfigured and therefore verified —
+   is worth having. */
+const sbUrl  = () => (process.env.SUPABASE_URL || '').replace(/\/+$/, '');
+const sbKey  = () => process.env.SUPABASE_SERVICE_KEY || '';
+const sbAnon = () => process.env.SUPABASE_ANON_KEY || '';
 const SB_URL  = (process.env.SUPABASE_URL || '').replace(/\/+$/, '');
 const SB_KEY  = process.env.SUPABASE_SERVICE_KEY || '';
 const SB_ANON = process.env.SUPABASE_ANON_KEY || '';
@@ -110,8 +127,8 @@ async function whoIs(req){
   const tok = h.startsWith('Bearer ') ? h.slice(7).trim() : '';
   if (!tok || tok.length > 4000) return null;
   try {
-    const r = await fetch(`${SB_URL}/auth/v1/user`, {
-      headers: { apikey: SB_ANON || SB_KEY, authorization: 'Bearer ' + tok } });
+    const r = await fetch(`${sbUrl()}/auth/v1/user`, {
+      headers: { apikey: sbAnon() || sbKey(), authorization: 'Bearer ' + tok } });
     if (!r.ok) return null;
     const u = await r.json();
     return (u && u.id) ? { uid: u.id, email: u.email || '' } : null;
@@ -320,6 +337,116 @@ export async function reconcile(ev, deps = {}){
 
   await write(uid, plan);
   return { uid, plan, subs: live.length };
+}
+
+/* ── THE ENTITLEMENT, DERIVED HERE ─────────────────────────────────────────
+   Exported because /api/read needs exactly this and must not reimplement it.
+   Two facts, both from the database, neither from the request body:
+
+     · the plan, which only the service role can write, so a plan typed into
+       developer tools is worth nothing here
+     · the trial, which is a date the signup trigger set — and which is checked
+       against the SERVER's clock, because a trial checked against the caller's
+       clock is a trial that never ends
+
+   Returns a small object rather than a boolean so the route can say WHY, and
+   so a future feature at a different tier can ask the same question.
+   Fails closed: with Supabase unconfigured there is no account layer, and
+   without an account layer nothing is entitled to spend the key. */
+const TIER = { 'solo':1, 'underwriter':2, 'the office':3 };
+export async function entitlementOf(req, need = 2){
+  if (!sbUrl() || !sbKey()) return { ok:false, why:'unconfigured' };
+  const who = await whoIs(req);
+  if (!who) return { ok:false, why:'nosession' };
+  let row = null;
+  try {
+    const r = await fetch(`${sbUrl()}/rest/v1/profiles?id=eq.${encodeURIComponent(who.uid)}`
+      + '&select=plan,trial', { headers:{ apikey:sbKey(), authorization:'Bearer ' + sbKey() } });
+    if (r.ok){ const j = await r.json(); row = Array.isArray(j) ? j[0] : null; }
+  } catch(e){ return { ok:false, why:'lookup' }; }
+  if (!row) return { ok:false, why:'noprofile' };
+
+  const started = row.trial ? Date.parse(String(row.trial) + 'T00:00:00Z') : NaN;
+  const trialDaysLeft = Number.isFinite(started)
+    ? Math.max(0, TRIAL_DAYS - Math.floor((Date.now() - started) / 86400000)) : 0;
+  const tier = TIER[String(row.plan || '').trim().toLowerCase()] || 0;
+
+  if (trialDaysLeft > 0) return { ok:true, uid:who.uid, tier:Math.max(tier, 3), trial:trialDaysLeft };
+  if (tier >= need)      return { ok:true, uid:who.uid, tier, trial:0 };
+  return { ok:false, why: tier === 0 ? 'free' : 'lowtier', uid:who.uid, tier };
+}
+
+/* ══ THE METER ═════════════════════════════════════════════════════════════
+   One table, one function, a row per (person, feature, month). This replaced
+   two columns on `profiles` the moment there was going to be a second AI
+   feature: five features would have been ten columns, five copies of the same
+   roll-the-month arithmetic, and a schema migration on every ship.
+
+   TWO CALLS, NOT ONE, and the split is deliberate:
+     · usedThisMonth() before the work, to refuse somebody who is out
+     · countUse() after it succeeded, so an upstream failure does not spend a
+       month on our error
+   The gap between them is a read of slack per person per month, which is a
+   much better trade than a reservation that has to be handed back whenever a
+   model call errors — that is a distributed transaction for a rounding error.
+
+   Both return null where the function or table is not in the database yet, and
+   every caller treats null as "do not block". A site deployed ahead of its
+   migration must not switch off something people are paying for. */
+
+/* Caps are per feature per tier, and The Office is 3x Underwriter throughout.
+   Every one is overridable from the environment because the right number is
+   discovered from usage, not from a meeting — and changing it should not be a
+   deploy. NI_CAP_AIREAD=150 sets Underwriter; Office follows unless
+   NI_CAP_AIREAD_OFFICE says otherwise. */
+const CAP_DEFAULT = {
+  airead:    100,   // the photo condition read
+  aicompare:  30,   // the written comparison
+  aistreet:   40,   // the street brief
+  aibid:      20,   // the contractor bid check
+  ailetter:   60,   // the other side of the table
+};
+export const FEATURES = Object.keys(CAP_DEFAULT);
+export function capFor(feature, tier){
+  const base = Number(process.env['NI_CAP_' + feature.toUpperCase()]);
+  const two  = Number.isFinite(base) && base >= 0 ? base : CAP_DEFAULT[feature];
+  if (two === undefined) return 0;
+  if (tier < 3) return two;
+  const off = Number(process.env['NI_CAP_' + feature.toUpperCase() + '_OFFICE']);
+  return Number.isFinite(off) && off >= 0 ? off : two * 3;
+}
+
+const monthStart = () => new Date().toISOString().slice(0, 8) + '01';
+
+/* what this person has already spent on this feature this month */
+export async function usedThisMonth(uid, feature){
+  if (!sbUrl() || !sbKey() || !uid) return null;
+  try {
+    const q = `${sbUrl()}/rest/v1/usage?uid=eq.${encodeURIComponent(uid)}`
+      + `&feature=eq.${encodeURIComponent(feature)}&month=eq.${monthStart()}&select=used`;
+    const r = await fetch(q, { headers:{ apikey:sbKey(), authorization:'Bearer ' + sbKey() } });
+    if (!r.ok) return null;                       // no table yet — do not block
+    const j = await r.json();
+    return Array.isArray(j) && j[0] ? (j[0].used|0) : 0;
+  } catch(e){ return null; }
+}
+
+/* spend one, and say what is left */
+export async function countUse(uid, feature, cap){
+  if (!sbUrl() || !sbKey() || !uid) return null;
+  try {
+    const r = await fetch(`${sbUrl()}/rest/v1/rpc/ni_use`, {
+      method:'POST',
+      headers:{ 'content-type':'application/json', apikey:sbKey(),
+                authorization:'Bearer ' + sbKey() },
+      body: JSON.stringify({ who: uid, feat: feature, cap }),
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    const row = Array.isArray(j) ? j[0] : j;
+    return (row && typeof row.remaining === 'number')
+      ? { used: row.used|0, remaining: row.remaining|0, cap } : null;
+  } catch(e){ return null; }
 }
 
 export const billingState = () => ({

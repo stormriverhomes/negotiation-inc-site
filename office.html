@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Your desk · Negotiation Inc</title><script>window.NI_LIVE=false;window.NI_SUPABASE_URL="https://zfsazgrxhtitxakjvyqq.supabase.co";window.NI_SUPABASE_ANON="sb_publishable_EcC8_XnC_bUVjqx7fpOWxQ_XWo0gu-R";</script>
+<title>Your desk · Negotiation Inc</title><script>window.NI_LIVE=false;</script>
 <meta name="description" content="Your underwriting hub: properties you have priced, market context, course progress, and the arcade.">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -21,12 +21,25 @@
    exists, this same form starts posting to it and nothing else changes.
    ═══════════════════════════════════════════════════════════════════════════ */
 :root{
-  --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --faint:#9aa3b2;
+  --ink:#0d1420; --mid:#41495a; /* --faint was #9aa3b2: 2.5:1 on white, at 10-12px. That is not "light grey",
+     it is text a person over forty reads by leaning toward the screen, and it
+     was carrying real sentences. #6f7681 clears WCAG AA (4.58:1) and is still
+     visibly a step below --soft, because the hierarchy here is meant to come
+     from size and weight rather than from washing the words out. */
+  --soft:#6b7486; --faint:#6f7681;
   --line:#e4e8ef; --line-2:#c9d0dc; --wash:#f6f8fb; --card:#fff;
   --blue:#1f5fd0; --blue-deep:#153872; --blue-soft:#eaf0fc; --blue-line:#c3d4f5;
   --green:#177a4d; --green-soft:#eaf6f0; --green-line:#bfe0cd;
   --amber:#a6610d; --amber-soft:#fdf8ee; --amber-line:#ecd9b0;
   --est:#5f6b82; --est-soft:#f4f6f9; --est-line:#dde3ec;   /* estimates read calm, not cautionary */
+
+  /* the other half of the vocabulary — see the note in desk.html's :root.
+     --line-ink was why the experience picker's options had no outline: the
+     border shorthand naming it was invalid, so border-style resolved to none
+     and only the SELECTED option was visible (its ring is a box-shadow). */
+  --line-ink:#c9d0dc;
+  --red:#b3372c; --red-soft:#faeeec; --red-line:#f0d2ce;
+  --gold:#8a6612; --gold-soft:#fbf6e9; --gold-line:#e8dcb8;
   --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
   --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
   --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;   /* no typewriter in the software */
@@ -158,7 +171,15 @@ body.railtight .rn-lnk em{display:none}
 .rn-p.on{background:rgba(31,95,208,.26);border-color:rgba(143,180,255,.42)}
 .rn-p .t{font-size:12.5px;font-weight:650;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rn-p .s{font-size:10.5px;color:#8ba3c4;margin-top:1px;font-variant-numeric:tabular-nums}
+/* ── A NEGATIVE NUMBER IS NEVER THE AFFIRMATIVE COLOUR ─────────────────────
+   This was mint green whatever the sign, so a property whose spread is
+   MINUS $102,000 — the one demo built specifically to be the deal you walk
+   away from — announced it in the colour the product uses for money you make.
+   Colour is read before the minus sign is; a red loss in green is a lie that
+   lands before the digits do. _tsign.mjs is on the board now and checks every
+   negative money value on every screen against its computed colour. */
 .rn-p .s b{color:#8fe0b4;font-weight:700}
+.rn-p .s b.dn{color:#f2a49f}
 .rn-empty{padding:2px 16px 0;font-size:11.5px;color:#7c93b5;line-height:1.5}
 .rn-foot{margin-top:auto;padding:12px;border-top:1px solid rgba(255,255,255,.09);display:grid;gap:5px}
 .rn-lnk{font-size:12px;color:#9db4d4;text-decoration:none;padding:5px 6px;border-radius:7px}
@@ -241,6 +262,7 @@ header{background:#fff;border-bottom:1px solid var(--line)}
  line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ghave .f{font-size:12.5px;color:#c9d8ee;margin-top:4px;font-variant-numeric:tabular-nums}
 .ghave .f b{color:#8fe0b4;font-weight:700}
+.ghave .f b.dn{color:#f2a49f}
 .ghave .w{font-size:12px;color:#9db4d4;margin-top:9px;padding-top:8px;
  border-top:1px solid rgba(255,255,255,.12);line-height:1.45}
 .gate h1{font-size:29px}
@@ -249,9 +271,27 @@ header{background:#fff;border-bottom:1px solid var(--line)}
 .gate form{padding:26px 28px 26px}
 label{display:block;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.14em;
  text-transform:uppercase;color:var(--soft);margin-top:14px}
-input[type=text],input[type=email]{width:100%;font-family:inherit;font-size:16px;padding:10px 12px;
- border:1px solid var(--line-2);background:#fff;color:var(--ink);margin-top:6px}
+/* PASSWORD BELONGS HERE TOO. It was missing from this selector, so the one
+   field on the page that arrives last and matters most fell all the way back
+   to the browser default — half the height of the fields above it, a smaller
+   typeface, and not even full width. Next to a styled Name and Email it read
+   as an afterthought bolted on, which is exactly what it looked like. */
+input[type=text],input[type=email],input[type=password]{width:100%;font-family:inherit;
+ font-size:16px;padding:10px 12px;border:1px solid var(--line-2);background:#fff;
+ color:var(--ink);margin-top:6px}
 input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+/* and the block it sits in gets its own air: it is a new idea arriving in the
+   middle of a form somebody has already started filling in */
+#g-pwwrap{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+/* "I already have an account" was wrapped in the same boxed grey panel the
+   legal fine print uses, jammed 6px under the field — a heavy slab doing the
+   job of a link. It is a link. */
+/* signing in leaves only Email above it, so the divider has nothing to
+   divide — it becomes a line for its own sake */
+#g-pwwrap.tight{margin-top:14px;padding-top:0;border-top:0}
+#g-pwwrap .haveacc{margin-top:10px;font-size:13px;text-align:right}
+#g-pwwrap .haveacc a{color:var(--blue);text-decoration:none;font-weight:600}
+#g-pwwrap .haveacc a:hover{text-decoration:underline}
 .gate .go{width:100%;justify-content:center;margin-top:18px}
 .gate .fine{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--wash);
  font-size:12.5px;color:var(--soft);line-height:1.5}
@@ -405,9 +445,12 @@ footer a{color:var(--mid);text-decoration:none;margin-right:16px}
 .lvl button{display:block;text-align:left;font-family:inherit;font-size:14.5px;font-weight:650;
  color:var(--ink);background:#fff;border:1px solid var(--line-ink);border-radius:10px;
  padding:11px 14px;cursor:pointer;transition:border-color .12s,background .12s}
-.lvl button span{display:block;font-size:12.5px;font-weight:400;color:var(--faint);margin-top:2px}
+.lvl button span{display:block;font-size:12.5px;font-weight:400;color:var(--soft);margin-top:2px}  /* --soft, not --faint: this is a sentence you are meant to read, and on the
+     chosen card it sits on blue-soft where faint drops to 2.2:1 */
 .lvl button:hover{border-color:var(--ink)}
 .lvl button[aria-checked="true"]{border-color:var(--blue);background:var(--blue-soft,#eef3fd);box-shadow:0 0 0 1px var(--blue)}
+.lvl button[aria-checked="true"] span{color:var(--mid)}  /* on the blue field --soft falls to 4.1:1, and the chosen option is the
+     one you most want legible */
 .lvl button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 </style>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
@@ -498,7 +541,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   <div id="g-pwwrap" hidden>
    <label for="g-pw">A password <span style="color:var(--faint)">&mdash; six characters or more</span></label>
    <input id="g-pw" type="password" placeholder="something you will remember" autocomplete="new-password" minlength="6">
-   <div class="fine" style="margin-top:6px"><a href="#" id="g-have">I already have an account &rarr;</a></div>
+   <div class="haveacc"><a href="#" id="g-have">I already have an account &rarr;</a></div>
   </div>
   <div class="err" id="g-err">A name and an email, and the desk is yours.</div>
   <button class="btn p go" type="submit" id="g-go">Create my workspace &rarr;</button>
@@ -579,7 +622,11 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 'use strict';
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const money = v => '$' + Math.round(v).toLocaleString('en-US');
+/* The sign goes OUTSIDE the dollar sign. This produced "$-102,000", which is
+   not how anybody writes money and reads for a beat as a currency code before
+   it reads as a loss — and desk.html's own fmt() four thousand lines up has
+   always done it correctly, so the file disagreed with itself. */
+const money = v => { const n = Math.round(v); return (n < 0 ? '−$' : '$') + Math.abs(n).toLocaleString('en-US'); };
 const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } };
 const LS_get = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
 const LS_set = (k,v) => { try { localStorage.setItem(k,v); } catch(e){} };
@@ -605,6 +652,13 @@ function account(){ const a = read(ACC);
               h:'One desk, as many properties as you work.',
               p:'The free tier holds one sheet in this browser. An account holds forty, side by '
               + 'side, with what each one is worth — and it costs nothing. <b>No card, no plan.</b>' },
+    /* somebody who clicked this has just watched three sales get scored and
+       wants a fourth. They do not need to be told what an account is. */
+    comps:  { k:'Twelve scored comps a week',
+              h:'Score as many sales as the house deserves.',
+              p:'Three comps in a browser is one honest range. An account scores <b>twelve a week</b> '
+              + '— two houses done properly — with every adjustment named and the ARV still yours to '
+              + 'set. It resets every Monday. <b>No card, no plan.</b>' },
   }[want];
   if (!H) return;
   const k = document.getElementById('gate-k'), h = document.getElementById('gate-h'),
@@ -650,6 +704,8 @@ let GMODE = 'up';                                  // 'up' = new account, 'in' =
     if (pw) pw.setAttribute('autocomplete', GMODE === 'in' ? 'current-password' : 'new-password');
     document.getElementById('g-go').innerHTML = GMODE === 'in' ? 'Sign in &rarr;' : 'Create my workspace &rarr;';
     have.textContent = GMODE === 'in' ? 'I need an account \u2192' : 'I already have an account \u2192';
+    const wrap = document.getElementById('g-pwwrap');
+    if (wrap) wrap.classList.toggle('tight', GMODE === 'in');
   };
 })();
 $('gate-form').onsubmit = async e => {
@@ -738,7 +794,7 @@ function renderShell(a, props, active, nameOf, spreadOf, filledOf, onPlan, left)
    const sp = spreadOf(p), n = filledOf(p).length;
    return `<a class="rn-p${i===active?' on':''}" href="desk.html#open=${i}">
      <div class="t">${smp(p)}${esc(nameOf(p,i))}</div>
-     <div class="s">${sp!==null?`<b>${money(sp)}</b> spread`:(n?`${n} figure${n>1?'s':''}`:'empty')}</div></a>`;
+     <div class="s">${sp!==null?`<b class="${sp<0?'dn':''}">${money(sp)}</b> spread`:(n?`${n} figure${n>1?'s':''}`:'empty')}</div></a>`;
  }).join('');
 
  const html = `
@@ -980,7 +1036,7 @@ function gateHave(){
   el.innerHTML = `<div class="ghave">
     <div class="k">Already in this browser</div>
     <div class="n">${esc(nm)}</div>
-    <div class="f">${sp!==null ? `<b>${money(sp)}</b> of spread on paper` : 'not priced through yet'}${
+    <div class="f">${sp!==null ? `<b class="${sp<0?'dn':''}">${money(sp)}</b> of spread on paper` : 'not priced through yet'}${
       live.length>1 ? ` &middot; and ${live.length-1} more` : ''}</div>
     <div class="w">It lives in this browser and nowhere else &mdash; clearing your history takes it
       with it, and it does not follow you to your phone. An account is what stops that.</div>
@@ -1611,6 +1667,10 @@ async function authBoot(){
   if (!SB_ON || AUTH_BOOTED) return;
   AUTH_BOOTED = true;
   await fillFromServer();
+  /* a zero-spend read, so the comp workbench knows the week's balance before
+     it draws the button rather than after somebody has pressed it */
+  try { if (await window.__compUse(0)) {
+    if (typeof window.__render === 'function') window.__render(); } } catch(e){}
   await syncSheets();
 }
 let SYNCING = false;
@@ -1646,8 +1706,59 @@ function syncSoon(){
   clearTimeout(pushT);
   pushT = setTimeout(() => { pushLocal(); }, 4000);
 }
+/* ══ THE WEEKLY COMP ALLOWANCE ═════════════════════════════════════════════
+   Scoring a comp costs nothing to run — it is arithmetic in this file's own
+   process, not a model call — so this meter is not a cost control. It is the
+   rung that was missing from the ladder: until now a FREE ACCOUNT bought you
+   nothing at all on the comp workbench, which meant the best thing in the
+   product gave nobody a reason to sign up.
+
+   The count lives on the SERVER, in the profile, for one reason: a counter in
+   localStorage is reset by clearing site data, and that is not a determined
+   attack, it is something people do by accident. A column the browser cannot
+   write is the difference between a limit and a suggestion.
+
+   It cannot stop somebody who edits the JavaScript — nothing client-side can,
+   and pretending otherwise would be the kind of security theatre this codebase
+   avoids saying out loud. It stops the easy bypass, which is the one that
+   actually happens.
+
+   DEGRADES TO TODAY. If the function is not in the database yet — the site
+   deploys before the SQL is run, which is the normal order — this returns null
+   and the desk falls back to the free-tier limit it has always used. A missing
+   migration must never lock somebody out of something that worked yesterday. */
+let COMPQ = null;                    // last known {used, cap, remaining}
+window.__compAllowance = () => COMPQ;
+window.__compUse = async function(n){
+  if (!SB_ON || !SESS) return null;
+  try {
+    const t = await token(); if (!t) return null;
+    const r = await fetch(SB.url + '/rest/v1/rpc/ni_use_comps', {
+      method:'POST',
+      headers: sbHead(t),
+      body: JSON.stringify({ n: Math.max(0, Math.min(50, n|0)) }),
+    });
+    if (!r.ok) return null;          // no function yet, or a policy said no
+    const j = await r.json();
+    const row = Array.isArray(j) ? j[0] : j;
+    if (!row || typeof row.remaining !== 'number') return null;
+    COMPQ = { used: row.used|0, cap: row.cap|0, remaining: Math.max(0, row.remaining|0) };
+    return COMPQ;
+  } catch(e){ return null; }
+};
+
 /* an access token for the one service allowed to ask Stripe anything */
 window.__authToken = token;
+/* ── THE HEADER THAT PROVES WHO IS ASKING ─────────────────────────────────
+   Any request to our own service that spends money or reveals a paid feature
+   carries this, and the service re-derives the plan from it rather than
+   believing anything the page says about itself. Returns an EMPTY object when
+   there is no session, so the caller composes it unconditionally and an
+   unconfigured build sends no header rather than sending "Bearer null". */
+window.__authHeader = async function(){
+  try { const t = await token(); return t ? { authorization: 'Bearer ' + t } : {}; }
+  catch(e){ return {}; }
+};
 /* ask the server what the plan is NOW. The only caller that needs this is the
    moment somebody comes back from Stripe: the redirect and the webhook are
    racing each other, and the redirect usually wins. */
@@ -1798,10 +1909,17 @@ try{ joinFromQuery(); }catch(e){}
 .wl .ws{display:block;font-size:12.5px;line-height:1.55;color:var(--mid,#4a5162);margin-top:5px}
 .wl .ws b{color:var(--ink,#101725)}
 .wl .wf{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
-.wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:14px;padding:9px 11px;border-radius:10px;
- border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
+/* 16px, not 14 — under 16px iOS Safari zooms the whole page the moment the
+   field takes focus, which on the one form that is the entire pre-launch
+   funnel is a real cost. And 44px of height because this was a 30px target
+   on a phone, which is smaller than a fingertip. */
+.wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;
+ min-height:44px;border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
 .wl .wf input:focus{outline:none;border-color:var(--blue,#1f5fd0);box-shadow:0 0 0 3px var(--blue-soft,#eaf0fc)}
-.wl .wf button{flex:none;cursor:pointer}
+.wl .wf button{flex:none;cursor:pointer;min-height:44px;padding-left:18px;padding-right:18px}
+/* side by side, a phone gives the address field about nine characters. Stack. */
+@media(max-width:560px){.wl .wf{flex-direction:column;align-items:stretch}
+ .wl .wf input,.wl .wf button{width:100%}}
 .wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:var(--soft,#677187)}
 .wl .wn.ok{color:var(--green,#177a4d)} .wl .wn.bad{color:var(--red,#b3372c)}
 .wl.done{border-color:var(--green-line,#bfe0cd);background:var(--green-soft,#eaf6f0)}

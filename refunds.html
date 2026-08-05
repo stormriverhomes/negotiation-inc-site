@@ -1,10 +1,10 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Billing &amp; refunds · Negotiation Inc</title><script>window.NI_LIVE=false;window.NI_SUPABASE_URL="https://zfsazgrxhtitxakjvyqq.supabase.co";window.NI_SUPABASE_ANON="sb_publishable_EcC8_XnC_bUVjqx7fpOWxQ_XWo0gu-R";</script>
+<title>Billing &amp; refunds · Negotiation Inc</title><script>window.NI_LIVE=false;</script>
 <meta name="description" content="How the trial works, how billing works, how to cancel in two clicks, and the refund policy written so you can tell in advance whether you will get your money back.">
 <style>
 :root{
-  --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --faint:#9aa3b2;
+  --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --faint:#6f7681;
   --line:#e4e8ef; --line-2:#c9d0dc; --wash:#f6f8fb;
   --blue:#1f5fd0; --blue-deep:#153872; --blue-soft:#eaf0fc; --blue-line:#c3d4f5;
   --green:#177a4d; --green-soft:#eaf6f0; --green-line:#bfe0cd;
@@ -63,8 +63,12 @@ header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba
 .toc .lab{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
  margin-bottom:10px}
 .toc ol{list-style:none;padding:0;margin:0;counter-reset:t}
-.toc li{counter-increment:t;margin:0 0 2px}
-.toc a{display:block;padding:5px 8px;border-radius:9px;color:var(--mid);text-decoration:none;line-height:1.35}
+.toc li{counter-increment:t;margin:0 0 4px}
+.toc a{display:block;padding:6px 9px;border-radius:9px;color:var(--mid);text-decoration:none;line-height:1.35}
+/* Ten links two pixels apart, each 28px tall, is a list you scroll past rather
+   than use — and on a phone it is a list you cannot hit. Give them room. */
+@media(max-width:900px){.toc li{margin:0 0 2px}
+ .toc a{padding:11px 10px;min-height:44px;display:flex;align-items:center}}
 .toc a::before{content:counter(t) ".";color:var(--faint);margin-right:7px;font-variant-numeric:tabular-nums}
 .toc a:hover{background:var(--wash);color:var(--ink)}
 
@@ -354,10 +358,17 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 .wl .ws{display:block;font-size:12.5px;line-height:1.55;color:var(--mid,#4a5162);margin-top:5px}
 .wl .ws b{color:var(--ink,#101725)}
 .wl .wf{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
-.wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:14px;padding:9px 11px;border-radius:10px;
- border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
+/* 16px, not 14 — under 16px iOS Safari zooms the whole page the moment the
+   field takes focus, which on the one form that is the entire pre-launch
+   funnel is a real cost. And 44px of height because this was a 30px target
+   on a phone, which is smaller than a fingertip. */
+.wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;
+ min-height:44px;border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
 .wl .wf input:focus{outline:none;border-color:var(--blue,#1f5fd0);box-shadow:0 0 0 3px var(--blue-soft,#eaf0fc)}
-.wl .wf button{flex:none;cursor:pointer}
+.wl .wf button{flex:none;cursor:pointer;min-height:44px;padding-left:18px;padding-right:18px}
+/* side by side, a phone gives the address field about nine characters. Stack. */
+@media(max-width:560px){.wl .wf{flex-direction:column;align-items:stretch}
+ .wl .wf input,.wl .wf button{width:100%}}
 .wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:var(--soft,#677187)}
 .wl .wn.ok{color:var(--green,#177a4d)} .wl .wn.bad{color:var(--red,#b3372c)}
 .wl.done{border-color:var(--green-line,#bfe0cd);background:var(--green-soft,#eaf6f0)}

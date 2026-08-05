@@ -34,7 +34,11 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { MODEL, SYSTEM, TOOL, LINES, LINE_IDS, RARELY_VISIBLE, userBlock } from './prompt.js';
-import { mountBilling, billingState } from './billing.js';
+import * as CMP from './compare.js';
+import * as ST from './street.js';
+import * as BID from './bid.js';
+import * as OBJ from './objections.js';
+import { mountBilling, billingState, entitlementOf, usedThisMonth, countUse, capFor } from './billing.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -83,6 +87,34 @@ function ipOk(ip){
    never an upstream body, never a header. */
 const log = (...a) => console.log(new Date().toISOString(), ...a);
 
+/* ── THE ACCESS CODE IS NOW A BETA SWITCH, NOT THE GATE ───────────────────
+   When this file was written the shared access code was the ONLY thing
+   standing between the internet and our key, so "no code configured means the
+   route is off" was exactly right — fail closed, always.
+
+   There is an account layer now, and it is strictly stronger: a Supabase
+   token, verified by Supabase, against a plan column only the service role can
+   write. Leaving the code as a hard requirement on top of that would mean
+   every paying subscriber typing a shared password into a box before they can
+   use a feature they have already bought — a second lock on a door they hold
+   the key to, and the kind of thing people email about on day one.
+
+   So: the route is available when there is a real gate of ANY kind, and each
+   gate that IS configured is enforced.
+     · code set          → it is checked, exactly as before (private beta)
+     · code not set, accounts configured → the account is the gate
+     · neither           → off, which is the fail-closed case that matters
+   Nothing here loosens the entitlement check below; it only stops the beta
+   switch from locking out the people the entitlement is for. */
+const ACCOUNTS_ON = () => !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY);
+const gateFails = (req, what) => {
+  if (!ACCESS && !ACCOUNTS_ON())
+    return [503, `The ${what} is not switched on for this deployment.`];
+  if (ACCESS && (req.get('x-ni-access') || '') !== ACCESS)
+    return [401, 'That access code is not right.'];
+  return null;
+};
+
 /* ══ THE READ ══════════════════════════════════════════════════════════════ */
 app.post('/api/read', express.json({ limit: (LIM.maxTotalKb + 1000) + 'kb' }), async (req, res) => {
   const t0 = Date.now();
@@ -90,10 +122,56 @@ app.post('/api/read', express.json({ limit: (LIM.maxTotalKb + 1000) + 'kb' }), a
 
   /* fails closed. An unconfigured deploy is a disabled endpoint, never an
      open one — this is the single most important line in the file. */
-  if (!ACCESS) return fail(503, 'The photo read is not switched on for this deployment.');
   if (!KEY && !MOCK) return fail(503, 'The photo read is not switched on for this deployment.');
-  if ((req.get('x-ni-access') || '') !== ACCESS)
-    return fail(401, 'That access code is not right.');
+  { const g = gateFails(req, 'photo read'); if (g) return fail(g[0], g[1]); }
+
+  /* ── AND WHO IS ASKING ───────────────────────────────────────────────────
+     The access code above says whether this DEPLOYMENT has the read switched
+     on. It does not say who may use it: it is one shared string, typed by a
+     person, kept in a browser, and one of them posting it in a forum makes it
+     everybody's. That is fine as a deployment switch and useless as an
+     entitlement.
+
+     The entitlement is the account. The token is Supabase's, Supabase says
+     whether it is real, and the plan behind it is a column only the service
+     role can write — which is the same chain that makes a subscription mean
+     something. A demo cannot reach here, because a demo has no session; a
+     free account cannot, because its tier is 0; and a browser claiming
+     otherwise is not consulted.
+
+     403 rather than 401: the credential was understood, it simply does not
+     buy this. The distinction matters to the page, which shows "that code is
+     wrong" for one and "this comes with Underwriter" for the other. */
+  const ent = await entitlementOf(req, 2);
+  if (!ent.ok){
+    const SAY = {
+      unconfigured: 'The photo read is not switched on for this deployment.',
+      nosession:    'The photo read needs an account. Nothing was sent.',
+      noprofile:    'The photo read needs an account. Nothing was sent.',
+      lookup:       'The account could not be checked just now. Nothing was sent.',
+      free:         'The photo read comes with Underwriter, and with the fourteen-day trial. Nothing was sent.',
+      lowtier:      'The photo read comes with Underwriter. Nothing was sent.',
+    };
+    const code = ent.why === 'unconfigured' ? 503 : ent.why === 'lookup' ? 503 : 403;
+    return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
+  }
+
+  /* ── AND THE MONTH THEY BOUGHT ───────────────────────────────────────────
+     The plans page prints a number of reads a month against each tier. Before
+     this there was one global daily cap and nothing counted per account, so
+     the number was decorative in both directions: unenforceable if somebody
+     ran hot, and unprotectable for everybody else when they did — one user
+     could spend the day's budget by lunchtime and the rest got 429s for
+     something they had paid for.
+
+     Read before the work, counted after it succeeds. Skipped entirely where
+     the meter is not in the database yet, because a site deployed ahead of
+     its migration must not switch off a feature somebody is paying for. */
+  const cap  = capFor('airead', ent.tier);
+  const used = await usedThisMonth(ent.uid, 'airead');
+  if (cap > 0 && used !== null && used >= cap)
+    return fail(429, `That is ${cap} photo reads this month, which is what this plan includes. `
+      + 'It resets on the first. Nothing was sent.', { monthly: true, used, cap });
 
   rollDay();
   if (day.n >= LIM.perDay || day.usd >= LIM.dailyUsd)
@@ -152,7 +230,14 @@ app.post('/api/read', express.json({ limit: (LIM.maxTotalKb + 1000) + 'kb' }), a
     day.usd += (out.usage.input_tokens || 0) * USD_IN + (out.usage.output_tokens || 0) * USD_OUT;
     log('read ok', images.length + 'img', totalKb + 'kb', (Date.now()-t0) + 'ms',
         'seen ' + clean.stats.seen + '/17', 'day $' + day.usd.toFixed(3));
+    /* the read worked, so it counts. Awaited rather than fired and forgotten:
+       a count that loses a race is a cap that does not hold on exactly the
+       traffic pattern it exists for. Failure here is not the caller's problem
+       — they get their read either way and the number is a business fact, not
+       a correctness one. */
+    const month = await countUse(ent.uid, 'airead', cap).catch(() => null);
     res.json({ ok:true, ...clean, model: MOCK ? 'mock' : MODEL,
+               ...(month ? { month: { used: month.used, cap: month.cap, left: month.remaining } } : {}),
                usage: { in: out.usage.input_tokens || 0, out: out.usage.output_tokens || 0 } });
   } catch (e){
     /* an upstream body can contain anything, including things about the
@@ -297,6 +382,452 @@ function listOk(ip){
   if (listHits.size > 5000) for (const [k, v] of listHits) if (!v.some(t => t > win)) listHits.delete(k);
   return true;
 }
+
+/* ══ THE WRITTEN COMPARISON ════════════════════════════════════════════════
+   The second thing on this service that spends the key, and it rides on
+   exactly the rails the photo read already laid: the same access-code switch,
+   the same account entitlement, the same per-account monthly meter. The only
+   thing new is what it refuses.
+
+   A model writing about money produces numbers that are NEARLY right, and a
+   number that is nearly right on a document somebody forwards to a lender is
+   worse than no document at all. So the model is handed every figure it could
+   want — including the differences between sheets, precomputed, because "X
+   more room than Y" is the one number it would otherwise work out and get
+   subtly wrong — and then the prose is CHECKED. Every dollar amount in the
+   reply has to be one we supplied. One invented figure fails the whole draft,
+   because a draft that is right about four numbers and wrong about the fifth
+   reads exactly as well as a correct one. */
+app.post('/api/compare', express.json({ limit: '256kb' }), async (req, res) => {
+  const t0 = Date.now();
+  const fail = (code, why, extra) => { log('compare', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
+
+  if (!KEY && !MOCK) return fail(503, 'The written comparison is not switched on for this deployment.');
+  { const g = gateFails(req, 'written comparison'); if (g) return fail(g[0], g[1]); }
+
+  const ent = await entitlementOf(req, 2);
+  if (!ent.ok){
+    const SAY = {
+      unconfigured: 'The written comparison is not switched on for this deployment.',
+      nosession:    'The written comparison needs an account. Nothing was sent.',
+      noprofile:    'The written comparison needs an account. Nothing was sent.',
+      lookup:       'The account could not be checked just now. Nothing was sent.',
+      free:         'The written comparison comes with Underwriter, and with the fourteen-day trial. Nothing was sent.',
+      lowtier:      'The written comparison comes with Underwriter. Nothing was sent.',
+    };
+    const code = (ent.why === 'unconfigured' || ent.why === 'lookup') ? 503 : 403;
+    return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
+  }
+
+  const cap  = capFor('aicompare', ent.tier);
+  const used = await usedThisMonth(ent.uid, 'aicompare');
+  if (cap > 0 && used !== null && used >= cap)
+    return fail(429, `That is ${cap} written comparisons this month, which is what this plan `
+      + 'includes. It resets on the first. Nothing was sent.', { monthly:true, used, cap });
+
+  rollDay();
+  if (day.n >= LIM.perDay || day.usd >= LIM.dailyUsd)
+    return fail(429, 'This service has hit its cap for today. It resets within 24 hours.', { retryHours: 24 });
+  if (!ipOk(req.ip || 'unknown'))
+    return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
+
+  /* the body is a stranger. Nothing here is a prompt: the facts are rebuilt
+     from a fixed shape, so this endpoint cannot be turned into a general
+     writing service by anybody who can open developer tools. */
+  const facts = CMP.factsFrom(req.body);
+  if (!facts) return fail(400, 'A comparison needs at least two sheets priced far enough to rank.');
+
+  try {
+    let text, usage = {};
+    if (MOCK){
+      const a = facts.sheets[facts.winner ?? 0], b = facts.sheets[facts.runner ?? 1];
+      text = `Take ${a.name}, as ${a.bestExit}. It leaves ${money(a.room)} of room against `
+           + `what they are asking, and the ceiling behind that is ${money(a.ceiling)}.\n\n`
+           + `${b.name} is not a bad deal. Its spread on paper is ${money(b.spread)}.\n\n`
+           + `What would change it: ${facts.flip ? facts.flip.assumption : 'nothing inside the ranges tested'}.\n\n`
+           + `Send the offer on ${a.name} first.`;
+    } else {
+      const r = await callText(CMP.SYSTEM, CMP.userBlock(facts), 900);
+      text = r.text; usage = r.usage;
+    }
+    const check = CMP.validate(text, facts);
+    day.n++;
+    day.usd += (usage.input_tokens || 0) * USD_IN + (usage.output_tokens || 0) * USD_OUT;
+
+    if (!check.ok){
+      /* refused, not repaired. A draft with an invented figure quietly removed
+         is still a draft written by something that invents figures. */
+      log('compare REFUSED', check.invented.join(' '));
+      return fail(422, 'The draft came back with a figure that is not on either sheet, so it was '
+        + 'not shown to you. Nothing was stored. Try again.', { invented: check.invented });
+    }
+    const month = await countUse(ent.uid, 'aicompare', cap).catch(() => null);
+    log('compare ok', facts.sheets.length + 'sheets', (Date.now()-t0) + 'ms', 'day $' + day.usd.toFixed(3));
+    res.json({ ok:true, text, model: MOCK ? 'mock' : CMP.MODEL,
+      ...(month ? { month:{ used: month.used, cap: month.cap, left: month.remaining } } : {}),
+      usage: { in: usage.input_tokens || 0, out: usage.output_tokens || 0 } });
+  } catch (e){
+    log('compare FAILED', e.niKind || 'error', e.niStatus || '');
+    return fail(502, 'The comparison did not come back. Nothing was stored, and nothing on your '
+      + 'sheets changed.');
+  }
+});
+const money = v => v === null || v === undefined ? '—'
+  : (v < 0 ? '−$' : '$') + Math.abs(Math.round(v)).toLocaleString('en-US');
+
+/* plain text out of the model, for the routes that want prose rather than a
+   tool call. Same key, same timeout discipline, same refusal to forward an
+   upstream body — an upstream error can contain anything. */
+async function callText(system, user, maxTokens){
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 60_000);
+  let r;
+  try {
+    r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST', signal: ctrl.signal,
+      headers: { 'content-type':'application/json', 'x-api-key': KEY, 'anthropic-version':'2023-06-01' },
+      body: JSON.stringify({ model: CMP.MODEL, max_tokens: maxTokens || 900,
+        system, messages: [{ role:'user', content: user }] }),
+    });
+  } finally { clearTimeout(timer); }
+  if (!r.ok){ const e = new Error('upstream'); e.niStatus = r.status; e.niKind = 'http'; throw e; }
+  const j = await r.json();
+  const text = (j.content || []).filter(c => c.type === 'text').map(c => c.text).join('').trim();
+  if (!text){ const e = new Error('empty'); e.niKind = 'shape'; throw e; }
+  return { text, usage: j.usage || {} };
+}
+
+
+/* ══ THE STREET BRIEF ══════════════════════════════════════════════════════
+   One page on what the block is actually doing. Four sources: the Census
+   geocoder for the tract, the ACS for what the government counted, FEMA for
+   the flood position at the actual coordinates, and a web search for permits
+   and planning — with Zillow and Redfin blocked IN THE REQUEST, because this
+   product has promised never to take their data and an intention is not a
+   control.
+
+   The three agency calls run in parallel and fail independently. If FEMA is
+   down, the brief says the point is not in a mapped panel and goes on; if the
+   census key is missing, it says so. A brief that returns nothing because one
+   of four sources was slow is a brief nobody trusts to be there when they need
+   it — and each absence is stated rather than left as a silence somebody reads
+   as an absence of the thing itself. */
+app.post('/api/street', express.json({ limit: '8kb' }), async (req, res) => {
+  const t0 = Date.now();
+  const fail = (code, why, extra) => { log('street', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
+
+  if (!KEY && !MOCK) return fail(503, 'The street brief is not switched on for this deployment.');
+  { const g = gateFails(req, 'street brief'); if (g) return fail(g[0], g[1]); }
+
+  const ent = await entitlementOf(req, 2);
+  if (!ent.ok){
+    const SAY = {
+      unconfigured: 'The street brief is not switched on for this deployment.',
+      nosession:    'The street brief needs an account. Nothing was sent.',
+      noprofile:    'The street brief needs an account. Nothing was sent.',
+      lookup:       'The account could not be checked just now. Nothing was sent.',
+      free:         'The street brief comes with Underwriter, and with the fourteen-day trial. Nothing was sent.',
+      lowtier:      'The street brief comes with Underwriter. Nothing was sent.',
+    };
+    const code = (ent.why === 'unconfigured' || ent.why === 'lookup') ? 503 : 403;
+    return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
+  }
+
+  const cap  = capFor('aistreet', ent.tier);
+  const used = await usedThisMonth(ent.uid, 'aistreet');
+  if (cap > 0 && used !== null && used >= cap)
+    return fail(429, `That is ${cap} street briefs this month, which is what this plan includes. `
+      + 'It resets on the first. Nothing was sent.', { monthly:true, used, cap });
+
+  rollDay();
+  if (day.n >= LIM.perDay || day.usd >= LIM.dailyUsd)
+    return fail(429, 'This service has hit its cap for today. It resets within 24 hours.', { retryHours: 24 });
+  if (!ipOk(req.ip || 'unknown'))
+    return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
+
+  /* an address is a string a stranger typed. It goes into a government URL and
+     into a prompt, so it is capped and stripped of anything that is not part
+     of an address before either. */
+  const address = String((req.body && req.body.address) || '')
+    .replace(/[^\w\s,.'#/-]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
+  if (address.length < 8)
+    return fail(400, 'That does not look like a full address. The brief needs a street, a city and a state.');
+
+  try {
+    const g = await ST.geocode(address);
+    if (!g) return fail(404, 'The Census Bureau could not find that address, so there is no tract to '
+      + 'brief. Check the street and the city — nothing was sent.');
+
+    /* independent, and none of them can hold the others up */
+    const [acs, flood] = await Promise.all([
+      ST.acsTract(g, process.env.CENSUS_KEY || '').catch(() => ({ ok:false, why:'error' })),
+      ST.floodZone(g.lat, g.lon).catch(() => ({ ok:false, why:'error' })),
+    ]);
+    const facts = ST.factsFrom({ g, acs, flood });
+
+    let content, usage = {}, searches = 0;
+    if (MOCK){
+      content = [{ type:'text', text:
+        `Census Tract 42 in Atlanta city. ${facts.census.ownerOccupiedPercent !== undefined
+          && facts.census.ownerOccupiedPercent !== null
+          ? facts.census.ownerOccupiedPercent + '% of the occupied homes are owned rather than rented.'
+          : 'The tract figures could not be read for this deployment.'}` },
+        { type:'text', text:'The flood position is zone ' + (facts.flood.zone || 'unmapped') + '.' },
+        { type:'text', text:'A rezoning was filed two streets north last spring.',
+          citations:[{ type:'web_search_result_location', url:'https://example.gov/planning/123',
+                       title:'Planning application 123' }] }];
+    } else {
+      const r = await callSearch(ST.SYSTEM, ST.userBlock(facts));
+      content = r.content; usage = r.usage; searches = r.searches;
+    }
+
+    const A = ST.assemble(content, facts);
+    const paras = ST.paragraphs(A);
+    day.n++;
+    day.usd += (usage.input_tokens || 0) * USD_IN + (usage.output_tokens || 0) * USD_OUT
+             + searches * 0.01;                      // web search, $10 per 1,000
+
+    if (!paras.length)
+      return fail(422, 'The brief came back with nothing that could be verified against the census '
+        + 'figures, so it was not shown to you. Nothing was stored.', { invented: A.invented });
+
+    const month = await countUse(ent.uid, 'aistreet', cap).catch(() => null);
+    log('street ok', g.tractName, searches + 'searches', A.dropped.length + 'dropped',
+        (Date.now()-t0) + 'ms', 'day $' + day.usd.toFixed(3));
+    res.json({ ok:true, address: g.matched, tract: g.tractName, county: g.countyName,
+      place: g.placeName, census: facts.census, flood: facts.flood,
+      paragraphs: paras, dropped: A.dropped.length, searches,
+      model: MOCK ? 'mock' : ST.MODEL,
+      ...(month ? { month:{ used: month.used, cap: month.cap, left: month.remaining } } : {}),
+      usage: { in: usage.input_tokens || 0, out: usage.output_tokens || 0 } });
+  } catch (e){
+    log('street FAILED', e.niKind || 'error', e.niStatus || '');
+    return fail(502, 'The brief did not come back. Nothing was stored.');
+  }
+});
+
+/* the model, with the search tool attached. Returns the raw content blocks
+   because the CITATIONS live on them, and the citations are the feature — a
+   brief whose web claims cannot be clicked through to is a brief that is
+   asking to be believed. */
+async function callSearch(system, user){
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 120_000);
+  let r;
+  try {
+    r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', signal: ctrl.signal,
+      headers:{ 'content-type':'application/json', 'x-api-key': KEY, 'anthropic-version':'2023-06-01' },
+      body: JSON.stringify({ model: ST.MODEL, max_tokens: 1600, system,
+        tools: [ST.SEARCH_TOOL],
+        messages: [{ role:'user', content: user }] }),
+    });
+  } finally { clearTimeout(timer); }
+  if (!r.ok){ const e = new Error('upstream'); e.niStatus = r.status; e.niKind = 'http'; throw e; }
+  const j = await r.json();
+  const searches = (j.content || []).filter(c => c.type === 'server_tool_use').length;
+  return { content: j.content || [], usage: j.usage || {}, searches };
+}
+
+
+/* ══ THE BID CHECK ═════════════════════════════════════════════════════════
+   The only route on this service where the model writes no prose at all. It
+   reads a pasted contractor's bid and says which of the seventeen systems
+   each line belongs to; every figure in the answer is arithmetic done in
+   bid.js against the desk's own condition read.
+
+   The honesty control is the tightest of the three: an amount that is not
+   printed in the pasted text is dropped, whatever it is. There is no draft to
+   refuse and no sentence to check, because there is no sentence. */
+app.post('/api/bid', express.json({ limit: '128kb' }), async (req, res) => {
+  const t0 = Date.now();
+  const fail = (code, why, extra) => { log('bid', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
+
+  if (!KEY && !MOCK) return fail(503, 'The bid check is not switched on for this deployment.');
+  { const g = gateFails(req, 'bid check'); if (g) return fail(g[0], g[1]); }
+
+  const ent = await entitlementOf(req, 2);
+  if (!ent.ok){
+    const SAY = {
+      unconfigured: 'The bid check is not switched on for this deployment.',
+      nosession:    'The bid check needs an account. Nothing was sent.',
+      noprofile:    'The bid check needs an account. Nothing was sent.',
+      lookup:       'The account could not be checked just now. Nothing was sent.',
+      free:         'The bid check comes with Underwriter, and with the fourteen-day trial. Nothing was sent.',
+      lowtier:      'The bid check comes with Underwriter. Nothing was sent.',
+    };
+    const code = (ent.why === 'unconfigured' || ent.why === 'lookup') ? 503 : 403;
+    return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
+  }
+
+  const cap  = capFor('aibid', ent.tier);
+  const used = await usedThisMonth(ent.uid, 'aibid');
+  if (cap > 0 && used !== null && used >= cap)
+    return fail(429, `That is ${cap} bid checks this month, which is what this plan includes. `
+      + 'It resets on the first. Nothing was sent.', { monthly:true, used, cap });
+
+  rollDay();
+  if (day.n >= LIM.perDay || day.usd >= LIM.dailyUsd)
+    return fail(429, 'This service has hit its cap for today. It resets within 24 hours.', { retryHours: 24 });
+  if (!ipOk(req.ip || 'unknown'))
+    return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
+
+  const text = String(req.body && req.body.bid || '').trim();
+  if (text.length < 40)
+    return fail(400, 'That is too short to be a bid. Paste the whole thing, prices included.');
+  if (text.length > BID.MAX_BID_CHARS)
+    return fail(413, `That is longer than ${BID.MAX_BID_CHARS.toLocaleString('en-US')} characters. `
+      + 'Paste the schedule of works rather than the whole contract.');
+  const sheetIn = BID.sheetFrom(req.body);
+  if (sheetIn.total <= 0)
+    return fail(400, 'Price the condition on the sheet first — the check is against your own estimate, and there is not one yet.');
+
+  try {
+    let data, usage = {};
+    if (MOCK){
+      /* the mock reads the pasted text the same way the route does, so a test
+         exercises the join and the figure check rather than a fixture */
+      const seen = [...BID.figuresIn(text)].filter(n => n >= 100).sort((a, b) => b - a);
+      data = { statedTotal: null, exclusions: ['Excludes permits and asbestos abatement.'],
+        items: seen.slice(0, 6).map((n, i) => ({
+          text: 'Mock line ' + (i + 1), amount: n,
+          line: ['roof','hvac','kitchen','elec','floors','other'][i % 6] })) };
+    } else {
+      const r = await callTool(BID.MODEL, BID.SYSTEM, BID.TOOL, BID.userBlock(text), 4000);
+      data = r.data; usage = r.usage;
+    }
+    const out = BID.reconcile(data, sheetIn, text);
+    day.n++;
+    day.usd += (usage.input_tokens || 0) * USD_IN + (usage.output_tokens || 0) * USD_OUT;
+
+    const why = BID.readable(out);
+    if (why){ log('bid UNREADABLE', out.counts.items, out.counts.dropped); return fail(422, why, { counts: out.counts }); }
+
+    const month = await countUse(ent.uid, 'aibid', cap);
+    log('bid ok', `${out.counts.items} lines`, `${out.missing.length} missing`,
+        `${out.counts.dropped} dropped`, `${Date.now() - t0}ms`);
+    return res.json({ ok:true, ...out,
+      ...(month ? { month:{ used: month.used, cap: month.cap, left: month.remaining } } : {}),
+      usage: { in: usage.input_tokens || 0, out: usage.output_tokens || 0 } });
+  } catch (e){
+    log('bid FAILED', e.niKind || 'error', e.niStatus || '');
+    return fail(502, 'The bid check did not come back. Nothing was stored.');
+  }
+});
+
+/* the same shape as callAnthropic, with the model and tool passed in, because
+   there are two structured-output routes now and one of them should not have
+   to borrow the other's constants */
+async function callTool(model, system, tool, user, maxTokens){
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 90_000);
+  let r;
+  try {
+    r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', signal: ctrl.signal,
+      headers:{ 'content-type':'application/json', 'x-api-key': KEY, 'anthropic-version':'2023-06-01' },
+      body: JSON.stringify({ model, max_tokens: maxTokens || 4000, system,
+        tools: [tool], tool_choice: { type:'tool', name: tool.name },
+        messages: [{ role:'user', content: user }] }),
+    });
+  } finally { clearTimeout(timer); }
+  if (!r.ok){ const e = new Error('upstream'); e.niStatus = r.status; e.niKind = 'http'; throw e; }
+  const j = await r.json();
+  const use = (j.content || []).find(c => c.type === 'tool_use');
+  if (!use){ const e = new Error('no tool call'); e.niKind = 'shape'; throw e; }
+  return { data: use.input, usage: j.usage || {} };
+}
+
+
+/* ══ THE OTHER SIDE OF THE TABLE ═══════════════════════════════════════════
+   The only route that is allowed to reason from the investor's CEILING. The
+   letter of intent may never print it — what they could have paid is theirs —
+   and this panel exists on the other side of exactly that rule: it never
+   leaves their screen, and the ceiling is the whole point of it. "Can you come
+   up five?" has a true answer and this is where it gets computed. */
+app.post('/api/objections', express.json({ limit: '32kb' }), async (req, res) => {
+  const t0 = Date.now();
+  const fail = (code, why, extra) => { log('object', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
+
+  if (!KEY && !MOCK) return fail(503, 'The other side of the table is not switched on for this deployment.');
+  { const g = gateFails(req, 'objections panel'); if (g) return fail(g[0], g[1]); }
+
+  const ent = await entitlementOf(req, 2);
+  if (!ent.ok){
+    const SAY = {
+      unconfigured: 'The other side of the table is not switched on for this deployment.',
+      nosession:    'The other side of the table needs an account. Nothing was sent.',
+      noprofile:    'The other side of the table needs an account. Nothing was sent.',
+      lookup:       'The account could not be checked just now. Nothing was sent.',
+      free:         'The other side of the table comes with Underwriter, and with the fourteen-day trial. Nothing was sent.',
+      lowtier:      'The other side of the table comes with Underwriter. Nothing was sent.',
+    };
+    const code = (ent.why === 'unconfigured' || ent.why === 'lookup') ? 503 : 403;
+    return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
+  }
+
+  const cap  = capFor('ailetter', ent.tier);
+  const used = await usedThisMonth(ent.uid, 'ailetter');
+  if (cap > 0 && used !== null && used >= cap)
+    return fail(429, `That is ${cap} of these this month, which is what this plan includes. `
+      + 'It resets on the first. Nothing was sent.', { monthly:true, used, cap });
+
+  rollDay();
+  if (day.n >= LIM.perDay || day.usd >= LIM.dailyUsd)
+    return fail(429, 'This service has hit its cap for today. It resets within 24 hours.', { retryHours: 24 });
+  if (!ipOk(req.ip || 'unknown'))
+    return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
+
+  const facts = OBJ.factsFrom(req.body);
+  if (!facts) return fail(400, 'This needs an offer and a ceiling — price the deal first.');
+
+  try {
+    let data, usage = {};
+    if (MOCK){
+      const m = v => '$' + Math.abs(v).toLocaleString('en-US');
+      data = { reading: 'Speed, and a closing date they can plan around.',
+        objections: [
+          { says:'Can you come up a bit?', beneath:'Convince me you will actually close.',
+            answer: facts.headroom > 0
+              ? `There is ${m(facts.headroom)} between this and the point where it stops working for me, and I would rather spend it on your date than on the price.`
+              : 'There is nothing left above this one. I would rather tell you that than find out at the closing table.',
+            verdict: facts.headroom > 0 ? 'trade' : 'hold', costs: facts.headroom > 0 ? facts.headroom : null },
+          { says:'We have another offer.', beneath:'Is yours the one that closes?',
+            answer:'Take it if it is better. Mine is the one that does not need an appraisal.', verdict:'hold', costs:null },
+          { says: facts.asking !== null ? `We are asking ${m(facts.asking)}.` : 'We were hoping for more.',
+            beneath:'Justify the difference.',
+            answer: facts.gap !== null ? `I know. The difference is ${m(facts.gap)} and it is all in the work.` : 'I know.',
+            verdict:'hold', costs: facts.gap },
+        ] };
+    } else {
+      const r = await callTool(OBJ.MODEL, OBJ.SYSTEM, OBJ.TOOL, OBJ.userBlock(facts), 2200);
+      data = r.data; usage = r.usage;
+    }
+    const check = OBJ.validate(data, facts);
+    day.n++;
+    day.usd += (usage.input_tokens || 0) * USD_IN + (usage.output_tokens || 0) * USD_OUT;
+
+    if (!check.ok){
+      log('object REFUSED', check.empty ? 'empty' : check.invented.join(' '));
+      return fail(422, check.empty
+        ? 'Nothing usable came back. Nothing was stored.'
+        : 'The draft came back with a figure that is not on this sheet, so it was refused rather '
+          + 'than tidied up. Nothing was stored. Try again.',
+        { invented: check.invented.slice(0, 6) });
+    }
+
+    const month = await countUse(ent.uid, 'ailetter', cap);
+    const out = OBJ.clean(data);
+    log('object ok', `${out.objections.length} back`, `${Date.now() - t0}ms`);
+    return res.json({ ok:true, ...out,
+      ...(month ? { month:{ used: month.used, cap: month.cap, left: month.remaining } } : {}),
+      usage: { in: usage.input_tokens || 0, out: usage.output_tokens || 0 } });
+  } catch (e){
+    log('object FAILED', e.niKind || 'error', e.niStatus || '');
+    return fail(502, 'That did not come back. Nothing on your sheet changed.');
+  }
+});
+
 app.post('/api/list', express.json({ limit: '4kb' }), async (req, res) => {
   if (!LIST_ON) { log('list 503 unconfigured'); return res.status(503).json({ ok:false, error:'The list is not open yet.' }); }
   if (!listOk(req.ip || 'unknown')) return res.status(429).json({ ok:false, error:'Too many, too fast.' });
@@ -342,7 +873,13 @@ mountBilling(app);
 app.get('/api/health', (_req, res) => {
   rollDay();
   res.json({ ok:true, service:'negotiation-inc', mock:MOCK,
-    read: (ACCESS && (KEY || MOCK)) ? 'on' : 'off',
+    read:    ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
+    compare: ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
+    street:  ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK))
+               ? (process.env.CENSUS_KEY ? 'on' : 'partial') : 'off',
+    bid:     ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
+    object:  ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
+    gate: ACCESS ? 'code+account' : ACCOUNTS_ON() ? 'account' : 'none',
     list: LIST_ON ? 'on' : 'off',
     billing: billingState(),
     today: { reads: day.n, capReads: LIM.perDay, capUsd: LIM.dailyUsd },
@@ -358,7 +895,12 @@ app.get('/api/health', (_req, res) => {
    allowlist of what a browser is ever meant to fetch rather than by handing
    out the directory and hoping. */
 const SERVE = /\.(html|css|js|mjs|json|png|jpe?g|gif|svg|webp|ico|woff2?|txt|xml|webmanifest|map)$/i;
-const NEVER = /^(server\.js|prompt\.js|billing\.js|package(-lock)?\.json|render\.yaml|test-api\.mjs|test-pay\.mjs|LAUNCH\.md|SUPABASE\.md|STRIPE\.md|\.env.*)$/i;
+/* Every server-side file by NAME, matched on the basename, so a stray copy in
+   a subdirectory is refused too — /srv/compare.js is as blocked as /compare.js.
+   compare.js and street.js were missing from this list for one deploy: neither
+   holds a secret, but both hold the system prompt, and a prompt you can read is
+   a prompt you can steer around. Anything added to srv/ belongs here. */
+const NEVER = /^(server|prompt|billing|compare|street|bid|objections)\.js$|^package(-lock)?\.json$|^render\.yaml$|^(publish|suite2?|harness-util|test-api|test-pay|_.*|t-.*|v\d+)\.mjs$|^(LAUNCH|SUPABASE|STRIPE|DOMAIN|README)\.md$|^\.env/i;
 app.use((req, res, next) => {
   const p = decodeURIComponent(req.path).replace(/^\/+/, '');
   if (!p || p.endsWith('/')) return next();

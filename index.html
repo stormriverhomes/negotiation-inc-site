@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Negotiation Inc — every exit priced, the working shown</title><script>window.NI_LIVE=false;window.NI_SUPABASE_URL="https://zfsazgrxhtitxakjvyqq.supabase.co";window.NI_SUPABASE_ANON="sb_publishable_EcC8_XnC_bUVjqx7fpOWxQ_XWo0gu-R";</script>
+<title>Negotiation Inc — every exit priced, the working shown</title><script>window.NI_LIVE=false;</script>
 <meta name="description" content="Six ways to buy the same house, priced against one seller's situation, with the arithmetic shown. Free course, free desk, no account.">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -27,7 +27,13 @@
    it looks like a page nobody chose a typeface for. Fraunces is chosen.
    ═══════════════════════════════════════════════════════════════════════════ */
 :root{
-  --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --faint:#9aa3b2;
+  --ink:#0d1420; --mid:#41495a; --soft:#6b7486;
+  /* --faint was #9aa3b2: 2.5:1 on white, at 10–12px. That is not "light grey",
+     it is text a person over forty reads by leaning toward the screen, and it
+     was carrying real sentences. #6f7681 clears WCAG AA (4.58:1) and is still
+     visibly a step below --soft, because the hierarchy here is meant to come
+     from size and weight rather than from washing the words out. */
+  --faint:#6f7681;
   --line:#e4e8ef; --line-2:#c9d0dc; --wash:#f6f8fb; --card:#fff;
   --blue:#1f5fd0; --blue-deep:#153872; --blue-soft:#eaf0fc; --blue-line:#c3d4f5;
   --green:#177a4d; --green-soft:#eaf6f0;
@@ -120,7 +126,11 @@ h1 em{font-style:italic;color:var(--blue)}
 .ex .f.na em{display:block;font-style:normal;font-size:11px;color:var(--faint);margin-top:1px}
 /* money, in the colour the desk uses for money, and the largest thing on the row */
 .ex .f.yes{color:#177a4d;font-weight:750;font-size:15.5px}
-.ex .f.yes em{font-style:normal;font-weight:600;font-size:11px;color:#5f8a72;
+/* #577f69 read 3.95:1 against the highlighted row's blue-soft ground — it
+   cleared AA on white and failed on the ONE row anybody looks at, which is
+   exactly the row the eye is sent to. #4c7160 clears on both (4.79 and 5.47)
+   and is still visibly the quieter half of the figure. */
+.ex .f.yes em{font-style:normal;font-weight:600;font-size:11px;color:#4c7160;
  font-variant-numeric:normal;margin-left:3px}
 .payline{margin-top:14px;border:1px solid #bfe0cd;border-radius:14px;
  background:linear-gradient(180deg,#eaf6f0,#fff);padding:15px 17px 14px}
@@ -157,6 +167,11 @@ h1 em{font-style:italic;color:var(--blue)}
 .showtabs button{font-family:var(--sans);font-size:12.5px;font-weight:600;padding:6px 11px;
  border:1px solid var(--line-2);background:#fff;color:var(--soft);cursor:pointer;white-space:nowrap}
 .showtabs button:hover{border-color:var(--ink);color:var(--ink)}
+/* the demo is the landing page's whole argument, and on a phone its six tabs
+   were 28px tall — you press one and get its neighbour. Nothing else on this
+   page needs the fix; these six do. */
+@media(max-width:700px){.showtabs{gap:8px}
+ .showtabs button{min-height:40px;padding:9px 13px;font-size:13px}}
 .showtabs button.on{background:var(--ink);border-color:var(--ink);color:#fff}
 .showtabs .live{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);
  margin-right:6px;vertical-align:1px}
@@ -233,10 +248,70 @@ h2{font-size:34px;margin-top:8px}
 .doors img{width:100%;height:auto;display:block;image-rendering:pixelated;border:1px solid #223047}
 .doors figcaption{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
  color:#6f7d94;margin-top:7px}
+/* Three card-sized pictures of doors, sitting under a button that says "enter
+   the arcade", that were not themselves clickable. Every person who has ever
+   used a website tried to click one. They are links now, and they say so on
+   hover rather than only on the pointer. */
+.doors a{display:block;text-decoration:none;color:inherit;border-radius:10px}
+.doors a:hover img,.doors a:focus-visible img{border-color:#5f7aa8}
+.doors a:hover figcaption,.doors a:focus-visible figcaption{color:#cdd6e4}
+.doors a:focus-visible{outline:2px solid #7fb4e8;outline-offset:3px}
 
 footer{border-top:1px solid var(--line);padding:30px 0 44px;font-size:13.5px;color:var(--soft)}
 footer a{color:var(--mid);text-decoration:none;margin-right:18px}
 footer a:hover{color:var(--ink)}
+
+
+
+/* ── what a plan adds ──────────────────────────────────────────────────────
+   The front page said "see what a workspace adds" and never once said what it
+   adds. That is a link to go and find out, not a reason to click one: a
+   visitor could read every word of this page and not know the product reads a
+   condition off photographs, pulls comps, or checks a contractor's bid.
+   Five lines. Each one goes to the paragraph on the plans page that sells it. */
+.adds{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:24px}
+@media (max-width:900px){ .adds{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:560px){ .adds{grid-template-columns:1fr} }
+.adds a{display:block;padding:13px 14px;background:#fff;border:1px solid var(--line-2);
+ border-radius:var(--r-card);text-decoration:none;color:inherit;
+ transition:border-color .14s,box-shadow .14s,transform .14s}
+.adds a:hover,.adds a:focus-visible{border-color:var(--blue);transform:translateY(-2px);
+ box-shadow:0 8px 22px rgba(13,20,32,.08);outline:none}
+.adds .t{display:block;font-family:var(--serif);font-size:16px;font-weight:700;
+ letter-spacing:-.015em;line-height:1.2}
+.adds .d{display:block;font-size:12.5px;color:var(--mid);line-height:1.45;margin-top:5px}
+.addk{margin-top:26px;font-size:11px;font-weight:700;letter-spacing:.16em;
+ text-transform:uppercase;color:var(--soft)}
+
+/* ── the three doors ────────────────────────────────────────────────────────
+   Both pages used to end on a row of text buttons, which is a link rather than
+   an invitation, and on a phone it is a 14px target under a 31px headline. The
+   whole card is the target now. Each one names what happens after the click
+   instead of naming the page it goes to, and the middle one is the one we
+   actually want pressed, so it is the one the eye lands on. */
+.ways{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px;text-align:left}
+@media(max-width:900px){ .ways{grid-template-columns:1fr} }
+.way{display:flex;flex-direction:column;gap:7px;padding:20px;background:#fff;
+ border:1.5px solid var(--line-2);border-radius:var(--r-card);text-decoration:none;color:var(--ink);
+ transition:border-color .14s,box-shadow .14s,transform .14s}
+.way:hover,.way:focus-visible{border-color:var(--blue);transform:translateY(-3px);
+ box-shadow:0 12px 32px rgba(13,20,32,.10);outline:none}
+.way:focus-visible{box-shadow:0 0 0 3px var(--blue-soft),0 12px 32px rgba(13,20,32,.10)}
+.way .wi{color:var(--soft);line-height:0;margin-bottom:2px}
+.way .wk{font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--soft)}
+.way .wt{font-family:var(--serif);font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.way .wd{font-size:14px;color:var(--mid);line-height:1.5;flex:1}
+.way .wd b{color:var(--ink);font-weight:650}
+.way .wgo{margin-top:5px;font-size:13.5px;font-weight:650;color:var(--blue);display:inline-flex;
+ align-items:center;gap:7px}
+.way .wgo em{font-style:normal;transition:transform .14s}
+.way:hover .wgo em{transform:translateX(4px)}
+.way.lead{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.way.lead .wi,.way.lead .wk{color:var(--blue)}
+.way.lead:hover,.way.lead:focus-visible{box-shadow:0 0 0 3px var(--blue-soft),0 14px 36px rgba(31,95,208,.20)}
+.finish{border-top:1px solid var(--line);padding:52px 0 8px}
+.finish h2{font-size:32px}
+.finish .eyebrow{color:var(--soft)}
 
 @media (max-width:900px){
   .hero{grid-template-columns:1fr;gap:34px;padding:36px 0}
@@ -260,14 +335,25 @@ footer a:hover{color:var(--ink)}
    These are all overrides on purpose: the rules above stay as the record of
    how the page is composed, and this block is the one place the shape lives. */
 .btn,.cta a,.btn.p,.btn.q{border-radius:var(--r-btn)}
+/* `.states` is off this list: it is a transparent layout grid with 18px gaps
+   between three separate cards. Rounding a box that paints nothing does not
+   round anything — it just tells the next person reading this that a shape
+   exists there. The three cards carry their own radius on the line below. */
 .hero .art,.showstage,.showbar,.show,.given,.givens,.ex,.exits,.eight,.arcade,
-.trust,.doors,.state,.states,.rc,.readout,.repl,.band,.three,.horizon{border-radius:var(--r-card)}
+.trust,.doors,.state,.rc,.readout,.repl,.band,.three,.horizon{border-radius:var(--r-card)}
 .given,.state,.tag,.t-e,.t-n,.t-s{border-radius:var(--r-in)}
 .tag,.t-e,.t-n,.t-s,.pill{border-radius:var(--r-pill)}
 .showtabs button{border-radius:var(--r-btn)}
 img,canvas,svg.art{border-radius:var(--r-card)}
-/* a rounded card cannot let a square child bleed out of its corner */
-.showstage,.hero .art,.arcade,.doors{overflow:hidden}
+/* ── A ROUNDED CARD CANNOT LET A SQUARE CHILD BLEED OUT OF ITS CORNER ──────
+   `.eight` was the one still doing it, and it is the one Elijah kept seeing:
+   an 18px grey rounded frame whose eight white cells are square and reach the
+   edge, with nothing clipping them. Each cell painted a hard white corner on
+   top of the curve, so the grey arc came out from behind a sharp edge — "it
+   still looks like the sharp edges are overlayed", which was exactly right.
+   _tround.mjs is on the board now and checks every rounded container on every
+   page at two widths, so this class of fault has to stop here. */
+.showstage,.hero .art,.arcade,.doors,.eight{overflow:hidden}
 
 /* ── ONE CARD, CLIPPED ONCE ───────────────────────────────────────────────
    The slideshow was FOUR independently rounded rectangles stacked inside one
@@ -287,6 +373,24 @@ img,canvas,svg.art{border-radius:var(--r-card)}
    single rounded images with nothing stacked on them, are untouched. */
 .show{overflow:hidden}
 .show .showstage,.show .showbar,.show .showstage img{border-radius:0}
+
+/* ── AND THE READOUT IS ONE CARD TOO ──────────────────────────────────────
+   The same fault, worse, in the first thing anybody sees. The block above
+   hands --r-card to `.readout`, `.givens`, `.given`, `.exits` AND `.ex` — so
+   the outer card, the four-cell grid, each cell inside it, the exit list and
+   every row in it were all independently rounded, and nothing clipped.
+
+   The four givens are a grid with `gap:1px` over a grey background: that 1px
+   IS the divider line. Round the cells and the grey shows through the curve
+   at every corner where cells meet, which is the notch on the seam between
+   Asking price / ARV and Repairs / Monthly rent. The exit rows did the same
+   against their hairline borders, and the whole card let square children sit
+   proud of its own corners because it never clipped.
+
+   One shape. The card owns the radius and clips; every cell, row and grid
+   inside it is square and takes its corners from the card. */
+.readout{overflow:hidden}
+.readout .givens,.readout .given,.readout .exits,.readout .ex{border-radius:0}
 
 </style>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
@@ -355,7 +459,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  <div class="readout">
   <div class="rh"><span>Form D-1 · 1128 Marrow Lane</span><span>Ranked by fit</span></div>
   <div class="givens">
-   <div class="given"><div class="k">Asking price</div><div class="v">$249,500<span class="tag t-e">Entered</span></div></div>
+   <div class="given"><div class="k">Asking price</div><div class="v">$184,500<span class="tag t-e">Entered</span></div></div>
    <div class="given"><div class="k">ARV — fixed value</div><div class="v">$291,000<span class="tag t-e">Entered</span></div></div>
    <div class="given"><div class="k">Repairs</div><div class="v">$41,300<span class="tag t-s">Estimate</span></div></div>
    <div class="given"><div class="k">Monthly rent</div><div class="v">—<span class="tag t-n">Needed</span></div></div>
@@ -366,18 +470,18 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
         arithmetic or a refusal gate moves, this hero has to move with it — a
         landing that advertises a ranking the product no longer produces is the
         precise dishonesty this page is selling against. Checked by v3.mjs. -->
-   <div class="ex best"><span class="r">01</span><span class="nm">The wholesale</span><span class="f yes">$14,000 <em>fee</em></span></div>
-   <div class="ex"><span class="r">02</span><span class="nm">The fix and flip</span><span class="f yes">$23,280 <em>profit</em></span></div>
-   <div class="ex"><span class="r">03</span><span class="nm">The wholetail <b class="pill no">Refused</b></span><span class="f na">not priced <em>repairs &gt; 8% of ARV</em></span></div>
-   <div class="ex"><span class="r">04</span><span class="nm">The novation <b class="pill no">Refused</b></span><span class="f na">not priced <em>not retail yet</em></span></div>
-   <div class="ex na"><span class="r">05</span><span class="nm">The buy and hold</span><span class="f na">not priced <em>needs monthly rent</em></span></div>
+   <div class="ex best"><span class="r">01</span><span class="nm">The fix and flip</span><span class="f yes">$23,280 <em>profit</em></span></div>
+   <div class="ex"><span class="r">02</span><span class="nm">The BRRRR</span><span class="f yes">$0 <em>of yours left in it</em></span></div>
+   <div class="ex"><span class="r">03</span><span class="nm">The wholesale</span><span class="f yes">$14,000 <em>fee</em></span></div>
+   <div class="ex"><span class="r">&middot;</span><span class="nm">The wholetail <b class="pill no">Refused</b></span><span class="f na">not priced <em>repairs are 14% of ARV</em></span></div>
+   <div class="ex na"><span class="r">&middot;</span><span class="nm">The buy and hold</span><span class="f na">not priced <em>needs monthly rent</em></span></div>
   </div>
   <!-- The reason anybody opened the page, said once, in the colour the desk
        uses for money. The red was doing half the job: a reader could see which
        exits fail before they could see that two of them pay. -->
   <div class="payline">
    <div class="pl">This house pays you</div>
-   <div class="pv">$23,680</div>
+   <div class="pv">$23,280</div>
    <div class="ps">as <b>the fix and flip</b> — and <b>$14,000</b> as a wholesale you never own.
     The same house, two right answers, a nine-thousand-dollar difference between them.</div>
   </div>
@@ -548,6 +652,14 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
        nothing leaves your browser.</p>
    </div>
   </div>
+  <div class="addk">And what a plan adds</div>
+  <div class="adds">
+   <a href="plans.html#photos"><span class="t">The photos read</span><span class="d">Drop the walk-through. Seventeen lines come back filled in, each with the picture it came from.</span></a>
+   <a href="plans.html#comps"><span class="t">The comps pulled</span><span class="d">Type the address. Recent sales arrive scored and adjusted, on your own key.</span></a>
+   <a href="plans.html#bid"><span class="t">Their bid checked</span><span class="d">Paste what the contractor sent. It shows you what is on your sheet that the bid never mentions.</span></a>
+   <a href="plans.html#objections"><span class="t">What they say back</span><span class="d">The four things this seller will say, and the reply that is true on your numbers.</span></a>
+   <a href="plans.html#packet"><span class="t">The packet written</span><span class="d">One PDF a lender reads, in your name, with the working still shown.</span></a>
+  </div>
   <div class="cta" style="margin-top:26px">
    <a class="btn p" href="demo.html">See how it works →</a>
    <a class="btn" href="plans.html">See what a workspace adds</a>
@@ -575,13 +687,62 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      the desk performs, with the clock and the money turned into a game.</p>
   <div class="cta"><a class="btn p" href="arcade.html">Enter the arcade →</a></div>
   <div class="doors">
-   <figure><img src="art/door-now.png" alt="A pixel-art suburban front door, present day" width="540" height="450" loading="lazy">
-    <figcaption>Now · a door that opens</figcaption></figure>
-   <figure><img src="art/door-old.png" alt="A pixel-art industrial-era door" width="540" height="450" loading="lazy">
-    <figcaption>1890 · the same question</figcaption></figure>
-   <figure><img src="art/door-future.png" alt="A pixel-art door from a later era" width="540" height="450" loading="lazy">
-    <figcaption>Later · the rates are worse</figcaption></figure>
+   <figure><a href="arcade.html"><img src="art/door-now.png" alt="A pixel-art suburban front door, present day" width="540" height="450" loading="lazy">
+    <figcaption>Now · a door that opens</figcaption></a></figure>
+   <figure><a href="arcade.html"><img src="art/door-old.png" alt="A pixel-art industrial-era door" width="540" height="450" loading="lazy">
+    <figcaption>1890 · the same question</figcaption></a></figure>
+   <figure><a href="arcade.html"><img src="art/door-future.png" alt="A pixel-art door from a later era" width="540" height="450" loading="lazy">
+    <figcaption>Later · the rates are worse</figcaption></a></figure>
   </div>
+ </div>
+</section>
+
+<!-- ═══ 6 · THE LAST WORD ═══════════════════════════════════════════════
+     The page ended on "enter the arcade", which sends the one visitor who
+     read all of it to go and play a game instead. Three doors, at the size
+     a decision deserves, in the order we would like them taken. ══════ -->
+<section class="finish">
+ <div class="wrap">
+  <div class="eyebrow">Three ways in</div>
+  <h2>Pick a door.</h2>
+  <div class="ways">
+  <a class="way" href="demo.html">
+   <span class="wi"><svg viewBox="0 0 40 52" width="32" height="42" aria-hidden="true" focusable="false">
+     <rect x="1.6" y="1.6" width="36.8" height="48.8" rx="3" fill="none" stroke="currentColor" stroke-width="2.4"/>
+     <rect x="8" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
+     <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
+   <span class="wk">Ninety seconds</span>
+   <span class="wt">See one already done</span>
+   <span class="wd">A finished sheet on 1128 Marrow Lane &mdash; every exit priced or refused, every number showing its working. Nothing to fill in.</span>
+   <span class="wgo">Open the worked example <em>&rarr;</em></span>
+  </a>
+  <a class="way lead" href="desk.html#new">
+   <span class="wi"><svg viewBox="0 0 40 52" width="32" height="42" aria-hidden="true" focusable="false">
+     <rect x="1.6" y="1.6" width="36.8" height="48.8" rx="3" fill="none" stroke="currentColor" stroke-width="2.4"/>
+     <rect x="8" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
+     <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
+   <span class="wk">Free &middot; no account &middot; no card</span>
+   <span class="wt">Price your own house</span>
+   <span class="wd">Your address and their asking price. Seven exits ranked against <b>this</b> seller, the repair estimate built line by line, and the words to say.</span>
+   <span class="wgo">Open a blank worksheet <em>&rarr;</em></span>
+  </a>
+  <a class="way" href="plans.html">
+   <span class="wi"><svg viewBox="0 0 40 52" width="32" height="42" aria-hidden="true" focusable="false">
+     <rect x="1.6" y="1.6" width="36.8" height="48.8" rx="3" fill="none" stroke="currentColor" stroke-width="2.4"/>
+     <rect x="8" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
+     <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
+   <span class="wk">One hundred places</span>
+   <span class="wt">Take a founding place</span>
+   <span class="wd">$49 a month for Underwriter, held for as long as you stay: the condition read off your photos, comps pulled and scored, the letters and the lender packet.</span>
+   <span class="wgo">See what a plan buys <em>&rarr;</em></span>
+  </a>
+ </div>
  </div>
 </section>
 
@@ -697,10 +858,17 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 .wl .ws{display:block;font-size:12.5px;line-height:1.55;color:var(--mid,#4a5162);margin-top:5px}
 .wl .ws b{color:var(--ink,#101725)}
 .wl .wf{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
-.wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:14px;padding:9px 11px;border-radius:10px;
- border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
+/* 16px, not 14 — under 16px iOS Safari zooms the whole page the moment the
+   field takes focus, which on the one form that is the entire pre-launch
+   funnel is a real cost. And 44px of height because this was a 30px target
+   on a phone, which is smaller than a fingertip. */
+.wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;
+ min-height:44px;border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
 .wl .wf input:focus{outline:none;border-color:var(--blue,#1f5fd0);box-shadow:0 0 0 3px var(--blue-soft,#eaf0fc)}
-.wl .wf button{flex:none;cursor:pointer}
+.wl .wf button{flex:none;cursor:pointer;min-height:44px;padding-left:18px;padding-right:18px}
+/* side by side, a phone gives the address field about nine characters. Stack. */
+@media(max-width:560px){.wl .wf{flex-direction:column;align-items:stretch}
+ .wl .wf input,.wl .wf button{width:100%}}
 .wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:var(--soft,#677187)}
 .wl .wn.ok{color:var(--green,#177a4d)} .wl .wn.bad{color:var(--red,#b3372c)}
 .wl.done{border-color:var(--green-line,#bfe0cd);background:var(--green-soft,#eaf6f0)}

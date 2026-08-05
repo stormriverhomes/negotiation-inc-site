@@ -7,7 +7,7 @@
 <style>
   :root{
     --paper:#e9e2d0; --stock:#f6f1e3; --stock-2:#f0e8d4; --stock-3:#eae1cb;
-    --carbon:#22201c; --carbon-soft:#4a463d; --carbon-faint:#8b8474;
+    --carbon:#22201c; --carbon-soft:#4a463d; --carbon-faint:#736e60;   /* was 3.3:1 on the stock — unreadable at 10px */
     --rule:#c9bfa6; --rule-soft:#ded5bd;
     --red:#b3372c; --green:#2f6b46; --amber:#9a6b1f;
     --red-bg:rgba(179,55,44,.1); --green-bg:rgba(47,107,70,.12); --amber-bg:rgba(154,107,31,.1);
@@ -22,7 +22,8 @@
   .wrap{max-width:560px;margin:0 auto;padding:0 14px}
   .board{background:var(--stock);border:1px solid var(--rule);box-shadow:2px 3px 0 rgba(0,0,0,.06);margin-top:16px}
   button{font-family:var(--mono);cursor:pointer}
-  .back{display:block;text-align:center;margin-top:12px;font-family:var(--mono);font-size:11px;
+  /* the only way out of this screen, and it was seventeen pixels tall */
+  .back{display:block;text-align:center;margin-top:6px;padding:14px 8px;font-family:var(--mono);font-size:11px;
     letter-spacing:.12em;text-transform:uppercase;color:var(--carbon-faint);text-decoration:none}
   .back:hover{color:var(--carbon)}
 
