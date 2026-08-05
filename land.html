@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Land Desk · Negotiation Inc</title>
+<!-- ══ THE LAND DESK ═══════════════════════════════════════════════════════
+     The desk prices seven exits and refuses the eighth with "it needs dirt".
+     This is where that refusal sends you. One parcel, one play — buy the
+     dirt, finish the lot, sell the lot — priced with the working shown, on
+     the committed design: the ground is the hero, the sheet docks over it,
+     and the floor is an opaque paper band the ground can never reach.
+
+     THE GROUND, v1: the page ships FLAT — a surveyor's sketch on the dark
+     ground token, no Google imagery, no Google credit (credit belongs to
+     imagery, and there is none). The CesiumJS + Photorealistic 3D Tiles
+     viewport slots into #ground when /api/land/config starts answering with
+     a key; every state the design specifies (loading, no-coverage, quota)
+     already has its markup and grammar here, so the 3D arrival is a swap,
+     not a rebuild. The arithmetic never depended on the ground.
+
+     The engine between the markers is INJECTED AT BUILD from land/engine.mjs
+     — the same bytes the test suite holds to the design doc's ledger. Edit
+     the module, never the copy. -->
+<style>
+:root{
+ --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --line:#e4e8ef; --line-ink:#c9d0dc;
+ --wash:#f6f8fb; --blue:#1f5fd0; --blue-deep:#174aa3; --blue-soft:#eaf0fc; --blue-line:#c3d4f5;
+ --green:#177a4d; --green-soft:#eaf6f0; --red:#b3372c; --red-soft:#faeeec; --red-line:#e8c4bf;
+ --gold:#8a6612; --gold-soft:#fbf6e9; --gold-line:#e6d9ae;
+ --r-card:18px; --r-in:12px; --r-btn:11px;
+ --serif:'Fraunces',Georgia,serif; --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+ --mono:var(--sans);
+ /* the dark-surface extension — five names, from the committed design, AA-
+    checked there and nowhere re-derived. Paper floats on the ground reuse
+    the light tokens unchanged: a card on the ground is the same card. */
+ --ground:#0A0F18; --ground-ink:#E8EDF5;
+ --ground-pill:rgba(13,20,32,.78); --ground-pill-line:rgba(255,255,255,.16);
+ --ground-refusal:#E4685A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--sans);color:var(--ink);background:var(--wash);font-size:15px;line-height:1.5}
+a{color:var(--blue)}
+.num{font-variant-numeric:tabular-nums}
+.btn{font-family:var(--sans);font-size:14.5px;font-weight:650;padding:11px 20px;
+ display:inline-flex;align-items:center;justify-content:center;text-decoration:none;
+ border:1px solid var(--line-ink);border-radius:var(--r-btn);background:#fff;color:var(--ink);
+ cursor:pointer;transition:background .12s,border-color .12s}
+.btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.p:hover{background:var(--blue-deep)}
+.btn.sm{font-size:13px;padding:8px 14px}
+
+/* ── the stage: ground + docked sheet ───────────────────────────────────── */
+.stage{position:relative;height:calc(100vh - 58px);min-height:660px}
+#ground{position:absolute;inset:0 0 34px 0;background:
+ radial-gradient(120% 90% at 38% 42%, #16231c 0%, #101a15 34%, #0c1310 62%, var(--ground) 100%);
+ overflow:hidden}
+/* contour rings — a surveyor's sketch, not a picture pretending to be one */
+#ground::before{content:'';position:absolute;inset:-20%;background:
+ repeating-radial-gradient(circle at 40% 45%, transparent 0 54px, rgba(232,237,245,.045) 54px 55px);}
+.floor{position:absolute;left:0;right:0;bottom:0;height:34px;background:#fff;
+ border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 14px;
+ font-size:11px;color:var(--soft);z-index:6}
+.floor b{color:var(--mid);font-weight:700}
+.floor .cam{margin-left:auto;font-size:10.5px}
+/* the header card — paper, floating on the ground */
+.hcard{position:absolute;top:18px;left:18px;z-index:5;background:#fff;border:1px solid var(--line);
+ border-radius:var(--r-card);padding:13px 17px 12px;box-shadow:0 10px 34px rgba(4,8,14,.45);max-width:420px}
+.hcard .k{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+.hcard h1{font-family:var(--serif);font-size:24px;font-weight:700;letter-spacing:-.01em;margin-top:2px}
+.hcard .sub{font-size:12px;color:var(--soft);margin-top:3px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hcard .cov{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+ border:1px solid var(--line-ink);border-radius:999px;padding:3px 8px;color:var(--mid);background:var(--wash)}
+.hcard input{font:inherit;font-size:13.5px;border:1px solid var(--line-ink);border-radius:9px;
+ padding:7px 10px;width:100%;margin-top:9px;background:var(--wash)}
+.hcard input:focus{outline:none;border-color:var(--blue);background:#fff}
+/* the parcel sketch */
+#parcel{position:absolute;inset:0;z-index:1}
+/* non-scaling-stroke: the viewBox stretches to the viewport, and without it
+   the dashes stretch too — 1.6px of survey line became forty-pixel slabs */
+#parcel polygon{fill:rgba(232,237,245,.03);stroke:var(--ground-ink);stroke-opacity:.55;
+ stroke-width:1.6;stroke-dasharray:7 6;vector-effect:non-scaling-stroke}
+#parcel .refline{stroke:var(--ground-refusal);stroke-opacity:.95;stroke-width:2.2;stroke-dasharray:4 4}
+/* anchored chips: white pill on a 1px leader; the dot is the truth */
+.chip{position:absolute;z-index:4;transform:translate(-50%,-100%)}
+/* the spec's collision rule, v1: the dot never moves; the chip slides along
+   its leader to free space. A chip anchored in the sheet's shadow keeps its
+   dot on the dirt and swings its pill out to the left. */
+.chip.flip{transform:translate(calc(-100% + 30px),-100%)}
+.chip.flip .leader,.chip.flip .dot{left:calc(100% - 30px)}
+.chip .pill{display:inline-flex;align-items:baseline;gap:7px;background:#fff;border:1px solid var(--line);
+ border-radius:999px;padding:7px 12px;white-space:nowrap;box-shadow:0 6px 20px rgba(4,8,14,.4);cursor:default}
+.chip .lab{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.chip .val{font-size:13px;font-weight:700}
+.chip .leader{position:absolute;left:50%;top:100%;width:1px;height:26px;background:var(--ground-ink);opacity:.6}
+.chip .dot{position:absolute;left:50%;top:calc(100% + 26px);width:7px;height:7px;border-radius:50%;
+ background:var(--ground-ink);transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(232,237,245,.18)}
+.tag{font-size:8.5px;font-weight:800;letter-spacing:.12em;border-radius:999px;padding:2px 7px}
+.tag.en{background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue-line)}
+.tag.es{background:var(--gold-soft);color:var(--gold);border:1px solid var(--gold-line)}
+.tag.nd{background:var(--red-soft);color:var(--red);border:1px solid var(--red-line)}
+/* ground controls — pills over the render, dark grammar */
+.gctl{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);display:flex;gap:8px;z-index:5}
+.gctl button{font-size:12.5px;font-weight:650;color:var(--ground-ink);background:var(--ground-pill);
+ border:1px solid var(--ground-pill-line);border-radius:999px;padding:8px 16px;cursor:not-allowed;opacity:.75}
+/* the docked worksheet */
+.sheet{position:absolute;top:18px;right:18px;bottom:52px;width:430px;z-index:5;overflow:auto;
+ background:#fff;border:1px solid var(--line);border-radius:var(--r-card);
+ box-shadow:0 14px 44px rgba(4,8,14,.5);padding:18px 20px}
+.sheet .k{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--soft)}
+.ask .big{font-family:var(--serif);font-size:31px;font-weight:700;letter-spacing:-.02em;display:flex;
+ align-items:center;gap:10px}
+.ask .sub{font-size:12px;color:var(--soft);margin-top:2px}
+.play{border-top:1px solid var(--line);margin-top:14px;padding-top:13px}
+.clears{font-family:var(--serif);font-size:42px;font-weight:700;letter-spacing:-.02em;color:var(--green);line-height:1.05}
+.clears.neg{color:var(--red)}
+.clears-sub{font-size:12.5px;color:var(--mid);margin-top:3px}
+.refuse{margin-top:10px;border:1px solid var(--red-line);background:var(--red-soft);color:var(--red);
+ border-radius:var(--r-in);padding:10px 13px;font-size:13px;line-height:1.55}
+.refuse b{font-weight:750}
+.ledger{margin-top:12px}
+.lrow{display:flex;align-items:baseline;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13.5px}
+.lrow:first-child{border-top:none}
+.lrow .n{color:var(--mid)}
+.lrow .f{margin-left:auto;display:flex;align-items:baseline;gap:8px}
+.lrow .num{font-weight:700}
+.lrow input{font:inherit;font-weight:700;font-variant-numeric:tabular-nums;width:7.5ch;text-align:right;
+ border:1px solid transparent;border-radius:7px;padding:2px 5px;background:transparent;box-sizing:content-box}
+.lrow input:hover{border-color:var(--line-ink);background:var(--wash)}
+.lrow input:focus{outline:none;border-color:var(--blue);background:#fff}
+.lsub{display:flex;gap:8px;align-items:baseline;padding:0 0 8px 16px;font-size:12.5px;color:var(--soft)}
+.lsub .num{margin-left:auto;font-weight:650}
+.tagbtn{cursor:pointer;border:none;background:none;padding:0}
+.conc{margin-top:10px;background:var(--wash);border-radius:var(--r-in);padding:10px 13px;font-size:13px}
+.conc b{font-weight:750}
+.conc input{font:inherit;font-weight:700;width:7ch;border:1px solid transparent;border-radius:6px;
+ text-align:left;background:transparent;font-variant-numeric:tabular-nums;padding:1px 2px;box-sizing:content-box}
+.conc input:hover{border-color:var(--line-ink);background:#fff}
+.conc input:focus{outline:none;border-color:var(--blue);background:#fff}
+.firm{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.firm .fh{display:flex;align-items:center;gap:8px}
+.firm p{font-size:12.5px;color:var(--mid);line-height:1.55;margin-top:6px}
+.facts{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.facts .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-top:9px}
+.facts label{font-size:9.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);display:block}
+.facts input,.facts select{font:inherit;font-size:13px;width:100%;border:1px solid var(--line-ink);
+ border-radius:8px;padding:6px 8px;margin-top:3px;background:#fff}
+.facts input:focus,.facts select:focus{outline:none;border-color:var(--blue)}
+.sfoot{border-top:1px solid var(--line);margin-top:14px;padding-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+.fine{font-size:11.5px;color:var(--soft);line-height:1.55;margin-top:10px}
+/* the phone: ground on top, chip rail pinned to it, sheet below */
+.rail{display:none}
+@media(max-width:1000px){
+ .stage{min-height:0;height:auto}
+ .hcard{top:12px;left:12px;padding:10px 13px 9px;border-radius:14px}
+ .hcard h1{font-size:16.5px}
+ .hcard .sub{font-size:10.5px;gap:6px}
+ .hcard input{font-size:12px;padding:5px 8px;margin-top:6px}
+ #ground{position:relative;inset:auto;height:46vh;min-height:300px}
+ .floor{position:static;height:auto;padding:8px 14px}
+ .sheet{position:static;width:auto;margin:0;border-radius:0;box-shadow:none;border-left:none;border-right:none}
+ .chip{display:none}
+ .dotn{position:absolute;z-index:4;width:20px;height:20px;border-radius:50%;background:#fff;color:var(--ink);
+  font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;
+  transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(232,237,245,.2)}
+ .rail{display:flex;gap:8px;overflow-x:auto;padding:10px 14px;background:var(--ground);
+  -webkit-overflow-scrolling:touch}
+ .rail .pill{display:inline-flex;align-items:baseline;gap:7px;background:#fff;border-radius:999px;
+  padding:8px 12px;white-space:nowrap;flex:0 0 auto;font-size:12.5px}
+ .rail .n{font-weight:800;color:var(--soft);font-size:10.5px}
+ .rail .lab{font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--soft)}
+ .rail .val{font-weight:700;font-size:12.5px}
+ .gctl{bottom:14px}
+ .hcard{max-width:calc(100% - 36px)}
+ .clears{font-size:36px}
+}
+@media(min-width:1001px){ .dotn{display:none} }
+.seam{background:#fff;border-top:1px solid var(--line);padding:13px 18px;font-size:12.5px;color:var(--soft)}
+.seam a{font-weight:650}
+</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Fraunces ships its "wonk" letterforms on by default — the single-storey f
+   and its friends. They read as a novelty at body sizes and Elijah clipped
+   them immediately. WONK 0 keeps the face and drops the party trick. */
+@font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
+ font-weight:100 900;font-style:normal;font-display:swap;
+ font-variation-settings:'WONK' 0}
+:root{
+ --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
+ /* NO MONOSPACE ANYWHERE IN THE SOFTWARE. Small letterspaced caps set in a
+    monospace face is the single most recognisable "an AI made this" tell on
+    the internet right now, and it was on every label we shipped. The eyebrows
+    keep their letterspacing; they lose the typewriter. Tabular figures come
+    from font-feature-settings instead, which is what they were always for.
+    (The arcade keeps its own type. It is a different world on purpose.) */
+ --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif !important;
+}
+.mono,.num,[class*="fig"],[class*="num"]{font-variant-numeric:tabular-nums}
+h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Land Desk · Negotiation Inc">
+<meta property="og:description" content="The eighth exit needs dirt. Price the dirt: what the finished lot sells for, what it costs to get there, and the most you can pay — with the working shown.">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+<div class="stage">
+ <div id="ground">
+  <svg id="parcel" preserveAspectRatio="none" viewBox="0 0 100 100" aria-hidden="true">
+   <polygon points="26,32 62,24 84,46 66,72 34,74 22,52"/>
+  </svg>
+  <div id="chips"></div>
+  <div class="gctl" aria-hidden="true">
+   <button type="button" title="The camera arrives with the 3D ground">Orbit</button>
+   <button type="button" title="The camera arrives with the 3D ground">Tilt</button>
+   <button type="button" title="The camera arrives with the 3D ground">Reset north</button>
+  </div>
+  <div class="hcard">
+   <div class="k">Negotiation Inc · The Land Desk</div>
+   <h1 id="h-addr">A parcel, priced with the working shown</h1>
+   <div class="sub"><span id="h-sub">Type the parcel below — one lump figure opens the play</span>
+    <span class="cov" id="h-cov">Ground · sketch</span></div>
+   <input id="in-addr" type="text" maxlength="90" placeholder="Address or parcel — e.g. 1847 Saddleback Pass, Wimberley TX" autocomplete="off">
+  </div>
+ </div>
+ <div class="rail" id="rail"></div>
+ <aside class="sheet" id="sheet"></aside>
+ <div class="floor" id="floor"></div>
+</div>
+<div class="seam" id="seam">
+ The desk prices seven exits on a house and refuses the eighth — <em>it needs dirt</em>. This is the dirt.
+ <a href="desk.html">Back to the desk</a> · <a href="exits.html#land">the land lesson</a>
+ <button class="btn sm" id="demo" style="margin-left:12px">Load the worked example — 1847 Saddleback Pass</button>
+ <button class="btn sm" id="clear">Start clean</button>
+</div>
+
+<script>const SALE_PCT=.07,REACH_GAP=.15,W_FINISHED=.12,W_SITE=.2,SEPTIC_ALLOWANCE=18e3,targetFor=e=>Math.max(25e3,2500*Math.round(.12*e/2500)),num=e=>e&&"number"==typeof e.v&&Number.isFinite(e.v)&&e.v>0?e.v:null,est=e=>!(!e||"estimate"!==e.prov),R=Math.round;function siteCarryOf(e){const s=num(e.months)??0,a=num(e.carryMo)??0,t=R(s*a),n=Array.isArray(e.site)?e.site.filter(e=>"number"==typeof e.v&&e.v>0):[],i=num(e.siteLump),r=[];let l,o,c=0;if(n.length)l=R(n.reduce((e,s)=>e+s.v,0)),o=n.some(e=>"estimate"===e.prov),"unknown"!==e.sewer||n.some(e=>"septic"===e.id||"sewer"===e.id)||(l+=18e3,c+=18e3,o=!0,r.push({id:"septic",assumed:18e3,say:"No sewer on record. A septic install is priced at $"+18e3.toLocaleString("en-US")+" inside site work until you confirm — the payday moves if you do."}));else{if(null===i)return{missing:!0,firm:r};l=R(i),o=est(e.siteLump),"unknown"===e.sewer&&r.push({id:"septic",assumed:0,say:"No sewer on record, and site work is one figure. Confirm that figure includes a septic — a conventional install runs about $"+18e3.toLocaleString("en-US")+"."})}return"unverified"===e.access&&r.push({id:"access",assumed:0,say:"Road access is not verified. A lot you cannot legally reach is not a lot — confirm the frontage or the easement before this number leaves the screen."}),{site:l,carry:t,months:s,siteCarry:l+t,siteEst:o,assumed:c,firm:r,missing:!1}}function landModel(e){const s=num(e.finished),a=num(e.asking),t=num(e.acres);if(null===s)return{refused:{why:"it needs what the finished lot sells for",needs:["finished"],say:"Nothing on this screen prices until the finished lot has a sold price. Comps for finished lots nearby are the way in — the same way the house sheet builds its ARV."}};const n=siteCarryOf(e);if(n.missing)return{refused:{why:"it needs the site work figure",needs:["siteLump"],say:"Site work is the whole difference between dirt and a lot. One lump figure is enough to open the play — mark it an estimate and firm it into quotes as they arrive."}};const i=R(.07*s),r=num(e.target)??targetFor(s),l=R(s-n.siteCarry-i-r),o=null===a?null:R(s-a-n.siteCarry-i),c=null===a||(a-l)/a<=.15,d=null===a?null:a-l,u=est(e.finished)?.12*s:0,p=n.siteEst?.2*n.site:0,f=R(u+p),h=null===o?null:{lo:o-f,hi:o+f},m=[est(e.finished)&&"finished",n.siteEst&&"site",est(e.acres)&&"acres"].filter(Boolean);return{refused:null,finished:s,asking:a,acres:t,perAcre:null!==a&&null!==t?R(a/t):null,saleCost:i,salePct:.07,site:n.site,carry:n.carry,months:n.months,siteCarry:n.siteCarry,target:r,ceiling:l,clears:o,clearsAt:e=>R(s-e-n.siteCarry-i),reaches:c,gap:d,band:h,spread:f,estimates:m,firm:n.firm,concession:"To clear $"+r.toLocaleString("en-US")+", buy at $"+l.toLocaleString("en-US")+" or less."}}const KEY="ni-land-v1";let S={addr:"",raw:{},est:{},months:"9",sewer:"unknown",access:"unverified",zoning:"",slope:"",frontage:"",fema:"",zoningEst:!0,slopeEst:!0,frontageEst:!0};try{const e=JSON.parse(localStorage.getItem(KEY)||"null");e&&"object"==typeof e&&(S=Object.assign(S,e))}catch(e){}const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}},$=e=>document.getElementById(e),numOf=e=>{const s=parseFloat(String(S.raw[e]||"").replace(/[^0-9.]/g,""));return Number.isFinite(s)&&s>0?s:null},inp=e=>{const s=numOf(e);return null===s?null:{v:s,prov:S.est[e]?"estimate":"entered"}},fmt=e=>"$"+Math.round(e).toLocaleString("en-US"),esc=e=>String(e).replace(/[&<>"]/g,e=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[e]));function model(){return landModel({asking:inp("asking"),acres:inp("acres"),finished:inp("finished"),siteLump:inp("lump"),target:inp("target"),sewer:S.sewer,access:S.access})}const TAG=(e,s)=>'<span class="tag '+("nd"===e?"nd":"es"===e?"es":"en")+'">'+s+"</span>";function chipData(e){const s=inp("acres");return[{at:[38,30],lab:"Acreage",val:s?s.v+" ac":"—",tag:s?S.est.acres?["es","ESTIMATE"]:["en","ENTERED"]:["nd","NEEDED"]},{at:[58,22],lab:"Zoning",val:S.zoning||"county code",tag:S.zoning?S.zoningEst?["es","ESTIMATE"]:["en","ENTERED"]:["nd","NEEDED"]},{at:[24,46],lab:"FEMA flood",val:S.fema||"look it up",tag:S.fema?["en","fema.gov"]:["nd","NEEDED"]},{at:[52,56],lab:"Slope",val:S.slope||"—",tag:S.slope?S.slopeEst?["es","ESTIMATE"]:["en","ENTERED"]:["nd","NEEDED"]},{at:[64,62],lab:"Frontage",val:S.frontage||"—",tag:S.frontage?S.frontageEst?["es","ESTIMATE"]:["en","ENTERED"]:["nd","NEEDED"]},{at:[40,70],lab:"Utilities",val:"yes"===S.sewer?"sewer on record":"septic"===S.sewer?"septic priced":"no sewer on record",tag:"unknown"===S.sewer?["nd","NEEDED"]:["en","ENTERED"]}]}function renderGround(e){const s=chipData(e);$("chips").innerHTML=s.map(e=>'<div class="chip'+(e.at[0]>58?" flip":"")+'" style="left:'+e.at[0]+"%;top:"+e.at[1]+'%"><span class="pill"><span class="lab">'+esc(e.lab)+'</span><span class="val">'+esc(e.val)+"</span>"+TAG(e.tag[0],e.tag[1])+'</span><span class="leader"></span><span class="dot"></span></div>').join("")+s.map((e,s)=>'<div class="dotn" style="left:'+e.at[0]+"%;top:"+(e.at[1]+7)+'%">'+(s+1)+"</div>").join(""),$("rail").innerHTML=s.map((e,s)=>'<span class="pill"><span class="n">'+(s+1)+'</span><span class="lab">'+esc(e.lab)+'</span><span class="val">'+esc(e.val)+"</span>"+TAG(e.tag[0],e.tag[1])+"</span>").join(""),$("h-addr").textContent=S.addr||"A parcel, priced with the working shown";const a=inp("acres");$("h-sub").textContent=(a?a.v+" acres":"")+(S.addr&&a?" · ":"")+(S.addr?"as typed — the pin arrives with the 3D ground":"Type the parcel below — one lump figure opens the play"),$("floor").innerHTML='<b>The sheet prices without the ground.</b> This is a surveyor’s sketch — the photorealistic 3D parcel arrives here, and its attribution with it.<span class="cam" id="camtext">flat · sketch</span>'}const rowIn=(e,s)=>'<input inputmode="decimal" data-k="'+e+'" value="'+esc(S.raw[e]||"")+'" placeholder="'+s+'">',tagFor=(e,s)=>null===numOf(e)?s?TAG("nd","NEEDED"):"":'<button type="button" class="tagbtn" data-tag="'+e+'" title="Entered or estimate — press to flip">'+(S.est[e]?TAG("es","ESTIMATE"):TAG("en","ENTERED"))+"</button>";function renderSheet(){const e=model();let s="";const a=inp("asking");s+='<div class="ask"><div class="k">What they’re asking</div><div class="big num">'+rowIn("asking","214,000")+tagFor("asking",!0)+'</div><div class="sub num">'+(null===e.refused&&null!==e.perAcre?fmt(e.perAcre).slice(0)+" per acre · ":"")+(a?"":"no ask yet — your ceiling stands alone")+"</div></div>",s+='<div class="play"><div class="k">The land play · finish the lot and sell</div>',e.refused?s+='<div class="refuse" style="margin-top:9px"><b>Not priced — '+esc(e.refused.why)+".</b> "+esc(e.refused.say)+"</div>":null!==e.clears?(s+='<div class="clears num'+(e.clears<0?" neg":"")+'">'+fmt(e.clears)+'</div><div class="clears-sub">what the play clears at their number, after everything below'+(e.spread?" · estimates swing it ±"+fmt(e.spread).slice(1):"")+"</div>",e.reaches||(s+='<div class="refuse"><b>The play doesn’t price at their number.</b> The most this play can pay and still clear '+fmt(e.target)+" is <b>"+fmt(e.ceiling)+"</b> — "+fmt(e.gap)+" under the ask, and past the line where a gap is a negotiation. If they come to "+fmt(e.ceiling)+", it works; above it, it doesn’t.</div>")):s+='<div class="clears num">'+fmt(e.ceiling)+'</div><div class="clears-sub">the most you can pay and still clear '+fmt(e.target)+" — they haven’t named a number, so yours stands alone</div>",s+='<div class="ledger"><div class="lrow"><span class="n">Finished lot, sold</span><span class="f"><span class="num">$</span>'+rowIn("finished","298,000")+tagFor("finished",!0)+'</span></div><div class="lrow"><span class="n">Their ask</span><span class="f"><span class="num">'+(inp("asking")?"− "+fmt(inp("asking").v):"—")+'</span></span></div><div class="lrow"><span class="n">Site work + carry, <input inputmode="numeric" data-k="months" value="'+esc(S.months)+'" style="width:30px;text-align:center"> mo</span><span class="f"><span class="num">− $</span>'+rowIn("lump","41,500")+tagFor("lump",!0)+"</span></div>",null===e.refused&&"unknown"===S.sewer&&(s+='<div class="lsub">↳ inside it: septic install, unconfirmed<span class="num">$18,000</span>'+TAG("nd","NEEDED")+"</div>"),s+='<div class="lrow"><span class="n">Cost of sale, 7%</span><span class="f"><span class="num">'+(null===e.refused?"− "+fmt(e.saleCost):"—")+"</span></span></div></div>",null===e.refused&&(s+='<div class="conc num">To clear $<input inputmode="decimal" data-k="target" aria-label="Profit target" value="'+esc(S.raw.target||"")+'" placeholder="'+e.target.toLocaleString("en-US")+'">, buy at <b>'+fmt(e.ceiling)+"</b> or less.</div>"),null===e.refused&&e.firm.length&&(s+='<div class="firm"><div class="fh"><span class="k">Before this prices firm</span>'+TAG("nd","NEEDED")+"</div>"+e.firm.map(e=>"<p>"+esc(e.say)+"</p>").join("")+"</div>"),s+='<div class="facts"><span class="k">The parcel</span><div class="grid"><div><label>Acres</label><input inputmode="decimal" data-k="acres" value="'+esc(S.raw.acres||"")+'" placeholder="2.61"></div><div><label>Zoning</label><input data-f="zoning" value="'+esc(S.zoning)+'" placeholder="RR — rural res."></div><div><label>Slope / terrain</label><input data-f="slope" value="'+esc(S.slope)+'" placeholder="11% avg · falls NE"></div><div><label>Road frontage</label><input data-f="frontage" value="'+esc(S.frontage)+'" placeholder="212 ft on Saddleback"></div><div><label>FEMA flood (<a href="https://msc.fema.gov/portal/search" target="_blank" rel="noopener">fema.gov</a>)</label><input data-f="fema" value="'+esc(S.fema)+'" placeholder="Zone X · minimal"></div><div><label>Sewer on record</label><select data-f="sewer"><option value="unknown"'+("unknown"===S.sewer?" selected":"")+'>Unknown — price a septic</option><option value="yes"'+("yes"===S.sewer?" selected":"")+'>Yes — tap fee in site work</option><option value="septic"'+("septic"===S.sewer?" selected":"")+'>Septic quoted — in site work</option></select></div><div><label>Road access</label><select data-f="access"><option value="unverified"'+("unverified"===S.access?" selected":"")+'>Not verified yet</option><option value="verified"'+("verified"===S.access?" selected":"")+">Verified — deeded or frontage</option></select></div></div></div>",s+='<p class="fine">Every figure says where it came from — typed figures are yours, estimates widen the answer, and a missing figure refuses rather than guesses. Cost of sale is 7% of the finished value: listing commission plus seller-side closing, the same constant the desk’s flip uses. None of this is a survey, a perc test or a title read — it is the arithmetic that tells you whether those are worth paying for.</p>',$("sheet").innerHTML=s,wire(),renderGround(e)}function wire(){document.querySelectorAll("[data-k]").forEach(e=>{const s=()=>{(e.closest(".lrow")||e.closest(".conc"))&&"months"!==e.dataset.k&&(e.style.width=Math.max(6.5,(e.value||e.placeholder||"").length+.4)+"ch")};s(),e.oninput=()=>{"months"===e.dataset.k?S.months=e.value:S.raw[e.dataset.k]=e.value,s(),save()},e.onchange=()=>{renderSheet()},e.onkeydown=s=>{"Enter"===s.key&&e.blur()}}),document.querySelectorAll("[data-tag]").forEach(e=>{e.onclick=()=>{const s=e.dataset.tag;S.est[s]=!S.est[s],save(),renderSheet()}}),document.querySelectorAll("[data-f]").forEach(e=>{const s=e.dataset.f;e.onchange=()=>{"sewer"===s||"access"===s?S[s]=e.value:(S[s]=e.value,"fema"!==s&&(S[s+"Est"]=!0)),save(),renderSheet()}})}$("demo").onclick=()=>{S={addr:"1847 Saddleback Pass, Wimberley TX",raw:{asking:"214,000",acres:"2.61",finished:"298,000",lump:"41,500",target:""},est:{finished:!0,lump:!0},months:"9",sewer:"unknown",access:"unverified",zoning:"RR — rural res.",zoningEst:!0,slope:"11% avg · falls NE",slopeEst:!0,frontage:"212 ft on Saddleback",frontageEst:!0,fema:"Zone X · minimal"},save(),$("in-addr").value=S.addr,renderSheet()},$("clear").onclick=()=>{S={addr:"",raw:{},est:{},months:"9",sewer:"unknown",access:"unverified",zoning:"",slope:"",frontage:"",fema:"",zoningEst:!0,slopeEst:!0,frontageEst:!0},save(),$("in-addr").value="",renderSheet()},$("in-addr").value=S.addr,$("in-addr").oninput=()=>{S.addr=$("in-addr").value,save()},$("in-addr").onchange=()=>renderSheet(),renderSheet();</script>
+</body>
+</html>
