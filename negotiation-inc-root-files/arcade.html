@@ -1,0 +1,349 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Arcade · Negotiation Inc</title><script>window.NI_LIVE=false;</script>
+<meta name="description" content="Cabinets that train the read: Comp Run, the daily street, and the drills. Free, no account.">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE ARCADE — the select screen.
+
+   "The arcade" that opens directly into one game is not an arcade, it is a
+   game with an ambitious name. This is the floor: cabinets you choose from,
+   with what each one trains written on the marquee, and the ones that are not
+   built yet saying so instead of pretending.
+
+   It is the one place on the site that wears the arcade's own colours. Cross
+   into here and the world changes — which is the whole point of it being a
+   separate room rather than a section of the landing page.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --paper:#e8e2d4; --ink:#23201c; --mid:#6b6153; --soft:#8a8072; --line:#c9c0ad;
+  --deep:#151a24; --deep-2:#1c2432; --edge:#223047;
+  --gold:#a8873a; --blue:#3a78e8; --green:#2c6142;
+  --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;   /* no typewriter in the software */
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:#0d1420}
+body{font-family:var(--sans);color:#e8e2d4;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.02em;line-height:1.1}
+a{color:#8fb4ff}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1140px;margin:0 auto;padding:0 26px}
+.ftlegal{border-top:1px solid var(--edge);color:#8794aa;margin-top:34px;padding:18px 0 40px;
+ font-size:12.5px;opacity:.72}
+.ftlegal a{color:inherit;text-decoration:none;margin-right:15px;border-bottom:1px solid transparent}
+.ftlegal a:hover{opacity:1;border-bottom-color:currentColor}
+
+.eyebrow{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#6f7d94}
+header{border-bottom:1px solid #223047;background:rgba(13,20,32,.9)}
+.mast{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:14px 0;flex-wrap:wrap}
+.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:#e8e2d4}
+.mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
+.mark .inc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--gold)}
+.mark:hover .nm{color:#fff}
+/* Every item in this row is optically centred on the same line. The account
+   chip carries a border and more padding than the plain links, so without an
+   explicit align-items the flex row stretched them to different heights and the
+   chip sat a pixel or two low — the kind of drift that reads as carelessness
+   long before anybody can name it. */
+.masknav{display:flex;align-items:center;gap:18px;font-size:14px;flex-wrap:wrap}
+.masknav a{display:inline-flex;align-items:center;padding:6px 2px;line-height:1;color:#aeb8c8;text-decoration:none}.masknav a:hover{color:#fff}
+
+.top{padding:44px 0 8px}
+h1{font-size:46px}
+.lede{font-size:18px;color:#aeb8c8;margin-top:12px;max-width:56ch}
+
+.floor{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:34px 0 20px}
+.cab{background:#141c2b;border:1px solid #223047;display:flex;flex-direction:column;overflow:hidden;border-radius:10px}
+.cab .shot{display:block;width:100%;height:186px;object-fit:cover;object-position:50% 62%;
+ image-rendering:pixelated;border-bottom:1px solid #223047;background:#0f1622}
+.cab .body{padding:16px 18px;flex:1}
+.cab h2{font-size:23px}
+.cab .marquee{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.16em;
+ text-transform:uppercase;color:var(--gold)}
+.cab p{font-size:14.5px;color:#aeb8c8;margin-top:9px}
+.cab .trains{margin-top:12px;padding-top:11px;border-top:1px solid #223047;font-size:13px;color:#8b98ac}
+.cab .trains b{color:#cdd6e4;font-weight:650}
+.cab .foot{padding:14px 18px;border-top:1px solid #223047;background:#101825;display:flex;gap:9px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:14px;font-weight:650;
+ padding:9px 15px;border:1.5px solid #39435a;background:transparent;color:#cdd6e4;text-decoration:none;cursor:pointer}
+.btn:hover{border-color:#fff;color:#fff}
+.btn.p{background:#3570d8;border-color:#3570d8;color:#fff}   /* not --blue: white on it was 4.17:1 */
+.btn.p:hover{background:#5a92ff;border-color:#5a92ff}
+.btn.sm{font-size:12.5px;padding:7px 11px}
+.cab.soon{opacity:.72}
+.cab.soon .marquee{color:#6f7d94}
+.chip{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.14em;
+ text-transform:uppercase;padding:3px 7px;border:1px solid #39435a;color:#8b98ac}
+
+.rail{border-top:1px solid #223047;margin-top:26px;padding:22px 0 60px;
+ display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+.rail p{color:#8b98ac;font-size:14.5px;max-width:60ch}
+@media (max-width:980px){ .floor{grid-template-columns:1fr 1fr} }
+@media (max-width:680px){ .floor{grid-template-columns:1fr} h1{font-size:34px} }
+</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Fraunces ships its "wonk" letterforms on by default — the single-storey f
+   and its friends. They read as a novelty at body sizes and Elijah clipped
+   them immediately. WONK 0 keeps the face and drops the party trick. */
+@font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
+ font-weight:100 900;font-style:normal;font-display:swap;
+ font-variation-settings:'WONK' 0}
+:root{
+ --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
+ /* NO MONOSPACE ANYWHERE IN THE SOFTWARE. Small letterspaced caps set in a
+    monospace face is the single most recognisable "an AI made this" tell on
+    the internet right now, and it was on every label we shipped. The eyebrows
+    keep their letterspacing; they lose the typewriter. Tabular figures come
+    from font-feature-settings instead, which is what they were always for.
+    (The arcade keeps its own type. It is a different world on purpose.) */
+ --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif !important;
+}
+.mono,.num,[class*="fig"],[class*="num"]{font-variant-numeric:tabular-nums}
+h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Arcade · Negotiation Inc">
+<meta property="og:description" content="Cabinets that train the read: Comp Run, the daily street, and the drills. Free, no account.">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+
+<header>
+ <div class="wrap mast">
+  <a class="mark" href="index.html" title="Negotiation Inc"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+  <!-- "The desk" and "Your desk" side by side was two links a reader had to
+       guess between. One is the tool, the other is the account; naming them
+       that way costs nothing and removes the guess. -->
+  <nav class="masknav">
+   <a href="desk.html">The desk</a>
+   <a href="demo.html">See how it works</a>
+   <a href="plans.html">Plans</a>
+   <a href="office.html">Sign in</a>
+  </nav>
+ </div>
+</header>
+
+<div class="wrap top">
+ <div class="eyebrow" id="ark-eye">The arcade · free, no account</div>
+ <h1>Pick a cabinet.</h1>
+ <p class="lede">Every machine on this floor trains one piece of the same read: what a
+  property is worth, what it needs, and what the person selling it actually wants.</p>
+</div>
+
+<div class="wrap floor">
+
+ <!-- ══ ORDERED BY WHAT THEY TEACH, NOT BY WHAT THEY COST TO BUILD ═══════
+      The floor used to open with the idle game, because the idle game was the
+      biggest. That is a shelf arranged by weight. It also pointed two cabinets
+      at the same URL — the Daily Street was a hash inside the long game — so
+      the two most different machines here were, to a link, one machine.
+
+      Now: the drill first, because sixty seconds is the shortest distance
+      between a stranger and the idea this whole company is built on. The
+      street second, because it is the same read against a clock and a rival.
+      The long game last, because it is the most fun and the least educational,
+      and a floor that leads with its idle game is an idle game with a business
+      attached rather than the other way round. ══════════════════════════ -->
+
+ <div class="cab">
+  <img class="shot" src="art/door-future.png" alt="A pixel-art door from a later era" width="540" height="450" fetchpriority="high" decoding="sync">
+  <div class="body">
+   <div class="marquee">Cabinet 01 · sixty seconds a house</div>
+   <h2>Exit Drill</h2>
+   <p>One house at a time, sixty seconds on the clock: flip it, hold it, take the
+      payments, run the listing, or walk. The desk's own arithmetic decides who was right,
+      and tells you by how much.</p>
+   <div class="trains"><b>Trains:</b> the first cut — matching the exit to the seller
+     before you reach for the sheet.</div>
+  </div>
+  <div class="foot"><a class="btn p" href="exit-drill.html">Run the drill →</a>
+   <a class="btn sm" href="exits.html">Learn the exits first</a></div>
+ </div>
+
+ <div class="cab">
+  <img class="shot" src="art/door-now.png" alt="A pixel-art front door" width="540" height="450" fetchpriority="high" decoding="sync">
+  <div class="body">
+   <div class="marquee">Cabinet 02 · three streets, three minutes</div>
+   <h2>The Daily Street</h2>
+   <p>Three streets a day, the same three for everybody playing today. Looks cost you
+      time, the offer is sealed, and the other buyers already made theirs.</p>
+   <div class="trains"><b>Trains:</b> reading a seller from a listing, and spending a
+     limited look where it actually changes the number.</div>
+  </div>
+  <div class="foot"><a class="btn p" href="daily-street.html">Work today's street →</a></div>
+ </div>
+
+ <div class="cab">
+  <img class="shot" src="art/world-now.png" alt="A pixel-art street of houses" width="960" height="540" fetchpriority="high" decoding="sync">
+  <div class="body">
+   <div class="marquee">Cabinet 03 · the long game</div>
+   <h2>Comp Run</h2>
+   <p>Knock doors, buy ground, and climb eight eras from a pole stapler to whatever
+      comes after the crash. An idle game with a phone that rings.</p>
+   <div class="trains"><b>Trains:</b> the least of the three, honestly — it is here
+     because it is the most fun, and because forty deeds is a long argument for patience.</div>
+  </div>
+  <div class="foot"><a class="btn p" href="comp-run.html">Play →</a></div>
+ </div>
+
+</div>
+
+<div class="wrap rail">
+ <p>The arcade is where the instinct gets cheap repetitions. When you want to run a real
+    address, the desk does the same arithmetic with your numbers in it.</p>
+ <!-- Signed in, a second button arrives in front of this one and this one
+      becomes "Price a property" — so the way out of the arcade is your desk,
+      not the sales page you have already bought from. -->
+ <a class="btn" href="desk.html" id="ark-out">Open the desk →</a>
+</div>
+
+
+<!-- The arcade is the top of the funnel and the cheapest traffic on the site,
+     and it had no way to take an address. The line is written for somebody who
+     has been playing a game, not for somebody who has just read a price — the
+     plans-page paragraph read to an arcade player is a non-sequitur. -->
+<div class="wrap" style="padding-top:6px" data-waitlist="The paid desk" data-from="arcade"
+  data-line="The arithmetic in these cabinets is the arithmetic the real desk runs &mdash; that part is <b>free and finished</b>, on your own addresses, today. The paid tiers are being wired to a payment rail. Leave an address and you get <b>one</b> email the day they open, with the founding price on it."></div>
+
+
+<footer class="ftlegal"><div class="wrap" style="padding-top:18px;font-size:12.5px">
+ <a href="index.html">Home</a><a href="desk.html">The desk</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Billing</a>
+</div></footer>
+
+<style>
+.whoami{border:1px solid currentColor!important;border-radius:999px;padding:5px 12px!important;
+ font-weight:650;opacity:.75;transition:opacity .13s;white-space:nowrap}
+.whoami:hover{opacity:1}
+</style>
+<script>
+(function(){
+ var a=null; try{ a=JSON.parse(localStorage.getItem('ni-account-v1')); }catch(e){}
+ if(!a || typeof a.name!=='string' || !a.name.trim()) return;
+ try{
+ var first=a.name.trim().split(/\s+/)[0]||'You';
+ document.body.classList.add('signedin');
+ var hdr=document.querySelector('header')||document.body;
+
+ var m=hdr.querySelector('a.mark,a.marklink');
+ if(m){ m.setAttribute('href','office.html'); m.setAttribute('title','Your desk'); }
+
+ /* "Sign in" is not a thing you do twice */
+ var got=false, ls=hdr.querySelectorAll('a[href="office.html"]');
+ for(var i=0;i<ls.length;i++){
+  var t=(ls[i].textContent||'').trim().toLowerCase().replace(/[\s\u2192]+$/,'');
+  if(t==='sign in'||t==='your desk'||t==='open a workspace'){
+   ls[i].textContent=first+' \u2192'; ls[i].className+=' whoami'; got=true; }
+ }
+ if(!got){
+  var nav=hdr.querySelector('.masknav')||hdr.querySelector('nav');
+  if(nav){ var l=document.createElement('a'); l.href='office.html';
+   l.className='whoami'; l.textContent=first+' \u2192';
+   /* insertBefore wants a CHILD, and querySelector returns a descendant — on a
+      masthead whose primary button is wrapped in a div that is a TypeError and
+      the whole page's script dies with it. Anchor to the button's own parent. */
+   var p=nav.querySelector('.btn');
+   if(p && p.parentNode) p.parentNode.insertBefore(l,p); else nav.appendChild(l); }
+ }
+
+ /* the arcade floor, once it has met you */
+ var eye=document.getElementById('ark-eye');
+ if(eye){
+  var best=0; try{ best=+(localStorage.getItem('ni-drill-best')||0)||0; }catch(e){}
+  var R=[[0,'Door-knocker'],[450,'Bird dog'],[900,'Apprentice'],
+         [1500,'Underwriter'],[2300,'Closer'],[3200,'The Desk']], nm='';
+  for(var j=0;j<R.length;j++) if(best>=R[j][0]) nm=R[j][1];
+  eye.textContent = best
+    ? first+'\u2019s floor \u00b7 '+nm+' \u00b7 best '+best.toLocaleString('en-US')
+    : first+'\u2019s floor \u00b7 nothing played yet';
+ }
+ var out=document.getElementById('ark-out');
+ if(out && out.parentNode){
+  var b=document.createElement('a');
+  b.href='office.html'; b.className='btn p'; b.textContent='Back to your desk \u2192';
+  out.parentNode.insertBefore(b,out);
+  out.textContent='Price a property'; out.href='desk.html#new';
+ }
+ }catch(e){ try{ console.warn('account chrome', e); }catch(_){}}
+})();
+</script>
+<style>
+.wl{border:1px solid var(--line-2,#c9d0dc);border-radius:16px;background:#fff;padding:15px 17px;text-align:left}
+.wl .wt{display:block;font-family:var(--serif,Georgia),serif;font-size:17px;font-weight:700;color:var(--ink,#101725)}
+.wl .ws{display:block;font-size:12.5px;line-height:1.55;color:var(--mid,#4a5162);margin-top:5px}
+.wl .ws b{color:var(--ink,#101725)}
+.wl .wf{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+/* 16px, not 14 — under 16px iOS Safari zooms the whole page the moment the
+   field takes focus, which on the one form that is the entire pre-launch
+   funnel is a real cost. And 44px of height because this was a 30px target
+   on a phone, which is smaller than a fingertip. */
+.wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;
+ min-height:44px;border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
+.wl .wf input:focus{outline:none;border-color:var(--blue,#1f5fd0);box-shadow:0 0 0 3px var(--blue-soft,#eaf0fc)}
+.wl .wf button{flex:none;cursor:pointer;min-height:44px;padding-left:18px;padding-right:18px}
+/* side by side, a phone gives the address field about nine characters. Stack. */
+@media(max-width:560px){.wl .wf{flex-direction:column;align-items:stretch}
+ .wl .wf input,.wl .wf button{width:100%}}
+.wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:var(--soft,#677187)}
+.wl .wn.ok{color:var(--green,#177a4d)} .wl .wn.bad{color:var(--red,#b3372c)}
+.wl.done{border-color:var(--green-line,#bfe0cd);background:var(--green-soft,#eaf6f0)}
+</style>
+<script>
+(function(){
+ var SUPPORT='support@negotiationinc.com', KEY='ni-wait-v1';
+ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+ function sent(){ try{ return localStorage.getItem(KEY)==='1'; }catch(e){ return false; } }
+ function doneHTML(){ return '<div class="wl done"><span class="wt">You are on the list.</span>'+
+   '<span class="ws">You will get one email the day it opens, and nothing else.</span></div>'; }
+ /* The default sentence is written for somebody standing on the plans page,
+    who has just read a price. A person who has been playing the arcade for
+    ten minutes has not, and the same paragraph read to them is a non-sequitur
+    that costs the capture. So a slot may carry its own line, and the ones that
+    sit at the end of a game or a lesson do. */
+ var LINE='The desk is <b>free and finished</b> \u2014 pricing, the seven exits, the comparison, the print. '+
+   'The paid tiers are being wired to a payment rail. Leave an address and you get <b>one</b> email the day they '+
+   'open, with the founding price on it.';
+ function formHTML(tier, line){ return '<div class="wl"><span class="wt">'+esc(tier)+' opens soon.</span>'+
+   '<span class="ws">'+(line||LINE)+'</span>'+
+   '<form class="wf"><input type="email" required placeholder="you@example.com" aria-label="Your email" '+
+   'autocomplete="email" spellcheck="false"><button type="submit" class="btn p sm">Tell me when it opens</button></form>'+
+   '<div class="wn" role="status"></div></div>'; }
+ function wire(box, from){
+  var f=box.querySelector('form'), note=box.querySelector('.wn');
+  if(!f) return;
+  function say(t,bad){ if(note){ note.textContent=t; note.className='wn'+(bad?' bad':' ok'); } }
+  f.addEventListener('submit', function(ev){
+   ev.preventDefault();
+   var i=f.querySelector('input'), btn=f.querySelector('button');
+   var email=(i.value||'').trim().slice(0,160);
+   if(!/^[^@\s]+@[^@\s.]+\.[^@\s]{2,}$/.test(email)) return say('That does not look like an email address.',true);
+   btn.disabled=true; say('Adding you\u2026');
+   fetch('/api/list',{method:'POST',headers:{'content-type':'application/json'},
+     body:JSON.stringify({email:email,from:from||'plans'})})
+    .then(function(r){
+      if(r.ok){ try{localStorage.setItem(KEY,'1');}catch(e){} box.outerHTML=doneHTML(); return; }
+      throw new Error('list');
+    })
+    .catch(function(){
+      say('The list is not reachable right now \u2014 email '+SUPPORT+' and you will be added by hand.',true);
+      btn.disabled=false;
+    });
+  });
+ }
+ function paint(){
+  var slots=document.querySelectorAll('[data-waitlist]');
+  for(var k=0;k<slots.length;k++){
+   var el=slots[k], tier=el.getAttribute('data-waitlist')||'Paid plans';
+   var from=el.getAttribute('data-from')||'plans';
+   el.innerHTML = sent() ? doneHTML() : formHTML(tier, el.getAttribute('data-line'));
+   if(!sent()) wire(el.firstChild, from);
+  }
+ }
+ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',paint); else paint();
+})();
+</script>
+</body></html>
