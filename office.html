@@ -221,7 +221,10 @@ a{color:var(--blue)}
 .wrap{max-width:1140px;margin:0 auto;padding:0 26px}
 .eyebrow{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
 header{background:#fff;border-bottom:1px solid var(--line)}
-.mast{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:14px 0;flex-wrap:wrap}
+/* `.mast` is a `.wrap`: the padding shorthand would zero the page gutter
+   and put the wordmark against the edge of a phone. Vertical only. */
+.mast{display:flex;justify-content:space-between;align-items:center;gap:14px 18px;
+ padding-top:14px;padding-bottom:14px;flex-wrap:wrap}
 .mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:inherit}
 .mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
 .mark .inc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--blue)}

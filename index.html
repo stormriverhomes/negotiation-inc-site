@@ -314,7 +314,15 @@ footer a:hover{color:var(--ink)}
 .finish .eyebrow{color:var(--soft)}
 
 @media (max-width:900px){
-  .hero{grid-template-columns:1fr;gap:34px;padding:36px 0}
+  /* ── padding-block, NOT the shorthand ──────────────────────────────────
+     `.hero` is `class="wrap hero"`. `.wrap` supplies the page's side gutter;
+     writing `padding:36px 0` here reset it to ZERO, so on every phone the
+     headline, the lede, both buttons, the trust strip and the whole form
+     readout sat flush against both edges of the glass with nothing between
+     the words and the bezel. That is most of what "cramped and not readable"
+     was — not the type, the gutter. The vertical rhythm is set on its own
+     axis now so the horizontal one survives. */
+  .hero{grid-template-columns:1fr;gap:34px;padding-top:36px;padding-bottom:36px}
   h1{font-size:40px} h2{font-size:28px}
   .three,.states{grid-template-columns:1fr;gap:20px}
   .eight{grid-template-columns:repeat(2,1fr)}
@@ -325,6 +333,52 @@ footer a:hover{color:var(--ink)}
   .eight{grid-template-columns:1fr}
   .doors{grid-template-columns:1fr}
   .givens{grid-template-columns:1fr}
+}
+/* ══ THE PHONE ═════════════════════════════════════════════════════════════
+   The masthead is one flex row with `flex-wrap`, which on a 390px screen is
+   not a masthead, it is three stacked rows: the wordmark, then four nav
+   links, then a blue button hanging off the bottom with no padding under it
+   — landing a call to action three pixels above the hero's eyebrow. It read
+   as cramped because it WAS: two unrelated pieces of the page touching.
+
+   The fix is to stop asking the header to carry everything. On a phone the
+   header's job is the wordmark and the way back into your account; the two
+   calls to action are already in the hero, one screenful below, in a much
+   better place to press them. The duplicate goes.                          */
+@media (max-width:700px){
+  /* and the masthead is a .wrap too — same trap, one rule later */
+  .mast{padding-top:11px;padding-bottom:11px;gap:10px 14px}
+  .masknav{gap:14px;font-size:13.5px;margin-left:auto}
+  .masknav a{white-space:nowrap}
+  .masknav .btn{padding:7px 12px;font-size:13px}
+  .masknav .btn.p{display:none}                    /* the hero says this, better */
+  .mark .nm{font-size:17px} .mark .inc{font-size:9px}
+  .hero{padding-top:26px;padding-bottom:34px}
+  /* ── AND THE TRUST STRIP IS A RULE, NOT A BOX ────────────────────────────
+     It is three claims under a hairline. The rounding block below gave it a
+     card radius, so on a phone — where the three claims stack — the hairline
+     curved at both ends and read as the top of a broken container that never
+     closed. It is a rule again, and the claims are a tight stack instead of
+     three paragraphs eighteen pixels apart. */
+  .trust{gap:7px 16px;margin-top:18px;padding-top:14px;border-radius:0}
+  .trust div{font-size:9.5px;line-height:1.4}
+}
+/* ── AND ON A REAL PHONE, THE HEADER IS TWO THINGS ────────────────────────
+   Four links and two buttons cannot share 390 pixels with a wordmark. Forced
+   onto one line they overflow and take the whole document with them — the
+   page grows wider than the screen, the side padding stops looking like
+   padding, and every section below inherits a horizontal scroll nobody asked
+   for. Allowed to wrap, they become a three-storey header on a page whose
+   first job is a headline.
+
+   So on a phone the header carries the wordmark and the way into your
+   account, and nothing else. The desk, the arcade and the plans are all
+   reachable from the body of this page and from the footer of every page —
+   they are not worth a storey here. */
+@media (max-width:520px){
+  .masknav a:not(.btn){display:none}
+  .mast{flex-wrap:nowrap}
+  .trust{flex-direction:column;gap:6px}
 }
 /* ── ROUNDING ──────────────────────────────────────────────────────────────
    The landing was drawn before the software was, and it kept the square

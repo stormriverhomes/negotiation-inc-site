@@ -37,7 +37,10 @@ a{color:#8fb4ff}
 
 .eyebrow{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#6f7d94}
 header{border-bottom:1px solid #223047;background:rgba(13,20,32,.9)}
-.mast{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:14px 0;flex-wrap:wrap}
+/* `.mast` is a `.wrap` — vertical padding on its own axis, or the page
+   gutter goes with it. Same trap as `.top` below. */
+.mast{display:flex;justify-content:space-between;align-items:center;gap:14px 18px;
+ padding-top:14px;padding-bottom:14px;flex-wrap:wrap}
 .mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:#e8e2d4}
 .mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
 .mark .inc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--gold)}
@@ -50,7 +53,11 @@ header{border-bottom:1px solid #223047;background:rgba(13,20,32,.9)}
 .masknav{display:flex;align-items:center;gap:18px;font-size:14px;flex-wrap:wrap}
 .masknav a{display:inline-flex;align-items:center;padding:6px 2px;line-height:1;color:#aeb8c8;text-decoration:none}.masknav a:hover{color:#fff}
 
-.top{padding:44px 0 8px}
+/* `.top` and `.rail` are both `class="wrap …"`. The `.wrap` gutter is the
+   only thing between this page's words and the edge of a phone, and the
+   padding SHORTHAND silently zeroes it — so the whole floor sat flush to
+   both edges of the glass. Vertical rhythm on its own axis, always. */
+.top{padding-top:44px;padding-bottom:8px}
 h1{font-size:46px}
 .lede{font-size:18px;color:#aeb8c8;margin-top:12px;max-width:56ch}
 
@@ -77,7 +84,7 @@ h1{font-size:46px}
 .chip{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.14em;
  text-transform:uppercase;padding:3px 7px;border:1px solid #39435a;color:#8b98ac}
 
-.rail{border-top:1px solid #223047;margin-top:26px;padding:22px 0 60px;
+.rail{border-top:1px solid #223047;margin-top:26px;padding-top:22px;padding-bottom:60px;
  display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
 .rail p{color:#8b98ac;font-size:14.5px;max-width:60ch}
 @media (max-width:980px){ .floor{grid-template-columns:1fr 1fr} }
@@ -136,23 +143,46 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 
 <div class="wrap floor">
 
- <!-- ══ ORDERED BY WHAT THEY TEACH, NOT BY WHAT THEY COST TO BUILD ═══════
-      The floor used to open with the idle game, because the idle game was the
-      biggest. That is a shelf arranged by weight. It also pointed two cabinets
-      at the same URL — the Daily Street was a hash inside the long game — so
-      the two most different machines here were, to a link, one machine.
+ <!-- ══ ORDERED BY WHAT GETS PLAYED ═════════════════════════════════════
+      This floor used to open with the drill, on the argument that sixty
+      seconds is the shortest distance between a stranger and the idea this
+      company is built on. That argument was about TEACHING, and teaching is
+      not this room's job — the course teaches and the desk proves. The
+      arcade's job is to earn ninety seconds of attention from somebody who
+      owes us none.
 
-      Now: the drill first, because sixty seconds is the shortest distance
-      between a stranger and the idea this whole company is built on. The
-      street second, because it is the same read against a clock and a rival.
-      The long game last, because it is the most fun and the least educational,
-      and a floor that leads with its idle game is an idle game with a business
-      attached rather than the other way round. ══════════════════════════ -->
+      Measured against that job, leading with the drill was leading with a
+      quiz. "Sixty seconds on the clock, the desk's arithmetic decides who
+      was right" is an exam offered to a stranger; "knock doors, buy ground,
+      climb eight eras" is a game offered to a stranger. Games get played.
+      It is also the cabinet with the largest and best art, and it was sitting
+      third — below the fold on a phone, which is where most of this traffic
+      actually is.
+
+      The cost of the swap, stated so the next person can weigh it: a floor
+      that opens with its idle game risks reading as an idle game with a
+      business attached. Three things hold that line — the marquee says what
+      each cabinet TRAINS, the drill sits immediately below with the shortest
+      path to the real desk, and the rail underneath points at the software.
+      If those ever come out, this order becomes the wrong one. ═════════ -->
+
+ <div class="cab">
+  <img class="shot" src="art/world-now.png" alt="A pixel-art street of houses" width="960" height="540" fetchpriority="high" decoding="sync">
+  <div class="body">
+   <div class="marquee">Cabinet 01 · the long game</div>
+   <h2>Comp Run</h2>
+   <p>Knock doors, buy ground, and climb eight eras from a pole stapler to whatever
+      comes after the crash. An idle game with a phone that rings.</p>
+   <div class="trains"><b>Trains:</b> the least of the three, honestly — it is here
+     because it is the most fun, and because forty deeds is a long argument for patience.</div>
+  </div>
+  <div class="foot"><a class="btn p" href="comp-run.html">Play →</a></div>
+ </div>
 
  <div class="cab">
   <img class="shot" src="art/door-future.png" alt="A pixel-art door from a later era" width="540" height="450" fetchpriority="high" decoding="sync">
   <div class="body">
-   <div class="marquee">Cabinet 01 · sixty seconds a house</div>
+   <div class="marquee">Cabinet 02 · sixty seconds a house</div>
    <h2>Exit Drill</h2>
    <p>One house at a time, sixty seconds on the clock: flip it, hold it, take the
       payments, run the listing, or walk. The desk's own arithmetic decides who was right,
@@ -167,7 +197,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  <div class="cab">
   <img class="shot" src="art/door-now.png" alt="A pixel-art front door" width="540" height="450" fetchpriority="high" decoding="sync">
   <div class="body">
-   <div class="marquee">Cabinet 02 · three streets, three minutes</div>
+   <div class="marquee">Cabinet 03 · three streets, three minutes</div>
    <h2>The Daily Street</h2>
    <p>Three streets a day, the same three for everybody playing today. Looks cost you
       time, the offer is sealed, and the other buyers already made theirs.</p>
@@ -175,19 +205,6 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      limited look where it actually changes the number.</div>
   </div>
   <div class="foot"><a class="btn p" href="daily-street.html">Work today's street →</a></div>
- </div>
-
- <div class="cab">
-  <img class="shot" src="art/world-now.png" alt="A pixel-art street of houses" width="960" height="540" fetchpriority="high" decoding="sync">
-  <div class="body">
-   <div class="marquee">Cabinet 03 · the long game</div>
-   <h2>Comp Run</h2>
-   <p>Knock doors, buy ground, and climb eight eras from a pole stapler to whatever
-      comes after the crash. An idle game with a phone that rings.</p>
-   <div class="trains"><b>Trains:</b> the least of the three, honestly — it is here
-     because it is the most fun, and because forty deeds is a long argument for patience.</div>
-  </div>
-  <div class="foot"><a class="btn p" href="comp-run.html">Play →</a></div>
  </div>
 
 </div>
