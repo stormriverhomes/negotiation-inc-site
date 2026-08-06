@@ -96,6 +96,9 @@ function form(obj, prefix = '', out = []){
   }
   return out;
 }
+const safePath = p => String(p).split('?')[0]
+  .replace(/\/(cus|sub|price|cs|in|pi|seti)_[A-Za-z0-9]+/g, '/$1_…');
+
 async function stripe(method, path, body){
   const init = { method, headers: {
     authorization: 'Bearer ' + SK,
@@ -111,7 +114,11 @@ async function stripe(method, path, body){
     /* the upstream message is written for a developer reading a dashboard and
        may quote an id or an amount — it is logged by TYPE only and never
        returned to a browser */
-    log('stripe', r.status, (j.error && j.error.code) || 'error', path);
+    /* the PATH carries identifiers — /v1/customers/cus_XXXX from reconcile, and
+       a query string containing the caller's own Supabase uid from
+       customerOf(). The comment above promises a type and nothing else, so the
+       path is stripped to its shape before it reaches a log line. */
+    log('stripe', r.status, (j.error && j.error.code) || 'error', safePath(path));
     const e = new Error('stripe'); e.status = r.status; e.code = (j.error && j.error.code) || ''; throw e;
   }
   return j;
@@ -127,9 +134,16 @@ async function whoIs(req){
   const h = String(req.get('authorization') || '');
   const tok = h.startsWith('Bearer ') ? h.slice(7).trim() : '';
   if (!tok || tok.length > 4000) return null;
+  if (!sbAnon()) { log('auth: SUPABASE_ANON_KEY is not set — nobody can sign in'); return null; }
   try {
     const r = await fetch(`${sbUrl()}/auth/v1/user`, {
-      headers: { apikey: sbAnon() || sbKey(), authorization: 'Bearer ' + tok } });
+      /* NOT `sbAnon() || sbKey()`. SUPABASE_ANON_KEY is sync:false in
+         render.yaml while ACCOUNTS_ON() needs only the URL and the service key,
+         so a deploy that sets the two required vars and forgets the anon key
+         used to put the key that bypasses every row-level policy into the
+         apikey header of every sign-in round trip — on the one call whose whole
+         purpose is to avoid needing a second key. Fail closed instead. */
+      headers: { apikey: sbAnon(), authorization: 'Bearer ' + tok } });
     if (!r.ok) return null;
     const u = await r.json();
     return (u && u.id) ? { uid: u.id, email: u.email || '' } : null;
@@ -141,14 +155,29 @@ async function whoIs(req){
    this write to every key except the service role, which is what makes a plan
    typed into developer tools worth nothing. */
 async function setPlan(uid, plan){
-  const r = await fetch(`${SB_URL}/rest/v1/profiles?id=eq.${encodeURIComponent(uid)}`, {
+  /* read at call time, like every other reader in this file. Captured at
+     import, the fail-closed behaviour the comment at the top describes could
+     not be exercised by a harness that boots twice — and this is the ONE
+     function that writes the column, so it was the one that mattered most. */
+  const r = await fetch(`${sbUrl()}/rest/v1/profiles?id=eq.${encodeURIComponent(uid)}`, {
     method: 'PATCH',
-    headers: { 'content-type':'application/json', apikey: SB_KEY,
-               authorization: 'Bearer ' + SB_KEY, Prefer: 'return=minimal' },
+    headers: { 'content-type':'application/json', apikey: sbKey(),
+               authorization: 'Bearer ' + sbKey(),
+               /* representation, not minimal: `Prefer: return=minimal` made a
+                  PATCH that matched ZERO ROWS answer 204, so a uid with no
+                  profiles row logged "plan set" and changed nothing. A write
+                  that wrote nothing is a failure, and the webhook has to be
+                  able to tell — it is the difference between Stripe retrying
+                  and a cancelled customer keeping their tier forever. */
+               Prefer: 'return=representation' },
     body: JSON.stringify({ plan }),
   });
-  log('plan', r.ok ? 'set' : 'FAILED', plan === null ? 'none' : plan);
-  return r.ok;
+  if (!r.ok){ log('plan FAILED', r.status, plan === null ? 'none' : plan); return false; }
+  const rows = await r.json().catch(() => null);
+  const hit = Array.isArray(rows) ? rows.length : 0;
+  if (!hit){ log('plan NO ROW', plan === null ? 'none' : plan); return false; }
+  log('plan set', plan === null ? 'none' : plan);
+  return true;
 }
 
 /* ── finding somebody's customer record ────────────────────────────────────
@@ -180,7 +209,12 @@ export function mountBilling(app){
     if (!who) return res.status(401).json({ ok:false, error:'Sign in first.' });
 
     const plan = String((req.body || {}).plan || '').trim().toLowerCase();
-    const price = PRICE[plan];
+    /* Object.hasOwn, not a truthiness check on PRICE[plan]: PRICE['constructor']
+       is Object, which is truthy, so a caller could send a prototype key and
+       have `function Object() { [native code] }` forwarded to Stripe as a
+       price id. It dies upstream as a 502 rather than a clean 400 — a wasted
+       round trip and a misleading error. planOfSub already does this properly. */
+    const price = Object.hasOwn(PRICE, plan) ? PRICE[plan] : '';
     if (!price) return res.status(400).json({ ok:false, error:'That is not a plan you can subscribe to here.' });
 
     try {
@@ -191,6 +225,34 @@ export function mountBilling(app){
         const c = await stripe('POST', '/v1/customers',
           { email: who.email || undefined, metadata: { uid: who.uid } });
         cust = c.id;
+      }
+      /* ── AND NOT A SECOND ONE ────────────────────────────────────────────
+         Nothing here checked whether this person already had a live
+         subscription. `office.html`'s joinFromQuery() fires startCheckout()
+         straight off `?join=underwriter` with no plan check, so an existing
+         subscriber following that link from a bookmark or from the marketing
+         site completed a second checkout against the same Stripe customer and
+         was billed twice a month, indefinitely. `reconcile` takes the higher
+         of the two, so the product looked completely normal — which is how it
+         would have stayed until somebody read a bank statement. That is the
+         shape of thing that becomes a chargeback and a refund thread rather
+         than a bug report.
+
+         Upgrades and downgrades belong in the portal, which prorates them and
+         cancels the old one. This says so instead of selling another. */
+      const have = await stripe('GET',
+        `/v1/subscriptions?limit=20&status=all&customer=${encodeURIComponent(cust)}`);
+      const live = (have.data || []).filter(s => LIVE_STATUS.has(s.status));
+      if (live.length){
+        const now = live.map(planOfSub).filter(Boolean);
+        log('checkout refused: already subscribed', live.length);
+        return res.status(409).json({ ok:false, portal:true,
+          error: now.length
+            ? `This account is already on ${now[0]}. Changing plan is done in the billing `
+              + 'portal, which prorates it and cancels the old one — subscribing again here '
+              + 'would bill you twice.'
+            : 'This account already has a live subscription. Manage it in the billing portal '
+              + 'rather than starting a second one.' });
       }
       const base = SITE || `${req.protocol}://${req.get('host')}`;
       const s = await stripe('POST', '/v1/checkout/sessions', {
@@ -250,11 +312,34 @@ export function mountBilling(app){
 
     let ev; try { ev = JSON.parse(raw.toString('utf8')); } catch(e){ return res.status(400).send('bad json'); }
 
-    /* Answer Stripe immediately and reconcile afterwards. A handler that does
-       its work before replying is a handler that gets retried every time the
-       database is slow, and every retry is another write. */
-    res.json({ received: true });
-    try { await reconcile(ev); } catch(e){ log('hook', (e && e.message) || 'failed'); }
+    /* ── AND THE RETRY IS THE POINT ────────────────────────────────────────
+       This used to answer Stripe first and reconcile afterwards, on the
+       reasoning that a handler doing its work before replying gets retried
+       whenever the database is slow. That is true, and it is the wrong trade,
+       because reconcile() is IDEMPOTENT — it reads the truth from Stripe and
+       writes one column — so a retry costs one extra read and a duplicate
+       write of the same value. What the old order cost is much worse.
+
+       `customer.subscription.deleted` is the LAST event a cancelled customer
+       will ever generate. No invoice follows it, no update, nothing. So if the
+       plan write failed — a 502 from Supabase's gateway, a service key rotated
+       an hour ago returning 401 — the process had already put 200 on the wire,
+       Stripe would never redeliver, and one log line went by: `plan FAILED
+       none`. That customer keeps The Office, free, permanently, and nothing in
+       the system will ever notice. The subscribe side self-heals because more
+       events follow it; the cancel side is terminal. That asymmetry is exactly
+       backwards from the one you want.
+
+       So: reconcile, then answer. A 500 here means Stripe retries with backoff
+       for three days, which is the behaviour the endpoint was built to have. */
+    try {
+      const r = await reconcile(ev);
+      res.json({ received: true, ...(r && r.skipped ? { skipped: r.skipped } : {}) });
+    } catch(e){
+      /* Never the upstream message: it can carry a customer id or an amount. */
+      log('hook FAILED', (e && e.niKind) || 'error', String((ev && ev.type) || ''));
+      res.status(500).json({ received: false });
+    }
   });
 }
 
@@ -297,7 +382,7 @@ export function planOfSub(sub){
   const pid = sub.items && sub.items.data && sub.items.data[0] && sub.items.data[0].price
             && sub.items.data[0].price.id;
   for (const [name, id] of Object.entries(PRICE)) if (id && id === pid) return name;
-  log('sub with no plan', sub.id);
+  log('sub with no plan');
   return null;
 }
 
@@ -336,7 +421,12 @@ export async function reconcile(ev, deps = {}){
   let plan = null, best = 0;
   for (const s of live){ const p = planOfSub(s); const r = RANK[p] || 0; if (p && r > best){ best = r; plan = p; } }
 
-  await write(uid, plan);
+  /* the return value was discarded. A write that failed then looked exactly
+     like a write that worked, all the way up to the 200 the endpoint sent. */
+  const wrote = await write(uid, plan);
+  if (wrote === false){
+    const e = new Error('plan not written'); e.niKind = 'plan-write'; throw e;
+  }
   return { uid, plan, subs: live.length };
 }
 
@@ -355,6 +445,42 @@ export async function reconcile(ev, deps = {}){
    Fails closed: with Supabase unconfigured there is no account layer, and
    without an account layer nothing is entitled to spend the key. */
 const TIER = { 'solo':1, 'underwriter':2, 'the office':3 };
+
+/* ── THE TRIAL WAS THREE BUGS STACKED ──────────────────────────────────────
+   1 · `Date.parse(String(row.trial) + 'T00:00:00Z')`. SUPABASE.md declares
+       `trial timestamptz`, and PostgREST returns
+       "2026-08-06T14:23:11.123456+00:00" — so the concatenation produced
+       "...+00:00T00:00:00Z" and Date.parse gave NaN. Every trial was zero days
+       old and zero days long, while the refusal it produced read "…and with
+       the fourteen-day trial". It failed CLOSED, which is why nobody has been
+       charged for it, but the column is described as load-bearing in three
+       documents and anybody backfilling it by hand — support granting a
+       courtesy trial is the obvious case — got silence.
+   2 · `TRIAL_DAYS` is `STRIPE_TRIAL_DAYS`, doing double duty. Setting it to 0
+       to drop Stripe's card-first trial also deleted the in-app one for every
+       account; raising it to 30 for a promotion retroactively resurrected
+       trials that expired weeks ago. They are two different decisions and now
+       they are two different variables.
+   3 · `Math.max(tier, 3)` handed THE OFFICE — three times every cap — to
+       anyone inside the window, including a Solo customer paying $49. The copy
+       everywhere says the trial is Underwriter, so that is what it now grants,
+       and NI_TRIAL_TIER can move it without a deploy if that turns out wrong.
+
+   Takes a date or a timestamp, in either shape, and refuses anything else. */
+const NUMENV = (k, d) => { const v = Number(process.env[k]);
+  return Number.isFinite(v) && v >= 0 ? v : d; };
+const TRIAL_LEN  = NUMENV('NI_TRIAL_DAYS', 14);
+const TRIAL_TIER = NUMENV('NI_TRIAL_TIER', 2);          // Underwriter, as advertised
+export function trialLeft(v, now = Date.now(), days = TRIAL_LEN){
+  if (!v) return 0;
+  const s = String(v).trim();
+  /* a bare date is midnight UTC; anything with a time in it already says so */
+  const started = Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(s) ? s + 'T00:00:00Z' : s);
+  if (!Number.isFinite(started)) return 0;
+  /* a trial that has not started yet is not a trial with extra days on it */
+  if (started > now) return 0;
+  return Math.max(0, days - Math.floor((now - started) / 86400000));
+}
 export async function entitlementOf(req, need = 2){
   if (!sbUrl() || !sbKey()) return { ok:false, why:'unconfigured' };
   const who = await whoIs(req);
@@ -367,12 +493,10 @@ export async function entitlementOf(req, need = 2){
   } catch(e){ return { ok:false, why:'lookup' }; }
   if (!row) return { ok:false, why:'noprofile' };
 
-  const started = row.trial ? Date.parse(String(row.trial) + 'T00:00:00Z') : NaN;
-  const trialDaysLeft = Number.isFinite(started)
-    ? Math.max(0, TRIAL_DAYS - Math.floor((Date.now() - started) / 86400000)) : 0;
+  const trialDaysLeft = trialLeft(row.trial);
   const tier = TIER[String(row.plan || '').trim().toLowerCase()] || 0;
 
-  if (trialDaysLeft > 0) return { ok:true, uid:who.uid, tier:Math.max(tier, 3), trial:trialDaysLeft };
+  if (trialDaysLeft > 0) return { ok:true, uid:who.uid, tier:Math.max(tier, TRIAL_TIER), trial:trialDaysLeft };
   if (tier >= need)      return { ok:true, uid:who.uid, tier, trial:0 };
   return { ok:false, why: tier === 0 ? 'free' : 'lowtier', uid:who.uid, tier };
 }
@@ -408,16 +532,36 @@ const CAP_DEFAULT = {
   ailetter:   60,   // the other side of the table
 };
 export const FEATURES = Object.keys(CAP_DEFAULT);
+/* ── AND A CAP OF ZERO MEANT UNLIMITED ─────────────────────────────────────
+   `Number('')` is 0 and `Number.isFinite(0)` is true. So NI_CAP_AIREAD added
+   to Render with the value field left EMPTY read as an explicit cap of zero —
+   and the route's guard is `if (cap > 0 && …)`, so zero skipped the check and
+   handed every subscriber unlimited reads. An operator setting a cap to 0 to
+   switch a feature off got the exact opposite of what they typed, on the one
+   env var whose whole purpose is to bound spend.
+
+   A blank value is now "not set", and a real zero is honoured as zero. The
+   route reads `cap === 0` as off rather than as unlimited. */
+const capEnv = name => {
+  const raw = process.env[name];
+  if (raw === undefined || String(raw).trim() === '') return null;   // not set
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? Math.floor(n) : null;
+};
 export function capFor(feature, tier){
-  const base = Number(process.env['NI_CAP_' + feature.toUpperCase()]);
-  const two  = Number.isFinite(base) && base >= 0 ? base : CAP_DEFAULT[feature];
+  const two = capEnv('NI_CAP_' + feature.toUpperCase()) ?? CAP_DEFAULT[feature];
   if (two === undefined) return 0;
   if (tier < 3) return two;
-  const off = Number(process.env['NI_CAP_' + feature.toUpperCase() + '_OFFICE']);
-  return Number.isFinite(off) && off >= 0 ? off : two * 3;
+  return capEnv('NI_CAP_' + feature.toUpperCase() + '_OFFICE') ?? two * 3;
 }
 
 const monthStart = () => new Date().toISOString().slice(0, 8) + '01';
+
+/* A sentinel no cap can be below, so a caller whose meter could not be read
+   is refused rather than waved through. It is a VALUE rather than a second
+   return channel on purpose: every route already compares `used >= cap`, so
+   there is no new branch anybody can forget to write. */
+export const NOMETER = Number.MAX_SAFE_INTEGER;
 
 /* what this person has already spent on this feature this month */
 export async function usedThisMonth(uid, feature){
@@ -426,10 +570,22 @@ export async function usedThisMonth(uid, feature){
     const q = `${sbUrl()}/rest/v1/usage?uid=eq.${encodeURIComponent(uid)}`
       + `&feature=eq.${encodeURIComponent(feature)}&month=eq.${monthStart()}&select=used`;
     const r = await fetch(q, { headers:{ apikey:sbKey(), authorization:'Bearer ' + sbKey() } });
-    if (!r.ok) return null;                       // no table yet — do not block
+    /* ── "NO TABLE YET" IS A 404, AND NOTHING ELSE IS ────────────────────
+       This returned null on EVERY non-200, and null means "do not block" all
+       the way up. The missing-migration case is deliberate and stays: a site
+       deployed ahead of its migration must not switch off a paid feature. But
+       the branch could not tell a 404 from anything else, so a renamed column
+       (400), a rotated service key (401), or a statement timeout on the usage
+       index (500/504) silently uncapped all five metered features for every
+       subscriber — with `profiles` untouched, so nothing else would notice
+       until the model bill arrived.
+       404 means the meter is not there. Anything else means the meter is
+       there and broken, and a broken meter is not a licence. */
+    if (r.status === 404) return null;
+    if (!r.ok){ log('usage lookup', r.status, feature); return NOMETER; }
     const j = await r.json();
     return Array.isArray(j) && j[0] ? (j[0].used|0) : 0;
-  } catch(e){ return null; }
+  } catch(e){ log('usage lookup failed', feature); return NOMETER; }
 }
 
 /* spend one, and say what is left */

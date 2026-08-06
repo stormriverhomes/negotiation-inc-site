@@ -248,6 +248,10 @@
   .bankline .l{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--carbon-faint)}
   .bankline .n{font-family:var(--mono);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;grid-row:span 2}
   .bankline .s{grid-column:1;font-size:13.5px;color:var(--carbon-soft);line-height:1.45}
+  /* the bankroll did not reach the disk. GOLD, not red: nothing was refused
+     and nothing is wrong with the deal — the browser will not keep it. */
+  .bankline.warn{grid-template-columns:1fr;border-color:var(--gold,#a8873a)}
+  .bankline.warn .s{color:var(--gold,#a8873a)}
   .bankline.up .n{color:var(--green)} .bankline.dn .n{color:var(--red)}
   .rec{margin:0 18px 16px;padding:10px 13px;border:1px solid var(--rule);background:var(--stock-2);
     font-size:14px;color:var(--carbon-soft);text-align:center}
@@ -424,7 +428,19 @@ function settle(bank, { game, delta, note, day, at }){
   if (applied > 0) b.earned += applied; else b.staked += -applied;
   b.best = Math.max(b.best, b.cash);
   b.low  = Math.min(b.low,  b.cash);
-  if (applied !== 0 || note)
+  /* ── A LEDGER ROW IS A RECORD OF MONEY MOVING ──────────────────────────
+     This read `applied !== 0 || note`, and the drill always sends a note. So
+     once the daily cap was reached — which the drill invites, it says so on
+     the card: "it still plays, it stops paying until tomorrow" — every further
+     answer pushed a $0 row and evicted a real one from a forty-row window.
+
+     Sixty capped answers and the whole ledger is sixty identical "$0 · read
+     the flip on 12 Elm" lines: the street you won and the era you banked are
+     both gone, replaced by play that moved nothing. The arcade hub's "where
+     the money went" panel is the only audit trail the arcade has.
+
+     A note is a description OF a movement, not a reason to record one. */
+  if (applied !== 0)
     b.ledger = [...b.ledger, { g, d: applied, t: int(at, 0), n: str(note, 90) }].slice(-LEDGER_MAX);
   return { bank: b, applied, capped, floored: applied !== d };
 }
@@ -491,30 +507,80 @@ function standing(bank){
    the browser half, guarded so the tests never reach it. One reader, one
    writer, and no cabinet is allowed its own: three games writing a shared key
    by three different routes is how a shared number stops being shared. */
+/* ── AND THE THREE WAYS DISK LIES ──────────────────────────────────────────
+   All three used to produce the same answer — a fresh $150,000 bankroll —
+   and none of them told anybody:
+
+     · THERE IS NO KEY. A new player. $150,000 is exactly right.
+     · THERE IS A KEY AND IT WILL NOT PARSE. Somebody's money is in there and
+       we cannot read it. Handing back $150,000 is a guess, and the next write
+       — one drill answer, anything — overwrites the blob, so a recoverable
+       corruption became unrecoverable inside one page load. A player at
+       $612,000 finished the day at $150,250 and the original was gone.
+     · WE CANNOT WRITE AT ALL. Private browsing, blocked site data, a full
+       quota. `write` swallowed the exception and returned the bank as though
+       it had persisted, so the drill's end card said "This run paid +$3,250"
+       directly above "Your bankroll is $150,000", and the daily cap never
+       engaged because drillToday never persisted — an unbounded lane that
+       paid nothing.
+
+   So `read` reports WHY, `write` reports WHETHER, and an unreadable blob is
+   never overwritten: the money stays on disk where somebody could still get
+   it back, and the cabinet says so instead of quietly starting again. */
 const BANK = {
-  read(){
-    if (typeof localStorage === 'undefined') return fresh();
-    let raw = null; try { raw = localStorage.getItem(BANK_KEY); } catch(e){ return fresh(); }
-    if (!raw) return fresh();
-    try { return clean(JSON.parse(raw)); } catch(e){ return fresh(); }
+  /** { bank, why } — why is 'ok' | 'new' | 'unreadable' | 'nostore' */
+  readState(){
+    if (typeof localStorage === 'undefined') return { bank: fresh(), why:'nostore' };
+    let raw = null;
+    try { raw = localStorage.getItem(BANK_KEY); } catch(e){ return { bank: fresh(), why:'nostore' }; }
+    if (!raw) return { bank: fresh(), why:'new' };
+    try { return { bank: clean(JSON.parse(raw)), why:'ok' }; }
+    catch(e){ return { bank: fresh(), why:'unreadable' }; }
   },
+  read(){ return this.readState().bank; },
+  /** true when it is actually on disk. Callers that move money must check. */
   write(b){
-    if (typeof localStorage !== 'undefined')
-      try { localStorage.setItem(BANK_KEY, JSON.stringify(b)); } catch(e){}
-    return b;
+    if (typeof localStorage === 'undefined') return false;
+    try { localStorage.setItem(BANK_KEY, JSON.stringify(b)); return true; }
+    catch(e){ return false; }
   },
-  /** Move the money and persist it. Returns the same shape settle() does, so a
-   *  caller can tell the player when the floor or the daily cap bit. */
+  /** Move the money and persist it. Returns the same shape settle() does, plus
+   *  `stored`, so a caller can tell the player when the floor or the daily cap
+   *  bit AND when the number on screen is not the number on disk. */
   move(o){
-    const r = settle(this.read(), { at: Date.now(), day: today(), ...o });
-    this.write(r.bank);
+    const s = this.readState();
+    /* refuse to write over money we could not read. A cabinet that cannot
+       read the bankroll must not be the thing that destroys it. */
+    if (s.why === 'unreadable')
+      return { bank: s.bank, applied: 0, capped: false, floored: false,
+               stored: false, why: 'unreadable' };
+    const r = settle(s.bank, { at: Date.now(), day: today(), ...o });
+    r.stored = this.write(r.bank);
+    r.why = r.stored ? 'ok' : 'nostore';
     return r;
   },
-  run(game){ return this.write(noteRun(this.read(), game)); },
+  run(game){ const b = noteRun(this.read(), game); this.write(b); return b; },
   standing(){ return standing(this.read()); },
+  /** Is the bankroll on screen the bankroll on disk? Cabinets ask at boot. */
+  trouble(){ const w = this.readState().why;
+    return w === 'unreadable' || w === 'nostore' ? w : null; },
   /** Opening a cabinet is not a run, but it is worth knowing somebody looked. */
-  opened(){ const b = this.read(); b.opened += 1; return this.write(b); },
+  opened(){ const b = this.read(); b.opened += 1; this.write(b); return b; },
 };
+/* One sentence, so all three cabinets say the same thing about the same
+   problem. A player whose money is not being saved is owed the reason and, in
+   the unreadable case, the fact that it has NOT been thrown away. */
+function troubleLine(why){
+  if (why === 'unreadable')
+    return 'Something is stored under this arcade’s bankroll and this browser cannot read it, '
+         + 'so nothing is being saved right now. It has not been overwritten — whatever is in '
+         + 'there is still in there.';
+  if (why === 'nostore')
+    return 'This browser is not letting the arcade save anything, so the bankroll will not '
+         + 'survive a reload. Private browsing and blocked site data both do this.';
+  return '';
+}
+
 function today(){
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
@@ -781,7 +847,8 @@ function nextRound(){
         note: delta === 0 ? 'three streets, nothing bought'
             : (delta > 0 ? 'made' : 'lost') + ' it on ' + (bought === 1 ? 'one flip' : bought + ' flips') });
       BANK.run('street');
-      run.banked = { delta, applied: r.applied, floored: r.floored, after: r.bank.cash };
+      run.banked = { delta, applied: r.applied, floored: r.floored, after: r.bank.cash,
+                      stored: r.stored !== false, why: r.why };
     } else {
       run.banked = null;
     }
@@ -820,7 +887,22 @@ function heroHTML(){
   /* the stake, stated before you play rather than after you lose it */
   const stake = '<div class="stake'+(bk.thin?' thin':'')+(bk.broke?' broke':'')+'">' +
     '<span class="l">You are playing with</span><span class="n">'+M(bk.cash)+'</span>' +
-    '<span class="s">'+(bk.broke
+    /* ── A REPLAY DOES NOT TAKE THE STAKE, SO IT MUST NOT PROMISE ONE ──────
+       nextRound only moves money when firstToday. This block branched on
+       broke and thin but not on whether today was already banked — four lines
+       after the record line checked exactly that — so a second run promised
+       "what you lose is gone", showed the cash falling across three streets,
+       and only admitted once it was over that none of it had been real. The
+       reverse is worse: win $60,000 and find out at the end it did not count.
+       The bankroll clause is decided first, because it decides the premise;
+       the broke and thin notes still apply, because the points penalty for
+       bidding on borrowed money is real on a replay too. */
+    '<span class="s">'+(r.days[todayISO()]
+      ? 'Today is already banked, so the bankroll does not move either way — this run is for the practice. '
+        + (bk.broke ? 'Bidding above nothing still costs you points.'
+          : bk.thin ? 'Bidding above what you have still costs you points.'
+          : 'The score still counts, and the record keeps your first run.')
+      : bk.broke
       ? 'Nothing. Every house on the street is borrowed money now, and the points come off the top. The drill pays a fee for a right read — that is the way back.'
       : bk.thin
       ? 'Thin. You can still bid above it, but the borrowed part costs you points, so the margins get tight.'
@@ -1192,8 +1274,14 @@ function summaryHTML(){
       '<span class="l">Your bankroll</span>' +
       '<span class="n">'+M(bk.after)+'</span>' +
       '<span class="s">'+(bk.applied === 0 ? 'Unchanged — you finished level.'
-        : (bk.applied>0?'Up ':'Down ')+'<b>'+M(Math.abs(bk.applied))+'</b> on this run, and it is banked.') +
-        (bk.floored ? ' You could not lose more than you had.' : '')+'</span></div>';
+        : (bk.applied>0?'Up ':'Down ')+'<b>'+M(Math.abs(bk.applied))+'</b> on this run'
+          + (bk.stored === false ? ', and it did not save.' : ', and it is banked.')) +
+        (bk.floored ? ' You could not lose more than you had.' : '')+'</span></div>' +
+      /* and if it did not actually reach the disk, the sentence above is a
+         claim we cannot make. Saying "it is banked" over a failed write is
+         the one thing this panel must never do. */
+      (bk.stored === false ? '<div class="bankline warn"><span class="s">' +
+        troubleLine(bk.why || 'nostore') + '</span></div>' : '');
   } else {
     bankline = '<div class="bankline"><span class="l">Your bankroll</span>' +
       '<span class="n">'+M(BANK.read().cash)+'</span>' +

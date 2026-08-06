@@ -38,7 +38,7 @@ import * as CMP from './compare.js';
 import * as ST from './street.js';
 import * as BID from './bid.js';
 import * as OBJ from './objections.js';
-import { mountBilling, billingState, entitlementOf, usedThisMonth, countUse, capFor, FEATURES } from './billing.js';
+import { mountBilling, billingState, entitlementOf, usedThisMonth, countUse, capFor, FEATURES, NOMETER } from './billing.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -210,6 +210,38 @@ const gateFails = (req, what) => {
   return null;
 };
 
+/* ══ THE MONTH SOMEBODY PAID FOR ═══════════════════════════════════════════
+   Five routes had five copies of this, and the copies are why it took a
+   second read of billing.js to notice that `usedThisMonth` could return a
+   third thing. One gate now, returning the cap the caller needs afterwards
+   for countUse(), so a new AI feature cannot be written with four of the
+   three cases handled.
+
+     · null    — the meter is not in the database yet. Deliberately does NOT
+                 block: a site deployed ahead of its migration must not switch
+                 off a feature somebody is paying for.
+     · NOMETER — the meter IS there and could not be read. That is not a
+                 licence, and it is not the caller's fault either, so it is a
+                 503 that says try again rather than a 429 that says you are
+                 out.
+     · a number — the ordinary case.
+
+   And a cap of exactly 0 now means OFF rather than unlimited. It used to mean
+   unlimited, because the guard read `cap > 0 &&`. */
+async function meterFails(ent, feature, plural){
+  const cap  = capFor(feature, ent.tier);
+  const used = await usedThisMonth(ent.uid, feature);
+  if (used === NOMETER)
+    return { cap, fail: [503, 'Your allowance for this month could not be checked just now, so '
+      + 'nothing was sent. Try again in a moment.', { meter: 'unreadable' }] };
+  if (cap === 0)
+    return { cap, fail: [403, 'That is not switched on for this deployment.', { capped: true }] };
+  if (cap > 0 && used !== null && used >= cap)
+    return { cap, fail: [429, `That is ${cap} ${plural} this month, which is what this plan `
+      + 'includes. It resets on the first. Nothing was sent.', { monthly: true, used, cap }] };
+  return { cap, fail: null };
+}
+
 /* ══ THE READ ══════════════════════════════════════════════════════════════ */
 app.post('/api/read', express.json({ limit: (LIM.maxTotalKb + 1000) + 'kb' }), async (req, res) => {
   const t0 = Date.now();
@@ -262,11 +294,9 @@ app.post('/api/read', express.json({ limit: (LIM.maxTotalKb + 1000) + 'kb' }), a
      Read before the work, counted after it succeeds. Skipped entirely where
      the meter is not in the database yet, because a site deployed ahead of
      its migration must not switch off a feature somebody is paying for. */
-  const cap  = capFor('airead', ent.tier);
-  const used = await usedThisMonth(ent.uid, 'airead');
-  if (cap > 0 && used !== null && used >= cap)
-    return fail(429, `That is ${cap} photo reads this month, which is what this plan includes. `
-      + 'It resets on the first. Nothing was sent.', { monthly: true, used, cap });
+  const meter = await meterFails(ent, 'airead', 'photo reads');
+  if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
+  const cap = meter.cap;
 
   { const b = budgetFails(ent.uid, 'The photo read'); if (b) return fail(b[0], b[1], b[2]); }
   const ip = req.ip || 'unknown';
@@ -578,11 +608,9 @@ app.post('/api/compare', express.json({ limit: '256kb' }), async (req, res) => {
     return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
   }
 
-  const cap  = capFor('aicompare', ent.tier);
-  const used = await usedThisMonth(ent.uid, 'aicompare');
-  if (cap > 0 && used !== null && used >= cap)
-    return fail(429, `That is ${cap} written comparisons this month, which is what this plan `
-      + 'includes. It resets on the first. Nothing was sent.', { monthly:true, used, cap });
+  const meter = await meterFails(ent, 'aicompare', 'written comparisons');
+  if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
+  const cap = meter.cap;
 
   { const b = budgetFails(ent.uid); if (b) return fail(b[0], b[1], b[2]); }
   if (!ipOk(req.ip || 'unknown'))
@@ -689,11 +717,9 @@ app.post('/api/street', express.json({ limit: '8kb' }), async (req, res) => {
     return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
   }
 
-  const cap  = capFor('aistreet', ent.tier);
-  const used = await usedThisMonth(ent.uid, 'aistreet');
-  if (cap > 0 && used !== null && used >= cap)
-    return fail(429, `That is ${cap} street briefs this month, which is what this plan includes. `
-      + 'It resets on the first. Nothing was sent.', { monthly:true, used, cap });
+  const meter = await meterFails(ent, 'aistreet', 'street briefs');
+  if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
+  const cap = meter.cap;
 
   { const b = budgetFails(ent.uid); if (b) return fail(b[0], b[1], b[2]); }
   if (!ipOk(req.ip || 'unknown'))
@@ -814,11 +840,9 @@ app.post('/api/bid', express.json({ limit: '128kb' }), async (req, res) => {
     return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
   }
 
-  const cap  = capFor('aibid', ent.tier);
-  const used = await usedThisMonth(ent.uid, 'aibid');
-  if (cap > 0 && used !== null && used >= cap)
-    return fail(429, `That is ${cap} bid checks this month, which is what this plan includes. `
-      + 'It resets on the first. Nothing was sent.', { monthly:true, used, cap });
+  const meter = await meterFails(ent, 'aibid', 'bid checks');
+  if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
+  const cap = meter.cap;
 
   { const b = budgetFails(ent.uid); if (b) return fail(b[0], b[1], b[2]); }
   if (!ipOk(req.ip || 'unknown'))
@@ -917,11 +941,9 @@ app.post('/api/objections', express.json({ limit: '32kb' }), async (req, res) =>
     return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
   }
 
-  const cap  = capFor('ailetter', ent.tier);
-  const used = await usedThisMonth(ent.uid, 'ailetter');
-  if (cap > 0 && used !== null && used >= cap)
-    return fail(429, `That is ${cap} of these this month, which is what this plan includes. `
-      + 'It resets on the first. Nothing was sent.', { monthly:true, used, cap });
+  const meter = await meterFails(ent, 'ailetter', 'of these');
+  if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
+  const cap = meter.cap;
 
   { const b = budgetFails(ent.uid); if (b) return fail(b[0], b[1], b[2]); }
   if (!ipOk(req.ip || 'unknown'))
