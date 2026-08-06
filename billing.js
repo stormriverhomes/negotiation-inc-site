@@ -268,8 +268,8 @@ export function mountBilling(app){
           ...(TRIAL_DAYS > 0 ? { trial_period_days: TRIAL_DAYS } : {}),
         },
         metadata: { uid: who.uid, plan },
-        success_url: `${base}/office.html?paid=1`,
-        cancel_url:  `${base}/plans.html`,
+        success_url: `${base}/office?paid=1`,
+        cancel_url:  `${base}/plans`,
       });
       log('checkout', plan);
       res.json({ ok:true, url: s.url });
@@ -293,7 +293,7 @@ export function mountBilling(app){
     try {
       const base = SITE || `${req.protocol}://${req.get('host')}`;
       const s = await stripe('POST', '/v1/billing_portal/sessions',
-        { customer: cust, return_url: `${base}/office.html` });
+        { customer: cust, return_url: `${base}/office` });
       res.json({ ok:true, url: s.url });
     } catch(e){
       res.status(502).json({ ok:false, error:'The billing page could not be opened just now.' });

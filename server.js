@@ -1228,20 +1228,60 @@ app.get('/api/health', (_req, res) => {
    The repo root also now contains the server itself, so it is served from an
    allowlist of what a browser is ever meant to fetch rather than by handing
    out the directory and hoping. */
-const SERVE = /\.(html|css|js|mjs|json|png|jpe?g|gif|svg|webp|ico|woff2?|txt|xml|webmanifest|map)$/i;
+/* ── .mjs IS OFF THE LIST ENTIRELY ─────────────────────────────────────────
+   Not one shipped page loads a module — every .mjs in this repo is build or
+   test tooling — so `mjs` on the ALLOW list was doing nothing except making
+   the block list below responsible for naming each one. It named five, and
+   test-urls.mjs made six: the harness caught the new file the same afternoon
+   it was written, which is the good outcome, but the shape of the mistake was
+   the one the comment below already describes happening to compare.js.
+
+   A list of what may be fetched is a list you can check against the pages. A
+   list of what may not is a list somebody has to remember to add to. */
+const SERVE = /\.(html|css|js|json|png|jpe?g|gif|svg|webp|ico|woff2?|txt|xml|webmanifest|map)$/i;
 /* Every server-side file by NAME, matched on the basename, so a stray copy in
    a subdirectory is refused too — /srv/compare.js is as blocked as /compare.js.
    compare.js and street.js were missing from this list for one deploy: neither
    holds a secret, but both hold the system prompt, and a prompt you can read is
    a prompt you can steer around. Anything added to srv/ belongs here. */
 const NEVER = /^(server|prompt|billing|compare|street|bid|objections)\.js$|^package(-lock)?\.json$|^render\.yaml$|^(publish|suite2?|harness-util|test-api|test-pay|_.*|t-.*|v\d+)\.mjs$|^(LAUNCH|SUPABASE|STRIPE|DOMAIN|README)\.md$|^\.env/i;
+/* ── ONE URL PER PAGE, AND IT HAS NO .html ON THE END ──────────────────────
+   `/desk` rather than `/desk.html`. express.static's `extensions:['html']`
+   below already resolves the clean form — what stopped it was the allowlist
+   gate, which refused anything without a recognised extension and so 404'd
+   every clean URL before static ever saw it.
+
+   Two halves, and the second is the one that matters:
+
+     · the gate lets an extensionless path through, still checking it against
+       NEVER and `..`. It cannot leak a server file: `extensions` only ever
+       APPENDS .html, so /server looks for server.html and finds nothing.
+     · and /desk.html permanently redirects to /desk, so there is exactly one
+       address for each page rather than two that both work. Two live URLs for
+       one page is how a site ends up with its own pages competing in search
+       results and half its inbound links pointing at the loser.
+
+   301 rather than 302 on purpose: browsers cache it, so the redirect is paid
+   once per link per browser and internal navigation costs nothing thereafter.
+   The query string is carried across — the arcade hands the desk a whole
+   house in one, and a redirect that drops it loses the handoff. */
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  const m = /^(\/.*)\.html$/i.exec(decodeURIComponent(req.path));
+  if (!m) return next();
+  const q = req.originalUrl.slice(req.path.length);        // '?a=1' or ''
+  const to = (m[1] === '/index' ? '/' : m[1]) + q;
+  return res.redirect(301, to);
+});
 app.use((req, res, next) => {
   const p = decodeURIComponent(req.path).replace(/^\/+/, '');
   if (!p || p.endsWith('/')) return next();
   const base = p.split('/').pop();
   if (NEVER.test(base) || base.startsWith('.')) return res.status(404).type('txt').send('Not found');
   if (p.indexOf('..') >= 0) return res.status(400).type('txt').send('No');
-  if (!SERVE.test(base)) return res.status(404).type('txt').send('Not found');
+  /* an extensionless name is a page request; static resolves it to .html or
+     nothing at all. Anything WITH an extension still has to be on the list. */
+  if (/\./.test(base) && !SERVE.test(base)) return res.status(404).type('txt').send('Not found');
   next();
 });
 app.use(express.static(__dirname, {
