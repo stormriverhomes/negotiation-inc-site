@@ -38,7 +38,7 @@ import * as CMP from './compare.js';
 import * as ST from './street.js';
 import * as BID from './bid.js';
 import * as OBJ from './objections.js';
-import { mountBilling, billingState, entitlementOf, usedThisMonth, countUse, capFor } from './billing.js';
+import { mountBilling, billingState, entitlementOf, usedThisMonth, countUse, capFor, FEATURES } from './billing.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -71,8 +71,103 @@ const USD_IN = 3 / 1e6, USD_OUT = 15 / 1e6;
    window resets on its own clock rather than at midnight, so a burst at 23:59
    cannot buy a second allowance sixty seconds later. */
 const hits = new Map();                 // ip → [timestamps]
-let day = { at: Date.now(), n: 0, usd: 0 };
-const rollDay = () => { if (Date.now() - day.at > 864e5) day = { at: Date.now(), n: 0, usd: 0 }; };
+let day = { at: Date.now(), n: 0, usd: 0, by: new Map() };
+const rollDay = () => { if (Date.now() - day.at > 864e5) day = { at: Date.now(), n: 0, usd: 0, by: new Map() }; };
+
+/* ══ THE DAY'S BUDGET IS NOT A QUEUE ═══════════════════════════════════════
+   The monthly meter above exists — its own comment says so — because "one user
+   could spend the day's budget by lunchtime and the rest got 429s for
+   something they had paid for". And then, four lines later, sat the gate that
+   produced exactly that outcome:
+
+       if (day.n >= LIM.perDay || day.usd >= LIM.dailyUsd) return 429
+
+   One number, one process, every account. The heaviest user on the service
+   decides when everybody else's day ends. Worse, the default was $5 — and one
+   Underwriter subscription sells 250 AI calls a month, so a single subscriber
+   doing a day's real work can spend the whole ceiling by mid-afternoon. It was
+   not a backstop for a runaway; it was the binding constraint in normal
+   operation, sitting in front of five features people have paid for.
+
+   The shape it should have had:
+
+     · WHILE THE BUDGET LASTS, nobody is refused. Same as before.
+     · ONCE IT IS SPENT, refuse only the callers who are ABOVE their share of
+       it — where the share is the budget divided by the accounts that have
+       actually used it today. The account that ate the budget is stopped; the
+       one arriving with nothing spent is served. That is the whole fix, and it
+       has the property that matters: a newcomer is never refused for something
+       somebody else did.
+     · AND THERE IS STILL A CEILING, because the reason a global cap existed at
+       all is real — a bug, or a stolen session, must not be able to run up an
+       unbounded bill. It is now set well above the budget rather than at it,
+       which is what a backstop means.
+
+   The share moves as the day goes on: one account alone owns the whole budget
+   until a second one appears, at which point the first is over its half and
+   stops. Arrival order therefore decides nothing, which is the point.
+
+   `day.by` is per process and dies with it, like every other counter here. It
+   is keyed by account, not by IP, because the entitlement check above has
+   already established who is asking — and an account is the thing that was
+   sold, so it is the thing a share belongs to. */
+const hardUsd = () => { const v = Number(process.env.NI_DAILY_USD_HARD);
+  return Number.isFinite(v) && v > 0 ? v : LIM.dailyUsd * 4; };
+const hardN   = () => { const v = Number(process.env.NI_PER_DAY_HARD);
+  return Number.isFinite(v) && v > 0 ? v : LIM.perDay * 4; };
+
+/* one bill, two books: the process total and the account that caused it */
+function charge(uid, usage, extraUsd){
+  const usd = ((usage && usage.input_tokens)  || 0) * USD_IN
+            + ((usage && usage.output_tokens) || 0) * USD_OUT
+            + (Number.isFinite(extraUsd) ? extraUsd : 0);
+  day.n += 1; day.usd += usd;
+  const who = uid || 'anon';
+  const m = day.by.get(who) || { n: 0, usd: 0 };
+  m.n += 1; m.usd += usd; day.by.set(who, m);
+  return usd;
+}
+
+/* null to proceed, or [status, message, extra] — one gate, five routes, so it
+   cannot drift between them the way five copies of two lines always do */
+function budgetFails(uid, what){
+  rollDay();
+  /* the ceiling: a runaway is refused whoever it is, and this is the only
+     refusal here that is allowed to be indiscriminate */
+  if (day.usd >= hardUsd() || day.n >= hardN())
+    return [429, (what || 'This service') + ' has hit its ceiling for today. It resets within 24 hours.',
+            { retryHours: 24, ceiling: true }];
+  /* under budget: nobody is refused, which is almost always the case */
+  if (day.n < LIM.perDay && day.usd < LIM.dailyUsd) return null;
+  /* over budget: only the accounts above their share */
+  const heads  = Math.max(1, day.by.size);
+  const mine   = day.by.get(uid || 'anon') || { n: 0, usd: 0 };
+  if (mine.usd >= LIM.dailyUsd / heads || mine.n >= LIM.perDay / heads)
+    return [429, 'That is this account\'s share of what the service can run today, and it is '
+              + 'busier than usual. It resets within 24 hours — your monthly allowance is untouched.',
+            { retryHours: 24, share: true }];
+  return null;
+}
+
+/* ── AND A BUDGET BELOW WHAT WAS SOLD IS A BUG YOU FIND FROM A COMPLAINT ────
+   The caps in billing.js are a promise printed on the plans page. This checks,
+   once at boot, that the day's budget could actually honour ONE subscriber of
+   the top tier working at the rate they bought — because if it cannot, the
+   ceiling is not protecting the service from customers, it is protecting the
+   service from having any. It only warns: the right number is discovered from
+   usage, and a deploy that refuses to boot over a guess is worse. */
+const NOMINAL_USD = 0.04;   // rough cost of one AI call here; used ONLY for this warning
+setTimeout(() => {
+  let month = 0;
+  for (const f of FEATURES) month += capFor(f, 3);
+  const perDay = month / 30;
+  if (LIM.perDay < perDay)
+    console.warn(`[budget] NI_PER_DAY is ${LIM.perDay} and one Office subscription sells `
+      + `${Math.ceil(perDay)} calls a day. Raise NI_PER_DAY.`);
+  if (LIM.dailyUsd < perDay * NOMINAL_USD)
+    console.warn(`[budget] NI_DAILY_USD is $${LIM.dailyUsd} and one Office subscription's daily `
+      + `share costs roughly $${(perDay * NOMINAL_USD).toFixed(2)}. Raise NI_DAILY_USD.`);
+}, 2000).unref?.();
 function ipOk(ip){
   const now = Date.now(), win = now - 36e5;
   const a = (hits.get(ip) || []).filter(t => t > win);
@@ -173,9 +268,7 @@ app.post('/api/read', express.json({ limit: (LIM.maxTotalKb + 1000) + 'kb' }), a
     return fail(429, `That is ${cap} photo reads this month, which is what this plan includes. `
       + 'It resets on the first. Nothing was sent.', { monthly: true, used, cap });
 
-  rollDay();
-  if (day.n >= LIM.perDay || day.usd >= LIM.dailyUsd)
-    return fail(429, 'The photo read has hit its cap for today. It resets within 24 hours.', { retryHours: 24 });
+  { const b = budgetFails(ent.uid, 'The photo read'); if (b) return fail(b[0], b[1], b[2]); }
   const ip = req.ip || 'unknown';
   if (!ipOk(ip)) return fail(429, `That is ${LIM.perIpHour} reads in an hour from one place. Try again shortly.`);
 
@@ -226,8 +319,7 @@ app.post('/api/read', express.json({ limit: (LIM.maxTotalKb + 1000) + 'kb' }), a
   try {
     const out = MOCK ? mockAnswer() : await callAnthropic(content);
     const clean = validate(out.data);
-    day.n += 1;
-    day.usd += (out.usage.input_tokens || 0) * USD_IN + (out.usage.output_tokens || 0) * USD_OUT;
+    charge(ent.uid, out.usage);
     log('read ok', images.length + 'img', totalKb + 'kb', (Date.now()-t0) + 'ms',
         'seen ' + clean.stats.seen + '/17', 'day $' + day.usd.toFixed(3));
     /* the read worked, so it counts. Awaited rather than fired and forgotten:
@@ -285,8 +377,71 @@ async function callAnthropic(content){
    did, and it is not decoration: a line that comes back with a number while
    claiming not to have been seen is DROPPED rather than trusted, and the
    count of those is returned so the calibration pass can see it happening. */
+/* ── THE PHOTO READ MAY NOT PUT A PRICE ON ANYTHING ────────────────────────
+   Four of the five AI features check every dollar figure against a set of
+   figures we supplied. The photo read checked NONE — and it is the only one
+   whose output is written into saved sheet state and printed on a lender
+   packet.
+
+   What that allowed: a model whose own system prompt demonstrates converting
+   scores to dollars returns "Kitchen and baths need roughly $45,000 of work",
+   `validate()` waves it through, `applyRead` stores it in S.read.summary and
+   SAVES THE SHEET, and the photo report renders it as the lead paragraph —
+   directly above a repairs total of about $21,000 computed from the very
+   sliders that same read just set. Two contradictory repair figures, one of
+   them invented, one paragraph apart, both persisted.
+
+   The check here can be absolute, and that is the point. This model is asked
+   for `seen` and a percentage-of-budget score per line. It is never given a
+   dollar figure and never asked for one, so there is no legitimate money
+   token for it to emit — any money-shaped string in its prose is invented by
+   definition. Nothing to compare against, nothing to allow: strip it.
+
+   Stripped rather than refused, unlike compare and objections. Those produce
+   a document whose whole content is prose, so one invented figure poisons the
+   draft. Here the prose is a caption on top of seventeen scored lines that are
+   independently checked — throwing the read away over one sentence would cost
+   the user a paid read to punish the model. The sentence goes; the read
+   stands; the count is reported. */
+/* A comma-grouped number is money-shaped, and so is a square footage. The
+   exemption is narrow and explicit — a figure immediately followed by a size
+   unit is a size, and "roughly 1,450 sq ft" is an honest thing for a caption
+   to say. Everything else that looks like money is treated as money, because
+   this model is never handed a price and so can never be right about one. */
+const SIZE_AFTER = /^\s?(?:sq\.?\s?f(?:ee)?t|sqft|square\s?feet|sf\b)/i;
+const MONEY_TOKEN = /(?:[$£€]\s?\d[\d,]*(?:\.\d{1,2})?)|(?:\b\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?\b)|(?:\b\d+(?:\.\d+)?\s?[kK]\b)|(?:\b\d[\d,]*\s?(?:dollars|USD)\b)/g;
+/** every money token in `t` that is not immediately followed by a size unit */
+function moneyHits(t){
+  const out = [];
+  MONEY_TOKEN.lastIndex = 0;
+  let m;
+  while ((m = MONEY_TOKEN.exec(t)) !== null){
+    const after = t.slice(m.index + m[0].length);
+    if (SIZE_AFTER.test(after)) continue;
+    out.push({ tok: m[0].trim(), at: m.index });
+  }
+  MONEY_TOKEN.lastIndex = 0;
+  return out;
+}
+function noMoney(text, tally){
+  const t = String(text || '');
+  const hits = moneyHits(t);
+  if (!hits.length) return t;
+  if (tally) for (const h of hits) tally.push(h.tok);
+  /* the sentence carrying it goes, not just the token — "roughly of work" is
+     a worse thing to print than nothing at all */
+  /* split on the semicolon too, not just the full stop. "Kitchen and baths
+     need roughly $45,000 of work; the mechanicals could not be seen" carries
+     one invented figure and one honest observation, and dropping the honest
+     half with it costs the reader something they paid for. */
+  const kept = t.split(/(?<=[.!?;])\s+/).filter(sent => moneyHits(sent).length === 0);
+  return kept.join(' ').replace(/^[;,\s]+/, '').replace(/\s+([.;,])/g, '$1').trim();
+}
+
 function validate(d){
   const lines = {}, unseen = [], contradicted = [];
+  /* every money token this model tried to emit, so the count is reportable */
+  const priced = [];
   const src = (d && typeof d.lines === 'object' && d.lines) ? d.lines : {};
   let seen = 0;
   for (const l of LINES){
@@ -302,7 +457,7 @@ function validate(d){
       seen: ok,
       pc: ok ? pc : null,
       conf: ok && ['high','med','low'].indexOf(r.conf) >= 0 ? r.conf : (ok ? 'low' : null),
-      why: typeof r.why === 'string' ? r.why.slice(0, 240) : '',
+      why: noMoney(typeof r.why === 'string' ? r.why.slice(0, 240) : '', priced),
       /* the lines a listing gallery almost never shows. Flagged so the desk
          can say "this one is unusual to be able to see" rather than treating
          a scored panel exactly like a scored kitchen. */
@@ -310,15 +465,19 @@ function validate(d){
     };
   }
   const flags = (Array.isArray(d && d.flags) ? d.flags : []).slice(0, 12).map(f => ({
-    what:  String((f && f.what)  || '').slice(0, 160),
-    where: String((f && f.where) || '').slice(0, 120),
-    why:   String((f && f.why)   || '').slice(0, 200),
+    what:  noMoney(String((f && f.what)  || '').slice(0, 160), priced),
+    where: noMoney(String((f && f.where) || '').slice(0, 120), priced),
+    why:   noMoney(String((f && f.why)   || '').slice(0, 200), priced),
   })).filter(f => f.what);
   return {
     lines, flags,
-    summary: String((d && d.summary) || '').slice(0, 600),
+    summary: noMoney(String((d && d.summary) || '').slice(0, 600), priced),
     stats: { seen, unseen: unseen.length, contradicted: contradicted.length,
-             rareScored: LINE_IDS.filter(id => lines[id].seen && lines[id].rare).length },
+             rareScored: LINE_IDS.filter(id => lines[id].seen && lines[id].rare).length,
+             /* said out loud, so the report can tell the reader a sentence was
+                withheld rather than quietly handing them a shorter one */
+             priced: priced.length },
+    priced: [...new Set(priced)].slice(0, 6),
     unseenIds: unseen,
   };
 }
@@ -425,9 +584,7 @@ app.post('/api/compare', express.json({ limit: '256kb' }), async (req, res) => {
     return fail(429, `That is ${cap} written comparisons this month, which is what this plan `
       + 'includes. It resets on the first. Nothing was sent.', { monthly:true, used, cap });
 
-  rollDay();
-  if (day.n >= LIM.perDay || day.usd >= LIM.dailyUsd)
-    return fail(429, 'This service has hit its cap for today. It resets within 24 hours.', { retryHours: 24 });
+  { const b = budgetFails(ent.uid); if (b) return fail(b[0], b[1], b[2]); }
   if (!ipOk(req.ip || 'unknown'))
     return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
 
@@ -451,8 +608,7 @@ app.post('/api/compare', express.json({ limit: '256kb' }), async (req, res) => {
       text = r.text; usage = r.usage;
     }
     const check = CMP.validate(text, facts);
-    day.n++;
-    day.usd += (usage.input_tokens || 0) * USD_IN + (usage.output_tokens || 0) * USD_OUT;
+    charge(ent.uid, usage);
 
     if (!check.ok){
       /* refused, not repaired. A draft with an invented figure quietly removed
@@ -539,9 +695,7 @@ app.post('/api/street', express.json({ limit: '8kb' }), async (req, res) => {
     return fail(429, `That is ${cap} street briefs this month, which is what this plan includes. `
       + 'It resets on the first. Nothing was sent.', { monthly:true, used, cap });
 
-  rollDay();
-  if (day.n >= LIM.perDay || day.usd >= LIM.dailyUsd)
-    return fail(429, 'This service has hit its cap for today. It resets within 24 hours.', { retryHours: 24 });
+  { const b = budgetFails(ent.uid); if (b) return fail(b[0], b[1], b[2]); }
   if (!ipOk(req.ip || 'unknown'))
     return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
 
@@ -583,9 +737,7 @@ app.post('/api/street', express.json({ limit: '8kb' }), async (req, res) => {
 
     const A = ST.assemble(content, facts);
     const paras = ST.paragraphs(A);
-    day.n++;
-    day.usd += (usage.input_tokens || 0) * USD_IN + (usage.output_tokens || 0) * USD_OUT
-             + searches * 0.01;                      // web search, $10 per 1,000
+    charge(ent.uid, usage, searches * 0.01);         // web search, $10 per 1,000
 
     if (!paras.length)
       return fail(422, 'The brief came back with nothing that could be verified against the census '
@@ -668,9 +820,7 @@ app.post('/api/bid', express.json({ limit: '128kb' }), async (req, res) => {
     return fail(429, `That is ${cap} bid checks this month, which is what this plan includes. `
       + 'It resets on the first. Nothing was sent.', { monthly:true, used, cap });
 
-  rollDay();
-  if (day.n >= LIM.perDay || day.usd >= LIM.dailyUsd)
-    return fail(429, 'This service has hit its cap for today. It resets within 24 hours.', { retryHours: 24 });
+  { const b = budgetFails(ent.uid); if (b) return fail(b[0], b[1], b[2]); }
   if (!ipOk(req.ip || 'unknown'))
     return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
 
@@ -699,8 +849,7 @@ app.post('/api/bid', express.json({ limit: '128kb' }), async (req, res) => {
       data = r.data; usage = r.usage;
     }
     const out = BID.reconcile(data, sheetIn, text);
-    day.n++;
-    day.usd += (usage.input_tokens || 0) * USD_IN + (usage.output_tokens || 0) * USD_OUT;
+    charge(ent.uid, usage);
 
     const why = BID.readable(out);
     if (why){ log('bid UNREADABLE', out.counts.items, out.counts.dropped); return fail(422, why, { counts: out.counts }); }
@@ -774,9 +923,7 @@ app.post('/api/objections', express.json({ limit: '32kb' }), async (req, res) =>
     return fail(429, `That is ${cap} of these this month, which is what this plan includes. `
       + 'It resets on the first. Nothing was sent.', { monthly:true, used, cap });
 
-  rollDay();
-  if (day.n >= LIM.perDay || day.usd >= LIM.dailyUsd)
-    return fail(429, 'This service has hit its cap for today. It resets within 24 hours.', { retryHours: 24 });
+  { const b = budgetFails(ent.uid); if (b) return fail(b[0], b[1], b[2]); }
   if (!ipOk(req.ip || 'unknown'))
     return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
 
@@ -806,8 +953,7 @@ app.post('/api/objections', express.json({ limit: '32kb' }), async (req, res) =>
       data = r.data; usage = r.usage;
     }
     const check = OBJ.validate(data, facts);
-    day.n++;
-    day.usd += (usage.input_tokens || 0) * USD_IN + (usage.output_tokens || 0) * USD_OUT;
+    charge(ent.uid, usage);
 
     if (!check.ok){
       log('object REFUSED', check.empty ? 'empty' : check.invented.join(' '));
@@ -1022,7 +1168,12 @@ app.get('/api/health', (_req, res) => {
        the writable columns on a locked database is a menu */
     grants: grantState.v === 'OPEN' ? { state:'OPEN', writable:grantState.open } : grantState.v,
     billing: billingState(),
-    today: { reads: day.n, capReads: LIM.perDay, capUsd: LIM.dailyUsd },
+    /* accounts, not who they are: a health endpoint that names the heavy user
+       is a health endpoint you cannot leave open */
+    today: { reads: day.n, capReads: LIM.perDay, capUsd: LIM.dailyUsd,
+             ceilingReads: hardN(), ceilingUsd: hardUsd(),
+             accounts: day.by.size,
+             share: day.by.size ? +(LIM.dailyUsd / day.by.size).toFixed(3) : LIM.dailyUsd },
     limits: { maxImages: LIM.maxImages, maxImageKb: LIM.maxImageKb, perIpHour: LIM.perIpHour } });
 });
 

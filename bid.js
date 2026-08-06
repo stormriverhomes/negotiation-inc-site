@@ -213,13 +213,33 @@ export function reconcile(data, sheetIn, bidText){
     const text = String(it.text || '').slice(0, 90).trim();
     if (!text) continue;
     let amount = (typeof it.amount === 'number' && Number.isFinite(it.amount)) ? it.amount : null;
+    let unverified = false;
     if (amount !== null){
       amount = Math.round(amount * 100) / 100;
       if (!allowed.has(amount) && !allowed.has(Math.round(amount))){
-        /* reported a figure that is not printed in the bid. Not repaired,
-           not rounded into acceptance — dropped, and counted. */
+        /* ── A REFUSED FIGURE IS NOT AN ABSENT LINE ────────────────────────
+           This used to `continue`, and the line vanished — which meant the
+           system it belonged to came back `quoted:false` and was printed under
+           "On your sheet, absent from the bid". The contractor DID quote the
+           roof. We simply could not verify the number they put on it, and the
+           page then told the customer, in a document they negotiate from, that
+           the roof was missing from the bid. That is an accusation, and it is
+           one we made up.
+
+           It also moved money: an omission carries the SHEET's estimate into
+           `missingTotal` and thence into `withMissing`, the figure the "use
+           this as my repair figure" button writes. So a dropped figure quietly
+           re-priced the deal at the sheet's number for work the bid had
+           already priced at a different one.
+
+           The figure is still refused — that part was always right. What
+           changes is that the LINE survives it, with no price, which is the
+           shape this file already has for "the bid names the work and does not
+           price it". It lands in `provisional` instead of `missing`, carrying
+           the reason, so the page can say which of the two happened. */
         dropped.push({ text, amount, line });
-        continue;
+        amount = null;
+        unverified = true;
       }
     }
     /* the note rides beside a price on the page, so it is held to the price's
@@ -230,7 +250,7 @@ export function reconcile(data, sheetIn, bidText){
       const bad = proseInvents(note, allowed);
       if (bad){ proseDropped.push({ where:'note', token:bad, text: note.slice(0,90) }); note = undefined; }
     }
-    items.push({ text, amount, line, note });
+    items.push({ text, amount, line, note, ...(unverified ? { unverified: true } : {}) });
   }
 
   /* per system: what the bid prices against what the sheet expected */
@@ -269,7 +289,12 @@ export function reconcile(data, sheetIn, bidText){
   const provisional = rows.filter(r => r.est > 0 && r.quoted && !r.priced)
                           .sort((a, b) => b.est - a.est)
                           .map(r => ({ id:r.id, lab:r.lab, est:r.est,
-                                       said: (r.items[0] && r.items[0].text) || '' }));
+                                       said: (r.items[0] && r.items[0].text) || '',
+                                       /* which of the two silences this is: the bid put no
+                                          price on it, or it put one we could not find in the
+                                          text. The reader is owed the difference — one is the
+                                          contractor's doing and the other is ours. */
+                                       why: r.items.some(i => i.unverified) ? 'unverified' : 'nopriced' }));
   const provisionalTotal = provisional.reduce((a, r) => a + r.est, 0);
 
   /* and its mirror: priced by the contractor, never priced by the sheet */
@@ -287,7 +312,10 @@ export function reconcile(data, sheetIn, bidText){
      loud. Under a hundred dollars it is rounding; over it is a missing page. */
   const statedGap = stated === null ? null : stated - bidTotal;
 
-  const unpriced = items.filter(i => i.amount === null).length;
+  /* "the contractor named it and put no price on it" — which is a fact about
+     the bid. A line we stripped the price off ourselves is a fact about US,
+     and it is counted separately as `unverified` below. */
+  const unpriced = items.filter(i => i.amount === null && !i.unverified).length;
 
   return {
     rows,
@@ -305,6 +333,9 @@ export function reconcile(data, sheetIn, bidText){
       items: items.length,
       dropped: dropped.length,
       unpriced,
+      /* the subset of `unpriced` that is unpriced because WE refused the
+         figure, not because the contractor withheld one */
+      unverified: items.filter(i => i.unverified).length,
       systemsQuoted: rows.filter(r => r.quoted).length,
       systemsOnSheet: rows.filter(r => r.est > 0).length,
     },
@@ -333,6 +364,12 @@ export function reconcile(data, sheetIn, bidText){
    failure. Say so instead. */
 export function readable(out){
   if (out.counts.items < 2) return 'Only one line could be read out of that. Paste the bid as text rather than a screenshot, or type the main lines in.';
-  if (out.counts.dropped > out.counts.items) return 'Most of the figures that came back are not printed in the bid, so nothing here can be trusted. Nothing has been saved.';
+  /* This read `dropped > items`, which was true only while a dropped line was
+     thrown away. Now that the line survives its refused figure, every dropped
+     figure is also an item and that comparison can never fire again — a guard
+     that has quietly stopped guarding is worse than one that was never there.
+     The intent was "most of the figures are not in the bid", so that is what it
+     asks now. */
+  if (out.counts.dropped * 2 > out.counts.items) return 'Most of the figures that came back are not printed in the bid, so nothing here can be trusted. Nothing has been saved.';
   return null;
 }

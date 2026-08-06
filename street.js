@@ -233,16 +233,38 @@ export function assemble(content, facts){
                      catch(e){ return false; } })
       .map(c => ({ url: String(c.url).trim().slice(0, 400), title: String(c.title || '').slice(0, 160) }));
 
-    /* rule 1 · money and percentages have to be ours */
+    /* ── rule 1 · EVERY FIGURE HAS TO BE OURS, NOT JUST THE DECORATED ONES ──
+       This matched `$N` and `N%` and nothing else, so the guarantee held for
+       figures the model happened to DECORATE and let through every figure it
+       wrote bare. Note precisely what escaped: an invented "34%" WITH the sign
+       would have been caught. What got through was the same claim written as
+       "Only 34 percent of the occupied homes here are owner-occupied, and the
+       median structure dates to 1974" — printed directly beneath a facts strip
+       reading "Owner-occupied 61% · Vacancy 9% · Built, median 1948", with the
+       ACS vintage cited under both.
+
+       The validator's coverage was a formatting accident rather than a control.
+       Four shapes now: a `$` amount, a percentage however it is spelled, a
+       bare thousands-separated number, and a bare four-digit year — because
+       "1974" is exactly the kind of figure this brief invents and exactly the
+       kind nobody writes with a comma. Small bare integers stay exempt, so
+       "three streets north" and "two permits" still read as English. */
     let bad = false;
-    for (const m of text.matchAll(/\$\s?([\d][\d,]*)(?:\.\d+)?/g)){
-      const n = Math.abs(parseInt(m[1].replace(/,/g, ''), 10));
-      if (Number.isFinite(n) && !allowed.has(n)){ bad = true; invented.push(m[0].trim()); }
-    }
-    for (const m of text.matchAll(/([\d]{1,3})\s?%/g)){
-      const n = parseInt(m[1], 10);
-      if (Number.isFinite(n) && !allowed.has(n)){ bad = true; invented.push(m[0].trim()); }
-    }
+    const note = tok => { bad = true; invented.push(String(tok).trim()); };
+    const seen = (re, whole) => {
+      for (const m of text.matchAll(re)){
+        const n = Math.abs(Number(String(m[1]).replace(/,/g, '')));
+        if (!Number.isFinite(n)) continue;
+        if (allowed.has(n) || allowed.has(Math.round(n))) continue;
+        note(whole ? m[0] : m[1]);
+      }
+    };
+    seen(/\$\s?([\d][\d,]*)(?:\.\d+)?/g, true);
+    seen(/([\d]{1,3}(?:\.\d)?)\s?(?:%|per\s?cent\b|percent\b)/gi, true);
+    seen(/(?<![$\d.,])([\d]{1,3}(?:,\d{3})+)(?:\.\d+)?(?![\d,])/g, true);
+    /* a bare year: the census facts carry median-year-built, so a legitimate
+       one is in `allowed` and an invented one is not */
+    seen(/(?<![$\d.,])(1[89]\d{2}|20[0-4]\d)(?![\d,%])/g, true);
     if (bad){ dropped.push({ why:'figure', text: text.slice(0, 90) }); continue; }
     kept.push({ text, cites });
   }

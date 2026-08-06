@@ -139,14 +139,44 @@ export function allowedFigures(facts){
   return set;
 }
 
+/* ── THE GATE WAS A FORMATTING ACCIDENT ───────────────────────────────────
+   This matched only `$`-prefixed amounts, and nothing at all for percentages.
+   So the rail held for figures the model happened to DECORATE and let through
+   every figure it wrote bare — in the feature whose output is written to be
+   forwarded to a lender.
+
+   The escape, on a real bench: "Sylvan's repairs run to 14% of the finished
+   value against Peach Tree's 9%, and it is still 32,000 short of the asking
+   price." No `$` anywhere, so `matchAll` found nothing and `ok` was true. The
+   true ratios are 13.5% and 9.2%, neither appears in the facts, and that is
+   the model doing arithmetic in a document destined for a lender.
+
+   Three shapes are checked now: a `$` amount with or without a sign, a
+   percentage, and a bare thousands-separated number. Bare SMALL integers stay
+   exempt on purpose — "two right answers" and "four comps" are English, and a
+   comparison that cannot say "three" is not worth having. The line between
+   them is the comma: a number a person would write with a thousands separator
+   is a number somebody might act on. */
+const AMOUNT   = /[−-]?\$\s?([\d][\d,]*)(?:\.\d+)?/g;
+const PERCENT  = /([\d]{1,3}(?:\.\d)?)\s?(?:%|per\s?cent\b|percent\b)/gi;
+const GROUPED  = /(?<![$\d.,])([\d]{1,3}(?:,\d{3})+)(?:\.\d+)?(?![\d,])/g;
+
 export function validate(text, facts){
   const allowed = allowedFigures(facts);
+  const t = String(text);
   const bad = [];
-  /* $1,234 / $1234 / −$1,234, and the same with a minus sign in front */
-  for (const m of String(text).matchAll(/[−-]?\$\s?([\d][\d,]*)(?:\.\d+)?/g)){
-    const n = Math.abs(parseInt(m[1].replace(/,/g, ''), 10));
-    if (!Number.isFinite(n)) continue;
-    if (!allowed.has(n)) bad.push(m[0].trim());
-  }
+  const check = (re, whole) => {
+    for (const m of t.matchAll(re)){
+      const n = Math.abs(Number(String(m[1]).replace(/,/g, '')));
+      if (!Number.isFinite(n)) continue;
+      /* a percentage is allowed if the number itself is one we supplied, and
+         so is its rounded form — the facts carry integers */
+      if (allowed.has(n) || allowed.has(Math.round(n))) continue;
+      bad.push((whole ? m[0] : String(m[1])).trim());
+    }
+  };
+  check(AMOUNT, true);
+  check(PERCENT, true);
+  check(GROUPED, true);
   return { ok: bad.length === 0, invented: [...new Set(bad)].slice(0, 6) };
 }
