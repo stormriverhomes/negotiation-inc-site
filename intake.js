@@ -51,9 +51,25 @@ import { randomBytes } from 'node:crypto';
 
 export const MODEL = process.env.NI_MODEL_INTAKE || process.env.NI_MODEL || 'claude-sonnet-4-5';
 
-/* what the sheet has a home for. Deliberately short: these are the figures a
-   listing actually prints. Anything else is a guess wearing a field name. */
-export const FIELDS = ['asking', 'sqft', 'beds', 'baths', 'year', 'lot', 'taxes', 'hoa'];
+/* ── WHAT THE SHEET CAN ACTUALLY PUT SOMEWHERE ─────────────────────────────
+   Two lists, because there are two different things and conflating them is
+   how a feature ends up extracting figures that land nowhere.
+
+   SHEET is the figures the desk has a box for — grep finds each of these
+   consumed by the pricing. They arrive marked as read from a photograph and
+   the person confirms them.
+
+   CONTEXT is real, printed, quoted, and has NO home: the desk does not price
+   on the year built, the tax bill or an HOA. They are shown beside the sheet
+   as what the listing said, and they never land in an input.
+
+   The locked shelf in desk.html states this rule for its own case — "if a
+   locked card names something, grep has to find the code that does it" — and
+   it applies exactly as well here. A field with no consumer is decoration,
+   and decoration on an underwriting sheet is worse than an omission. */
+export const SHEET_FIELDS   = ['asking', 'sqft', 'beds', 'baths'];
+export const CONTEXT_FIELDS = ['year', 'lot', 'taxes', 'hoa'];
+export const FIELDS = [...SHEET_FIELDS, ...CONTEXT_FIELDS];
 
 export const SYSTEM = `You are reading photographs of real-estate documents — a listing screenshot, a tax card, an MLS sheet, a disclosure page — for an investor who is about to price the property themselves.
 
@@ -91,7 +107,7 @@ export const TOOL = {
           type: 'object',
           properties: {
             id:    { type: 'string', enum: FIELDS,
-                     description: 'asking = the list or asking price. lot = lot size in acres. taxes = annual property tax. hoa = the HOA figure as printed, with its period in `saw`.' },
+                     description: 'asking = the list or asking price. sqft = living area. lot = lot size in acres. taxes = annual property tax. hoa = the HOA figure as printed, with its period in `saw`.' },
             value: { type: 'number', description: 'The figure as a plain number, exactly as printed. No conversion.' },
             saw:   { type: 'string', description: 'The exact substring of YOUR transcript this came from, including the label. Not a paraphrase.' },
           },
@@ -209,11 +225,20 @@ export function validate(data){
     notes.push(s);
   }
 
+  /* the split: what the sheet can place, and what it can only quote */
+  const sheet = {}, context = {};
+  for (const [id, f] of Object.entries(fields))
+    (SHEET_FIELDS.includes(id) ? sheet : context)[id] = f;
+
   return {
     transcript: transcript.slice(0, 6000),
-    fields, notes,
+    fields: sheet,          // these land in boxes, marked as read from a photograph
+    context,                // these are quoted beside the sheet and land nowhere
+    notes,
     dropped, noteDropped,
-    counts: { read: Object.keys(fields).length, dropped: dropped.length,
+    counts: { read: Object.keys(sheet).length,
+              context: Object.keys(context).length,
+              dropped: dropped.length,
               unquoted: dropped.filter(d => d.why === 'unquoted').length,
               notesDropped: noteDropped.length },
     unreadable: typeof data?.unreadable === 'string' ? data.unreadable.slice(0, 240) : null,
@@ -230,7 +255,7 @@ export function readable(out){
     return 'Nothing readable came back from those images. A screenshot of the listing page, or a photo of the printed sheet, reads far better than a photo of a screen.';
   if (out.counts.unquoted && out.counts.unquoted >= out.counts.read)
     return 'The figures that came back could not be found in what it says it read, so none of them have been put on your sheet. Try a sharper image.';
-  if (!out.counts.read)
+  if (!out.counts.read && !out.counts.context)
     return 'That was readable, but none of the figures the sheet has a place for were printed in it. The transcript is below if it helps.';
   return null;
 }
