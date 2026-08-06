@@ -1093,7 +1093,13 @@ const tileHits = new Map();
 function tileOk(ip){
   const now = Date.now(), win = now - 36e5;
   const a = (tileHits.get(ip) || []).filter(t => t > win);
-  if (a.length >= 6){ tileHits.set(ip, a); return false; }
+  /* 6/hour was set when the page spent a session on every ARRIVAL, and it
+     silently flattened the map for anybody who opened the desk seven times in
+     an hour — which is one person actually working, and is exactly the
+     "sometimes the map is just broken" report. The ground is a deliberate
+     press now, so a config call means somebody asked; twenty an hour is a
+     person, and the daily cap still bounds the spend. */
+  if (a.length >= 20){ tileHits.set(ip, a); return false; }
   a.push(now); tileHits.set(ip, a);
   if (tileHits.size > 5000) for (const [k, v] of tileHits) if (!v.some(t => t > win)) tileHits.delete(k);
   return true;
