@@ -1862,7 +1862,7 @@ async function openPortal(){
 }
 
 /* ── the wait ───────────────────────────────────────────────────────────── */
-function payNote(msg, kind){
+function payNote(msg, kind, action){
   let n = document.getElementById('paynote');
   if (!n){
     n = document.createElement('div'); n.id = 'paynote';
@@ -1875,6 +1875,22 @@ function payNote(msg, kind){
   n.style.color = '#f3efe6';
   n.style.border = '1px solid ' + (kind === 'bad' ? '#7a4040' : '#3d6b52');
   n.textContent = msg;
+  /* ── A REFUSAL THAT NAMES THE DOOR SHOULD OPEN IT ─────────────────────────
+     The server now refuses a second subscription to somebody who already has
+     one — otherwise a stale ?join=underwriter bookmark billed them twice a
+     month, indefinitely, and the product looked completely normal. The refusal
+     says the change belongs in the billing portal. Saying that and then making
+     them go and find it is how a correct answer still loses a customer, so the
+     sentence carries the button. */
+  if (action && action.label && typeof action.fn === 'function'){
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = action.label;
+    b.style.cssText = 'display:block;margin-top:10px;padding:7px 13px;border-radius:8px;'
+      + 'font:inherit;font-weight:600;cursor:pointer;color:#f3efe6;background:transparent;'
+      + 'border:1px solid currentColor';
+    b.onclick = () => { b.disabled = true; b.textContent = 'One moment…'; action.fn(); };
+    n.appendChild(b);
+  }
   return n;
 }
 async function afterStripe(){
@@ -1918,7 +1934,7 @@ async function joinFromQuery(){
   const a = (typeof signedIn === 'function') ? signedIn() : null;
   if (!a) { try { sessionStorage.setItem('ni-join', plan); } catch(e){} return; }
   const r = await startCheckout(plan);
-  if (!r.ok) payNote(r.error, 'bad');
+  if (!r.ok) payNote(r.error, 'bad', r.portal ? PORTAL_ACTION : null);
 }
 /* and the same thing again for somebody who had to sign up on the way */
 async function joinAfterDoor(){
@@ -1927,8 +1943,13 @@ async function joinAfterDoor(){
   if (!plan) return;
   try { sessionStorage.removeItem('ni-join'); } catch(e){}
   const r = await startCheckout(plan);
-  if (!r.ok) payNote(r.error, 'bad');
+  if (!r.ok) payNote(r.error, 'bad', r.portal ? PORTAL_ACTION : null);
 }
+/* the one refusal that has somewhere for the person to go */
+const PORTAL_ACTION = { label: 'Manage your plan', fn: async () => {
+  const p = await openPortal();
+  if (!p.ok) payNote(p.error || 'The billing portal could not be opened just now.', 'bad');
+} };
 
 window.__checkout   = startCheckout;
 window.__portal     = openPortal;
