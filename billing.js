@@ -511,13 +511,72 @@ export async function entitlementOf(req, need = 2){
      · usedThisMonth() before the work, to refuse somebody who is out
      · countUse() after it succeeded, so an upstream failure does not spend a
        month on our error
-   The gap between them is a read of slack per person per month, which is a
-   much better trade than a reservation that has to be handed back whenever a
-   model call errors — that is a distributed transaction for a rounding error.
 
-   Both return null where the function or table is not in the database yet, and
-   every caller treats null as "do not block". A site deployed ahead of its
-   migration must not switch off something people are paying for. */
+   ── AND THE GAP BETWEEN THEM, WHICH WAS NOT "ONE READ OF SLACK" ───────────
+   This comment used to claim the exposure was a read of slack per person per
+   month. It was not: ten PARALLEL requests at used=99 all read 99, all pass a
+   cap of 100, and all reach the model — nine paid reads over the sold cap and
+   ten real model calls, comfortably inside the per-IP limit. The window was
+   bounded by concurrency, not by arithmetic.
+
+   The obvious fixes are both worse than the bug:
+     · enforcing inside ni_use cannot work — it runs AFTER the model call, so
+       by the time it could refuse, the money is spent;
+     · claim-before-work with a release on failure is the distributed
+       transaction this file refuses on principle, and its failure mode is
+       charging a customer's month for OUR error — the exact thing the
+       two-call split exists to prevent.
+
+   So the race is closed the way every other counter in server.js closes one:
+   IN PROCESS. A request that passes the cap check places a HOLD; the check
+   counts live holds on top of the database figure; the compare and the hold
+   are synchronous inside one event-loop continuation, so two requests cannot
+   both pass the last slot. The hold is dropped when countUse() lands the real
+   count, and self-expires otherwise — a failed request never spends anything,
+   it just keeps the boundary slot warm for two minutes.
+
+   The trade, stated so nobody rediscovers it angrily: a second server
+   instance would reopen the window to one instance's worth — the same
+   accepted trade as the day budget, and a much smaller problem than a Redis
+   dependency. And at the EXACT last read of a month, a failed attempt can
+   shadow the boundary for up to HOLD_MS — the customer retries two minutes
+   later, which is the right side to err on when the other side is unmetered
+   spend. */
+const HOLD_MS = 120_000;                 // the upstream abort is 90s; this outlives it
+const holds = new Map();                 // `${uid}|${feature}` → [timestamps]
+const liveHolds = k => (holds.get(k) || []).filter(t => t > Date.now() - HOLD_MS);
+export function meterHolds(uid, feature){
+  const k = uid + '|' + feature, a = liveHolds(k);
+  if (a.length) holds.set(k, a); else holds.delete(k);
+  return a.length;
+}
+export function meterHold(uid, feature){
+  const k = uid + '|' + feature, a = liveHolds(k);
+  a.push(Date.now()); holds.set(k, a);
+  if (holds.size > 5000)
+    for (const [key, v] of holds) if (!v.some(t => t > Date.now() - HOLD_MS)) holds.delete(key);
+}
+/* dropped only once the database HOLDS the count — dropping before the RPC
+   commits would reopen the race in the gap between the two */
+function meterDrop(uid, feature){
+  const k = uid + '|' + feature, a = liveHolds(k);
+  a.shift();
+  if (a.length) holds.set(k, a); else holds.delete(k);
+}
+/* and the failure half of the same bargain: a request that placed a hold and
+   then died — bad input, the daily budget, an upstream error — must give the
+   slot back when its RESPONSE closes, or three garbage requests at cap−3
+   shadow a customer's last reads for two minutes. Holds are a fungible count,
+   so releasing "a" hold and releasing "this request's" hold are the same
+   operation; the 200/non-200 split between countUse and the close-hook is
+   what makes exactly one of them fire per request. The expiry stays as the
+   backstop for the response that never closes at all. */
+export function meterRelease(uid, feature){ meterDrop(uid, feature); }
+
+/* Both meter calls return null where the function or table is not in the
+   database yet, and every caller treats null as "do not block". A site
+   deployed ahead of its migration must not switch off something people are
+   paying for. */
 
 /* Caps are per feature per tier, and The Office is 3x Underwriter throughout.
    Every one is overridable from the environment because the right number is
@@ -601,6 +660,12 @@ export async function countUse(uid, feature, cap){
     if (!r.ok) return null;
     const j = await r.json();
     const row = Array.isArray(j) ? j[0] : j;
+    /* the database holds the count now, so the in-flight hold that was
+       standing in for it comes down. Only here: on any failure path above,
+       the hold outlives the request and expires on its own — a use that was
+       never recorded must keep its slot warm, or the race reopens in the gap
+       between the RPC and this line. */
+    meterDrop(uid, feature);
     return (row && typeof row.remaining === 'number')
       ? { used: row.used|0, remaining: row.remaining|0, cap } : null;
   } catch(e){ return null; }

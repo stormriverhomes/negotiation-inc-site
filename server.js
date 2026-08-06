@@ -38,7 +38,7 @@ import * as CMP from './compare.js';
 import * as ST from './street.js';
 import * as BID from './bid.js';
 import * as OBJ from './objections.js';
-import { mountBilling, billingState, entitlementOf, usedThisMonth, countUse, capFor, FEATURES, NOMETER } from './billing.js';
+import { mountBilling, billingState, entitlementOf, usedThisMonth, countUse, capFor, FEATURES, NOMETER, meterHold, meterHolds, meterRelease } from './billing.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -228,7 +228,7 @@ const gateFails = (req, what) => {
 
    And a cap of exactly 0 now means OFF rather than unlimited. It used to mean
    unlimited, because the guard read `cap > 0 &&`. */
-async function meterFails(ent, feature, plural){
+async function meterFails(res, ent, feature, plural){
   const cap  = capFor(feature, ent.tier);
   const used = await usedThisMonth(ent.uid, feature);
   if (used === NOMETER)
@@ -236,9 +236,30 @@ async function meterFails(ent, feature, plural){
       + 'nothing was sent. Try again in a moment.', { meter: 'unreadable' }] };
   if (cap === 0)
     return { cap, fail: [403, 'That is not switched on for this deployment.', { capped: true }] };
-  if (cap > 0 && used !== null && used >= cap)
-    return { cap, fail: [429, `That is ${cap} ${plural} this month, which is what this plan `
-      + 'includes. It resets on the first. Nothing was sent.', { monthly: true, used, cap }] };
+  /* ── THE LAST SLOT CANNOT BE PASSED TWICE ────────────────────────────────
+     Ten parallel requests at used=99 all read 99 and all passed a cap of 100:
+     the gap between the read above and the count after the work is bounded by
+     concurrency, not arithmetic. So the check charges live in-flight HOLDS on
+     top of the database figure, and a request that passes places one — the
+     compare and the hold are synchronous in one event-loop continuation, so
+     no await separates them and two requests cannot both take the last slot.
+     countUse() retires the hold when the real count lands; a request that
+     dies keeps its slot warm until the hold expires, which errs on the side
+     that is not unmetered spend. The full reasoning lives above meterHold in
+     billing.js. */
+  if (cap > 0 && used !== null){
+    if (used + meterHolds(ent.uid, feature) >= cap)
+      return { cap, fail: [429, `That is ${cap} ${plural} this month, which is what this plan `
+        + 'includes. It resets on the first. Nothing was sent.', { monthly: true, used, cap }] };
+    meterHold(ent.uid, feature);
+    /* the hold comes down by exactly one of two hands: countUse(), when the
+       real count lands in the database, or this — when the response closes on
+       anything that is not a success. Without the second, a request refused
+       for bad input two lines further down would shadow the boundary until
+       the hold expired. The split on statusCode is what stops them both
+       firing for one request. */
+    res.on('close', () => { if (res.statusCode !== 200) meterRelease(ent.uid, feature); });
+  }
   return { cap, fail: null };
 }
 
@@ -294,7 +315,7 @@ app.post('/api/read', express.json({ limit: (LIM.maxTotalKb + 1000) + 'kb' }), a
      Read before the work, counted after it succeeds. Skipped entirely where
      the meter is not in the database yet, because a site deployed ahead of
      its migration must not switch off a feature somebody is paying for. */
-  const meter = await meterFails(ent, 'airead', 'photo reads');
+  const meter = await meterFails(res, ent, 'airead', 'photo reads');
   if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
   const cap = meter.cap;
 
@@ -608,7 +629,7 @@ app.post('/api/compare', express.json({ limit: '256kb' }), async (req, res) => {
     return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
   }
 
-  const meter = await meterFails(ent, 'aicompare', 'written comparisons');
+  const meter = await meterFails(res, ent, 'aicompare', 'written comparisons');
   if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
   const cap = meter.cap;
 
@@ -717,7 +738,7 @@ app.post('/api/street', express.json({ limit: '8kb' }), async (req, res) => {
     return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
   }
 
-  const meter = await meterFails(ent, 'aistreet', 'street briefs');
+  const meter = await meterFails(res, ent, 'aistreet', 'street briefs');
   if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
   const cap = meter.cap;
 
@@ -840,7 +861,7 @@ app.post('/api/bid', express.json({ limit: '128kb' }), async (req, res) => {
     return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
   }
 
-  const meter = await meterFails(ent, 'aibid', 'bid checks');
+  const meter = await meterFails(res, ent, 'aibid', 'bid checks');
   if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
   const cap = meter.cap;
 
@@ -941,7 +962,7 @@ app.post('/api/objections', express.json({ limit: '32kb' }), async (req, res) =>
     return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
   }
 
-  const meter = await meterFails(ent, 'ailetter', 'of these');
+  const meter = await meterFails(res, ent, 'ailetter', 'of these');
   if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
   const cap = meter.cap;
 
