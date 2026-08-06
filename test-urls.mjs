@@ -21,11 +21,23 @@ const HERE = path.dirname(new URL(import.meta.url).pathname);
 const DIST = path.join(HERE, '..', 'dist');
 const staged = [];
 if (fs.existsSync(DIST))
-  for (const f of fs.readdirSync(DIST).filter(f => /\.html$/.test(f))){
+  for (const f of fs.readdirSync(DIST).filter(f => /\.html$|^robots\.txt$|^sitemap\.xml$|^favicon\.ico$|^site\.webmanifest$/.test(f))){
     const to = path.join(HERE, f);
     if (!fs.existsSync(to)){ fs.copyFileSync(path.join(DIST, f), to); staged.push(to); }
   }
-const unstage = () => { for (const f of staged) try { fs.unlinkSync(f); } catch(e){} };
+/* art/ too: the manifest names icons under it, and a manifest that lists a
+   404 is a manifest that installs a broken home-screen tile. */
+const ART = path.join(HERE, 'art');
+let madeArt = false;
+if (fs.existsSync(path.join(DIST, 'art'))){
+  if (!fs.existsSync(ART)){ fs.mkdirSync(ART); madeArt = true; }
+  for (const f of fs.readdirSync(path.join(DIST, 'art'))){
+    const to = path.join(ART, f);
+    if (!fs.existsSync(to)){ fs.copyFileSync(path.join(DIST, 'art', f), to); staged.push(to); }
+  }
+}
+const unstage = () => { for (const f of staged) try { fs.unlinkSync(f); } catch(e){}
+  if (madeArt) try { fs.rmdirSync(ART); } catch(e){} };
 process.on('exit', unstage);
 
 process.env.NI_NO_LISTEN = '1';
@@ -126,8 +138,80 @@ for (const p of PAGES){
       check((await get(a)).s === 200, `${a} stopped being served`);
 }
 
+/* ── 7 · THE PAGE NOBODY MEANS TO VISIT, AND THE TWO CRAWLERS ASK FOR ──────
+   server.js has always tried to send 404.html and, until the file existed,
+   always fell back to nine bytes of plain text on a white screen. And every
+   URL on this site changed shape this week, so a sitemap naming the CLEAN
+   address of each page is how a crawler learns which one is real. */
+{
+  const nf = await fetch(base + '/not-a-page');
+  const body = await nf.text();
+  out.notfound = { status: nf.status, bytes: body.length,
+                   type: (nf.headers.get('content-type') || '').split(';')[0] };
+  check(nf.status === 404, `a missing page answered ${nf.status}`);
+  check(/text\/html/.test(out.notfound.type),
+    `the 404 came back as ${out.notfound.type} — a mistyped address gets plain text`);
+  check(body.length > 1500, `the 404 body is ${body.length} bytes — that is the bare fallback, not a page`);
+  check(/NEGOTIATION/.test(body), 'the 404 does not carry the masthead, so it reads as broken hosting');
+  check(/href="\/desk"/.test(body), 'the 404 offers no way back to the desk');
+  check(/name="robots" content="noindex"/.test(body), 'the 404 page is indexable');
+  /* it says the address back, and it must never do that as MARKUP — a 404
+     that writes location.pathname with innerHTML is reflected XSS on the one
+     page nobody reviews. The check is on ASSIGNMENT, not on the word: the
+     page's own comment explains why it uses textContent, and an assertion
+     that fires on prose about the bug is an assertion you learn to skip. */
+  check(/textContent\s*=/.test(body), 'the 404 does not use textContent to say the address back');
+  check(!/innerHTML\s*=/.test(body), 'the 404 writes the requested path into the DOM as markup');
+
+  /* /favicon.ico is asked for BY NAME, with no link tag, by browsers and by
+     every link-preview crawler. It has to be at the root or it is a 404 in
+     somebody's log forever — which is exactly what it was. */
+  const fav = await get('/favicon.ico');
+  out.favicon = fav.s;
+  check(fav.s === 200, `/favicon.ico answered ${fav.s}`);
+  const man = await fetch(base + '/site.webmanifest');
+  out.manifest = man.status;
+  check(man.status === 200, `/site.webmanifest answered ${man.status}`);
+  const mj = await man.json().catch(() => null);
+  check(mj && Array.isArray(mj.icons) && mj.icons.length >= 2, 'the manifest names no icons');
+  /* manifest srcs are relative to the manifest, which sits at the root — so
+     they need the leading slash putting back before they are a path */
+  for (const ic of (mj && mj.icons) || []){
+    const at = ic.src.startsWith('/') ? ic.src : '/' + ic.src;
+    check((await get(at)).s === 200, `the manifest names ${ic.src} and it 404s`);
+  }
+  /* and every page carries the set, not just the ones somebody remembered */
+  for (const p2 of ['/', '/desk', '/plans', '/office', '/arcade']){
+    const h = await (await fetch(base + p2)).text();
+    check(/rel="icon" href="(\.\.\/)?favicon\.ico"/.test(h), `${p2} does not point at favicon.ico`);
+    check(/rel="apple-touch-icon"/.test(h), `${p2} has no touch icon`);
+  }
+
+  const rb = await fetch(base + '/robots.txt');
+  const rbody = await rb.text();
+  out.robots = { status: rb.status };
+  check(rb.status === 200, `robots.txt answered ${rb.status}`);
+  check(/Sitemap:\s*https?:\/\/\S+\/sitemap\.xml/.test(rbody), 'robots.txt does not name the sitemap');
+
+  const sm = await fetch(base + '/sitemap.xml');
+  const xml = await sm.text();
+  out.sitemap = { status: sm.status, urls: (xml.match(/<loc>/g) || []).length };
+  check(sm.status === 200, `sitemap.xml answered ${sm.status}`);
+  check(out.sitemap.urls >= 10, `the sitemap lists ${out.sitemap.urls} pages`);
+  /* a sitemap that lists a dead page is worse than no sitemap, and one that
+     lists the .html form teaches the crawler the address we just retired */
+  check(!/\.html<\/loc>/.test(xml), 'the sitemap lists .html addresses — the ones that redirect');
+  check(!/office<\/loc>|404/.test(xml), 'the sitemap lists a page behind a sign-in, or the 404 itself');
+  for (const m of xml.matchAll(/<loc>[^<]*?\/([^<\/]*)<\/loc>/g)){
+    const p = m[1] ? '/' + m[1] : '/';
+    const r = await get(p);
+    check(r.s === 200, `the sitemap lists ${p} and it answers ${r.s}`);
+  }
+}
+
 srv.close();
 console.log(JSON.stringify(out, null, 1));
 if (bad.length){ console.log('FAIL'); bad.forEach(b => console.log(' - ' + b)); process.exit(1); }
 console.log(`PASS — ${PAGES.length} pages, each on exactly one URL, with .html permanently `
-  + 'redirected, the query string carried across, and the source allowlist still closed');
+  + 'redirected, the query string carried across, the source allowlist still closed, a real 404 '
+  + `for a mistyped address, and a sitemap of ${out.sitemap.urls} pages that every one of them answers`);

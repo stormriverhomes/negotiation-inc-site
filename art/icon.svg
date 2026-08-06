@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<!-- ══ THE MARK ═══════════════════════════════════════════════════════════════
+     A favicon is sixteen pixels of a company's face, seen in a strip of twenty
+     other people's. The old one was a cream tile with a serif N and a single
+     rule — legible, and indistinguishable from a note-taking app.
+
+     What this one adds is a MEANING that happens to be legible small. In
+     bookkeeping a DOUBLE RULE under a figure means the total is final: the
+     number you can act on, closed off, no more entries below it. That is the
+     entire promise of an underwriting desk, and it is two lines.
+
+     Dark ground rather than cream, because a browser tab strip is pale in
+     light mode and a pale icon dissolves into it. Warm navy rather than black,
+     because the product is not a terminal.
+     ═══════════════════════════════════════════════════════════════════════ -->
+<rect width="64" height="64" rx="14" fill="#101a2c"/>
+<!-- the ledger tint: a barely-there warm wash so the tile does not read as a
+     flat system icon at large sizes -->
+<rect width="64" height="64" rx="14" fill="url(#g)"/>
+<defs>
+  <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#1c2b46"/>
+    <stop offset="1" stop-color="#101a2c"/>
+  </linearGradient>
+</defs>
+<!-- N, drawn as a path so it is the same letter on every platform rather than
+     whichever serif the operating system happens to own. Slab-ish and heavy:
+     a hairline serif disappears at 16px. -->
+<path fill="#f4efe2" d="
+  M15 15 h9.5 l14 21.5 V15 H47 v2.6 h-3.4 v27.1 h-7.9 l-15.4-23.6 v21 h3.6 V45 H15 v-2.6 h3.5 V17.6 H15 Z
+"/>
+<!-- the double rule: the total is final -->
+<rect x="15" y="50.2" width="34" height="2.6" rx="1.3" fill="#c9a227"/>
+<rect x="15" y="55.4" width="34" height="2.6" rx="1.3" fill="#c9a227"/>
+</svg>

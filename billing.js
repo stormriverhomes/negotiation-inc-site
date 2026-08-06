@@ -267,6 +267,14 @@ export function mountBilling(app){
           metadata: { uid: who.uid, plan },
           ...(TRIAL_DAYS > 0 ? { trial_period_days: TRIAL_DAYS } : {}),
         },
+        /* ── THE TRIAL PUTS A CARD ON FILE ─────────────────────────────────
+           Stripe collects one by default for a subscription, so this was
+           already true — and something being true by default is something a
+           future flag can quietly change. The plans page and the workspace
+           door both promise "card on file, nothing charged for fourteen
+           days", and a promise the product makes in words should be pinned
+           in the request rather than inherited from an upstream default. */
+        payment_method_collection: 'always',
         metadata: { uid: who.uid, plan },
         success_url: `${base}/office?paid=1`,
         cancel_url:  `${base}/plans`,
@@ -470,7 +478,17 @@ const TIER = { 'solo':1, 'underwriter':2, 'the office':3 };
 const NUMENV = (k, d) => { const v = Number(process.env[k]);
   return Number.isFinite(v) && v >= 0 ? v : d; };
 const TRIAL_LEN  = NUMENV('NI_TRIAL_DAYS', 14);
-const TRIAL_TIER = NUMENV('NI_TRIAL_TIER', 2);          // Underwriter, as advertised
+/* ── AND NO CARD MEANS NO PRODUCT ──────────────────────────────────────────
+   The fourteen days are sold as "card on file, nothing charged" — that is what
+   the plans page says and what the workspace door now says. This column is the
+   OTHER kind of trial: a grant with no card behind it, which nothing in the
+   product writes and which would quietly contradict the offer if it did.
+
+   So it grants nothing by default. The mechanism stays, because support
+   comping somebody a fortnight is a real thing to want, and NI_TRIAL_TIER=2
+   turns it on deliberately for as long as that is the intention. What it will
+   not do is be the default and disagree with the price list. */
+const TRIAL_TIER = NUMENV('NI_TRIAL_TIER', 0);
 export function trialLeft(v, now = Date.now(), days = TRIAL_LEN){
   if (!v) return 0;
   const s = String(v).trim();

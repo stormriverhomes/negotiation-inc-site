@@ -1,0 +1,26 @@
+{
+ "name": "Negotiation Inc",
+ "short_name": "Negotiation",
+ "description": "Price a property against eight exits. The sheet shows its working.",
+ "start_url": "/",
+ "display": "standalone",
+ "background_color": "#101a2c",
+ "theme_color": "#101a2c",
+ "icons": [
+  {
+   "src": "art/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "art/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  },
+  {
+   "src": "art/apple-touch-icon.png",
+   "sizes": "180x180",
+   "type": "image/png"
+  }
+ ]
+}

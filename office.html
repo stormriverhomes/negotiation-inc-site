@@ -456,7 +456,11 @@ footer a{color:var(--mid);text-decoration:none;margin-right:16px}
      one you most want legible */
 .lvl button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 </style>
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23101a2c'/%3E%3Cpath%20fill='%23f4efe2'%20d='M15%2015h9.5l14%2021.5V15H47v2.6h-3.4v27.1h-7.9L20.3%2021.1v21h3.6V45H15v-2.6h3.5V17.6H15Z'/%3E%3Crect%20x='15'%20y='50.2'%20width='34'%20height='2.6'%20rx='1.3'%20fill='%23c9a227'/%3E%3Crect%20x='15'%20y='55.4'%20width='34'%20height='2.6'%20rx='1.3'%20fill='%23c9a227'/%3E%3C/svg%3E" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="16x16 24x24 32x32 48x48 64x64">
+<link rel="apple-touch-icon" href="art/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#101a2c">
 <link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 /* Fraunces ships its "wonk" letterforms on by default — the single-storey f
@@ -522,8 +526,9 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   <ul class="gwhy">
    <li><b>Free, and it stays free.</b> Pricing a property needs no account and never will
      &mdash; what this adds is memory.</li>
-   <li><b>No card.</b> Fourteen days of the whole product come with it, unstarted, so you spend
-     them on a week you are actually working.</li>
+   <li><b>No card to open it.</b> Registering asks for a name and an email and nothing else.
+     The fourteen-day trial of the whole product is a separate step and it does put a card on
+     file &mdash; nothing is charged until day fifteen, and one click cancels.</li>
    <li><b>Yours to take.</b> Export every sheet as a file whenever you like, and delete the lot
      in one press.</li>
   </ul>
@@ -1113,7 +1118,10 @@ function boot(){
   const TIER = onPlan ? { k:'Plan', d:esc(planName) }
     : left > 0 ? { k:left + ' day' + (left===1?'':'s'), d:'of the full product left' }
     : a.trial ? { k:'Free', d:'trial finished · pricing still unlimited' }
-    : { k:'Free', d:'14 days waiting, unstarted' };
+    /* "14 days waiting" read as fourteen days already yours. They are not:
+       the trial starts at checkout, with a card, and saying otherwise here is
+       the same sentence the door used to get wrong. */
+    : { k:'Free', d:'14-day trial available · card on file' };
 
   /* ── the rail ─────────────────────────────────────────────────────────
      Same furniture as the desk, drawn from the same record, so the account
@@ -1121,8 +1129,10 @@ function boot(){
   renderShell(a, props, (v3 && typeof v3.active === 'number') ? v3.active : 0,
               nameOf, spreadOf, filledOf, onPlan, left);
 
-  /* the one offer worth making on this page: a member who has never spent
-     their fourteen days. One button, no card, and it says what it opens. */
+  /* the one offer worth making on this page: a member who has never started
+     their fourteen days. One button, and it says what it opens and what it
+     asks for — the trial puts a card on file and turns into the subscription
+     on day fifteen unless it is cancelled. */
   const pb = $('planbar');
   if (pb){
     if (!a.trial && !onPlan){
@@ -1141,10 +1151,11 @@ function boot(){
       if (Date.now() - hid < 14*86400000){ pb.innerHTML = ''; return; }
       pb.innerHTML = `<div class="offer" id="offerbox">
         <div class="ob-t">
-         <div class="eyebrow" style="color:var(--blue)">Unstarted · nothing is charged</div>
+         <div class="eyebrow" style="color:var(--blue)">Card on file · nothing charged for fourteen days</div>
          <h2>Fourteen days of the whole thing.</h2>
          <p>Every condition line instead of three presets, comps without a cap, the photo
-          condition read, the lender packet.</p>
+          condition read, the lender packet. Cancel in one click before day fifteen and
+          you are not charged at all.</p>
         </div>
         <div class="ob-a">
          <a class="btn p" href="plans.html" id="pb-go">Start 14 days free →</a>
