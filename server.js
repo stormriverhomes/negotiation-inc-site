@@ -38,6 +38,7 @@ import * as CMP from './compare.js';
 import * as ST from './street.js';
 import * as BID from './bid.js';
 import * as OBJ from './objections.js';
+import * as INTAKE from './intake.js';
 import { mountBilling, billingState, entitlementOf, usedThisMonth, countUse, capFor, FEATURES, NOMETER, meterHold, meterHolds, meterRelease } from './billing.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -935,6 +936,115 @@ async function callTool(model, system, tool, user, maxTokens){
 }
 
 
+/* ══ THE INTAKE ════════════════════════════════════════════════════════════
+   Photographs of paperwork in, figures out, each one quoted from the model's
+   own transcript of what it read. Nothing here prices anything: the sheet has
+   a home for these figures and a NEEDED state for the ones nobody supplied,
+   so the whole feature is a faster way to fill a form the desk already has.
+
+   The image validation is the read's, character for character, because the
+   two routes accept the same thing and a second, subtly different copy of a
+   size check is how one of them ends up with the looser one. */
+app.post('/api/intake', express.json({ limit: (LIM.maxTotalKb + 1000) + 'kb' }), async (req, res) => {
+  const t0 = Date.now();
+  const fail = (code, why, extra) => { log('intake', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
+
+  if (!KEY && !MOCK) return fail(503, 'The intake is not switched on for this deployment.');
+  { const g = gateFails(req, 'intake'); if (g) return fail(g[0], g[1]); }
+
+  const ent = await entitlementOf(req, 2);
+  if (!ent.ok){
+    const SAY = {
+      unconfigured: 'The intake is not switched on for this deployment.',
+      nosession:    'The intake needs an account. Nothing was sent.',
+      noprofile:    'The intake needs an account. Nothing was sent.',
+      lookup:       'The account could not be checked just now. Nothing was sent.',
+      free:         'The intake comes with Underwriter, and with the fourteen-day trial. Nothing was sent.',
+      lowtier:      'The intake comes with Underwriter. Nothing was sent.',
+    };
+    const code = (ent.why === 'unconfigured' || ent.why === 'lookup') ? 503 : 403;
+    return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
+  }
+
+  const meter = await meterFails(res, ent, 'aiintake', 'intakes');
+  if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
+  const cap = meter.cap;
+
+  { const b = budgetFails(ent.uid, 'The intake'); if (b) return fail(b[0], b[1], b[2]); }
+  if (!ipOk(req.ip || 'unknown'))
+    return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
+
+  const body = req.body;
+  if (!body || typeof body !== 'object') return fail(400, 'No request body.');
+  const images = Array.isArray(body.images) ? body.images : null;
+  if (!images || !images.length) return fail(400, 'No photographs were sent.');
+  if (images.length > LIM.maxImages) return fail(400, `That is more than ${LIM.maxImages} photographs.`);
+
+  const OKTYPE = ['image/jpeg','image/png','image/webp'];
+  let totalKb = 0;
+  const content = [];
+  for (let i = 0; i < images.length; i++){
+    const im = images[i];
+    if (!im || typeof im !== 'object') return fail(400, `Photograph ${i+1} is not readable.`);
+    const mt = String(im.media_type || '');
+    if (OKTYPE.indexOf(mt) < 0) return fail(400, `Photograph ${i+1} is not a JPEG, PNG or WebP.`);
+    const data = String(im.data || '');
+    const kb = Math.round(data.length * 0.75 / 1024);
+    if (kb > LIM.maxImageKb) return fail(413, `Photograph ${i+1} is ${kb}KB — the limit is ${LIM.maxImageKb}KB after resizing.`);
+    if (data.length < 64 || data.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(data))
+      return fail(400, `Photograph ${i+1} is not valid image data.`);
+    totalKb += kb;
+    if (totalKb > LIM.maxTotalKb) return fail(413, 'Those photographs come to more than the request limit.');
+    content.push({ type:'text', text:`Photograph ${i+1}` });
+    content.push({ type:'image', source:{ type:'base64', media_type:mt, data } });
+  }
+  /* one line of context, fenced with a nonce. No prompt, no system, no model,
+     no tool is read from the body — the same rule as every other route. */
+  const hint = typeof body.note === 'string' ? body.note.slice(0, 200) : '';
+  content.push({ type:'text', text: INTAKE.userBlock(images.length, hint) });
+
+  try {
+    let data, usage = {};
+    if (MOCK){
+      /* the mock TRANSCRIBES a fixture and reports against it, so a test
+         exercises the rail rather than a hand-written pass */
+      data = { transcript: 'List price $249,500\nLiving area 1,412 sq ft\n3 beds · 2 baths\nYear built 1968\nAnnual taxes $3,240\nSold as-is, seller has never occupied',
+        fields: [ { id:'asking', value:249500, saw:'List price $249,500' },
+                  { id:'sqft',   value:1412,   saw:'Living area 1,412 sq ft' },
+                  { id:'beds',   value:3,      saw:'3 beds' },
+                  { id:'baths',  value:2,      saw:'2 baths' },
+                  { id:'year',   value:1968,   saw:'Year built 1968' },
+                  { id:'taxes',  value:3240,   saw:'Annual taxes $3,240' },
+                  /* the failure that actually happens: an ARV inferred from
+                     the list price, cited to a line that does not say it */
+                  { id:'lot',    value:287000, saw:'Estimated value $287,000' } ],
+        notes: ['Sold as-is, seller has never occupied'] };
+    } else {
+      const r = await callTool(INTAKE.MODEL, INTAKE.SYSTEM, INTAKE.TOOL,
+                               content, 4000);
+      data = r.data; usage = r.usage;
+    }
+    const out = INTAKE.validate(data);
+    charge(ent.uid, usage);
+
+    const why = INTAKE.readable(out);
+    if (why){ log('intake UNREADABLE', out.counts.read, out.counts.dropped); return fail(422, why, { counts: out.counts }); }
+
+    log('intake ok', images.length + 'img', totalKb + 'kb', (Date.now()-t0) + 'ms',
+        'read ' + out.counts.read, 'dropped ' + out.counts.dropped);
+    const month = await countUse(ent.uid, 'aiintake', cap).catch(() => null);
+    res.json({ ok:true, ...out, model: MOCK ? 'mock' : INTAKE.MODEL,
+               ...(month ? { month: { used: month.used, cap: month.cap, left: month.remaining } } : {}),
+               usage: { in: usage.input_tokens || 0, out: usage.output_tokens || 0 } });
+  } catch(e){
+    const code = e && e.niStatus ? e.niStatus : 502;
+    log('intake upstream-fail', code, (e && e.niKind) || 'unknown');
+    fail(code === 429 ? 429 : 502,
+      code === 429 ? 'The intake is busy. Try again in a moment.'
+                   : 'The intake could not be completed. Nothing was stored.');
+  }
+});
+
 /* ══ THE OTHER SIDE OF THE TABLE ═══════════════════════════════════════════
    The only route that is allowed to reason from the investor's CEILING. The
    letter of intent may never print it — what they could have paid is theirs —
@@ -1210,6 +1320,7 @@ app.get('/api/health', (_req, res) => {
                ? (process.env.CENSUS_KEY ? 'on' : 'partial') : 'off',
     bid:     ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
     object:  ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
+    intake:  ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
     land: TILES_KEY ? (tiles.n >= TILES_CAP ? 'quota' : 'on') : 'flat',
     gate: ACCESS ? 'code+account' : ACCOUNTS_ON() ? 'account' : 'none',
     list: LIST_ON ? 'on' : 'off',
@@ -1245,12 +1356,22 @@ app.get('/api/health', (_req, res) => {
    A list of what may be fetched is a list you can check against the pages. A
    list of what may not is a list somebody has to remember to add to. */
 const SERVE = /\.(html|css|js|json|png|jpe?g|gif|svg|webp|ico|woff2?|txt|xml|webmanifest|map)$/i;
-/* Every server-side file by NAME, matched on the basename, so a stray copy in
-   a subdirectory is refused too — /srv/compare.js is as blocked as /compare.js.
-   compare.js and street.js were missing from this list for one deploy: neither
-   holds a secret, but both hold the system prompt, and a prompt you can read is
-   a prompt you can steer around. Anything added to srv/ belongs here. */
-const NEVER = /^(server|prompt|billing|compare|street|bid|objections)\.js$|^package(-lock)?\.json$|^render\.yaml$|^(publish|suite2?|harness-util|test-api|test-pay|_.*|t-.*|v\d+)\.mjs$|^(LAUNCH|SUPABASE|STRIPE|DOMAIN|README)\.md$|^\.env/i;
+/* ── AND THE .js RULE IS AN ALLOWLIST NOW, FOR THE SAME REASON ─────────────
+   This was a list of server modules to BLOCK, matched on the basename. It
+   named seven and it was wrong twice: compare.js and street.js were servable
+   for a deploy — neither holds a secret, but both hold a system prompt, and a
+   prompt you can read is a prompt you can steer around — and intake.js was
+   servable the afternoon it was written, caught by this file's own harness.
+
+   Exactly one .js is FETCHED by a page: priors.js, via window.NI_PRIORS_URL.
+   That is a list of one, checkable against the pages, and a new module in
+   this directory cannot join it by being forgotten. `.mjs` came off the
+   ALLOW list entirely for the same reason earlier today.
+
+   The rest of NEVER stays a blocklist because those are files with no
+   extension rule to hang an allowlist on. */
+const JS_OK = new Set(['priors.js']);
+const NEVER = /^package(-lock)?\.json$|^render\.yaml$|^(publish|suite2?|harness-util|test-api|test-pay|test-urls|_.*|t-.*|v\d+)\.mjs$|^(LAUNCH|SUPABASE|STRIPE|DOMAIN|README)\.md$|^\.env/i;
 /* ── ONE URL PER PAGE, AND IT HAS NO .html ON THE END ──────────────────────
    `/desk` rather than `/desk.html`. express.static's `extensions:['html']`
    below already resolves the clean form — what stopped it was the allowlist
@@ -1284,6 +1405,7 @@ app.use((req, res, next) => {
   if (!p || p.endsWith('/')) return next();
   const base = p.split('/').pop();
   if (NEVER.test(base) || base.startsWith('.')) return res.status(404).type('txt').send('Not found');
+  if (/\.js$/i.test(base) && !JS_OK.has(base)) return res.status(404).type('txt').send('Not found');
   if (p.indexOf('..') >= 0) return res.status(400).type('txt').send('No');
   /* an extensionless name is a page request; static resolves it to .html or
      nothing at all. Anything WITH an extension still has to be on the list. */

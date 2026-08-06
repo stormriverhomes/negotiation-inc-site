@@ -607,6 +607,8 @@ const CAP_DEFAULT = {
   aistreet:   40,   // the street brief
   aibid:      20,   // the contractor bid check
   ailetter:   60,   // the other side of the table
+  aiintake:   80,   // reading the paperwork — cheap per call, and the one
+                    // people will reach for on every property they look at
 };
 export const FEATURES = Object.keys(CAP_DEFAULT);
 /* ── AND A CAP OF ZERO MEANT UNLIMITED ─────────────────────────────────────
