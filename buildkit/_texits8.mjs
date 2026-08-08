@@ -228,6 +228,60 @@ const NUMS = x => [x.key, x.ceil, ...(x.band || []), ...(x.band0 || [])].filter(
      !flip0 || !f2 || f2.ceil < flip0.ceil, { base:flip0 && flip0.ceil, longer:f2 && f2.ceil });
 }
 
+/* ══ AND THE NUMBER THE PAGES SAY OUT LOUD ═════════════════════════════════
+   The landing page said three different numbers for one fact inside a single
+   screen: the headline said EIGHT ways out, the exits band listed EIGHT tiles,
+   and the section between them was headed "SIX prices, not one" above a
+   sentence naming SEVEN. The list was right; the word was a leftover from a
+   version of this product with fewer exits, and nothing was comparing a number
+   written in prose to the number the engine actually produces.
+
+   That is the whole class of bug: a count in copy is a claim about the
+   software, and copy does not throw. Two counts are the truth — how many the
+   engine prices for a house (seven; the eighth is the Land Desk, because a
+   parcel is not a house) and how many exist at all (eight). Every number word
+   the marketing pages write about exits has to be one of those two. */
+{
+  const WORD = { one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10 };
+  /* how many exits the engine CONSIDERS for a house — not how many priced on
+     one sheet. On any given sheet several refuse for want of a number, which
+     is the product working; the claim in the copy is about the catalogue. */
+  const priced = (await price(BASE)).length;
+  const pg2 = await b.newPage({ viewport:{ width:1400, height:1100 } });
+  await pg2.goto('file://' + path.resolve('dist/index.html'));
+  await pg2.waitForTimeout(400);
+  const tiles = await pg2.evaluate(() => document.querySelectorAll('.ex8').length);
+  ok('the landing page lists every exit there is', tiles === 8, tiles);
+  ok('and the engine prices the ones a house can take', priced >= 5 && priced <= 7, priced);
+
+  const PAGES = ['dist/index.html', 'dist/plans.html', 'dist/exits.html'];
+  for (const f of PAGES){
+    await pg2.goto('file://' + path.resolve(f)); await pg2.waitForTimeout(400);
+    const t = await pg2.evaluate(() => document.body.innerText.replace(/\s+/g, ' '));
+    /* every "<number> prices | exits | ways out" the page says, in words or
+       digits — the two shapes a person actually writes */
+    const said = [...t.matchAll(/\b(one|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+(prices|exits|ways out)\b/gi)]
+      .map(m => ({ phrase: m[0], n: WORD[m[1].toLowerCase()] ?? Number(m[1]) }));
+    for (const s of said)
+      ok(`${f.split('/').pop()}: "${s.phrase}" is a number the software can back`,
+         s.n === 8 || s.n === 7, { said: s.n, exist: 8, pricedForAHouse: 7 });
+  }
+  /* and the one that was actually wrong: a heading naming a count, directly
+     above a list, must agree with the list under it */
+  await pg2.goto('file://' + path.resolve('dist/index.html')); await pg2.waitForTimeout(300);
+  const pair = await pg2.evaluate(() => {
+    const h = [...document.querySelectorAll('h3')].find(x => /prices, not one/i.test(x.textContent));
+    if (!h) return null;
+    const p = h.nextElementSibling;
+    const first = (p ? p.textContent : '').split(/\.\s/)[0];
+    return { head: h.textContent.trim(), listed: first.split(',').length };
+  });
+  ok('the "N prices, not one" heading exists to be checked', !!pair, pair);
+  if (pair) ok('and its number matches the list directly under it',
+    (WORD[pair.head.trim().split(/\s+/)[0].toLowerCase()] || 0) === pair.listed, pair);
+  await pg2.close();
+}
+
 ok('no page errors', errs.length === 0, [...new Set(errs)]);
 await b.close();
 console.log('\n' + (bad ? '✗ ' + bad + ' of ' + n + ' failed' : '✓ all ' + n + ' hold'));

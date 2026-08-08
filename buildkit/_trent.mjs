@@ -153,6 +153,20 @@ srv.kill(); sb.close();
     .map(b => b.textContent.trim()));
   ok('no row on the plans table sells an address-level value',
      !rows.some(r => /value/i.test(r) && !/what it becomes/i.test(r)), rows.filter(r => /value/i.test(r)));
+  /* ── AND THE CARDS, WHICH IS WHERE IT SURVIVED ──────────────────────────
+     The table was corrected and the plan CARD above it went on reading
+     "Address-level values and rents" for weeks, because this harness read
+     table rows and a card is not a table row. Same shape as the packet gate:
+     the right rule, applied to the wrong noun, passing loudly.
+
+     Every bullet on every card is now read, and the phrase that sells a value
+     alongside a rent is the one that must not be there. */
+  const bullets = await pg.evaluate(() =>
+    [...document.querySelectorAll('.pb li span, .pf li span')].map(s => s.textContent.replace(/\s+/g,' ').trim()));
+  ok('and no bullet on any plan card sells one either',
+     !bullets.some(b => /address[- ]level values?|values? and rents?|value estimate for the address/i.test(b)),
+     bullets.filter(b => /address[- ]level|values? and rents?/i.test(b)));
+  ok('the cards were actually read', bullets.length > 10, bullets.length);
   ok('and where the page mentions one, it is to say there is not one',
      /no value estimate here|IS an automated valuation model/i.test(t), '');
   ok('it does sell the rent', /rent for the address/i.test(t));

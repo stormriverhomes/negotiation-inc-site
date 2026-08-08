@@ -112,6 +112,10 @@ h1 em{font-style:normal;color:var(--blue)}
 .founding h3{font-size:20px;margin-top:3px}
 .founding p{font-size:14px;color:var(--mid);margin-top:4px;max-width:64ch;line-height:1.5}
 .billing{display:flex;align-items:center;gap:9px;margin-top:16px;font-size:13.5px;color:var(--soft);flex-wrap:wrap}
+/* the interpunct is a separator between two things on one line. When the line
+   wraps it becomes a full stop with nothing before it, sitting alone at the
+   end of a row — so on a phone the separator goes and the parts stack. */
+@media(max-width:560px){ .billing{gap:4px 9px} .billing .sep{display:none} }
 .billing b{color:var(--ink);font-weight:650}
 .billing .save{font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
  color:var(--green);background:var(--green-soft);border:1px solid var(--green-line);
@@ -202,6 +206,21 @@ h1 em{font-style:normal;color:var(--blue)}
  font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--soft)}
 .wgl em{font-style:normal;color:var(--faint);letter-spacing:.02em;text-transform:none;
  font-weight:600;text-align:right;flex:none}
+/* ── flex:none IS A PROMISE THE SCREEN CANNOT KEEP ─────────────────────────
+   The label takes what it needs and the value never shrinks, which is right
+   on a desk and impossible on a phone: "all 17, each with the picture it came
+   from" cannot sit beside "YOUR PHOTOS READ THE CONDITION" in 390 pixels, so
+   the value ran past the card's edge and was CLIPPED mid-word — on the single
+   comparison this page exists to make. The label wrapped underneath its own
+   first word at the same time, so it read "YOU / TYPE".
+
+   Below the fold of a phone they stack: the label, then the value under it,
+   both left-aligned. No clipping, nothing to shrink, and the reading order is
+   the one the sentence already had. */
+@media(max-width:560px){
+ .wgl{display:block}
+ .wgl em{display:block;text-align:left;margin-top:2px}
+}
 /* one box, one field of the real sheet. Empty is a thing you type. */
 .wr{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
 .wr i{width:13px;height:9px;border-radius:2px;border:1px solid var(--line-2);background:#fff}
@@ -450,7 +469,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  </div>
 
  <div class="billing"><b>Monthly or yearly</b><span class="save">Two months free on annual</span>
-  <span>·</span><span>Cancel in one click — no contract, no call</span></div>
+  <span class="sep" aria-hidden="true">·</span><span>Cancel in one click — no contract, no call</span></div>
 </div>
 
 <!-- ══ the half hour, drawn ═════════════════════════════════════════════════
@@ -577,7 +596,20 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <ul>
     <li><i>✓</i><span><b>The photo condition read</b> — drop the walk-through pictures, get seventeen line items back with a number on each</span></li>
     <li><i>✓</i><span><b>Comps pulled for the address</b> in one click, already adjusted for size, beds, baths, time and condition — <b>on our key</b>, no vendor account to open. Forty a month on Underwriter, a hundred and twenty on The Office. They arrive <b>unscored</b>: the comparability score and the ARV stay yours</span></li>
-    <li><i>✓</i><span>Address-level values and rents — an address, not a ZIP average. Paste your own RentCast key and these run on yours instead, billed to you at their price</span></li>
+    <!-- ── THIS BULLET SOLD AN AVM ─────────────────────────────────────────
+         It read "Address-level values and rents". The table was corrected
+         weeks ago and this was not, because the harness that enforces the
+         correction reads the TABLE ROWS — the right rule applied to the wrong
+         noun, which is how the packet gate broke too.
+
+         There is no address-level value and there is not going to be one: an
+         automated valuation model is the thing this product exists to be an
+         alternative to, and the lender packet states in writing that none was
+         used. Selling one on the pricing page while refusing to produce one in
+         the software is the worst version of that — the customer buys the row
+         and finds the refusal. The rent is a different claim, it is real, and
+         it lands as an ESTIMATE with its range. -->
+    <li><i>✓</i><span><b>The rent for the address</b> — this address, not the ZIP median, with the range around it and the number of leases behind it. It comes on our key and counts against the same forty; paste your own RentCast key and it runs on yours instead, billed to you at their price. <b>No value estimate</b>: what it is worth is still the number you set, from comps you kept</span></li>
     <li><i>✓</i><span><b>Offer letters and the text message</b>, written from the winning exit in the seller's language</span></li>
     <li><i>✓</i><span><b>The written comparison</b> — the case for each deal in prose you can forward. Every figure in it is one from your own table; a draft carrying anything else is refused rather than shown to you</span></li>
     <li><i>✓</i><span><b>The street brief</b> — what the block is actually doing. Tract-level income, tenure and vacancy from the census, the FEMA flood zone at the exact coordinates, and what has been permitted or planned nearby, <b>each claim carrying the page it came from</b>. The forty minutes of browser tabs, in about fifteen seconds</span></li>

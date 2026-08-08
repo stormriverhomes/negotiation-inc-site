@@ -561,7 +561,13 @@ footer a{color:var(--mid);text-decoration:none;margin-right:16px}
    <button type="button" role="tab" data-mode="in" aria-selected="false">Sign in</button>
   </div>
   <label for="g-name">Your name</label>
-  <input id="g-name" type="text" placeholder="Elijah Payne" autocomplete="name" required>
+  <!-- The placeholder was the founder's own full name. Ghost text is read as a
+       VALUE before it is read as an example, so every stranger who opened the
+       door met somebody else's name sitting in the first field and had to work
+       out whether the form was already filled in. A placeholder's job is to
+       show the shape of the answer; a first name and a surname do that without
+       belonging to anybody. -->
+  <input id="g-name" type="text" placeholder="Dana Whitfield" autocomplete="name" required>
   <label for="g-email">Email</label>
   <input id="g-email" type="email" placeholder="you@example.com" autocomplete="email" required>
   <label for="g-market">The market you work <span style="color:var(--faint)">&mdash; optional</span></label>

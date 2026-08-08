@@ -525,6 +525,16 @@ h1{font-family:var(--serif);font-size:34px;font-weight:700;letter-spacing:-.015e
 .rail button.on .i{background:var(--blue);color:#fff}
 .rail button.done .i{background:var(--green-soft);color:var(--green)}
 .rail button:disabled{opacity:.55;cursor:default}
+/* ── TWO GROUPS THAT MUST NOT WRAP INTO EACH OTHER ─────────────────────────
+   The three steps are a place you are; Simple/Advanced is how much of it you
+   want to see. On a desk the mode group is pushed to the far right and nobody
+   confuses them. On a phone the rail wraps, and "3 The deal" landed on the
+   same row as "Simple | Advanced" — so the last step of the sheet read as a
+   third option in a two-option control, which is the one reading that makes
+   somebody press the wrong thing. Below the fold of a phone the mode group
+   takes its own row. */
+.rail .railmodes{margin-left:auto;display:flex;align-items:center}
+@media(max-width:560px){ .rail .railmodes{margin-left:0;width:100%;margin-top:8px} }
 
 .step{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);
  padding:30px 32px 32px;box-shadow:0 1px 2px rgba(16,23,37,.05)}
@@ -8896,7 +8906,7 @@ function renderRail(){
    const state = s.id===V.step ? 'on' : (V.seen.has(s.id) ? 'done' : '');
    return `<button type="button" class="${state}" data-goto="${s.id}"${V.seen.has(s.id)||s.id===V.step?'':' disabled'}>
      <span class="i">${V.seen.has(s.id)&&s.id!==V.step?'✓':i+1}</span>${s.n}</button>`; }).join('')
-  + `<span style="margin-left:auto;display:flex;align-items:center">
+  + `<span class="railmodes">
       <span class="modes" role="group" aria-label="Level of detail">
        <button id="m-simple" type="button" class="${S.mode==='simple'?'on':''}">Simple</button>
        <button id="m-adv" type="button" class="${S.mode==='advanced'&&!advLocked?'on':''}${advLocked?' lk':''}"
