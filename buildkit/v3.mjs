@@ -1,7 +1,24 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 const MIME={'.html':'text/html','.js':'text/javascript','.png':'image/png','.svg':'image/svg+xml','.woff2':'font/woff2'};
-const srv=http.createServer((q,r)=>{ let f=path.join('dist',decodeURIComponent(q.url.split('?')[0].split('#')[0]));
+const srv=http.createServer((q,r)=>{
+  /* ── THE API EXISTS ON THE REAL SERVER, SO IT EXISTS HERE ────────────────
+     This served dist/ and nothing else, so the moment the plans page started
+     asking how many founding places were left, every run logged a console 404
+     and this file went red — for a route the real deployment mounts
+     unconditionally and always answers.
+
+     A harness whose server is less complete than production reports failures
+     that only exist in the harness, and the fix people reach for is to stop
+     asking, which removes a real feature to satisfy a fake constraint. So the
+     stub answers /api/ the way the real one does when nothing is configured:
+     a 200 with the "off" shape. It is a static-page harness; anything that
+     actually depends on an API has its own file. */
+  if (q.url.startsWith('/api/')){
+    r.writeHead(200,{'content-type':'application/json'});
+    return r.end(JSON.stringify({ ok:true, on:false }));
+  }
+  let f=path.join('dist',decodeURIComponent(q.url.split('?')[0].split('#')[0]));
   if(f.endsWith('/'))f+='index.html';
   if(!fs.existsSync(f)||fs.statSync(f).isDirectory()){r.writeHead(404);return r.end('nope');}
   r.writeHead(200,{'content-type':MIME[path.extname(f)]||'application/octet-stream'});

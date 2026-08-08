@@ -33,6 +33,7 @@
 import express from 'express';
 import path from 'node:path';
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { MODEL, SYSTEM, TOOL, LINES, LINE_IDS, RARELY_VISIBLE, userBlock } from './prompt.js';
 import * as CMP from './compare.js';
@@ -40,7 +41,7 @@ import * as ST from './street.js';
 import * as BID from './bid.js';
 import * as OBJ from './objections.js';
 import * as INTAKE from './intake.js';
-import { mountBilling, billingState, entitlementOf, usedThisMonth, countUse, capFor, FEATURES, NOMETER, meterHold, meterHolds, meterRelease } from './billing.js';
+import { mountBilling, billingState, foundingState, entitlementOf, usedThisMonth, countUse, capFor, FEATURES, NOMETER, meterHold, meterHolds, meterRelease } from './billing.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -118,6 +119,47 @@ const hardUsd = () => { const v = Number(process.env.NI_DAILY_USD_HARD);
 const hardN   = () => { const v = Number(process.env.NI_PER_DAY_HARD);
   return Number.isFinite(v) && v > 0 ? v : LIM.perDay * 4; };
 
+/* ══ WHAT WENT WRONG, AND HOW OFTEN ════════════════════════════════════════
+   If a route throws in production, nobody finds out. There is no alerting, no
+   log anybody reads, and the browser turns every 500 into the same polite
+   sentence — so the failure mode of this service is silence, and the way you
+   learn is a customer who has already given up writing in to say so.
+
+   This is deliberately NOT a logging service. It is a ring buffer in memory:
+   the last forty distinct problems, each with a count and the times it was
+   first and last seen. That shape is chosen on purpose — a route failing two
+   hundred times is ONE thing to look at, and a list of two hundred identical
+   lines is how a real signal gets buried.
+
+   It holds no bodies, no addresses, no uids and no tokens. A message is
+   truncated hard, because an upstream error string is the most likely place
+   for somebody's data to end up somewhere it was never meant to be. */
+const ERRS = new Map();                       // key → { route, code, msg, n, first, last }
+const ERR_MAX = 40;
+function noteErr(route, code, err){
+  try {
+    const msg = String((err && (err.message || err)) || 'unknown').slice(0, 160);
+    const key = route + ' ' + code + ' ' + msg.slice(0, 60);
+    const now = Date.now();
+    const cur = ERRS.get(key);
+    if (cur){ cur.n += 1; cur.last = now; return; }
+    /* full: drop the oldest thing nobody has seen recently, never the newest */
+    if (ERRS.size >= ERR_MAX){
+      let oldestKey = null, oldest = Infinity;
+      for (const [k, v] of ERRS) if (v.last < oldest){ oldest = v.last; oldestKey = k; }
+      if (oldestKey) ERRS.delete(oldestKey);
+    }
+    ERRS.set(key, { route, code, msg, n: 1, first: now, last: now });
+  } catch(e){}
+}
+const errList = () => [...ERRS.values()].sort((a, b) => b.last - a.last)
+  .map(e => ({ ...e, first: new Date(e.first).toISOString(), last: new Date(e.last).toISOString() }));
+const errCount = () => [...ERRS.values()].reduce((t, e) => t + e.n, 0);
+/* the last hour is the number worth putting on a health check — a total since
+   boot goes up forever and stops meaning anything after a week of uptime */
+const errRecent = () => { const cut = Date.now() - 3600000;
+  return [...ERRS.values()].filter(e => e.last >= cut).reduce((t, e) => t + e.n, 0); };
+
 /* one bill, two books: the process total and the account that caused it */
 function charge(uid, usage, extraUsd){
   const usd = ((usage && usage.input_tokens)  || 0) * USD_IN
@@ -132,19 +174,39 @@ function charge(uid, usage, extraUsd){
 
 /* null to proceed, or [status, message, extra] — one gate, five routes, so it
    cannot drift between them the way five copies of two lines always do */
+/* ── THE TWO LEVERS, DECLARED HERE ─────────────────────────────────────────
+   Above budgetFails, which reads them, rather than beside the route that
+   writes them. `let` has a temporal dead zone and even `typeof` throws inside
+   it — this file has been bitten by exactly that once already, on the land
+   desk, where a state object declared below its first reader threw silently
+   inside the function that drew the floor. Declaration order is the fix and
+   it costs nothing. */
+let OPS = { pausedUntil: 0, pauseWhy: '', budgetOverride: null };
+const opsPaused = () => OPS.pausedUntil > Date.now();
+const opsBudget = () => Number.isFinite(OPS.budgetOverride) ? OPS.budgetOverride : null;
+
 function budgetFails(uid, what){
   rollDay();
+  /* ── THE BIG RED SWITCH ──────────────────────────────────────────────────
+     It goes HERE because this is the one function every metered route already
+     calls — five copies of a pause is five places for it to be forgotten, and
+     the route that forgets is the one still spending. */
+  if (opsPaused())
+    return [503, (what || 'This service') + ' is paused for a few minutes while something is '
+              + 'checked. Nothing was sent and nothing was counted against your allowance.',
+            { paused: true }];
   /* the ceiling: a runaway is refused whoever it is, and this is the only
      refusal here that is allowed to be indiscriminate */
   if (day.usd >= hardUsd() || day.n >= hardN())
     return [429, (what || 'This service') + ' has hit its ceiling for today. It resets within 24 hours.',
             { retryHours: 24, ceiling: true }];
   /* under budget: nobody is refused, which is almost always the case */
-  if (day.n < LIM.perDay && day.usd < LIM.dailyUsd) return null;
+  const budget = opsBudget() !== null ? opsBudget() : LIM.dailyUsd;
+  if (day.n < LIM.perDay && day.usd < budget) return null;
   /* over budget: only the accounts above their share */
   const heads  = Math.max(1, day.by.size);
   const mine   = day.by.get(uid || 'anon') || { n: 0, usd: 0 };
-  if (mine.usd >= LIM.dailyUsd / heads || mine.n >= LIM.perDay / heads)
+  if (mine.usd >= budget / heads || mine.n >= LIM.perDay / heads)
     return [429, 'That is this account\'s share of what the service can run today, and it is '
               + 'busier than usual. It resets within 24 hours — your monthly allowance is untouched.',
             { retryHours: 24, share: true }];
@@ -205,6 +267,11 @@ const log = (...a) => console.log(new Date().toISOString(), ...a);
    switch from locking out the people the entitlement is for. */
 const ACCOUNTS_ON = () => !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY);
 const gateFails = (req, what) => {
+  /* the label is a NOUN, never a noun with its article already attached: the
+     sentence supplies "The". Two routes handed it "the comp pull" and shipped
+     "The the comp pull is not switched on" — a sentence a person reads as a
+     product that is not being looked after. */
+  if (/^the\s/i.test(String(what))) what = String(what).replace(/^the\s+/i, '');
   if (!ACCESS && !ACCOUNTS_ON())
     return [503, `The ${what} is not switched on for this deployment.`];
   if (ACCESS && (req.get('x-ni-access') || '') !== ACCESS)
@@ -1293,10 +1360,106 @@ app.post('/api/account/delete', express.json({ limit: '1kb' }), async (req, res)
   res.json({ ok:true, deleted:done });
 });
 
+/* ══ WHAT IT RENTS FOR ═════════════════════════════════════════════════════
+   The plans page had a row reading "Address-level values and rents ✓" on two
+   paid tiers, and NEITHER HALF EXISTED. There is no code anywhere in this
+   product that surfaces a rent estimate or a value estimate — the one RentCast
+   call it makes reads `comparables` and discards everything else on the reply,
+   deliberately and by name.
+
+   Only one of those halves should be built, and it is the rent.
+
+   THE VALUE IS NOT COMING BACK. "No automated valuation model was used" is
+   printed on the lender packet, and an address-level value estimate is exactly
+   an automated valuation model. Shipping one would make the sentence on the
+   most important document this product produces untrue, in exchange for a
+   number the whole design exists to refuse. The row comes off the page.
+
+   THE RENT IS A DIFFERENT CLAIM. The desk already asks for monthly rent as an
+   input, and already fills it with a rule of thumb — 0.65% of ARV — marked as
+   an ESTIMATE that widens every band it touches. An address-level figure from
+   actual nearby rentals is strictly better than that rule, it is the same KIND
+   of object, and the sheet's grammar already knows what to do with it.
+
+   So it lands as an ESTIMATE with its provenance attached, never as ENTERED,
+   and it rides the SAME monthly allowance as the comp pull: both are one
+   RentCast request on our key, and inventing a second number would be
+   advertising an allowance that does not exist. */
+app.post('/api/lookup/rent', express.json({ limit: '4kb' }), async (req, res) => {
+  const fail = (code, why, extra) => { log('rent', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
+  if (!RENTCAST_KEY) return fail(503, 'The rent lookup is not switched on for this deployment.');
+  { const g = gateFails(req, 'rent lookup'); if (g) return fail(g[0], g[1]); }
+
+  const ent = await entitlementOf(req, 2);
+  if (!ent.ok){
+    const SAY = {
+      unconfigured: 'The rent lookup is not switched on for this deployment.',
+      nosession:    'The rent lookup needs an account. Nothing was sent.',
+      noprofile:    'The rent lookup needs an account. Nothing was sent.',
+      lookup:       'The account could not be checked just now. Nothing was sent.',
+      free:         'The rent lookup arrives with Underwriter, and with the fourteen-day trial. On the free desk, type the rent or bring your own RentCast key.',
+      lowtier:      'The rent lookup arrives with Underwriter. On this plan you can type the rent or bring your own RentCast key.',
+    };
+    const code = (ent.why === 'unconfigured' || ent.why === 'lookup') ? 503 : 403;
+    return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why, byok: true });
+  }
+
+  /* the SAME meter as the comp pull, on purpose — see the note above */
+  const meter = await meterFails(res, ent, 'aicomps', 'of these');
+  if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
+  { const b = budgetFails(ent.uid, 'The rent lookup'); if (b) return fail(b[0], b[1], b[2]); }
+  if (!ipOk(req.ip || 'unknown'))
+    return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
+
+  const addr = String((req.body && req.body.address) || '').trim().slice(0, 160);
+  if (addr.length < 6) return fail(400, 'That is not enough address to look up. Street, city and ZIP work best.');
+
+  let j = null, status = 200;
+  if (MOCK){
+    j = { rent: 1875, rentRangeLow: 1700, rentRangeHigh: 2050,
+          comparables: [{ formattedAddress:'9 Mock Row', price:1850 },
+                        { formattedAddress:'11 Mock Row', price:1900 }] };
+  } else
+  try {
+    const u = new URL('https://api.rentcast.io/v1/avm/rent/long-term');
+    u.searchParams.set('address', addr);
+    u.searchParams.set('compCount', '8');
+    const r = await fetch(u, { headers: { 'X-Api-Key': RENTCAST_KEY, accept:'application/json' },
+                               signal: AbortSignal.timeout(15000) });
+    status = r.status;
+    if (r.ok) j = await r.json();
+  } catch(e){
+    return fail(502, 'The rent source did not answer. Nothing was spent from your allowance.');
+  }
+  if (status === 404){ charge(ent.uid, {}, RENTCAST_USD);
+    return fail(404, 'There is no rental record near that address. Type the rent instead — three real listings beat any estimate.'); }
+  if (status === 429) return fail(429, 'The rent source is rate-limiting us this minute. Try again shortly.');
+  if (status === 401 || status === 403)
+    return fail(503, 'The rent lookup is not switched on for this deployment.');
+  if (!j){ charge(ent.uid, {}, RENTCAST_USD);
+    return fail(502, 'The rent source returned ' + status + '.'); }
+
+  const num = v => { const x = Number(v); return Number.isFinite(x) && x > 0 ? Math.round(x) : null; };
+  const rent = num(j.rent), lo = num(j.rentRangeLow), hi = num(j.rentRangeHigh);
+  charge(ent.uid, {}, RENTCAST_USD);
+  if (rent === null) return fail(404, 'No rent came back for that address. Type it instead.');
+
+  const n = Array.isArray(j.comparables) ? j.comparables.length : 0;
+  const month = await countUse(ent.uid, 'aicomps');
+  res.json({ ok:true, rent, lo, hi, comps: n,
+    ...(month ? { month: { used: month.used, cap: month.cap, left: month.remaining } } : {}),
+    /* the sentence the sheet will print beside the figure. It says where the
+       number came from and how wide it is, because a rent estimate with no
+       range is a rent estimate pretending to be a fact. */
+    prov: 'the rent for this address, from ' + (n ? n + ' nearby rental' + (n === 1 ? '' : 's') : 'nearby rentals')
+        + (lo && hi ? ' · they range ' + lo.toLocaleString('en-US') + '–' + hi.toLocaleString('en-US') : '')
+        + ' · check three real listings before you lean on it' });
+});
+
 app.post('/api/comps', express.json({ limit: '4kb' }), async (req, res) => {
   const fail = (code, why, extra) => { log('comps', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
   if (!RENTCAST_KEY) return fail(503, 'Pulling comps is not switched on for this deployment.');
-  { const g = gateFails(req, 'the comp pull'); if (g) return fail(g[0], g[1]); }
+  { const g = gateFails(req, 'comp pull'); if (g) return fail(g[0], g[1]); }
 
   const ent = await entitlementOf(req, 2);
   if (!ent.ok){
@@ -1602,6 +1765,319 @@ const BUILD = (() => {
   return { id:'unstamped', at:'', stage:'' };
 })();
 
+/* ══ THE OPS PAGE ══════════════════════════════════════════════════════════
+   Everything on this page already existed. The meters, the day budget, the
+   billing state, the build stamp, the error ring — every number was being kept
+   and none of it was ever shown anywhere, so "how is the business doing" and
+   "is anything broken" were both answered by reading source code.
+
+   ONE TOKEN, AND IT FAILS CLOSED. Unset means the route does not exist, so a
+   deploy that forgets it exposes nothing rather than everything. The token is
+   compared in constant time, because a naive === on a secret leaks its prefix
+   to anybody willing to time a few thousand requests.
+
+   AND IT NAMES NOBODY. Counts, sums, tiers and rates — never an email, never
+   a uid, never a sheet. An ops page is a page you will open on a phone on a
+   train, and one that lists your customers is one screenshot from being a
+   breach. Everything here would be fine on a slide. */
+const OPS_TOKEN = process.env.NI_OPS_TOKEN || '';
+const opsOk = (given) => {
+  if (!OPS_TOKEN || !given) return false;
+  const a = Buffer.from(String(given)), b = Buffer.from(OPS_TOKEN);
+  if (a.length !== b.length) return false;
+  try { return crypto.timingSafeEqual(a, b); } catch(e){ return false; }
+};
+/* ── AND THE TOKEN STOPS RIDING IN THE URL ─────────────────────────────────
+   ?k=… is the only way to open the page the first time, and it is a bad place
+   for a secret to live afterwards: query strings land in browser history, in
+   proxy logs, in a Referer header, and in the screenshot somebody takes of the
+   dashboard. So the first valid load sets it as a cookie and every later
+   request — including the control forms — carries it there instead.
+
+   HttpOnly so no script on the page can read it, SameSite=Strict so it is not
+   sent from anywhere else at all, Secure in production. The cookie IS the
+   token rather than a session derived from it: a second secret would need
+   storage, expiry and rotation to protect something that already has all
+   three, badly, in an environment variable. */
+const opsFrom = (req) => (req.headers.authorization || '').replace(/^Bearer\s+/i, '')
+  || (req.query && req.query.k)
+  || (String(req.headers.cookie || '').match(/(?:^|;\s*)ni_ops=([^;]+)/) || [])[1]
+  || (req.body && req.body.k);
+const opsRemember = (req, res) => {
+  if (String(req.headers.cookie || '').includes('ni_ops=')) return;
+  const secure = (req.get('x-forwarded-proto') || req.protocol) === 'https';
+  res.cookie ? res.cookie('ni_ops', OPS_TOKEN, { httpOnly:true, sameSite:'strict', secure, maxAge: 12*3600*1000 })
+             : res.setHeader('set-cookie', 'ni_ops=' + OPS_TOKEN
+                 + '; HttpOnly; SameSite=Strict; Path=/; Max-Age=43200' + (secure ? '; Secure' : ''));
+};
+
+async function opsData(){
+  rollDay();
+  const bill = billingState();
+  const caps = {};
+  for (const f of FEATURES) caps[f] = capFor(f, 3);
+  /* the account layer answers "how many people are there" better than we can:
+     it is the only place that knows. HEAD with a count header is one row of
+     traffic rather than a table download. */
+  const countOf = async (table, q) => {
+    const SB = (process.env.SUPABASE_URL || '').replace(/\/+$/, '');
+    const K = process.env.SUPABASE_SERVICE_KEY || '';
+    if (!SB || !K) return null;
+    try {
+      const r = await fetch(`${SB}/rest/v1/${table}?select=id${q ? '&' + q : ''}`,
+        { method:'HEAD', headers:{ apikey:K, authorization:'Bearer ' + K, Prefer:'count=exact' } });
+      const cr = r.headers.get('content-range') || '';
+      const n = Number(String(cr).split('/')[1]);
+      return Number.isFinite(n) ? n : null;
+    } catch(e){ return null; }
+  };
+  const since = d => new Date(Date.now() - d * 86400000).toISOString();
+  const [people, wk, day1, solo, uw, off, trialing] = await Promise.all([
+    countOf('profiles'),
+    countOf('profiles', 'created_at=gte.' + since(7)),
+    countOf('profiles', 'created_at=gte.' + since(1)),
+    countOf('profiles', 'plan=eq.solo'),
+    countOf('profiles', 'plan=eq.underwriter'),
+    countOf('profiles', 'plan=in.(the office,office)'),
+    countOf('profiles', 'trial=not.is.null&plan=is.null'),
+  ]);
+  /* MRR from the prices actually charged, not from the plans page — the page
+     is marketing and this is the books. Unknown price means unknown MRR, said
+     as null rather than guessed as zero. */
+  const PRICE = { solo: 39, underwriter: 129, office: 249 };
+  const mrr = (solo === null || uw === null || off === null) ? null
+            : solo * PRICE.solo + uw * PRICE.underwriter + off * PRICE.office;
+  return {
+    build: BUILD,
+    at: new Date().toISOString(),
+    uptimeH: +(process.uptime() / 3600).toFixed(1),
+    people: { total: people, newToday: day1, newThisWeek: wk, trialing },
+    plans: { solo, underwriter: uw, office: off, mrr },
+    billing: bill,
+    today: { calls: day.n, usd: +day.usd.toFixed(3), accounts: day.by.size,
+             budgetUsd: LIM.dailyUsd, ceilingUsd: hardUsd(),
+             budgetCalls: LIM.perDay, ceilingCalls: hardN(),
+             pctOfBudget: LIM.dailyUsd ? Math.round(day.usd / LIM.dailyUsd * 100) : null },
+    features: {
+      read:    (KEY || MOCK) ? 'on' : 'off',
+      comps:   RENTCAST_KEY ? 'on' : 'byok',
+      land:    TILES_KEY ? (tiles.n >= TILES_CAP ? 'quota' : 'on') : 'flat',
+      census:  process.env.CENSUS_KEY ? 'on' : 'partial',
+      accounts: ACCOUNTS_ON() ? 'on' : 'off',
+    },
+    capsAtTopTier: caps,
+    founding: await foundingState(),
+    control: { paused: opsPaused(),
+               pausedFor: opsPaused() ? Math.round((OPS.pausedUntil - Date.now()) / 60000) : 0,
+               pauseWhy: OPS.pauseWhy || '',
+               budgetUsd: opsBudget() ?? LIM.dailyUsd,
+               budgetIsOverride: opsBudget() !== null },
+    errors: { lastHour: errRecent(), sinceBoot: errCount(), list: errList() },
+  };
+}
+
+/* ── THE CONTROLS ──────────────────────────────────────────────────────────
+   Elijah: "in my developer dashboard I should be able to have a high degree of
+   control over the service."
+
+   The honest version of that is narrow, and the narrowness is the design. Two
+   levers, both reversible, both taking effect on the next request:
+
+     · PAUSE THE SPEND. Every metered feature stops and says the true thing.
+       This is the control you want at 2am when a bill is running away, and
+       nothing else does that job — the daily budget is a ceiling, not a
+       switch, and Render's environment variables need a redeploy.
+     · CHANGE TODAY'S BUDGET, without a deploy. Same reason.
+
+   WHAT IS DELIBERATELY NOT HERE: nothing that grants a plan, refunds a
+   payment, edits a sheet or reads a customer's work. A dashboard that can hand
+   out an Underwriter subscription is a dashboard whose token is worth stealing
+   and whose actions have to be audited; every one of those jobs already has a
+   place it belongs — Stripe for money, Supabase for accounts — and doing them
+   here would mean two systems that can disagree about the same fact.
+
+   Both levers live in memory and die with the process, ON PURPOSE. A pause
+   that survives a restart is a pause somebody sets at 2am and rediscovers on
+   Thursday when a customer writes in. A deploy is the natural end of an
+   emergency, and this is an emergency control. */
+/* urlencoded as well as JSON: the buttons on the page are plain <form> posts,
+   because a control panel that needs JavaScript to work is a control panel
+   that does not work on the morning you most need it */
+app.post('/api/ops/control', express.urlencoded({ extended:false, limit:'2kb' }),
+                             express.json({ limit:'2kb' }), (req, res) => {
+  const given = opsFrom(req);
+  if (!opsOk(given)) return res.status(404).json({ ok:false, error:'No such endpoint.' });
+  const b = req.body || {};
+  const act = String(b.action || '');
+  if (act === 'pause'){
+    const mins = Math.max(1, Math.min(720, Number(b.minutes) || 60));
+    OPS.pausedUntil = Date.now() + mins * 60000;
+    OPS.pauseWhy = String(b.why || '').slice(0, 120);
+    log('OPS pause', mins + 'm', OPS.pauseWhy);
+  } else if (act === 'resume'){
+    OPS.pausedUntil = 0; OPS.pauseWhy = '';
+    log('OPS resume');
+  } else if (act === 'budget'){
+    const v = Number(b.usd);
+    OPS.budgetOverride = (Number.isFinite(v) && v >= 0 && v <= 5000) ? v : null;
+    log('OPS budget', OPS.budgetOverride);
+  } else return res.status(400).json({ ok:false, error:'Unknown action.' });
+  /* a browser that posted a form gets sent back to the page it pressed on;
+     a script gets JSON. Same route, same rules, two callers. */
+  if (/text\/html/.test(String(req.headers.accept || '')))
+    return res.redirect(303, '/ops');
+  res.json({ ok:true, paused: opsPaused(),
+             pausedFor: opsPaused() ? Math.round((OPS.pausedUntil - Date.now()) / 60000) : 0,
+             budgetUsd: opsBudget() ?? LIM.dailyUsd });
+});
+
+app.get('/api/ops', async (req, res) => {
+  const given = opsFrom(req);
+  /* 404, not 403: an endpoint that says "wrong token" has confirmed it exists */
+  if (!opsOk(given)) return res.status(404).json({ ok:false, error:'No such endpoint.' });
+  res.set('cache-control', 'no-store');
+  res.json(await opsData());
+});
+
+/* the same numbers, drawn. No build step, no framework, no external anything —
+   a page that needs a bundler is a page that stops working on the day you most
+   need to look at it. */
+app.get('/ops', async (req, res) => {
+  const given = opsFrom(req);
+  if (!opsOk(given)) return res.status(404).type('txt').send('Not found');
+  opsRemember(req, res);
+  const d = await opsData();
+  const esc = t => String(t === null || t === undefined ? '' : t)
+    .replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+  const n = v => v === null || v === undefined ? '—' : Number(v).toLocaleString('en-US');
+  const usd = v => v === null || v === undefined ? '—' : '$' + Number(v).toLocaleString('en-US');
+  const card = (label, value, note, tone) =>
+    `<div class="c ${tone || ''}"><div class="l">${esc(label)}</div>`
+    + `<div class="v">${esc(value)}</div>${note ? `<div class="n">${esc(note)}</div>` : ''}</div>`;
+  /* the two states that look identical from outside and are not: a live site
+     on a test key takes no money, and a stamped build that is not the one you
+     pushed means the deploy did not happen */
+  const modeTone = d.billing.mode === 'live' ? 'good' : d.billing.mode === 'test' ? 'bad' : 'warn';
+  const errTone  = d.errors.lastHour > 0 ? 'bad' : 'good';
+  const budgTone = d.today.pctOfBudget === null ? '' : d.today.pctOfBudget >= 100 ? 'bad'
+                 : d.today.pctOfBudget >= 60 ? 'warn' : 'good';
+  res.set('cache-control', 'no-store').type('html').send(`<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>ops · negotiation inc</title>
+<style>
+:root{--ink:#0d1420;--mid:#3f4759;--soft:#6b7488;--line:#dfe4ec;--wash:#f6f8fb;
+ --good:#12633e;--goodbg:#eaf6f0;--warn:#8a6206;--warnbg:#fdf6e6;--bad:#a32a20;--badbg:#fdefed}
+*{box-sizing:border-box}
+body{margin:0;background:#eef1f6;color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.w{max-width:960px;margin:0 auto;padding:22px 16px 60px}
+h1{font-family:Georgia,serif;font-size:24px;margin:0}
+.sub{color:var(--soft);font-size:12.5px;margin-top:4px}
+h2{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--soft);margin:26px 0 8px;font-weight:800}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px}
+.c{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.c .l{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--soft);font-weight:700}
+.c .v{font-family:Georgia,serif;font-size:25px;font-weight:700;line-height:1.1;margin-top:5px;word-break:break-word}
+.c .n{font-size:12px;color:var(--soft);margin-top:3px}
+.c.good{background:var(--goodbg);border-color:#bfe0cd} .c.good .v{color:var(--good)}
+.c.warn{background:var(--warnbg);border-color:#e8d5a3} .c.warn .v{color:var(--warn)}
+.c.bad{background:var(--badbg);border-color:#f0c9c4} .c.bad .v{color:var(--bad)}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th{text-align:left;font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--soft);padding:9px 12px;border-bottom:1px solid var(--line)}
+td{padding:9px 12px;border-bottom:1px solid var(--wash);font-size:13.5px;vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right;white-space:nowrap}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+.none{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;color:var(--soft);font-size:13.5px}
+.ctl{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 15px;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center}
+.ctl .cf{display:flex;gap:8px;align-items:center;margin:0}
+.ctl label{font-size:12.5px;color:var(--soft)}
+.ctl input{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;width:70px}
+.ctl button{font:inherit;font-size:13px;font-weight:650;padding:8px 13px;border-radius:9px;cursor:pointer;
+ border:1px solid var(--line);background:var(--wash);color:var(--ink);min-height:38px}
+.ctl button:hover{border-color:var(--soft)}
+.ctl button.stop{background:var(--badbg);border-color:#f0c9c4;color:var(--bad)}
+.ctl button.go{background:var(--goodbg);border-color:#bfe0cd;color:var(--good)}
+.ctl p{flex:1 1 100%;margin:2px 0 0;font-size:12px;color:var(--soft);line-height:1.5}
+@media(max-width:560px){.w{padding:16px 12px 50px}.c .v{font-size:21px}}
+</style></head><body><div class="w">
+<h1>Ops</h1>
+<div class="sub">${esc(d.at)} · up ${esc(d.uptimeH)}h · build <span class="mono">${esc(d.build.id)}</span> · ${esc(d.build.stage || 'unstamped')}</div>
+
+<h2>Money</h2>
+<div class="g">
+ ${card('MRR', usd(d.plans.mrr), 'from live plan counts')}
+ ${card('Paying', n((d.plans.solo || 0) + (d.plans.underwriter || 0) + (d.plans.office || 0)),
+        `${n(d.plans.solo)} solo · ${n(d.plans.underwriter)} uw · ${n(d.plans.office)} office`)}
+ ${card('In trial', n(d.people.trialing), 'no plan yet')}
+ ${card('Stripe', d.billing.mode, d.billing.mode === 'test' ? 'NOBODY CAN PAY YOU' : d.billing.pay === 'on' ? 'checkout on' : 'checkout off', modeTone)}
+</div>
+
+<h2>People</h2>
+<div class="g">
+ ${card('Accounts', n(d.people.total))}
+ ${card('New today', n(d.people.newToday))}
+ ${card('New this week', n(d.people.newThisWeek))}
+ ${card('Webhook', d.billing.hook, d.billing.hook === 'on' ? 'signing secret set' : 'plans will not update', d.billing.hook === 'on' ? 'good' : 'bad')}
+</div>
+
+<h2>Today's spend</h2>
+<div class="g">
+ ${card('Spent', usd(d.today.usd), `${n(d.today.calls)} calls · ${n(d.today.accounts)} accounts`, budgTone)}
+ ${card('Of budget', d.today.pctOfBudget === null ? '—' : d.today.pctOfBudget + '%', `budget ${usd(d.today.budgetUsd)}`, budgTone)}
+ ${card('Ceiling', usd(d.today.ceilingUsd), 'hard stop')}
+ ${card('Errors, 1h', n(d.errors.lastHour), `${n(d.errors.sinceBoot)} since boot`, errTone)}
+</div>
+
+<h2>Control</h2>
+<div class="ctl">
+ <form method="POST" action="/api/ops/control" class="cf">
+  <input type="hidden" name="action" value="${d.control.paused ? 'resume' : 'pause'}">
+  ${d.control.paused ? '' : '<input type="hidden" name="minutes" value="60">'}
+  <button class="${d.control.paused ? 'go' : 'stop'}">${d.control.paused
+    ? 'Resume — paused ' + d.control.pausedFor + ' more min'
+    : 'Pause everything metered · 60 min'}</button>
+ </form>
+ <form method="POST" action="/api/ops/control" class="cf">
+  <input type="hidden" name="action" value="budget">
+  <label>Today's budget $<input name="usd" inputmode="decimal" value="${esc(d.control.budgetUsd)}" size="5"></label>
+  <button>Set</button>
+ </form>
+ <p>Pause stops every metered feature and tells the person the truth about why.
+  Both levers take effect on the next request and both die with a deploy, which
+  is the natural end of an emergency.</p>
+</div>
+
+<h2>The founding twenty-five</h2>
+<div class="g">
+ ${d.founding && d.founding.on
+   ? (d.founding.known
+      ? card('Places taken', n(d.founding.taken) + ' of ' + n(d.founding.seats),
+             d.founding.open ? n(d.founding.left) + ' left — it closes itself' : 'closed automatically',
+             d.founding.open ? '' : 'warn')
+      : card('Places taken', '—', 'Stripe could not be counted — no founding price is being issued', 'bad'))
+   : card('Founding offer', 'off', 'no STRIPE_PRICE_FOUNDING set')}
+</div>
+
+<h2>Switched on</h2>
+<div class="g">
+ ${Object.entries(d.features).map(([k, v]) =>
+    card(k, v, '', v === 'on' ? 'good' : v === 'off' ? 'bad' : 'warn')).join('')}
+</div>
+
+<h2>What went wrong</h2>
+${d.errors.list.length ? `<table><thead><tr><th>Route</th><th>Message</th><th class="r">Count</th><th class="r">Last</th></tr></thead><tbody>`
+ + d.errors.list.map(e => `<tr><td class="mono">${esc(e.route)}</td><td>${esc(e.msg)}</td>`
+   + `<td class="r">${n(e.n)}</td><td class="r mono">${esc(String(e.last).slice(11, 19))}</td></tr>`).join('')
+ + `</tbody></table>`
+ : '<div class="none">Nothing has thrown since this process started.</div>'}
+
+<h2>Monthly caps at the top tier</h2>
+<table><tbody>${Object.entries(d.capsAtTopTier).map(([k, v]) =>
+  `<tr><td>${esc(k)}</td><td class="r mono">${n(v)}</td></tr>`).join('')}</tbody></table>
+
+</div></body></html>`);
+});
+
 app.get('/api/health', (_req, res) => {
   rollDay();
   checkGrants();                      // refreshes in the background; never blocks
@@ -1627,6 +2103,9 @@ app.get('/api/health', (_req, res) => {
              ceilingReads: hardN(), ceilingUsd: hardUsd(),
              accounts: day.by.size,
              share: day.by.size ? +(LIM.dailyUsd / day.by.size).toFixed(3) : LIM.dailyUsd },
+    /* the number worth seeing from a phone: not a total since boot, which goes
+       up forever, but whether anything is throwing RIGHT NOW */
+    errors: { lastHour: errRecent() },
     limits: { maxImages: LIM.maxImages, maxImageKb: LIM.maxImageKb, perIpHour: LIM.perIpHour } });
 });
 
@@ -1719,6 +2198,25 @@ app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, '404.html'), err => {
     if (err) res.status(404).type('txt').send('Not found');
   });
+});
+
+/* ── THE ONE THAT CATCHES EVERYTHING ELSE ──────────────────────────────────
+   Express swallows a thrown handler into a generic 500 with no trace unless
+   there is a four-argument middleware at the very end. Without it a route that
+   throws produces a blank error to the caller and NOTHING anywhere else: no
+   line in the log, no counter, no way to know it is happening. Every 500 this
+   service has ever served was invisible.
+
+   The caller still gets a sentence and never a stack — a stack trace names
+   file paths and library versions and is a gift to anybody probing. */
+app.use((err, req, res, _next) => {
+  const route = String(req.path || '').slice(0, 60);
+  noteErr(route, 500, err);
+  log('ERROR', route, String((err && err.message) || err).slice(0, 200));
+  if (res.headersSent) return;
+  if (route.startsWith('/api/'))
+    return res.status(500).json({ ok:false, error:'Something failed on our side. It has been recorded.' });
+  res.status(500).type('txt').send('Something failed on our side.');
 });
 
 if (process.env.NI_NO_LISTEN !== '1'){

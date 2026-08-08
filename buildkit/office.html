@@ -125,6 +125,28 @@ body.railtight .rn-caret{display:none}
  font-family:var(--sans);font-size:11px;font-weight:650;cursor:pointer;padding:7px 4px;text-decoration:none;
  border-radius:8px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#c9d8ee}
 .ac-data button:hover,.ac-data .acbtn:hover{background:rgba(255,255,255,.14);color:#fff}
+/* a billing warning is a fact about money, so it gets the weight of one —
+   and it is the only thing in this panel allowed to be red */
+/* the two doors, told apart before anything is typed */
+/* The form column is WHITE — the first version of this strip was styled for
+   the dark column beside it, so "Sign in" came out as pale grey on white and
+   the unselected tab was nearly invisible. A control whose second option
+   cannot be read is a control that still has one option. */
+.gtabs{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;margin:0 0 20px;
+ background:#eef1f6;border:1px solid #dfe4ec;border-radius:12px}
+.gtabs button{font:inherit;font-size:13.5px;font-weight:650;padding:10px 8px;min-height:42px;
+ border:0;border-radius:9px;background:transparent;color:#4a5162;cursor:pointer;
+ transition:background .12s,color .12s}
+.gtabs button:hover{color:#101725}
+.gtabs button[aria-selected="true"]{background:#fff;color:#101725;
+ box-shadow:0 1px 3px rgba(13,20,32,.13),0 0 0 1px rgba(13,20,32,.06)}
+.gtabs button:focus-visible{outline:2px solid #1f5fd0;outline-offset:1px}
+@media(max-width:640px){.gtabs button{min-height:46px}}
+.ac-bs{display:block;margin:2px 0 9px;padding:10px 12px;border-radius:10px;border:1px solid;font-size:13px;line-height:1.5}
+.ac-bs b{display:block;font-weight:700;margin-bottom:2px}
+.ac-bs span{display:block;opacity:.9}
+.ac-bs.bad{border-color:#d6786e;background:rgba(180,60,48,.16);color:#f6cfc9}
+.ac-bs.warn{border-color:#c9a45a;background:rgba(160,120,30,.16);color:#f2ddb0}
 .ac-del{width:100%;margin-top:5px;border-color:rgba(214,120,110,.4)!important;color:#f0b4ac!important}
 .ac-del:hover{background:rgba(180,60,48,.28)!important;border-color:#d6786e!important;color:#fff!important}
 .ac-del.armed{background:#a8332a!important;border-color:#a8332a!important;color:#fff!important}
@@ -507,6 +529,22 @@ footer a{color:var(--mid);text-decoration:none;margin-right:16px}
   </ul>
  </div>
  <form id="gate-form" autocomplete="on">
+  <!-- ── WHICH OF THE TWO THINGS AM I DOING ────────────────────────────────
+       There was one form, and the only way to tell it apart from the other
+       one was a small text link underneath reading "I already have an
+       account". So a returning customer met a page headed "Open your
+       workspace" with a NAME field on it, asking them to register again — and
+       the way out was a sentence sized like a footnote.
+
+       Two tabs. The state is the loudest thing on the form rather than the
+       quietest, and it is visible before anything is typed, which is the
+       whole point. It carries `hidden` until the account layer boots: without
+       Supabase there is only one door and a tab strip offering two would be
+       offering a thing that does not exist. -->
+  <div class="gtabs" id="g-tabs" role="tablist" aria-label="Sign in or create an account" hidden>
+   <button type="button" role="tab" data-mode="up" aria-selected="true">Create an account</button>
+   <button type="button" role="tab" data-mode="in" aria-selected="false">Sign in</button>
+  </div>
   <label for="g-name">Your name</label>
   <input id="g-name" type="text" placeholder="Elijah Payne" autocomplete="name" required>
   <label for="g-email">Email</label>
@@ -522,7 +560,13 @@ footer a{color:var(--mid);text-decoration:none;margin-right:16px}
   <div id="g-pwwrap" hidden>
    <label for="g-pw">A password <span style="color:var(--faint)">&mdash; six characters or more</span></label>
    <input id="g-pw" type="password" placeholder="something you will remember" autocomplete="new-password" minlength="6">
-   <div class="haveacc"><a href="#" id="g-have">I already have an account &rarr;</a></div>
+   <div class="haveacc"><a href="#" id="g-have">I already have an account &rarr;</a>
+    <!-- A product with accounts and no password reset loses a customer
+         permanently the first time somebody forgets one — and they will:
+         this is a tool you open on a Tuesday every few weeks, which is
+         exactly the interval at which people forget passwords. -->
+    <a href="#" id="g-forgot" hidden>I forgot my password &rarr;</a>
+    <a href="#" id="g-resend" hidden>Send the confirmation again &rarr;</a></div>
   </div>
   <div class="err" id="g-err">A name and an email, and the desk is yours.</div>
   <button class="btn p go" type="submit" id="g-go">Create my workspace &rarr;</button>
@@ -662,32 +706,157 @@ let LVL = 'pro';
    record, no password, the fine print saying so — because the site is live
    and a half-built auth layer must not be able to lock anybody out of a
    product that works today. */
-let GMODE = 'up';                                  // 'up' = new account, 'in' = returning
+let GMODE = 'up';        // 'up' new account · 'in' sign in · 'recover' · 'reset'
+let RESET_TOKEN = null;  // only ever set by arriving from a link in an email
 (function(){
   if (!(window.NI_SUPABASE_URL && window.NI_SUPABASE_ANON)) return;
   const w = document.getElementById('g-pwwrap'); if (w) w.hidden = false;
+  const tabs = document.getElementById('g-tabs');
+  if (tabs) tabs.hidden = false;      // two doors exist, so the strip appears
   const fine = document.getElementById('g-fine');
   if (fine) fine.innerHTML = '<b>Where this lives:</b> your sheets stay in this browser and are '
     + 'copied to your account so they reach your other devices. Export or delete everything at '
     + 'any time, from inside the product.';
+  /* ── THE OLD TOGGLE IS GONE ──────────────────────────────────────────────
+     It was a hand-rolled second copy of setMode(), written before there were
+     four modes, and it flipped between two of them while knowing nothing
+     about the other two. Two functions that both decide what the door looks
+     like is one function too many, and the one that gets forgotten is the one
+     that ships a screen nobody meant. The link now does one thing — come back
+     from recover — and setMode does all the deciding. */
   const have = document.getElementById('g-have');
-  if (have) have.onclick = ev => {
-    ev.preventDefault();
-    GMODE = GMODE === 'up' ? 'in' : 'up';
+  if (have) have.onclick = ev => { ev.preventDefault(); setMode('in'); };
+
+  /* ── FOUR MODES, NOT TWO ─────────────────────────────────────────────────
+     'up' make an account · 'in' sign in · 'recover' ask for a reset link ·
+     'reset' choose a new password. The last one is not reachable by clicking:
+     you arrive in it, from a link in an email, with a token in the fragment. */
+  const setMode = m => {
+    GMODE = m;
     const nm = document.getElementById('g-name'), lv = document.getElementById('g-lvl'),
-          mk = document.getElementById('g-market'), pw = document.getElementById('g-pw');
-    const hideRow = (el, hide) => { if (!el) return; const lab = el.previousElementSibling;
+          mk = document.getElementById('g-market'), pw = document.getElementById('g-pw'),
+          go = document.getElementById('g-go'), have = document.getElementById('g-have'),
+          fg = document.getElementById('g-forgot'), rs = document.getElementById('g-resend'),
+          em = document.getElementById('g-email'), wrap = document.getElementById('g-pwwrap'),
+          h = document.querySelector('#gate h1, .gate h1');
+    const row = (el, hide) => { if (!el) return; const lab = el.previousElementSibling;
       el.style.display = hide ? 'none' : ''; if (lab && lab.tagName === 'LABEL') lab.style.display = hide ? 'none' : ''; };
-    hideRow(nm, GMODE === 'in'); hideRow(mk, GMODE === 'in');
-    if (nm) nm.required = GMODE === 'up';
-    if (lv) lv.style.display = GMODE === 'in' ? 'none' : '';
-    if (lv && lv.previousElementSibling) lv.previousElementSibling.style.display = GMODE === 'in' ? 'none' : '';
-    if (pw) pw.setAttribute('autocomplete', GMODE === 'in' ? 'current-password' : 'new-password');
-    document.getElementById('g-go').innerHTML = GMODE === 'in' ? 'Sign in &rarr;' : 'Create my workspace &rarr;';
-    have.textContent = GMODE === 'in' ? 'I need an account \u2192' : 'I already have an account \u2192';
-    const wrap = document.getElementById('g-pwwrap');
-    if (wrap) wrap.classList.toggle('tight', GMODE === 'in');
+    row(nm, m !== 'up'); row(mk, m !== 'up');
+    if (nm) nm.required = m === 'up';
+    if (lv){ lv.style.display = m === 'up' ? '' : 'none';
+      if (lv.previousElementSibling) lv.previousElementSibling.style.display = m === 'up' ? '' : 'none'; }
+    /* recover asks for an address and nothing else; reset asks for a password
+       and nothing else — an email field on the reset screen is a question the
+       person has already answered by clicking the link */
+    if (wrap) wrap.hidden = (m === 'recover');
+    row(em, m === 'reset');
+    if (pw) pw.setAttribute('autocomplete', m === 'up' ? 'new-password'
+                                          : m === 'reset' ? 'new-password' : 'current-password');
+    if (pw) pw.placeholder = m === 'reset' ? 'your new password' : 'something you will remember';
+    const pwLab = pw && pw.previousElementSibling;
+    if (pwLab && pwLab.tagName === 'LABEL')
+      pwLab.innerHTML = m === 'reset' ? 'A new password <span style="color:var(--faint)">&mdash; six characters or more</span>'
+                                      : 'A password <span style="color:var(--faint)">&mdash; six characters or more</span>';
+    if (go) go.innerHTML = m === 'up' ? 'Create my workspace &rarr;'
+                         : m === 'in' ? 'Sign in &rarr;'
+                         : m === 'recover' ? 'Email me a reset link &rarr;'
+                         : 'Set it and sign me in &rarr;';
+    /* the tab strip now says which door you are at, so this link is redundant
+       on the two modes that HAVE tabs. It survives as the way back from
+       recover and reset, where the strip is deliberately hidden. */
+    if (have){ have.hidden = (m === 'up' || m === 'in' || m === 'reset');
+      have.textContent = 'Back to signing in \u2192'; }
+    if (fg) fg.hidden = (m !== 'in');
+    if (rs) rs.hidden = true;
+    if (wrap) wrap.classList.toggle('tight', m !== 'up');
+    /* the tabs show the state, and the two modes that are NOT reachable from
+       them — recover and reset — hide the strip entirely rather than leaving
+       a control selected that no longer describes the screen */
+    const tabs = document.getElementById('g-tabs');
+    if (tabs){
+      const two = (m === 'up' || m === 'in');
+      tabs.hidden = !two || !(window.NI_SUPABASE_URL && window.NI_SUPABASE_ANON);
+      tabs.querySelectorAll('[data-mode]').forEach(t =>
+        t.setAttribute('aria-selected', String(t.dataset.mode === m)));
+    }
+    /* and the promise at the top of the page changes with it: a returning
+       customer met a heading that said "open your workspace", which is what
+       you say to somebody who does not have one */
+    const gh = document.getElementById('gate-h'), gk = document.getElementById('gate-k');
+    if (gh) gh.textContent = m === 'up' ? 'Open your workspace.'
+                           : m === 'in' ? 'Welcome back.'
+                           : m === 'recover' ? 'Get back into your workspace.'
+                           : 'Choose a new password.';
+    if (gk) gk.textContent = m === 'in' ? 'Sign in' : 'Your desk';
   };
+  window.__setGateMode = setMode;
+
+  const tabEls = document.querySelectorAll('#g-tabs [data-mode]');
+  tabEls.forEach(t => t.onclick = () => {
+    setMode(t.dataset.mode);
+    const e = document.getElementById('g-err');
+    if (e) e.textContent = t.dataset.mode === 'in'
+      ? 'Your email and your password.'
+      : 'A name and an email, and the desk is yours.';
+  });
+
+  const fg = document.getElementById('g-forgot');
+  if (fg) fg.onclick = ev => { ev.preventDefault(); setMode('recover');
+    const e = document.getElementById('g-err');
+    if (e){ e.textContent = 'Your address, and a link comes to it.'; e.style.display = 'block'; } };
+
+  const rs = document.getElementById('g-resend');
+  if (rs) rs.onclick = async ev => { ev.preventDefault();
+    const em = document.getElementById('g-email'), e = document.getElementById('g-err');
+    const say = t => { if (e){ e.textContent = t; e.style.display = 'block'; } };
+    if (!em || !em.value.trim()) return say('Put the address in first.');
+    rs.textContent = 'Sending\u2026';
+    const r = window.__authResend ? await window.__authResend(em.value.trim()) : { ok:false };
+    rs.textContent = 'Send the confirmation again \u2192';
+    say(r.ok ? 'Sent. It can take a minute, and it does land in spam sometimes.'
+             : (r.error || 'That did not send. Email support@negotiationinc.com and we will confirm it by hand.'));
+  };
+
+  /* ── ARRIVING FROM AN EMAIL ──────────────────────────────────────────────
+     Supabase puts the token in the URL FRAGMENT, which never reaches a server
+     log — ours or anybody's. It is read once and then stripped, because a
+     token left in the address bar is a token in the next screenshot. */
+  /* ── READ THE FRAGMENT HERE, NOT THROUGH THE AUTH MODULE ────────────────
+     This block runs while the page's own script is parsing; the auth module
+     is appended at the end of the document and has not run yet, so
+     window.__authResetToken is undefined at this instant. The first version called it anyway, got null,
+     and every reset link in existence landed on the make-an-account screen
+     with the token still sitting in the address bar.
+
+     Parsing a fragment needs nothing from that module, so it is done here and
+     the module is only asked for the part that genuinely needs it — setting
+     the password, at submit time, by which point everything has loaded. */
+  const readArrival = () => {
+    try {
+      const h = new URLSearchParams(String(location.hash || '').replace(/^#/, ''));
+      const t = h.get('access_token'), type = h.get('type');
+      if (t && (type === 'recovery' || type === 'signup')) return { token:t, type };
+      const e = h.get('error_description') || h.get('error');
+      if (e) return { error: String(e).split('+').join(' ') };
+    } catch(err){}
+    return null;
+  };
+  const arrived = readArrival();
+  if (arrived && arrived.token){
+    RESET_TOKEN = arrived.token;
+    try { history.replaceState(null, '', location.pathname + location.search); } catch(e){}
+    setMode('reset');
+    const e = document.getElementById('g-err');
+    if (e){ e.textContent = 'Choose a new password and you are back in.'; e.style.display = 'block'; }
+  } else if (arrived && arrived.error){
+    const e = document.getElementById('g-err');
+    if (e){ e.textContent = arrived.error + ' \u2014 ask for a fresh link below.'; e.style.display = 'block'; }
+    setMode('recover');
+  } else if (/[?&]confirmed=1/.test(location.search)){
+    setMode('in');
+    const e = document.getElementById('g-err');
+    if (e){ e.textContent = 'Address confirmed. Sign in and the desk is yours.'; e.style.display = 'block'; }
+  }
 })();
 $('gate-form').onsubmit = async e => {
   e.preventDefault();
@@ -695,6 +864,40 @@ $('gate-form').onsubmit = async e => {
   const email = $('g-email').value.trim().slice(0,120);
   const err = $('g-err');
   const bad = t => { err.textContent = t; err.style.display = 'block'; };
+  /* ── THE TWO NEW MODES ARE HANDLED FIRST AND RETURN ─────────────────────
+     Both of them end here: neither creates a local workspace record, because
+     neither one is a person arriving — one is a person asking for an email,
+     the other is a person who already had an account and is getting back in. */
+  if (GMODE === 'recover'){
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return bad('That email address is not valid.');
+    const btn = $('g-go'); const was = btn.innerHTML;
+    btn.disabled = true; btn.textContent = 'Sending\u2026';
+    const r = window.__authRecover ? await window.__authRecover(email) : { ok:false };
+    btn.disabled = false; btn.innerHTML = was;
+    /* the same sentence whether or not the address exists. "No account with
+       that email" is a free membership check for anybody holding a list — and
+       it is also the honest answer, because from here we do not know whether
+       the mail was delivered. */
+    return bad(r.ok
+      ? 'If there is an account on that address, a link is on its way. It can take a minute, and it does land in spam sometimes.'
+      : (r.error || 'That did not send. Email support@negotiationinc.com and we will sort it by hand.'));
+  }
+  if (GMODE === 'reset'){
+    const pw = ($('g-pw').value || '');
+    if (pw.length < 6) return bad('Six characters or more.');
+    if (!RESET_TOKEN) return bad('This link has expired. Ask for a fresh one.');
+    const btn = $('g-go'); const was = btn.innerHTML;
+    btn.disabled = true; btn.textContent = 'One moment\u2026';
+    const r = window.__authSetPassword ? await window.__authSetPassword(RESET_TOKEN, pw) : { ok:false };
+    btn.disabled = false; btn.innerHTML = was;
+    if (!r.ok) return bad(r.error || 'That link has expired. Ask for a fresh one below.');
+    RESET_TOKEN = null;
+    /* the recovery token IS a session, so they are already signed in — sending
+       them to the door to type the password they just chose would be theatre */
+    if (typeof window.__authRefresh === 'function') { try { await window.__authRefresh(); } catch(e){} }
+    location.href = 'desk.html';
+    return;
+  }
   if (GMODE === 'up' && !name) return bad('A name and an email, and the desk is yours.');
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return bad('That email address is not valid.');
 
@@ -708,7 +911,12 @@ $('gate-form').onsubmit = async e => {
                              : await window.__authSignUp(email, pw, name);
     btn.disabled = false; btn.innerHTML = was;
     if (!r.ok) return bad(r.error || 'That did not work.');
-    if (r.confirm) return bad('Check your email for the link, then come back and sign in.');
+    if (r.confirm){
+      /* a confirmation that lands in spam, or an address with a typo in it, is
+         a dead end unless there is a way to send it again */
+      const rs = $('g-resend'); if (rs) rs.hidden = false;
+      return bad('Check your email for the link, then come back and sign in.');
+    }
   }
   /* An account is not a plan. Registering used to switch the whole product on
      for fourteen days, which spent the trial on people who had not decided to
@@ -914,6 +1122,11 @@ function acctPanel(){
        `<button type="button" data-plan="${i?esc(n):''}" class="${t===i?'on':''}">${n}</button>`).join('')}</div>
      <p>Switches this browser only. Nothing is charged and nothing is sent anywhere.</p></div>` : ''}
    ${(!PRELAUNCH && a.plan) ? `<div class="ac-data"><span class="k">Your subscription</span>
+     <!-- filled in by billingBanner(): Stripe retries a declined card for about
+          two weeks and then cancels. Through all of it the product keeps
+          working and nobody says anything, so the cancellation arrives as the
+          product breaking. -->
+     <div id="ac-billstate"></div>
      <div class="ac-row"><button type="button" id="ac-bill">Manage billing or cancel</button></div>
      <p class="fine">Card, invoices and cancelling, on Stripe's own page. Cancelling takes
       effect at the end of the month you have paid for and nothing is deleted.</p></div>` : ''}
@@ -999,6 +1212,38 @@ async function wipeAll(say){
   location.href = 'office.html';
   return true;
 }
+/* ── SAYING IT BEFORE STRIPE CANCELS ───────────────────────────────────────
+   Asked once, after the panel is drawn, and it never blocks the panel: a
+   billing check that cannot answer must not stop somebody reaching their own
+   sheets. Silence is the default and every state that is fine renders nothing
+   at all — a green "your card is fine" badge on every visit is noise that
+   teaches people to ignore the one visit it matters. */
+async function billingBanner(){
+  const box = document.getElementById('ac-billstate'); if (!box) return;
+  let d = null;
+  try {
+    const t = (typeof window.__authToken === 'function') ? await window.__authToken() : null;
+    const r = await fetch('/api/billing/state', { headers: t ? { authorization:'Bearer ' + t } : {} });
+    d = await r.json();
+  } catch(e){ return; }
+  if (!d || !d.ok) return;
+  const say = (tone, title, body) => { box.innerHTML =
+    '<div class="ac-bs ' + tone + '"><b>' + title + '</b><span>' + body + '</span></div>'; };
+  if (d.state === 'past_due' || d.state === 'unpaid')
+    return say('bad', 'Your last payment did not go through.',
+      'Stripe will try the card a few more times and then cancel the subscription. '
+      + 'Nothing is switched off yet, and updating the card below fixes it in one step.');
+  if (d.state === 'incomplete')
+    return say('bad', 'That payment was never finished.',
+      'The card needed a confirmation step that did not complete. Open billing and try it again.');
+  if (d.cancelsAtPeriodEnd)
+    return say('warn', 'This subscription ends on ' + (d.periodEnd || 'the end of the period') + '.',
+      'You keep everything until then. Re-subscribing before that date changes nothing about the price.');
+  if (d.state === 'canceled')
+    return say('warn', 'This subscription has been cancelled.',
+      'Your sheets are untouched and the free desk keeps working. The plans page has the current prices.');
+}
+
 function wireAcct(){
  const box = $('rn-acct'); if (!box) return;
  /* writes ni-preview-plan, never `plan` — see previewTier() */
@@ -1022,6 +1267,7 @@ function wireAcct(){
  if (exp) exp.onclick = () => { const n = exportAll();
    say(n < 0 ? 'This browser would not let that be written.'
      : `${n} propert${n===1?'y':'ies'} written to a file.`, n < 0); };
+ billingBanner();
  const del = $('ac-del'); let delT = null;
  if (del) del.onclick = () => {
    if (del.dataset.armed){ clearTimeout(delT);

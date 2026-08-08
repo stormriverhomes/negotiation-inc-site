@@ -106,6 +106,9 @@ h1 em{font-style:normal;color:var(--blue)}
 @media(min-width:1001px){ .founding{margin-top:38px} }
 .founding .btn{width:100%}
 .founding .k{font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+/* closed reads as a fact that already happened, not as a thing being sold */
+.founding.closed{background:var(--wash);border-color:var(--line-2)}
+.founding.closed .k{color:var(--soft)}
 .founding h3{font-size:20px;margin-top:3px}
 .founding p{font-size:14px;color:var(--mid);margin-top:4px;max-width:64ch;line-height:1.5}
 .billing{display:flex;align-items:center;gap:9px;margin-top:16px;font-size:13.5px;color:var(--soft);flex-wrap:wrap}
@@ -334,8 +337,22 @@ footer a:hover{color:var(--ink)}
   th:first-child,td:first-child{width:40%}
   th,td{padding:10px 11px;font-size:13.5px}
 }
-/* "in build" is a different fact from "—", and the table has to be able to say
-   it. Grey and small: it is a plan for later, not a feature being advertised. */
+/* ── "IN BUILD" IS GONE FROM THIS TABLE, AND THE CLASS STAYS ───────────────
+   Four rows on The Office carried it: seats, a shared assumption set, a
+   pipeline board, an API. All four are the same feature underneath — more than
+   one person — and none of them existed.
+
+   The reasoning for showing them was that a buyer deciding whether to pay
+   should be able to see where this is going, which is true and is why the
+   marker was invented. The arithmetic against it is stronger: four grey chips
+   on the most expensive tier tell somebody that tier is UNFINISHED, and they
+   do it on the page where the decision is made. Cutting them makes the top
+   tier read as complete, because it is — bulk underwriting, buy-box rules,
+   the whole week priced, branding on everything, and three times the
+   allowances, all of it working.
+
+   The class survives on purpose. The next honest "in build" will want it, and
+   deleting a way to say a true thing is not an improvement. */
 .soon{display:inline-block;font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:.1em;
  text-transform:uppercase;color:var(--soft);border:1px solid var(--line-2);border-radius:999px;
  padding:2px 7px;white-space:nowrap}
@@ -404,8 +421,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 
  <div class="founding">
   <div>
-   <div class="k">The founding twenty-five</div>
-   <h3>$79 a month for Underwriter, for your first year.</h3>
+   <div class="k" id="fnd-k">The founding twenty-five</div>
+   <h3 id="fnd-h">$79 a month for Underwriter, for your first year.</h3>
    <p>Twenty-five places, and then it closes. In exchange we want the thing money cannot buy at
     this stage: what breaks, what is missing, and what you would have paid for instead. On the
     day it renews you go to whatever Underwriter costs then — you will hear from us thirty days
@@ -419,8 +436,17 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  </div>
 
 
+ <!-- The widget writes "<tier> opens soon." — so this slot was producing
+      "Solo, Underwriter and The Office opens soon.", which is ungrammatical
+      and, sitting directly under a founding offer that says "claim a place",
+      reads as a page arguing with itself about whether it is selling. The
+      whole block disappears on a live build; until then it says one clean
+      thing, and it says what is actually true: the desk works now, the rail
+      is the part being wired. -->
  <div id="waitlist" style="max-width:640px;margin:26px auto 0"
-   data-waitlist="Solo, Underwriter and The Office" data-from="plans"></div>
+   data-waitlist="The paid desk"
+   data-line="The desk is <b>free and finished</b> and works today &mdash; pricing, the seven exits, the comparison, the print. The paid tiers are wired to a payment rail that is being switched on. Leave an address and you get <b>one</b> email the day it opens, with the founding price on it."
+   data-from="plans"></div>
 
 
  <div class="billing"><b>Monthly or yearly</b><span class="save">Two months free on annual</span>
@@ -556,8 +582,14 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
     <li><i>✓</i><span><b>The written comparison</b> — the case for each deal in prose you can forward. Every figure in it is one from your own table; a draft carrying anything else is refused rather than shown to you</span></li>
     <li><i>✓</i><span><b>The street brief</b> — what the block is actually doing. Tract-level income, tenure and vacancy from the census, the FEMA flood zone at the exact coordinates, and what has been permitted or planned nearby, <b>each claim carrying the page it came from</b>. The forty minutes of browser tabs, in about fifteen seconds</span></li>
    </ul>
-   <div class="fair">Fair use: 200 property lookups and 100 photo reads a month. Nobody working
-    normally has ever come close; if you do, we will call you rather than cut you off.</div>
+   <!-- These were 200 lookups and 100 reads, invented before the meters existed
+        and never reconciled with them. The table below sells 40 and 100, the
+        server enforces 40 and 100, and a card promising 200 is a card writing
+        a cheque the software refuses. The numbers here are now the numbers. -->
+   <div class="fair">The month includes <b>40 property lookups</b> — the comp pull and the rent
+    lookup share them — plus <b>100 photo reads</b>, 40 street briefs, 30 written comparisons,
+    20 bid checks, 60 letters and 80 paperwork reads. Each is counted and shown to you before
+    you spend it. The Office is three times every one of them.</div>
   </div>
   <div class="pf"><a class="btn p" href="#waitlist">Tell me when it opens →</a>
    <span class="under">The free desk works today — this tier is being wired up</span></div>
@@ -881,9 +913,9 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
     between what it can carry and what they are asking, in one table. Buy-box rules flag a fit the
     moment it appears — <b>and refuse the ones nobody should be driving out to see</b>. Your name and
     your masthead on every packet and every letter that leaves.</p>
-   <p class="fine" style="margin-top:10px">Seats, shared assumption sets, a pipeline board and an API
-    are in build and are <b>not</b> part of this plan yet. They are listed in the table below, marked,
-    and the price here is for what exists today.</p>
+   <p class="fine" style="margin-top:10px">Everything named on this page exists and works today.
+    Nothing on it is a plan for later: a price with a roadmap attached is a price for something
+    you cannot use yet.</p>
    <div class="saves"><b>The Monday morning</b> you get back</div>
   </div>
  </div>
@@ -918,7 +950,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      <td><span class="y">✓</span><small>3 in a browser · 12 a week with a free account</small></td><td><span class="y">✓</span><small>unlimited</small></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>Comps pulled for the address</b><small>on our key, metered — or paste your own and it runs on that instead. Either way the sheet adjusts them and you score them</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>Address-level values and rents</b><small>your own RentCast key, in the same panel — an address, not a ZIP average</small></td>
+   <tr><td><b>The rent for the address</b><small>from nearby rentals, on our key — it lands as an <b>estimate</b> with its range beside it, and typing over it makes it yours. There is deliberately no value estimate here: an address-level value IS an automated valuation model, and the lender packet says none was used</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>The street brief</b><small>the census tract — not the ZIP — the FEMA flood zone at the exact coordinates, and what has been permitted or planned nearby, each with the page it came from</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span><small>40 a month</small></td><td><span class="y">✓</span><small>120 a month</small></td></tr>
@@ -984,19 +1016,9 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
         remove something material from a plan — so shipping them as ticks
         would have been a promise written next to the promise that undoes it.
         They are listed, marked, and dated to nothing. ─────────────────────-->
-   <tr class="soonrow"><td><b>Seats and roles</b><small>in build — The Office is one person running volume until it lands, and the price says so</small></td>
-     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="soon">in build</span></td></tr>
    <tr><td><b>One assumption set for every deal</b><small>rate, refinance LTV, DSCR floor, selling costs, holding period, target profit and operating costs — set once, and every property on the desk reprices, including the ones you open next. With an account they follow you to the phone</small></td>
      <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-   <tr class="soonrow"><td><b>One assumption set across the seats</b><small>in build — the set above is per person; sharing it across an office needs seats, which are the row above this one</small></td>
-     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="soon">in build</span></td></tr>
-   <tr class="soonrow"><td><b>Pipeline across the office</b><small>in build — by stage and by spread</small></td>
-     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="soon">in build</span></td></tr>
-   <tr class="soonrow"><td><b>API and webhooks</b><small>in build — into the CRM you already pay for</small></td>
-     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="soon">in build</span></td></tr>
    <tr class="sec"><td colspan="5">What the data costs</td></tr>
-   <tr><td><b>Property lookups a month</b><small>on your own RentCast key, billed by them, not by us — their free tier is 50 a month and we never see the key</small></td>
-     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">Your key</td><td>Your key</td></tr>
    <tr><td><b>Photo condition reads a month</b><small>on our key, counted per account</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">100</td><td>300</td></tr>
    <tr><td><b>Street briefs a month</b><small>the census, FEMA and the permits, with their sources</small></td>
@@ -1009,8 +1031,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">60</td><td>180</td></tr>
    <tr><td><b>Reading the paperwork, a month</b><small>drop the listing screenshots — the sheet fills itself, and every figure quotes the line it came from</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">80</td><td>240</td></tr>
-   <tr><td><b>Comps pulled and scored, a month</b><small>type the address and the recent sales arrive on our key — no vendor account, nothing to set up. They land <b>unscored</b>: the comparability score and the ARV stay yours. On the free desk, bring your own RentCast key instead</small></td>
-     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">40</td><td>120</td></tr>
+   <tr><td><b>Property lookups a month</b><small>one allowance, shared by the comp pull and the rent lookup — each is one request to RentCast, <b>on our key</b>. No vendor account, nothing to paste. Comps land <b>unscored</b>: the comparability score and the ARV stay yours. On the free desk, bring your own key instead and the requests are billed to you at their price</small></td>
+     <td><span class="n">—</span><small>your own key</small></td><td><span class="n">—</span><small>your own key</small></td><td class="hi">40</td><td>120</td></tr>
    <tr class="sec"><td colspan="5">The walk-through and the arcade</td></tr>
    <tr><td><b>The eight lessons, with live controls</b><small>free forever, no account</small></td>
      <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
@@ -1133,6 +1155,48 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 </footer>
 
 </div>
+<script>
+/* ── THE OFFER COUNTS AND CLOSES ITSELF ────────────────────────────────────
+   A scarce offer somebody has to track by hand is an offer that stays open too
+   long or closes early because nobody was sure, and both are worse than not
+   running one. The count comes from Stripe — how many subscriptions exist on
+   the founding price — because that is the only definition that cannot drift
+   from what people were actually charged.
+
+   The page is written as if the offer is OPEN, and this only ever narrows it.
+   So a failed request, a blocked network or a pre-launch build with no billing
+   configured all leave exactly what the HTML already said, rather than
+   flashing "sold out" at somebody on a bad connection. */
+(function(){
+ var k = document.getElementById('fnd-k'),
+     h = document.getElementById('fnd-h'),
+     cta = document.getElementById('fnd-cta'),
+     box = k && k.closest('.founding');
+ if (!k) return;
+ fetch('/api/founding').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+  if (!d || !d.ok || !d.on || !d.known) return;
+  if (d.open){
+   /* the number is the whole point of the offer, so it goes in the eyebrow
+      where the count belongs, not buried in a paragraph */
+   k.textContent = d.left === 1 ? 'The founding twenty-five \u00b7 one place left'
+                 : d.left <= 8  ? 'The founding twenty-five \u00b7 ' + d.left + ' places left'
+                                : 'The founding twenty-five';
+   return;
+  }
+  /* full. It says so plainly and stops offering something that is gone —
+     an offer you can still click after it closed is worse than no offer. */
+  k.textContent = 'The founding twenty-five \u00b7 taken';
+  h.textContent = 'All twenty-five places are gone.';
+  var p = box && box.querySelector('p');
+  if (p) p.innerHTML = 'They went to the people who were early, and the price they were '
+    + 'promised is held for their first year exactly as it was written. Underwriter is '
+    + '<b>$129 a month</b> from here, with the same fourteen days free and the same one-click '
+    + 'cancel.';
+  if (cta){ cta.textContent = 'Start 14 days free \u2192'; cta.href = 'office.html?join=underwriter'; }
+  if (box) box.classList.add('closed');
+ }).catch(function(){});
+})();
+</script>
 <style>
 .whoami{border:1px solid currentColor!important;border-radius:999px;padding:5px 12px!important;
  font-weight:650;opacity:.75;transition:opacity .13s;white-space:nowrap}

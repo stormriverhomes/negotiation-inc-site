@@ -72,6 +72,85 @@ const PRICE = {
   'underwriter': process.env.STRIPE_PRICE_UNDERWRITER || '',
   'the office':  process.env.STRIPE_PRICE_OFFICE || '',
 };
+
+/* ══ THE FOUNDING TWENTY-FIVE, WHICH COUNTS AND CLOSES ITSELF ══════════════
+   A scarce offer somebody has to keep track of by hand is an offer that stays
+   open too long, or closes early because nobody was sure. Both are worse than
+   no offer: the first gives the discount away past the point it bought
+   anything, and the second turns a promise into a thing that moved.
+
+   So the count is not a number anybody types. It is asked of Stripe: how many
+   subscriptions exist on the founding price. That is the only definition that
+   cannot drift from what people were actually charged, and it is right the
+   first time after a refund, a cancellation inside the window, or a
+   subscription created by hand in the dashboard.
+
+   THREE THINGS FOLLOW FROM IT AUTOMATICALLY, with nothing to remember:
+     · the plans page says how many places are left, and stops saying it when
+       there are none
+     · checkout hands out the founding price while places remain and the
+       normal price the moment they do not — inside one request, so two people
+       arriving at place 25 cannot both get it
+     · /ops shows the count
+
+   A CANCELLED FOUNDER FREES THEIR PLACE. That is the honest reading of "25
+   places": the promise is a price held for whoever holds a place, and somebody
+   who left is not holding one. It also cannot be gamed — leaving costs the
+   founding price permanently, since re-subscribing takes whatever is open. */
+const FOUNDING_PRICE = process.env.STRIPE_PRICE_FOUNDING || '';
+const FOUNDING_SEATS = Number(process.env.NI_FOUNDING_SEATS || 25);
+const FOUNDING_TIER  = 'underwriter';       // what a founding place actually buys
+
+/* Cached, because the plans page asks on every visit and Stripe is a network
+   hop with a rate limit. Ninety seconds is short enough that "3 left" is never
+   meaningfully stale and long enough that a front page does not become a
+   denial-of-service on our own billing account. CHECKOUT DOES NOT USE THE
+   CACHE — see foundingClaim below. */
+let foundCache = { at: 0, taken: null };
+/* the window is a variable so a harness can set it to zero and watch the count
+   actually move — and so the number can be tightened in production from the
+   dashboard, without a deploy, on the day the last few places are going */
+const FOUND_TTL = Number(process.env.NI_FOUNDING_TTL_MS ?? 90000);
+async function foundingTaken(force = false){
+  if (!FOUNDING_PRICE || !SK) return null;
+  if (!force && foundCache.taken !== null && Date.now() - foundCache.at < FOUND_TTL)
+    return foundCache.taken;
+  try {
+    let taken = 0, url = `/v1/subscriptions?limit=100&status=all&price=${encodeURIComponent(FOUNDING_PRICE)}`;
+    for (let page = 0; page < 5; page++){
+      const j = await stripe('GET', url);
+      for (const sub of (j.data || [])) if (LIVE_STATUS.has(sub.status)) taken++;
+      if (!j.has_more || !j.data || !j.data.length) break;
+      url = `/v1/subscriptions?limit=100&status=all&price=${encodeURIComponent(FOUNDING_PRICE)}`
+          + `&starting_after=${encodeURIComponent(j.data[j.data.length - 1].id)}`;
+    }
+    foundCache = { at: Date.now(), taken };
+    return taken;
+  } catch(e){
+    /* Stripe unreachable must not hand out an unbounded number of founding
+       places. Unknown means the offer is closed until we can count again —
+       failing closed on a discount is the same rule as failing closed on a key. */
+    log('founding count failed');
+    return null;
+  }
+}
+export async function foundingState(){
+  if (!FOUNDING_PRICE) return { on:false };
+  const taken = await foundingTaken();
+  if (taken === null) return { on:true, known:false, seats: FOUNDING_SEATS };
+  return { on:true, known:true, seats: FOUNDING_SEATS, taken,
+           left: Math.max(0, FOUNDING_SEATS - taken), open: taken < FOUNDING_SEATS,
+           tier: FOUNDING_TIER };
+}
+/* the checkout-time question, and it is deliberately a different function:
+   it never reads the cache, because two people arriving at place 25 within the
+   same ninety seconds must not both be told yes. */
+async function foundingClaim(plan){
+  if (!FOUNDING_PRICE || plan !== FOUNDING_TIER) return null;
+  const taken = await foundingTaken(true);
+  if (taken === null || taken >= FOUNDING_SEATS) return null;
+  return FOUNDING_PRICE;
+}
 const TRIAL_DAYS = Number(process.env.STRIPE_TRIAL_DAYS || 14);
 
 /* fails closed, exactly like the photo read: an unconfigured deploy has no
@@ -214,8 +293,20 @@ export function mountBilling(app){
        have `function Object() { [native code] }` forwarded to Stripe as a
        price id. It dies upstream as a 502 rather than a clean 400 — a wasted
        round trip and a misleading error. planOfSub already does this properly. */
-    const price = Object.hasOwn(PRICE, plan) ? PRICE[plan] : '';
+    let price = Object.hasOwn(PRICE, plan) ? PRICE[plan] : '';
     if (!price) return res.status(400).json({ ok:false, error:'That is not a plan you can subscribe to here.' });
+    /* ── AND IF THERE IS A FOUNDING PLACE LEFT, THIS IS IT ─────────────────
+       Decided HERE, at the moment of purchase, from a live count — not from
+       the number the page happened to be showing when it loaded. Somebody who
+       opened the page while three places remained and checks out an hour later
+       gets whatever is true when they press the button, in either direction.
+
+       The plan the subscription BUYS is unchanged; only the price id differs.
+       reconcile() reads the plan out of subscription metadata first and falls
+       back to the price map, so the metadata below is what keeps a founding
+       subscriber correctly on Underwriter rather than on no plan at all. */
+    const founding = await foundingClaim(plan);
+    if (founding) price = founding;
 
     try {
       /* one customer per person, found by the uid rather than by the email —
@@ -264,7 +355,9 @@ export function mountBilling(app){
         /* THE PLAN TRAVELS WITH THE SUBSCRIPTION, not with the price. See the
            first trap at the top of this file. */
         subscription_data: {
-          metadata: { uid: who.uid, plan },
+          /* `founding` is stamped so a place can be recognised later without
+             re-deriving it from a price id that may be archived by then */
+          metadata: { uid: who.uid, plan, ...(founding ? { founding: '1' } : {}) },
           ...(TRIAL_DAYS > 0 ? { trial_period_days: TRIAL_DAYS } : {}),
         },
         /* ── THE TRIAL PUTS A CARD ON FILE ─────────────────────────────────
@@ -305,6 +398,76 @@ export function mountBilling(app){
       res.json({ ok:true, url: s.url });
     } catch(e){
       res.status(502).json({ ok:false, error:'The billing page could not be opened just now.' });
+    }
+  });
+
+  /* ── HOW MANY PLACES ARE LEFT ────────────────────────────────────────────
+     Public and unauthenticated on purpose: it is a number printed on a
+     marketing page, it names nobody, and requiring a session to read it would
+     mean the one page where the offer matters most could not show it.
+     Cached upstream, so a front page cannot become a load test on Stripe. */
+  app.get('/api/founding', async (_req, res) => {
+    res.set('cache-control', 'public, max-age=60');
+    res.json({ ok:true, ...(await foundingState()) });
+  });
+
+  /* ══ IS THIS CARD ACTUALLY WORKING ═══════════════════════════════════════
+     Stripe retries a declined card for about two weeks and then cancels the
+     subscription. During those two weeks the customer keeps the product —
+     which is right, `past_due` is in LIVE_STATUS on purpose — and NOBODY TELLS
+     THEM. Then one morning it cancels, they drop to free, and from where they
+     are sitting the product broke. That is a cancellation you caused and did
+     not have to.
+
+     No new column, no migration: Stripe already knows, and this asks it. The
+     answer is the subscription's own status plus the date the retries run out,
+     so the account panel can say the true thing with a real deadline on it.
+
+     It reports on the CALLER'S OWN subscription and nobody else's — whoIs()
+     establishes that first, and the customer id is looked up from the uid
+     rather than taken from the request. */
+  app.get('/api/billing/state', async (req, res) => {
+    if (!PAY_ON) return res.json({ ok:true, state:'unconfigured' });
+    const who = await whoIs(req);
+    if (!who) return res.status(401).json({ ok:false, error:'Sign in first.' });
+    const cust = await customerOf(who.uid);
+    if (!cust) return res.json({ ok:true, state:'none' });
+    try {
+      const subs = await stripe('GET',
+        `/v1/subscriptions?limit=10&status=all&customer=${encodeURIComponent(cust)}`);
+      const all = subs.data || [];
+      /* ── WHAT COUNTS AS LIVE, AND WHAT COUNTS AS WORTH SAYING ────────────
+         Not the same set, on purpose, and it is the same distinction as
+         tierOf/entitled elsewhere: LIVE_STATUS decides what somebody is still
+         ENTITLED to, and `unpaid` is correctly not in it — Stripe has stopped
+         retrying and the money is not coming.
+
+         But reporting only on LIVE_STATUS meant an `unpaid` subscription came
+         back as "none", and "none" renders nothing at all — so the one person
+         whose subscription has actually failed was the one person told
+         nothing. This set is wider than that one BECAUSE it is only used to
+         choose a sentence. */
+      const SPEAKABLE = new Set(['active','trialing','past_due','unpaid','incomplete']);
+      const live = all.filter(s => SPEAKABLE.has(s.status));
+      /* the worst live status is the one worth saying: a customer with two
+         subscriptions, one healthy and one failing, still has a problem */
+      const rank = { past_due:3, unpaid:3, incomplete:2, trialing:1, active:0 };
+      let worst = 'active', at = null, cancels = false;
+      for (const s of live){
+        if ((rank[s.status] || 0) > (rank[worst] || 0)) worst = s.status;
+        if (s.cancel_at_period_end) cancels = true;
+        if (s.current_period_end) at = Math.max(at || 0, s.current_period_end);
+      }
+      if (!live.length){
+        const gone = all.find(s => s.status === 'canceled');
+        return res.json({ ok:true, state: gone ? 'canceled' : 'none' });
+      }
+      res.json({ ok:true, state: worst, cancelsAtPeriodEnd: cancels,
+                 periodEnd: at ? new Date(at * 1000).toISOString().slice(0, 10) : null });
+    } catch(e){
+      /* Stripe being unreachable is not "your card failed" — saying so would
+         alarm somebody whose card is fine, which is worse than saying nothing */
+      res.json({ ok:true, state:'unknown' });
     }
   });
 

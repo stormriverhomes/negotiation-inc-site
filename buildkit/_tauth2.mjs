@@ -71,6 +71,62 @@ await pg.waitForTimeout(1100);
     return out;
   });
   ok('signing in offers a way out of a forgotten password', m.in.forgot, m.in);
+  /* ── THE TWO DOORS ARE TOLD APART BEFORE ANYTHING IS TYPED ───────────────
+     There was one form, and the only thing distinguishing it from the other
+     one was a small text link underneath reading "I already have an account".
+     So a returning customer met a page headed "Open your workspace" with a
+     NAME field on it, asking them to register again, and the way out was
+     sized like a footnote. */
+  const tabs = await pg.evaluate(() => {
+    const $ = id => document.getElementById(id), t = $('g-tabs');
+    if (!t) return { missing: true };
+    const read = () => ({ shown: !t.hidden,
+      sel: [...t.querySelectorAll('[data-mode]')].filter(x => x.getAttribute('aria-selected') === 'true')
+             .map(x => x.dataset.mode)[0] || null,
+      h: $('gate-h').textContent, go: $('g-go').innerText.trim(),
+      name: $('g-name').style.display !== 'none' });
+    const out = {};
+    t.querySelector('[data-mode=up]').click(); out.up = read();
+    t.querySelector('[data-mode=in]').click(); out.in = read();
+    window.__setGateMode('recover'); out.recover = { shown: !t.hidden };
+    window.__setGateMode('reset');   out.reset = { shown: !t.hidden };
+    return out;
+  });
+  ok('the door shows two tabs, not one form with a footnote', !tabs.missing, tabs);
+  ok('and the selected one is the mode you are in',
+     tabs.up.sel === 'up' && tabs.in.sel === 'in', { up:tabs.up.sel, in:tabs.in.sel });
+  ok('signing in does not ask for a name', tabs.in.name === false, tabs.in);
+  ok('and does not greet a returning customer as a stranger',
+     /welcome back/i.test(tabs.in.h) && !/open your workspace/i.test(tabs.in.h), tabs.in.h);
+  ok('while making an account still says what it makes',
+     /open your workspace/i.test(tabs.up.h), tabs.up.h);
+  /* the two modes you ARRIVE in rather than choose have no tab, because a
+     selected tab that no longer describes the screen is worse than none */
+  ok('recover and reset hide the strip rather than leaving a stale tab selected',
+     tabs.recover.shown === false && tabs.reset.shown === false, tabs);
+  /* This strip only exists on a CONFIGURED build, and this is the only file
+     that makes one — so the paint harnesses never see it and the contrast
+     check has to live here. The first version was styled for the dark column
+     beside the form and shipped pale grey on white: a control whose second
+     option cannot be read is a control that still has one option. */
+  const paint = await pg.evaluate(() => {
+    const lum = c => { const s = c.map(v => { v /= 255;
+      return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); });
+      return 0.2126*s[0] + 0.7152*s[1] + 0.0722*s[2]; };
+    const rgb = t => (String(t).match(/\d+(\.\d+)?/g) || [0,0,0]).slice(0,3).map(Number);
+    const cr = (a, b) => { const [hi, lo] = [lum(rgb(a)), lum(rgb(b))].sort((x,y) => y-x);
+      return +((hi + .05) / (lo + .05)).toFixed(2); };
+    const strip = document.getElementById('g-tabs');
+    const track = getComputedStyle(strip).backgroundColor;
+    return [...strip.querySelectorAll('button')].map(b => { const cs = getComputedStyle(b);
+      return { m: b.dataset.mode, sel: b.getAttribute('aria-selected'),
+        cr: cr(cs.color, cs.backgroundColor === 'rgba(0, 0, 0, 0)' ? track : cs.backgroundColor),
+        h: Math.round(b.getBoundingClientRect().height) }; });
+  });
+  for (const t of paint){
+    ok(`the ${t.m} tab is readable (${t.cr}:1)`, t.cr >= 4.5, t);
+    ok(`  and is a real target (${t.h}px)`, t.h >= 40, t);
+  }
   ok('recover asks for an address and not a password', m.recover.pwHidden, m.recover);
   ok('reset asks for a password and not an address', m.reset.emailHidden, m.reset);
   ok('and reset offers no way to wander off into sign-up', m.reset.haveHidden, m.reset);

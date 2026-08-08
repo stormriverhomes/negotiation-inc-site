@@ -1436,6 +1436,18 @@ body.traytight .tray{padding-bottom:11px}
 .field{background:#fff;border:1px solid var(--line-ink);border-radius:var(--r-in);padding:11px 13px;transition:border-color .12s,box-shadow .12s}
 /* provenance under an estimate: the arithmetic it used, and what replaces it */
 .prov{font-size:11.5px;color:var(--est);margin-top:8px;line-height:1.5}
+/* the rent lookup sits under the field it fills, quiet — it is an offer, not
+   a demand, and it must not out-shout the number already on the sheet */
+.rlk{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:8px;font-size:11.5px;color:var(--soft)}
+.rlk button{font:inherit;font-size:11.5px;font-weight:650;color:var(--blue);background:var(--blue-soft);
+ border:1px solid var(--blue-line,#c3d5f4);border-radius:8px;padding:5px 10px;cursor:pointer;min-height:30px}
+.rlk button:hover:not(:disabled){background:#fff;border-color:var(--blue)}
+.rlk button:disabled{opacity:.5;cursor:default}
+.rlk.bad span{color:var(--red)}
+.rlk .sp{width:11px;height:11px;border:2px solid var(--line-2);border-top-color:var(--blue);
+ border-radius:50%;display:inline-block;animation:rspin .7s linear infinite}
+@keyframes rspin{to{transform:rotate(360deg)}}
+@media(max-width:640px){ .rlk button{min-height:36px;padding:7px 12px} }
 .field.entered{border-style:solid}
 /* An estimate no longer tints the field at all. Tinting made every worked-out
    number look like a caution, and the sheet is most useful when it hands you a
@@ -3719,6 +3731,58 @@ function priorChips(fid){
   return out;
 }
 function chipsFor(f){ return [...(priorChips(f.id)), ...(f.est||[])]; }
+/* ── THE RENT, FROM THE ADDRESS ────────────────────────────────────────────
+   The plans page claimed "address-level values and rents" on two paid tiers
+   and neither half existed. Only one of them should: an address-level VALUE is
+   an automated valuation model, and "no automated valuation model was used" is
+   printed on the lender packet — so shipping one would make the sentence on
+   the most important document this product produces untrue.
+
+   A rent is a different claim. The desk already asks for monthly rent and
+   already fills it with 0.65% of ARV, marked ESTIMATE. A figure drawn from
+   actual nearby rentals is strictly better than that rule and is the same KIND
+   of object, so the grammar already knows what to do with it: it lands as an
+   ESTIMATE, it widens every band it touches, and typing over it makes it
+   yours. It never lands as ENTERED. */
+let RENT = { busy:false, msg:null, err:null };
+function rentLookupHTML(){
+  if (!entitled(2)) return '';                 // painting follows entitlement here
+  if (RENT.busy) return `<div class="rlk busy"><span class="sp"></span>
+    <span>Asking what this address rents for…</span></div>`;
+  if (RENT.err) return `<div class="rlk bad"><span>${esc(RENT.err)}</span>
+    <button type="button" data-rentlk="1">Try again</button></div>`;
+  const noAddr = !String(S.addr || '').trim();
+  return `<div class="rlk">
+    <button type="button" data-rentlk="1" ${noAddr ? 'disabled' : ''}>Look up the rent</button>
+    <span>${noAddr ? 'Put the address at the top first.'
+                   : 'From nearby rentals, on our key. It lands as an estimate.'}</span></div>`;
+}
+async function rentLookup(){
+  const addr = String(S.addr || '').trim();
+  if (!addr || RENT.busy) return;
+  RENT.busy = true; RENT.err = null; render();
+  try {
+    const t = (typeof window.__authToken === 'function') ? await window.__authToken() : null;
+    const r = await fetch('/api/lookup/rent', { method:'POST',
+      headers:{ 'content-type':'application/json', ...(t ? { authorization:'Bearer ' + t } : {}) },
+      body: JSON.stringify({ address: addr }) });
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j || !j.ok){
+      RENT.err = (j && j.error) || 'That did not come back. Nothing was spent.';
+    } else {
+      /* ESTIMATE, with its provenance — never ENTERED. The same rule the
+         photo read obeys, for the same reason. */
+      S.raw.rent = fmt(j.rent).replace('$','');
+      S.est.rent = true;
+      S.prov.rent = j.prov || 'the rent for this address, from nearby rentals';
+      S.unc.rent = 0.12;
+      if (S.src) delete S.src.rent;
+      save();
+    }
+  } catch(e){ RENT.err = 'The request never completed. Nothing was spent.'; }
+  RENT.busy = false; render();
+}
+
 function fieldHTML(f){
  const v = val(f.id), e = S.est[f.id] && v !== null;
  /* ── READ IS NOT A FOURTH CONFIDENCE, IT IS A SOURCE ─────────────────────
@@ -3742,6 +3806,7 @@ function fieldHTML(f){
      : `<span class="stchip st-${st}">${stTxt}</span>`}
   </div>
   ${(e || photo) && S.prov[f.id] ? `<div class="prov">${esc(S.prov[f.id])}</div>` : ''}
+  ${f.id === 'rent' && v === null ? rentLookupHTML() : ''}
   ${(()=>{ const chips = chipsFor(f); if (v!==null || !chips.length) return '';
    /* the caption here used to read "rough it in — marked estimate, bands
       widen", above a row of buttons that each already say "≈". Saying it a
@@ -6501,6 +6566,7 @@ function wire(order){
   el.onblur   = () => commit(false);
   el.onkeydown = ev => { if (ev.key === 'Enter'){ ev.preventDefault(); el.blur(); } };
  });
+ document.querySelectorAll('[data-rentlk]').forEach(el => el.onclick = () => rentLookup());
  document.querySelectorAll('[data-advrst]').forEach(el => el.onclick = () => {
    S.adv[el.dataset.advrst] = DEFAULTS[el.dataset.advrst]; save(); render(); });
  { const ar = $('adv-allrst');

@@ -106,7 +106,14 @@ const get = (p) => fetch(B + p).then(async r => ({ status:r.status, ct:r.headers
     ok(`the JSON contains no ${what}`, !re.test(r.text), (r.text.match(re) || [])[0]);
     ok(`the page contains no ${what}`, !re.test(html), (html.match(re) || [])[0]);
   }
-  ok('and the ops token is never echoed back', !r.text.includes(TOKEN) && !html.includes(TOKEN));
+  /* The token must not be in the JSON at all, and must not appear in a URL on
+     the page — a query string lands in browser history, in a proxy log, in a
+     Referer header and in the screenshot somebody takes of the dashboard.
+     The first valid load moves it into an HttpOnly cookie and every request
+     after that carries it there, so the forms do not need it. */
+  ok('the JSON never echoes the token', !r.text.includes(TOKEN), '');
+  ok('and no URL on the page carries it', !/[?&]k=/.test(html), (html.match(/.{30}[?&]k=.{20}/) || [])[0]);
+  ok('and the page does not contain it at all', !html.includes(TOKEN), '');
 }
 
 /* ── 4 · a thrown route is counted rather than silent ──────────────────────
@@ -144,6 +151,68 @@ const get = (p) => fetch(B + p).then(async r => ({ status:r.status, ct:r.headers
   ok('repeats collapse into one row with a count', d.errors.list.length <= 4, d.errors.list.length);
   ok('and the count went up', d.errors.sinceBoot >= 12, d.errors.sinceBoot);
   ok('the list never grows past its bound', d.errors.list.length <= 40, d.errors.list.length);
+}
+
+/* ── 5b · the token moves into a cookie on first load ──────────────────────*/
+{
+  const r = await fetch(B + '/ops?k=' + TOKEN);
+  const setc = r.headers.get('set-cookie') || '';
+  ok('the first valid load sets a cookie', /ni_ops=/.test(setc), setc.slice(0, 80));
+  ok('and no script on the page can read it', /HttpOnly/i.test(setc), setc);
+  ok('and it is not sent from anywhere else', /SameSite=Strict/i.test(setc), setc);
+  /* and the cookie alone opens it, with no token in the URL */
+  const c = await fetch(B + '/ops', { headers:{ cookie:'ni_ops=' + TOKEN } });
+  ok('the cookie alone opens the page', c.status === 200, c.status);
+  const w = await fetch(B + '/ops', { headers:{ cookie:'ni_ops=' + TOKEN + 'x' } });
+  ok('and a wrong cookie is still a 404', w.status === 404, w.status);
+}
+
+/* ── 6 · the two levers ────────────────────────────────────────────────────
+   "In my developer dashboard I should be able to have a high degree of control
+   over the service." The honest version is narrow: pause the spend, and change
+   today's budget. Both reversible, both effective on the next request, both
+   dead after a deploy — a pause that survives a restart is a pause somebody
+   sets at 2am and rediscovers on Thursday. */
+{
+  const post = (body) => fetch(B + '/api/ops/control?k=' + TOKEN, { method:'POST',
+    headers:{ 'content-type':'application/json' }, body: JSON.stringify(body) })
+    .then(async r => ({ status:r.status, j: await r.json().catch(() => null) }));
+
+  const nope = await fetch(B + '/api/ops/control', { method:'POST',
+    headers:{ 'content-type':'application/json' }, body:'{"action":"pause"}' });
+  ok('the controls are behind the same token as the page', nope.status === 404, nope.status);
+
+  const p = await post({ action:'pause', minutes:30, why:'a bill running away' });
+  ok('pause takes', p.j && p.j.paused === true && p.j.pausedFor === 30, p.j);
+  const d = JSON.parse((await get('/api/ops?k=' + TOKEN)).text);
+  ok('and the page knows it is paused', d.control.paused === true, d.control);
+  ok('and remembers why', /bill running away/.test(String(d.control.pauseWhy)), d.control);
+
+  const r = await post({ action:'resume' });
+  ok('resume takes', r.j && r.j.paused === false, r.j);
+
+  const b1 = await post({ action:'budget', usd:42 });
+  ok("today's budget can be changed without a deploy", b1.j && b1.j.budgetUsd === 42, b1.j);
+  const d2 = JSON.parse((await get('/api/ops?k=' + TOKEN)).text);
+  ok('and the page says it is an override rather than the configured number',
+     d2.control.budgetIsOverride === true, d2.control);
+  /* bounds, because a control panel that accepts anything is a way to break
+     the thing it exists to protect */
+  const junk = await post({ action:'budget', usd:'not a number' });
+  ok('a budget that is not a number falls back rather than becoming NaN',
+     junk.j && Number.isFinite(junk.j.budgetUsd), junk.j);
+  const huge = await post({ action:'budget', usd:999999 });
+  ok('and an absurd one is refused', huge.j && huge.j.budgetUsd !== 999999, huge.j);
+  await post({ action:'budget', usd:'' });
+
+  const bad2 = await post({ action:'delete-everything' });
+  ok('an action nobody wrote is refused rather than ignored', bad2.status === 400, bad2);
+
+  /* a pause is a HELD position: it must survive being asked about */
+  await post({ action:'pause', minutes:1 });
+  const held = JSON.parse((await get('/api/ops?k=' + TOKEN)).text);
+  ok('and reading the page does not clear the pause', held.control.paused === true, held.control);
+  await post({ action:'resume' });
 }
 
 srv.kill(); stub.close();
