@@ -29,6 +29,7 @@
    one that always does. */
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 import path from 'node:path';
 
 let n = 0, bad = 0;
@@ -64,14 +65,42 @@ try {
   const back = build();
   ok('and putting the page back puts the id back', back.id === a.id, { a:a.id, back:back.id });
 
+  /* ── AND A CHANGE TO NOTHING BUT THE CARDS MOVES IT ─────────────────────
+     This is the case that shipped a lie: the link-preview redesign touched
+     seven PNGs and no HTML at all, the id did not move, and the deploy script
+     — which polls for exactly this id — would have printed "LIVE, running
+     build X" against the build that was already running, while the new cards
+     sat on a laptop. A stamp that says yes to a deploy that did not happen is
+     worse than no stamp, because the whole point of it is to be the thing you
+     believe. */
+  const card = path.join(DIR, 'og', 'page-site.png');
+  const before2 = fs.readFileSync(card);
+  const idWithCard = JSON.parse(fs.readFileSync(path.join(DIR, 'build.json'), 'utf8')).id;
+  fs.writeFileSync(card, Buffer.concat([before2, Buffer.from('x')]));
+  {
+    const h = crypto.createHash('sha256');
+    /* recompute the way publish does, to prove the card is IN the digest
+       rather than rebuilding (which would just overwrite the tampered file) */
+    const cards = fs.readdirSync(path.join(DIR, 'og')).filter(f => /^page-.*\.png$/.test(f)).sort().map(f => 'og/' + f);
+    const files = fs.readdirSync(DIR).filter(f => /\.(html|js|css|json|xml|txt)$/i.test(f) && f !== 'build.json').sort().concat(cards);
+    for (const f of files){ h.update(f); h.update(fs.readFileSync(path.join(DIR, f))); }
+    ok('a card that changed moves the id — the digest reaches the cards',
+       h.digest('hex').slice(0, 12) !== idWithCard, idWithCard);
+  }
+  fs.writeFileSync(card, before2);
+
   /* ── 3 · the two facts a person reads off it ────────────────────────────*/
   ok('the stamp names the stage it was built for',
      back.stage === 'prelaunch' || back.stage === 'live', back);
   const live = build({ NI_STAGE:'live' });
   ok('and a live build says live, and is a different build',
      live.stage === 'live' && live.id !== back.id, { live:live.stage, same: live.id === back.id });
+  /* the link-preview cards are hashed too, and they must be: a redesign of
+     them changes seven PNGs and nothing else, and the deploy script polls for
+     this id — an unmoved id would report a deploy that never happened */
   const shipped = fs.readdirSync(DIR)
-    .filter(f => /\.(html|js|css|json|xml|txt)$/i.test(f) && f !== 'build.json').length;
+    .filter(f => /\.(html|js|css|json|xml|txt)$/i.test(f) && f !== 'build.json').length
+    + fs.readdirSync(path.join(DIR, 'og')).filter(f => /^page-.*\.png$/.test(f)).length;
   ok('and counts the files it actually hashed', live.files === shipped, { said: live.files, are: shipped });
   ok('and carries a timestamp anyone can read', !Number.isNaN(Date.parse(live.at)), live.at);
   ok('and an id short enough to compare by eye', /^[0-9a-f]{12}$/.test(live.id), live.id);

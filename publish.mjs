@@ -258,6 +258,7 @@ async function minifyInline(html, label){
    a search engine has no way to know they are the same page. */
 const SITE = (process.env.NI_SITE_URL || 'https://negotiationinc.com').replace(/\/+$/, '');
 const OGCARDS = new Set();          // filled in below, once the cards are drawn
+const OGFIELDS = [];                // the flat colours the card's panels are made of
 const OG = (t, d, slug) => {
   const key = slug === undefined ? null : (slug || 'site');
   /* A page with no card of its own borrows the nearest one that means the same
@@ -340,71 +341,173 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    The one number in green is the only green on the card, because green means
    money that pays and it means nothing else anywhere in this product. */
 {
+  /* ── THE CARD, AS CLAUDE DESIGN SPECIFIED IT ─────────────────────────────
+     Three of their decisions are load-bearing and worth naming, because each
+     one fixes something the first version got wrong:
+
+     · THE RIGHT COLUMN IS THE LEDGER, NOT A PICTURE OF ONE. It was a
+       screenshot-shaped thing that was not a screenshot. It is now four
+       inputs, the double rule that means final in any book ever kept by
+       hand, the one figure — and THE EXIT THE SOFTWARE REFUSED TO PRICE,
+       with the reason named. Every calculator on the internet gives you a
+       number. This is the only one that says "the wholetail cannot be
+       priced, repairs are 14% of ARV and it needs a figure you have not
+       given" — and it was nowhere in the thing advertising it.
+
+     · THE LEFT COLUMN IS BOTTOM-ALIGNED. Fixed type, top-aligned, meant a
+       four-line headline pushed 200px of dead space down the card while a
+       two-line headline left a third of it empty. Anchored to the baseline,
+       a long headline grows UP into air that was doing nothing anyway.
+
+     · ONE SLOT TAKES TWO SHAPES. mode:'rows' is a sheet being priced;
+       mode:'list' is the eight exits by name, for the page that argues about
+       them. One template, and no headline is hand-tuned.
+
+     Four things are sized to survive the ~300px thumbnail a feed actually
+     renders: the wordmark and its rule, the headline, the green figure, and
+     the pink refusal. Everything else is credibility for the second look. */
+  /* The two flat fields the card's structure is made of, named once so the
+     check after the squeeze can ask for them BY VALUE rather than guessing
+     which light tones in the palette were meant to be panels. */
+  OGFIELDS.push([255, 255, 255], [238, 241, 246]);        // the page, and the ledger's field
+  const REFUSAL = ['Will not price', 'The wholetail',
+                   'Repairs are 14% of ARV and it needs a figure you have not given.'];
+  const SHEET = [['Asking', '$184,500'], ['ARV — sells for, fixed up', '$291,000'],
+                 ['Repairs', '$41,300'], ['Exits priced', '7 of 8']];
+  const EIGHT = [['Wholesale'], ['Fix and flip'], ['Wholetail'], ['Buy and hold'],
+                 ['BRRRR'], ['Subject-to'], ['Novation'], ['The land play']];
   const CARDS = {
-    site:    ['Underwriting · est. of record', 'Know what to pay before you call.',
-              'Eight ways out of a property deal, all of them priced — seven against the house, the eighth against the dirt — with the arithmetic shown every time.'],
-    desk:    ['The desk · underwriting worksheet', 'Price a property in three steps.',
-              'The two hardest numbers in underwriting get done properly, and nothing is calculated until you say so.'],
-    plans:   ['Plans', 'Pricing a property is free.',
-              'A plan buys back the half hour: the condition read off your photographs, the comps pulled and scored, the lender packet with your name on it.'],
-    exits:   ['The eight exits', 'The same house is worth eight different maximums.',
-              'Wholesale, flip, wholetail, buy and hold, BRRRR, subject-to, novation, land. The gap between the best and the worst is usually the whole margin.'],
-    arcade:  ['The arcade · free, no account', 'Or train the instinct the fun way.',
-              'Three cabinets running the desk’s own arithmetic, with the clock and the money turned into a game.'],
-    land:    ['The land desk', 'Dirt is not a house with the house removed.',
-              'Frontage, slope, utilities, the flood zone at the exact coordinates, and the lots that actually sold.'],
-    demo:    ['See how it works', 'Five sheets, already worked.',
-              'Every exit priced or refused, every number showing where it came from. Nothing here is a mock-up.'],
+    /* the headline matches the page it advertises, and the page's headline is
+       now the question rather than the benefit — a card promising one thing
+       and a page opening with another is a bounce with extra steps */
+    site: { eyebrow:'Underwriting · est. of record', tag:'The desk is free',
+      head:'What should you pay for this house?',
+      sub:'Eight ways to make money on the same house, each priced against the seller’s situation rather than the property’s — arithmetic shown, and the ones it cannot price named instead of guessed.',
+      formNo:'Form D-1', mode:'rows', rows:SHEET,
+      figEyebrow:'Best of the eight · the fix and flip', fig:'$23,280',
+      figCap:'What the house pays you, line by line, at the price it says to offer.' },
+    desk: { eyebrow:'The desk · underwriting worksheet', tag:'Free, no account',
+      head:'Tell it four things. It prices eight.',
+      sub:'The two hardest numbers in underwriting get done properly, every figure shows its working, and nothing is calculated until you say so.',
+      formNo:'Form D-1', mode:'rows', rows:SHEET,
+      figEyebrow:'Best of the eight · the fix and flip', fig:'$23,280',
+      figCap:'What the house pays you, line by line, at the price it says to offer.' },
+    plans: { eyebrow:'Plans', tag:'Pricing is free forever',
+      head:'Pricing a property is free.',
+      sub:'A plan buys back the half hour: the condition read off your photographs, the comps pulled and scored, the street read, the lender packet with your name on it.',
+      formNo:'Form D-1', mode:'rows', rows:SHEET,
+      figEyebrow:'Best of the eight · the fix and flip', fig:'$23,280',
+      figCap:'Free forever on the desk. A plan buys the typing, never the answer.' },
+    exits: { eyebrow:'The eight exits', tag:'The argument',
+      head:'The same house is worth eight different maximums.',
+      sub:'The gap between the best exit and the worst is usually the entire margin. Ranked against the seller, not the property.',
+      formNo:'Form D-1 · all exits', mode:'list', rows:EIGHT,
+      figEyebrow:'Best of the eight · the fix and flip', fig:'$23,280',
+      figCap:'One of the eight, on 1128 Marrow Lane. The page prices all of them.' },
+    arcade: { eyebrow:'The arcade · free, no account', tag:'Ninety seconds',
+      head:'Or train the instinct the fun way.',
+      sub:'Three cabinets running the desk’s own arithmetic, with the clock and the money turned into a game. Same read, no account, nothing to buy.',
+      formNo:'Form D-1', mode:'rows', rows:SHEET,
+      figEyebrow:'Best of the eight · the fix and flip', fig:'$23,280',
+      figCap:'The number the game teaches you to see before the sheet prints it.' },
+    land: { eyebrow:'The land desk', tag:'The eighth exit',
+      head:'Dirt is not a house with the house removed.',
+      sub:'Frontage, slope, utilities, the flood zone at the exact coordinates, and the lots that actually sold — priced on their own arithmetic.',
+      formNo:'Form L-1 · 1847 Saddleback', mode:'rows',
+      rows:[['Acreage', '2.61 ac'], ['Zoning', 'RR — rural res.'], ['Finished lot', '$298,000'], ['Parcels', '5 of 7']],
+      figEyebrow:'The number nobody publishes', fig:'$21,640',
+      figCap:'What the parcel clears at the ask, after site work, carry and the sale.' },
+    demo: { eyebrow:'See how it works', tag:'Nothing to fill in',
+      head:'Five sheets, already worked.',
+      sub:'Every exit priced or refused, every number showing where it came from, on properties that do not exist. Nothing here is a mock-up.',
+      formNo:'Form D-1', mode:'rows', rows:SHEET,
+      figEyebrow:'Best of the eight · the fix and flip', fig:'$23,280',
+      figCap:'One of five worked examples. Open it and the real software prices it.' },
   };
-  const cardPage = (eyebrow, head, sub) => `<!doctype html><html><head><meta charset="utf-8">
+  const cardPage = (c) => `<!doctype html><html><head><meta charset="utf-8">
 <style>
 @font-face{font-family:'Fraunces';src:url('file://${path.resolve(out, 'fonts/fraunces.woff2')}') format('woff2-variations');
  font-weight:100 900;font-style:normal;font-variation-settings:'WONK' 0}
 *{margin:0;padding:0;box-sizing:border-box}
 body{width:1200px;height:630px;background:#fff;overflow:hidden;
  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
- color:#101725;display:grid;grid-template-columns:1fr 396px}
-.l{padding:64px 52px 56px 68px;display:flex;flex-direction:column}
-.k{font-size:14px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#6b7488}
+ color:#101725;display:grid;grid-template-columns:1fr 428px}
+.l{padding:44px 46px 52px 60px;display:flex;flex-direction:column}
+/* the mark, and the double rule that means a total is final — this product is
+   styled as an instrument of record, and that convention is where it comes from */
+.mk{display:flex;align-items:baseline;gap:9px}
+.mk b{font-family:'Fraunces',Georgia,serif;font-variation-settings:'WONK' 0;font-weight:700;
+ font-size:21px;letter-spacing:.085em}
+.mk i{font-style:normal;color:#1f5fd0;font-size:11.5px;font-weight:800;letter-spacing:.2em;vertical-align:2px}
+.rule{border-top:2px solid #101725;border-bottom:1px solid #101725;height:4px;margin-top:7px;width:268px}
+.gap{flex:1 1 auto;min-height:16px}
+.k{font-size:13px;font-weight:800;letter-spacing:.19em;text-transform:uppercase;color:#677187}
 h1{font-family:'Fraunces',Georgia,serif;font-variation-settings:'WONK' 0;font-weight:700;
- font-size:60px;line-height:1.06;letter-spacing:-.022em;margin-top:20px;max-width:14ch}
-.s{font-size:21px;line-height:1.5;color:#3f4759;margin-top:22px;max-width:44ch}
-.f{margin-top:auto;display:flex;align-items:center;gap:14px;font-size:16px;color:#6b7488}
-.f b{font-family:'Fraunces',Georgia,serif;font-weight:700;color:#101725;font-size:19px;letter-spacing:-.01em}
-.f b em{font-style:normal;color:#1f5fd0;font-size:12px;font-weight:800;letter-spacing:.14em;vertical-align:3px}
-.r{background:#f6f8fb;border-left:1px solid #dfe4ec;padding:46px 40px;display:flex;flex-direction:column;justify-content:center}
-.tk{background:#fff;border:1px solid #c9d0dc;border-radius:14px;padding:20px 20px 18px;
- box-shadow:0 2px 10px rgba(16,23,37,.06)}
-.tkh{font-size:10.5px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#6b7488;
- display:flex;justify-content:space-between;border-bottom:1.5px solid #101725;padding-bottom:8px}
-.row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid #eef1f6}
-.row .lb{font-size:10.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:#6b7488}
-.row .vl{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:19px;font-variant-numeric:tabular-nums}
-.win{margin-top:14px;background:#eaf6f0;border:1px solid #bfe0cd;border-radius:11px;padding:13px 15px}
-.win .k2{font-size:9.5px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#12633e}
-.win .big{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:38px;color:#12633e;
- letter-spacing:-.02em;line-height:1.05;margin-top:2px;font-variant-numeric:tabular-nums}
-.win .p{font-size:12.5px;color:#3f4759;margin-top:5px;line-height:1.4}
+ font-size:55px;line-height:1.03;letter-spacing:-.024em;margin-top:15px;max-width:15ch}
+.s{font-size:19px;line-height:1.47;color:#41495a;margin-top:19px;max-width:47ch}
+.tag{align-self:flex-start;margin-top:22px;font-size:12px;font-weight:800;letter-spacing:.16em;
+ text-transform:uppercase;color:#1f5fd0;background:#eaf0fc;border:1px solid #c3d4f5;
+ border-radius:999px;padding:7px 14px}
+/* ── A TINT IS NOT A STRUCTURE ────────────────────────────────────────────
+   This column was #f6f8fb against a #fff page — nine units of difference, and
+   the whole reason the ledger reads as a separate object. The build indexes
+   every PNG to a 256-colour palette, and median cut splits boxes by span:
+   two enormous flat fields nine units apart sit in one box and come out of it
+   AVERAGED. So the shipped card had no second panel at all, while the HTML it
+   was rendered from did. Invisible in the browser, invisible in review, and
+   the only place it shows is the file that represents the company.
+   The separation is a LINE and a real field now, not a whisper of tint. */
+.r{background:#eef1f6;border-left:1px solid #d3d9e3;padding:40px 34px;display:flex;
+ flex-direction:column;justify-content:center;gap:0}
+.led{background:#fff;border:1px solid #d3d9e3;border-radius:14px;padding:20px 22px 22px;
+ box-shadow:0 1px 2px rgba(16,23,37,.05)}
+.fn{font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#677187;
+ border-bottom:1.5px solid #101725;padding-bottom:9px}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+ padding:9px 0;border-bottom:1px solid #e4e8ef}
+.row .lb{font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#677187}
+.row .vl{font-family:'Fraunces',Georgia,serif;font-variation-settings:'WONK' 0;font-weight:700;
+ font-size:19px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.row.li .lb{font-size:14.5px;font-weight:600;letter-spacing:0;text-transform:none;color:#101725}
+/* the same double rule, closing the column: everything above it is added up */
+.dbl{border-top:2px solid #101725;border-bottom:1px solid #101725;height:4px;margin-top:10px}
+/* GREEN IS MONEY THAT PAYS AND IT IS NOTHING ELSE, ANYWHERE IN THIS PRODUCT */
+.win{margin-top:14px}
+.win .k2{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#177a4d}
+.win .big{font-family:'Fraunces',Georgia,serif;font-variation-settings:'WONK' 0;font-weight:700;
+ font-size:52px;color:#177a4d;letter-spacing:-.028em;line-height:1;margin-top:3px;
+ font-variant-numeric:tabular-nums}
+.win .p{font-size:12.5px;line-height:1.42;color:#41495a;margin-top:7px}
+/* AND RED IS ONLY EVER A REFUSAL — never an error we caused, never urgency */
+.no{margin-top:16px;background:#faeeec;border:1px solid #f0d2ce;border-radius:11px;padding:11px 13px}
+.no .k3{font-size:9.5px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#b3372c}
+.no .t{font-family:'Fraunces',Georgia,serif;font-variation-settings:'WONK' 0;font-weight:700;
+ font-size:17px;color:#b3372c;margin-top:1px}
+.no .why{font-size:12px;line-height:1.4;color:#41495a;margin-top:4px}
 </style></head><body>
 <div class="l">
- <div class="k">${eyebrow}</div>
- <h1>${head}</h1>
- <div class="s">${sub}</div>
- <div class="f"><b>NEGOTIATION <em>INC</em></b><span>negotiationinc.com</span></div>
+ <div class="mk"><b>NEGOTIATION</b><i>INC</i></div>
+ <div class="rule"></div>
+ <div class="gap"></div>
+ <div class="k">${c.eyebrow}</div>
+ <h1>${c.head}</h1>
+ <div class="s">${c.sub}</div>
+ <div class="tag">${c.tag}</div>
 </div>
-<div class="r"><div class="tk">
- <div class="tkh"><span>Form D-1 · 1128 Marrow Lane</span></div>
- <div class="row"><span class="lb">Asking</span><span class="vl">$184,500</span></div>
- <div class="row"><span class="lb">ARV</span><span class="vl">$291,000</span></div>
- <div class="row"><span class="lb">Repairs</span><span class="vl">$41,300</span></div>
- <div class="row" style="border-bottom:0"><span class="lb">The fix and flip</span><span class="vl">01</span></div>
- <div class="win"><div class="k2">This house pays you</div><div class="big">$23,280</div>
-  <div class="p">as the flip — and $14,000 as a wholesale you never own. One house, two right answers.</div></div>
+<div class="r"><div class="led">
+ <div class="fn">${c.formNo}</div>
+ ${c.rows.map(r => `<div class="row${c.mode === 'list' ? ' li' : ''}"><span class="lb">${r[0]}</span>${
+   r[1] ? `<span class="vl">${r[1]}</span>` : ''}</div>`).join('')}
+ <div class="dbl"></div>
+ <div class="win"><div class="k2">${c.figEyebrow}</div><div class="big">${c.fig}</div>
+  <div class="p">${c.figCap}</div></div>
+ <div class="no"><div class="k3">${REFUSAL[0]}</div><div class="t">${REFUSAL[1]}</div>
+  <div class="why">${REFUSAL[2]}</div></div>
 </div></div></body></html>`;
 
   const cp = await b.newPage({ viewport:{ width:1200, height:630 }, deviceScaleFactor:1 });
-  for (const [slug, [k, h, s]] of Object.entries(CARDS)){
-    await cp.setContent(cardPage(k, h, s), { waitUntil:'load' });
+  for (const [slug, card] of Object.entries(CARDS)){
+    await cp.setContent(cardPage(card), { waitUntil:'load' });
     /* the face has to be THERE before the shutter, or the card ships in
        Georgia and looks like a different company */
     await cp.evaluate(() => document.fonts.ready);
@@ -2736,6 +2839,48 @@ await b.close();
     const canon = (d.match(/rel=["']canonical["'] href=["']([^"']+)/) || [])[1];
     if (canon !== want) throw new Error(`${f}: canonical is ${canon || 'missing'}, should be ${want}`);
 
+    /* ── AND THE CARD STILL HAS TWO SIDES AFTER IT WAS OPTIMISED ──────────
+       The ledger sat on #f6f8fb against a #fff page: nine units, and the only
+       thing making it read as a separate object. Every PNG here is indexed to
+       a 256-colour palette by median cut, which splits boxes by SPAN — two
+       enormous flat fields nine units apart land in one box and come back out
+       of it averaged. The HTML had two panels. The file that shipped had one.
+
+       Nothing could see that: not the browser, not a review of the source,
+       not a screenshot taken before the squeeze. Only the bytes. So the bytes
+       are what gets asked, after the squeeze has had its go at them. */
+    if (page === '' && local.startsWith('og/')){
+      /* The squeeze rewrites these as INDEXED pngs, which decodePNG does not
+         read — and it does not need to. The palette is the evidence: if the
+         page and the ledger's field survived as two colours, two distinct
+         light entries are in the PLTE. If median cut merged them, there is
+         one. Reading the palette asks the question directly and needs about
+         six lines instead of a second decoder. */
+      const buf = fs.readFileSync(path.join(out, local));
+      const pal = [];
+      for (let i = 8; i + 8 <= buf.length; ){
+        const len = buf.readUInt32BE(i), type = buf.toString('ascii', i + 4, i + 8);
+        if (type === 'PLTE') for (let k = 0; k < len; k += 3)
+          pal.push([buf[i + 8 + k], buf[i + 9 + k], buf[i + 10 + k]]);
+        if (type === 'IEND') break;
+        i += 12 + len;
+      }
+      if (!pal.length) throw new Error(local + ': no palette — the preview card was not optimised, or is not the file this build wrote');
+      /* Ask for the two fields BY VALUE. The first version of this looked for
+         "two light tones far enough apart", which the pink refusal block
+         answered on its own — so the check passed on a card whose panels had
+         merged, which is the one thing it existed to catch. A test that can be
+         satisfied by something other than the thing it is testing is worse
+         than none, because it reports green while the bug ships. */
+      for (const want of OGFIELDS){
+        const near = pal.some(c => c.every((v, k) => Math.abs(v - want[k]) <= 3));
+        if (!near) throw new Error(`${local}: rgb(${want}) is one of the two flat fields this card `
+          + `is built from and it is not in the palette after optimisation — median cut merged it `
+          + `into its neighbour, so the shipped card has one panel where the HTML has two. `
+          + `Separate them with a line or a real step, not a whisper of tint.`);
+      }
+    }
+
     /* a description written once, used by both kinds of reader */
     if (!/<meta name=["']description["']/i.test(d)){
       const od = (d.match(/og:description["'] content=["']([^"']*)/) || [])[1];
@@ -2827,8 +2972,24 @@ await b.close();
 
      An instrument that reads differently every time you look at it is not
      measuring the thing you pointed it at. */
+  /* ── AND THE LINK-PREVIEW CARDS, WHICH ARE PAGES ─────────────────────────
+     A redesign of the cards changes seven PNGs and nothing else, so the id did
+     not move — and the deploy script polls for the id. It would have reported
+     "LIVE, running build X" against the build already running, while the new
+     cards sat on a laptop. The stamp answering "yes" to a deploy that did not
+     happen is worse than having no stamp.
+
+     Only page-*.png. The forty deed cards in the same directory are drawn on a
+     canvas and do not come out byte-identical between runs, so hashing those
+     would move the id on every build and cost the stamp the property that
+     makes it worth having. These are screenshots of a static page: same input,
+     same bytes, checked. */
+  const cards = fs.existsSync(path.join(out, 'og'))
+    ? fs.readdirSync(path.join(out, 'og')).filter(f => /^page-.*\.png$/.test(f)).sort()
+        .map(f => 'og/' + f) : [];
   const files = fs.readdirSync(out)
-    .filter(f => /\.(html|js|css|json|xml|txt)$/i.test(f) && f !== 'build.json').sort();
+    .filter(f => /\.(html|js|css|json|xml|txt)$/i.test(f) && f !== 'build.json').sort()
+    .concat(cards);
   const h = crypto.createHash('sha256');
   for (const f of files){ h.update(f); h.update(fs.readFileSync(path.join(out, f))); }
   const id = h.digest('hex').slice(0, 12);
