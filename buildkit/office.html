@@ -132,6 +132,11 @@ body.railtight .rn-caret{display:none}
    the dark column beside it, so "Sign in" came out as pale grey on white and
    the unselected tab was nearly invisible. A control whose second option
    cannot be read is a control that still has one option. */
+/* `hidden` is an ATTRIBUTE that sets display:none — and a later rule with the
+   same specificity beats it. `.gtabs{display:grid}` did exactly that, so a
+   build with only ONE door still showed both tabs, and "Sign in" did nothing.
+   Every element with a display rule and a hidden state needs this line. */
+.gtabs[hidden]{display:none}
 .gtabs{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;margin:0 0 20px;
  background:#eef1f6;border:1px solid #dfe4ec;border-radius:12px}
 .gtabs button{font:inherit;font-size:13.5px;font-weight:650;padding:10px 8px;min-height:42px;
@@ -708,8 +713,24 @@ let LVL = 'pro';
    product that works today. */
 let GMODE = 'up';        // 'up' new account · 'in' sign in · 'recover' · 'reset'
 let RESET_TOKEN = null;  // only ever set by arriving from a link in an email
-(function(){
-  if (!(window.NI_SUPABASE_URL && window.NI_SUPABASE_ANON)) return;
+/* ── THE DOOR WAITS FOR THE ANSWER ─────────────────────────────────────────
+   This block decided which door to show by reading window.NI_SUPABASE_URL —
+   a value written into the page at BUILD time. The build runs where the build
+   runs, and that is not where the configuration lives, so the live site
+   served a door with no password field, no sign-in and no reset, while the
+   server was demanding an account for every paid feature. It looked normal.
+
+   The config now comes from the server, which is asynchronous, so this can no
+   longer be a synchronous check on a global. It awaits the same promise the
+   auth module exposes and then decides once. */
+/* Registered, not awaited. The auth module is appended at the END of the
+   document, so awaiting window.__authReady() from here finds it undefined and
+   falls through to the build-time globals — which is exactly the state that
+   shipped a door with no password field on a site whose server demanded
+   accounts. The module calls this when it knows. The build-time path still
+   works for a preview or a file:// copy, where there is no server to ask. */
+window.__authDoorInit = function(on){
+  if (!on) return;
   const w = document.getElementById('g-pwwrap'); if (w) w.hidden = false;
   const tabs = document.getElementById('g-tabs');
   if (tabs) tabs.hidden = false;      // two doors exist, so the strip appears
@@ -775,7 +796,9 @@ let RESET_TOKEN = null;  // only ever set by arriving from a link in an email
     const tabs = document.getElementById('g-tabs');
     if (tabs){
       const two = (m === 'up' || m === 'in');
-      tabs.hidden = !two || !(window.NI_SUPABASE_URL && window.NI_SUPABASE_ANON);
+      /* by the time setMode can run, the door has already established that
+         accounts exist — it is only reachable from inside that block */
+      tabs.hidden = !two;
       tabs.querySelectorAll('[data-mode]').forEach(t =>
         t.setAttribute('aria-selected', String(t.dataset.mode === m)));
     }
@@ -857,7 +880,10 @@ let RESET_TOKEN = null;  // only ever set by arriving from a link in an email
     const e = document.getElementById('g-err');
     if (e){ e.textContent = 'Address confirmed. Sign in and the desk is yours.'; e.style.display = 'block'; }
   }
-})();
+};
+/* the build-time path: a preview build or a file:// copy has both values and
+   no server, so nothing will ever call the hook — run it here instead */
+if (window.NI_SUPABASE_URL && window.NI_SUPABASE_ANON) window.__authDoorInit(true);
 $('gate-form').onsubmit = async e => {
   e.preventDefault();
   const name = $('g-name').value.trim().slice(0,60);

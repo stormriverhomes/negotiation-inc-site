@@ -134,6 +134,13 @@ const NAMES = [
      while the PAGE fails the other way, leaving the copy alone rather than
      telling a bad connection it missed out. */
   '_tfound',
+  /* Found in a browser on the second page of a walk-through: the account layer
+     was DEAD on the live site. Both Supabase values were baked in at BUILD
+     time, the build runs where the configuration is not, so the server
+     demanded an account for every paid feature while the pages it served had
+     no way to make one — and the door fell back to a local-only workspace
+     that looked completely normal. The pages ask the server now. */
+  '_tconfig',
 ];
 /* ── WHAT IS DELIBERATELY *NOT* HERE ────────────────────────────────────────
    · _tlive — signs up a real person against the real Supabase project. It

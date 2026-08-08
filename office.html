@@ -132,6 +132,11 @@ body.railtight .rn-caret{display:none}
    the dark column beside it, so "Sign in" came out as pale grey on white and
    the unselected tab was nearly invisible. A control whose second option
    cannot be read is a control that still has one option. */
+/* `hidden` is an ATTRIBUTE that sets display:none — and a later rule with the
+   same specificity beats it. `.gtabs{display:grid}` did exactly that, so a
+   build with only ONE door still showed both tabs, and "Sign in" did nothing.
+   Every element with a display rule and a hidden state needs this line. */
+.gtabs[hidden]{display:none}
 .gtabs{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;margin:0 0 20px;
  background:#eef1f6;border:1px solid #dfe4ec;border-radius:12px}
 .gtabs button{font:inherit;font-size:13.5px;font-weight:650;padding:10px 8px;min-height:42px;
@@ -735,8 +740,24 @@ let LVL = 'pro';
    product that works today. */
 let GMODE = 'up';        // 'up' new account · 'in' sign in · 'recover' · 'reset'
 let RESET_TOKEN = null;  // only ever set by arriving from a link in an email
-(function(){
-  if (!(window.NI_SUPABASE_URL && window.NI_SUPABASE_ANON)) return;
+/* ── THE DOOR WAITS FOR THE ANSWER ─────────────────────────────────────────
+   This block decided which door to show by reading window.NI_SUPABASE_URL —
+   a value written into the page at BUILD time. The build runs where the build
+   runs, and that is not where the configuration lives, so the live site
+   served a door with no password field, no sign-in and no reset, while the
+   server was demanding an account for every paid feature. It looked normal.
+
+   The config now comes from the server, which is asynchronous, so this can no
+   longer be a synchronous check on a global. It awaits the same promise the
+   auth module exposes and then decides once. */
+/* Registered, not awaited. The auth module is appended at the END of the
+   document, so awaiting window.__authReady() from here finds it undefined and
+   falls through to the build-time globals — which is exactly the state that
+   shipped a door with no password field on a site whose server demanded
+   accounts. The module calls this when it knows. The build-time path still
+   works for a preview or a file:// copy, where there is no server to ask. */
+window.__authDoorInit = function(on){
+  if (!on) return;
   const w = document.getElementById('g-pwwrap'); if (w) w.hidden = false;
   const tabs = document.getElementById('g-tabs');
   if (tabs) tabs.hidden = false;      // two doors exist, so the strip appears
@@ -802,7 +823,9 @@ let RESET_TOKEN = null;  // only ever set by arriving from a link in an email
     const tabs = document.getElementById('g-tabs');
     if (tabs){
       const two = (m === 'up' || m === 'in');
-      tabs.hidden = !two || !(window.NI_SUPABASE_URL && window.NI_SUPABASE_ANON);
+      /* by the time setMode can run, the door has already established that
+         accounts exist — it is only reachable from inside that block */
+      tabs.hidden = !two;
       tabs.querySelectorAll('[data-mode]').forEach(t =>
         t.setAttribute('aria-selected', String(t.dataset.mode === m)));
     }
@@ -884,7 +907,10 @@ let RESET_TOKEN = null;  // only ever set by arriving from a link in an email
     const e = document.getElementById('g-err');
     if (e){ e.textContent = 'Address confirmed. Sign in and the desk is yours.'; e.style.display = 'block'; }
   }
-})();
+};
+/* the build-time path: a preview build or a file:// copy has both values and
+   no server, so nothing will ever call the hook — run it here instead */
+if (window.NI_SUPABASE_URL && window.NI_SUPABASE_ANON) window.__authDoorInit(true);
 $('gate-form').onsubmit = async e => {
   e.preventDefault();
   const name = $('g-name').value.trim().slice(0,60);
@@ -1797,14 +1823,68 @@ boot();
        into columns would mean a migration every time a field is added, and
        there will be a lot of new fields. ══════════════════════════════════ */
 
+/* ── WHERE THESE COME FROM, AND WHY IT CHANGED ─────────────────────────────
+   They used to come from window.NI_SUPABASE_URL / NI_SUPABASE_ANON, written
+   into every page at BUILD time. The build runs wherever the build runs, and
+   that is not the machine holding the configuration — so the live site served
+   pages with neither value while the SERVER had both. The server correctly
+   demanded an account for every paid feature; the browser had no way to make
+   one; the door silently fell back to a local-only workspace with no password
+   and no sync, and looked entirely normal. Nothing anywhere said a word.
+
+   The build-time values still WIN when present, because a preview build or a
+   file:// copy has no server to ask. But when they are absent the module asks
+   /api/config, which reads the same two variables from the process that
+   actually holds them. A rebuild can no longer strip the account layer, and
+   there is no second place to remember. */
 const SB = {
   url: (window.NI_SUPABASE_URL || '').replace(/\/+$/, ''),
   key: window.NI_SUPABASE_ANON || '',
 };
+/* Resolved before anything else runs. Everything downstream reads SB.url and
+   SB.key through SB_ON(), never through a value captured at parse time. */
+let SB_READY = (async () => {
+  if (SB.url && SB.key) return true;              // baked in — nothing to ask
+  /* A page opened from disk has no server to ask, and the attempt is not
+     merely pointless: the browser logs "Fetch API cannot load file:///…" as a
+     console error that no catch can suppress, and half this product's
+     harnesses load pages over file:// and assert a clean console. */
+  if (location.protocol === 'file:') return false;
+  try {
+    const r = await fetch('/api/config', { cache:'no-store' });
+    if (!r.ok) return false;
+    const j = await r.json();
+    if (j && j.accounts && j.supabaseUrl && j.supabaseAnon){
+      SB.url = String(j.supabaseUrl).replace(/\/+$/, '');
+      SB.key = String(j.supabaseAnon);
+      return true;
+    }
+  } catch(e){}
+  return false;
+})();
+window.__authReady = () => SB_READY;
+/* ── AND THE PAGE IS TOLD, RATHER THAN HAVING TO ASK AT THE RIGHT MOMENT ───
+   This module is appended at the END of the document, so anything in the
+   page's own script that awaits window.__authReady() finds it undefined and
+   falls through to the build-time globals — which is precisely the state that
+   shipped. The door did exactly that and quietly stayed local-only.
+
+   So the module CALLS the page instead. The hook is defined by the page's own
+   script, which runs first, and is invoked once with the answer. No ordering
+   to get right, in either direction. */
+SB_READY.then(on => { try { if (typeof window.__authDoorInit === 'function') window.__authDoorInit(on); } catch(e){} });
 /* The anon key is PUBLIC by design and is safe only because row-level
    security is on. SUPABASE.md has the policies; without them this key would
    let anybody read every row in the project. */
-const SB_ON = !!(SB.url && SB.key);
+/* A FUNCTION, not a constant. It was evaluated once at parse time, which is
+   before the answer from /api/config can possibly have arrived — so every
+   caller would have seen false forever.
+   (And the first version of this comment quoted the old line inside
+   backticks. This whole module is a template literal, so a backtick in a
+   COMMENT closes it and the build dies on the next keyword. Same class of
+   mistake as the eaten backslash that deleted this module once already: in
+   here, prose is code.) */
+const SB_ON = () => !!(SB.url && SB.key);
 const SESSKEY = 'ni-session-v1';
 let SESS = null;
 try { SESS = JSON.parse(localStorage.getItem(SESSKEY) || 'null'); } catch(e){}
@@ -1821,7 +1901,7 @@ const saveSess = s => {
 
 /* an access token that has not expired, refreshing it if it has */
 async function token(){
-  if (!SB_ON || !SESS) return null;
+  if (!SB_ON() || !SESS) return null;
   if (SESS.expires_at && Date.now() < SESS.expires_at - 60000) return SESS.access_token;
   if (!SESS.refresh_token) { saveSess(null); return null; }
   try {
@@ -1851,7 +1931,7 @@ const authBack = (page) => {
 };
 
 async function authSignUp(email, password, name){
-  if (!SB_ON) return { ok:false, offline:true };
+  if (!SB_ON()) return { ok:false, offline:true };
   try {
     const r = await fetch(`${SB.url}/auth/v1/signup`, { method:'POST', headers: sbHead(),
       body: JSON.stringify({ email, password, data:{ name },
@@ -1869,7 +1949,7 @@ async function authSignUp(email, password, name){
   } catch(e){ return { ok:false, error:'Could not reach the server.' }; }
 }
 async function authSignIn(email, password){
-  if (!SB_ON) return { ok:false, offline:true };
+  if (!SB_ON()) return { ok:false, offline:true };
   try {
     const r = await fetch(`${SB.url}/auth/v1/token?grant_type=password`, { method:'POST',
       headers: sbHead(), body: JSON.stringify({ email, password }) });
@@ -2031,7 +2111,7 @@ async function fillFromServer(){
   return null;
 }
 async function authBoot(){
-  if (!SB_ON || AUTH_BOOTED) return;
+  if (!SB_ON() || AUTH_BOOTED) return;
   AUTH_BOOTED = true;
   await fillFromServer();
   /* a zero-spend read, so the comp workbench knows the week's balance before
@@ -2042,7 +2122,7 @@ async function authBoot(){
 }
 let SYNCING = false;
 async function syncSheets(){
-  if (!SB_ON || SYNCING || typeof P === 'undefined') return;
+  if (!SB_ON() || SYNCING || typeof P === 'undefined') return;
   SYNCING = true;
   try {
     const remote = await pullSheets();
@@ -2064,7 +2144,7 @@ async function syncSheets(){
   } finally { SYNCING = false; }
 }
 async function pushLocal(){
-  if (!SB_ON || typeof P === 'undefined' || !SESS) return;
+  if (!SB_ON() || typeof P === 'undefined' || !SESS) return;
   /* ── THROUGH THE DESK'S OWN SERIALISER ───────────────────────────────────
      This sent `blob: p` — the raw in-memory prop — while the loader on the
      other end restored figures only from the `f` map that save() builds. The
@@ -2087,7 +2167,7 @@ async function pushLocal(){
    rate limited on the free tier */
 let pushT = null;
 function syncSoon(){
-  if (!SB_ON) return;
+  if (!SB_ON()) return;
   clearTimeout(pushT);
   pushT = setTimeout(() => { pushLocal(); }, 4000);
 }
@@ -2115,7 +2195,7 @@ function syncSoon(){
 let COMPQ = null;                    // last known {used, cap, remaining}
 window.__compAllowance = () => COMPQ;
 window.__compUse = async function(n){
-  if (!SB_ON || !SESS) return null;
+  if (!SB_ON() || !SESS) return null;
   try {
     const t = await token(); if (!t) return null;
     const r = await fetch(SB.url + '/rest/v1/rpc/ni_use_comps', {
@@ -2166,7 +2246,7 @@ window.__authSignUp = authSignUp;
    the honest answer, because from here we genuinely do not know whether the
    mail was delivered. */
 async function authRecover(email){
-  if (!SB_ON) return { ok:false, offline:true };
+  if (!SB_ON()) return { ok:false, offline:true };
   try {
     const r = await fetch(`${SB.url}/auth/v1/recover`, { method:'POST', headers: sbHead(),
       body: JSON.stringify({ email, options:{ emailRedirectTo: authBack('office.html?reset=1') } }) });
@@ -2177,7 +2257,7 @@ async function authRecover(email){
   } catch(e){ return { ok:false, error:'Could not reach the server.' }; }
 }
 async function authResend(email){
-  if (!SB_ON) return { ok:false, offline:true };
+  if (!SB_ON()) return { ok:false, offline:true };
   try {
     const r = await fetch(`${SB.url}/auth/v1/resend`, { method:'POST', headers: sbHead(),
       body: JSON.stringify({ type:'signup', email,
@@ -2205,7 +2285,7 @@ function authResetToken(){
   return null;
 }
 async function authSetPassword(token, password){
-  if (!SB_ON) return { ok:false, offline:true };
+  if (!SB_ON()) return { ok:false, offline:true };
   try {
     const r = await fetch(`${SB.url}/auth/v1/user`, { method:'PUT',
       headers: { ...sbHead(), authorization:'Bearer ' + token },
@@ -2226,7 +2306,7 @@ window.__authResetToken = authResetToken;
 window.__authSetPassword = authSetPassword;
 
 window.__authSignOut = authSignOut;
-window.__authOn = () => SB_ON;
+window.__authOn = () => SB_ON();
 window.__mergeSheets = mergeSheets;
 
 

@@ -2078,6 +2078,44 @@ ${d.errors.list.length ? `<table><thead><tr><th>Route</th><th>Message</th><th cl
 </div></body></html>`);
 });
 
+/* ══ THE TWO PUBLIC VALUES THE BROWSER NEEDS ═══════════════════════════════
+   The account layer was DEAD on the live site and nothing said so. Both
+   values were baked into every page at BUILD time from NI_SUPABASE_URL and
+   NI_SUPABASE_ANON — and the build runs wherever the build runs, which is not
+   the machine holding the configuration. So the server had Supabase and
+   demanded an account for every paid feature, while the pages it served had
+   no way to make one: the door silently fell back to a local-only workspace
+   with no password, no sync and no sign-in, and looked completely normal.
+
+   A build-time secret is a secret that has to be present in a second place
+   nobody thinks about, and the failure mode is silence rather than an error.
+   So the pages ask instead.
+
+   BOTH VALUES ARE PUBLIC. The URL is a hostname. The anon key is designed to
+   be served to every browser that loads the site — it is safe because
+   row-level security is on, and if it were not, baking it into the HTML would
+   have been exactly as exposed. Nothing here is a secret being handed out;
+   the SERVICE key, which is a secret, is never in this response and never
+   leaves this process.
+
+   Cached hard at the edge: it changes when the deployment changes, and a
+   deployment is a new process. */
+app.get('/api/config', (_req, res) => {
+  const url = (process.env.SUPABASE_URL || '').replace(/\/+$/, '');
+  const key = process.env.SUPABASE_ANON_KEY || '';
+  /* a SERVICE key in the anon slot would be handed to every browser on the
+     site — refuse to serve it rather than pass it on. The build has the same
+     assertion; this is the second place because this is the one that ships. */
+  const looksService = /^(sb_secret_|service_role)/.test(key)
+    || (/^eyJ/.test(key) && /service_role/.test(Buffer.from(key.split('.')[1] || '', 'base64').toString('utf8')));
+  res.set('cache-control', 'public, max-age=300');
+  if (looksService){
+    log('CONFIG REFUSED: SUPABASE_ANON_KEY looks like a service key');
+    return res.json({ ok:true, accounts:false, why:'anon-key-looks-like-a-service-key' });
+  }
+  res.json({ ok:true, accounts: !!(url && key), supabaseUrl: url || null, supabaseAnon: key || null });
+});
+
 app.get('/api/health', (_req, res) => {
   rollDay();
   checkGrants();                      // refreshes in the background; never blocks

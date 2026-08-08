@@ -109,6 +109,10 @@ await pg.waitForTimeout(1100);
      check has to live here. The first version was styled for the dark column
      beside the form and shipped pale grey on white: a control whose second
      option cannot be read is a control that still has one option. */
+  /* the block above left the door in 'reset', where the strip is deliberately
+     hidden — measuring it there measures nothing. Put it back on a screen
+     that HAS tabs before reading their paint. */
+  await pg.evaluate(() => window.__setGateMode('up'));
   const paint = await pg.evaluate(() => {
     const lum = c => { const s = c.map(v => { v /= 255;
       return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); });
