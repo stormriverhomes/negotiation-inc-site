@@ -12,6 +12,12 @@ const DB = { profiles:[{ id:'u1', name:'Elijah Payne', market:'Atlanta, GA 30310
                               raw:{asking:'1'}, est:{},prov:{},unc:{},sys:{},comps:[],subj:{},compAdj:{},sit:'unknown' } }] };
 const seen = [];
 const sb = http.createServer((q,r)=>{
+  /*__API_STUB__*/ /* a static directory is a deployment with no accounts configured, and saying
+     so is the honest answer to /api/config — a 404 is a console error the page
+     cannot suppress and the harness cannot tell from a real one */
+  if (/^\/api\//.test(q.url)){ r.writeHead(200, {'content-type':'application/json'});
+    return r.end(JSON.stringify({ ok:true, accounts:false })); }
+
   let body=''; q.on('data',c=>body+=c);
   q.on('end',()=>{
     seen.push({m:q.method,u:q.url,auth:q.headers.authorization,body});

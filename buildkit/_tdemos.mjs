@@ -35,6 +35,12 @@ const PROMISE = {
 };
 
 const site = http.createServer((req, res) => {
+  /*__API_STUB__*/ /* a static directory is a deployment with no accounts configured, and saying
+     so is the honest answer to /api/config — a 404 is a console error the page
+     cannot suppress and the harness cannot tell from a real one */
+  if (/^\/api\//.test(req.url)){ res.writeHead(200, {'content-type':'application/json'});
+    return res.end(JSON.stringify({ ok:true, accounts:false })); }
+
   const u = new URL(req.url, 'http://x');
   const p = u.pathname === '/' ? '/index.html' : u.pathname;
   const f = '/home/claude/dist' + p;

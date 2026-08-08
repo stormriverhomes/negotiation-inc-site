@@ -1,7 +1,13 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 const MIME={'.html':'text/html','.js':'text/javascript','.woff2':'font/woff2','.png':'image/png','.svg':'image/svg+xml'};
-const srv=http.createServer((q,r)=>{ let f=path.join('dist',decodeURIComponent(q.url.split('?')[0].split('#')[0]));
+const srv=http.createServer((q,r)=>{
+  /*__API_STUB__*/ /* a static directory is a deployment with no accounts configured, and saying
+     so is the honest answer to /api/config — a 404 is a console error the page
+     cannot suppress and the harness cannot tell from a real one */
+  if (/^\/api\//.test(q.url)){ r.writeHead(200, {'content-type':'application/json'});
+    return r.end(JSON.stringify({ ok:true, accounts:false })); }
+ let f=path.join('dist',decodeURIComponent(q.url.split('?')[0].split('#')[0]));
   if(f.endsWith('/'))f+='index.html';
   if(!fs.existsSync(f)||fs.statSync(f).isDirectory()){r.writeHead(404);return r.end('nope');}
   r.writeHead(200,{'content-type':MIME[path.extname(f)]||'application/octet-stream'});

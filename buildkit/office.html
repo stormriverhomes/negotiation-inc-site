@@ -323,6 +323,15 @@ input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blu
 .haveacc[hidden]{display:none}
 .haveacc a{color:var(--blue);text-decoration:none;font-weight:600}
 .haveacc a:hover{text-decoration:underline}
+/* ── THE ONLY EXIT MUST BE HITTABLE WITH A THUMB ───────────────────────────
+   On recover and reset the tab strip is hidden on purpose, so this link is
+   not a convenience — it is the whole way out of the screen. At 13px it draws
+   a 15px-tall box, which is a third of what a thumb needs. Inline-block so
+   the padding is real, and a negative margin so the layout above and below
+   does not move on a mouse-driven screen that never sees this rule. */
+@media (pointer:coarse){
+ .haveacc a{display:inline-block;padding:14px 4px;margin:-14px 0}
+}
 .gate .go{width:100%;justify-content:center;margin-top:18px}
 .gate .fine{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--wash);
  font-size:12.5px;color:var(--soft);line-height:1.5}

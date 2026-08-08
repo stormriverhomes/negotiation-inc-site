@@ -5,7 +5,13 @@ import { chromium } from 'playwright';
 import { step, underwrite, openExit, fillSheet } from './harness-util.mjs';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 const MIME={'.html':'text/html','.js':'text/javascript','.png':'image/png','.svg':'image/svg+xml','.woff2':'font/woff2','.txt':'text/plain'};
-const srv=http.createServer((q,r)=>{ let f=path.join('dist',decodeURIComponent(q.url.split('?')[0].split('#')[0]));
+const srv=http.createServer((q,r)=>{
+  /*__API_STUB__*/ /* a static directory is a deployment with no accounts configured, and saying
+     so is the honest answer to /api/config — a 404 is a console error the page
+     cannot suppress and the harness cannot tell from a real one */
+  if (/^\/api\//.test(q.url)){ r.writeHead(200, {'content-type':'application/json'});
+    return r.end(JSON.stringify({ ok:true, accounts:false })); }
+ let f=path.join('dist',decodeURIComponent(q.url.split('?')[0].split('#')[0]));
   if(f.endsWith('/'))f+='index.html';
   if(!fs.existsSync(f)||fs.statSync(f).isDirectory()){r.writeHead(404);return r.end('nope');}
   r.writeHead(200,{'content-type':MIME[path.extname(f)]||'application/octet-stream'});
@@ -184,6 +190,19 @@ ck(/desk\.html#/.test(p.url()), 'the course handoff did not reach the desk');
 out.consentAsked = await p.evaluate(()=>!!document.getElementById('c-load'));
 ck(out.consentAsked, 'the desk overwrote a sheet in progress without asking');
 await p.click('#c-load'); await p.waitForTimeout(700);
+/* THE EXAMPLE GETS ITS OWN SHEET. applyCase() used to overwrite the open
+   property in place, keeping that property's comps, condition panel and paid
+   photo read — so a reader with one real sheet who clicked a lesson link lost
+   it, from a link that looked like reading material. The step-3 sheet must
+   still be here, with its own figures, after the handoff. */
+out.handoffKept = await p.evaluate(()=>({
+  props: P.props.length, active: P.active,
+  step3Asking: (P.props[0] && P.props[0].raw && P.props[0].raw.asking) || '',
+  exampleIsOwnSheet: P.active !== 0 }));
+ck(out.handoffKept.props >= 2 && out.handoffKept.exampleIsOwnSheet,
+   'the lesson example landed on top of the sheet in progress: '+JSON.stringify(out.handoffKept));
+ck(out.handoffKept.step3Asking !== '',
+   'the sheet from step 3 lost its figures to the lesson: '+JSON.stringify(out.handoffKept));
 await p.click('#c-blank'); await p.waitForTimeout(250); await p.click('#c-blank'); await p.waitForTimeout(700);
 // clearing the sheet must put you back at the beginning, not leave you parked
 // on an empty results screen with nothing to do
@@ -216,10 +235,16 @@ ck(out.freeAdd !== '(bar hidden)', 'the property bar did not appear for a signed
 await p.waitForTimeout(700);
 out.afterAdd = await p.evaluate(()=>({props:P.props.length, active:P.active,
   tabs:document.querySelectorAll('.ptab').length}));
-ck(out.afterAdd.props===2, 'the add-property click was eaten by a re-render: '+JSON.stringify(out.afterAdd));
+/* Counted RELATIVE to what the walk already has: the lesson example is its own
+   sheet now (see handoffKept above), so pinning an absolute 2 here was pinning
+   the data-losing behaviour it replaced. What matters is that the click made
+   exactly one more. */
+ck(out.afterAdd.props === out.tier.props + 1,
+   'the add-property click was eaten by a re-render: '+JSON.stringify({...out.afterAdd, before:out.tier.props}));
 await fillSheet(p, { addr:'88 Ostend Street', asking:'162000', arv:'240000', repairs:'51000' });
 out.tabs = await p.evaluate(()=>document.querySelectorAll('.ptab').length);
-ck(out.tabs===2, 'a second property did not open for a signed-in user');
+ck(out.tabs === out.afterAdd.props, 'a second property did not open for a signed-in user: '+
+   JSON.stringify({tabs:out.tabs, props:out.afterAdd.props}));
 await p.evaluate(()=>document.querySelector('[data-prop="0"]').click()); await p.waitForTimeout(700);
 out.switched = await p.evaluate(()=>({asking:document.querySelector('[data-f="asking"]').value, active:P.active}));
 ck(out.switched.active===0 && out.switched.asking!=='', 'switching properties lost the first sheet');
@@ -235,7 +260,8 @@ out.hub2 = await p.evaluate(()=>{
            figures:cards.filter(c=>/\$/.test(c.innerText)).length,
            opens:cards.filter(c=>c.querySelector('a[href*="desk.html"]')||/desk\.html/.test(c.getAttribute('href')||'')).length };
 });
-ck(out.hub2.props===2 && out.hub2.named && out.hub2.figures>=1 && out.hub2.opens===2,
+ck(out.hub2.props === out.afterAdd.props && out.hub2.named && out.hub2.figures>=1
+   && out.hub2.opens === out.hub2.props,
    'the hub does not show the portfolio as a readable deck: '+JSON.stringify(out.hub2));
 
 /* 4b · plans: the page sells the product and hedges nowhere. It used to carry
@@ -270,18 +296,29 @@ out.floor = await p.evaluate(()=>({cabs:document.querySelectorAll('.cab').length
   titles:[...document.querySelectorAll('.cab h2')].map(h=>h.textContent)}));
 // three cabinets, all real now — Exit Drill shipped, so zero "coming soon"
 ck(out.floor.cabs===3 && out.floor.soon===0, 'the arcade floor is not a floor of built cabinets');
-/* Ordered by what they teach: the drill, then the street, then the long game.
-   The floor used to lead with the idle game and point two cabinets at one URL,
-   so this checks both the order and that each button opens a DIFFERENT thing. */
-ck(JSON.stringify(out.floor.titles)===JSON.stringify(['Exit Drill','The Daily Street','Comp Run']),
-   'the arcade floor is not ordered drill, street, long game: '+out.floor.titles.join(' / '));
+/* ── ORDERED BY WHAT GETS PLAYED ────────────────────────────────────────────
+   This pinned drill / street / long-game, on the argument that the floor
+   should teach. Teaching is the course's job; this room's job is to earn
+   ninety seconds from a stranger, and a stranger offered a timed quiz first
+   leaves. Comp Run leads now — the most fun cabinet and the best art, which
+   was sitting third and therefore below the fold on a phone.
+
+   The check itself is unchanged in spirit: the exact order, and three
+   DIFFERENT destinations, because the floor once pointed two cabinets at the
+   same URL and looked like three machines while being two. */
+ck(JSON.stringify(out.floor.titles)===JSON.stringify(['Comp Run','Exit Drill','The Daily Street']),
+   'the arcade floor is not ordered long game, drill, street: '+out.floor.titles.join(' / '));
 out.hrefs = await p.evaluate(()=>[...document.querySelectorAll('.cab .btn.p')].map(a=>a.getAttribute('href')));
 ck(new Set(out.hrefs).size===3, 'two cabinets point at the same game: '+out.hrefs.join(', '));
 out.cabs = {};
 for (let i=0;i<3;i++){
   await p.goto(B+'/arcade.html'); await p.waitForTimeout(500);
   const links = await p.$$('.cab .btn.p');
-  await links[i].click(); await p.waitForTimeout(i===2?3500:1600);
+  /* the long game needs longer to boot than the two short cabinets, and it
+     is no longer the last one clicked — wait on WHICH cabinet, not where it
+     happens to sit in the row */
+  await links[i].click();
+  await p.waitForTimeout(out.floor.titles[i]==='Comp Run' ? 3500 : 1600);
   out.cabs[out.floor.titles[i]] = await p.evaluate(()=>({
     url: location.pathname.split('/').pop(),
     playable: !!document.querySelector('button, .btn, .ans'),
@@ -295,6 +332,11 @@ for (const [nm, r] of Object.entries(out.cabs)){
 ck(out.cabs['Comp Run'].url==='comp-run.html' && out.cabs['The Daily Street'].url==='daily-street.html'
    && out.cabs['Exit Drill'].url==='exit-drill.html',
    'a cabinet opened the wrong game: '+JSON.stringify(Object.fromEntries(Object.entries(out.cabs).map(([k,v])=>[k,v.url]))));
+/* this used to read whatever page the loop happened to leave open, which was
+   the long game only because the long game was last on the floor. The floor
+   reordered and this silently started interrogating the daily street for a
+   global it does not have. It navigates to the game it means to check. */
+await p.goto(B+'/comp-run.html'); await p.waitForTimeout(3500);
 out.game = await p.evaluate(()=>({ booted: typeof S!=='undefined', cash: typeof S!=='undefined'?S.cash:null,
   home: !!document.querySelector('a[href="index.html"]') }));
 ck(out.game.booted && out.game.home, 'the long game did not open, or has no way home');

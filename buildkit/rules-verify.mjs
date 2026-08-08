@@ -13,7 +13,13 @@ import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 const MIME={'.html':'text/html','.js':'text/javascript','.png':'image/png',
             '.svg':'image/svg+xml','.woff2':'font/woff2'};
-const srv=http.createServer((q,r)=>{ let f=path.join('dist',decodeURIComponent(q.url.split('?')[0].split('#')[0]));
+const srv=http.createServer((q,r)=>{
+  /*__API_STUB__*/ /* a static directory is a deployment with no accounts configured, and saying
+     so is the honest answer to /api/config — a 404 is a console error the page
+     cannot suppress and the harness cannot tell from a real one */
+  if (/^\/api\//.test(q.url)){ r.writeHead(200, {'content-type':'application/json'});
+    return r.end(JSON.stringify({ ok:true, accounts:false })); }
+ let f=path.join('dist',decodeURIComponent(q.url.split('?')[0].split('#')[0]));
   if(f.endsWith('/'))f+='index.html';
   if(!fs.existsSync(f)||fs.statSync(f).isDirectory()){r.writeHead(404);return r.end('nope');}
   r.writeHead(200,{'content-type':MIME[path.extname(f)]||'application/octet-stream'});
@@ -327,7 +333,13 @@ R.shell = await p.evaluate(()=>({ shown:!document.getElementById('rail-nav').hid
     return !!h && getComputedStyle(h).display !== 'none'; })() }));
 ck(R.shell.shown && R.shell.pad === '232px', '6g: the shell did not appear for a member: '+JSON.stringify(R.shell));
 ck(R.shell.props >= 1, '6g: the shell carries no live state — it is a nav bar on its side');
-ck(/spread|figure/.test(R.shell.spread), '6g: the shell does not show what each property is worth: '+R.shell.spread);
+/* the rail used to print SPREAD — value minus repairs minus asking, gross —
+   which is a different quantity from anything on the offer page and does not
+   move when a lever does. It prints the CEILING now: the same number the
+   offer's chips, band and room meter are built on, so the two cannot
+   disagree. "figure(s)" is still allowed: a sheet too empty to price says how
+   many figures it has. */
+ck(/pay up to|figure/.test(R.shell.spread), '6g: the shell does not show what each property is worth: '+R.shell.spread);
 ck(R.shell.toggle, '6g: the shell cannot be collapsed, so it costs width it may not deserve');
 ck(!R.shell.dupMast, '6g: the page masthead is duplicating the shell');
 

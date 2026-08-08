@@ -46,15 +46,27 @@ const cr  = (a, b) => { const [hi, lo] = [lum(rgb(a)), lum(rgb(b))].sort((x,y) =
 
 const READ = () => p.evaluate(() => {
   const box = document.querySelector('.wl'); if (!box) return null;
-  const cardBg = getComputedStyle(box).backgroundColor;
+  /* ── WHAT COLOUR IS BEHIND THIS, REALLY ──────────────────────────────────
+     Reading the card's own backgroundColor and stopping there was fine while
+     every slot painted itself white. A BARE slot — one that sits inside a
+     card which already has a border, a background and a heading — paints
+     nothing, so that read came back rgba(0,0,0,0) and the contrast maths
+     divided by a transparent colour and produced 2.26:1 for black-ish text on
+     a cream card. The check has to answer the question a reader's eye asks,
+     which is what is actually behind the letters. */
+  const behind = el => { for (let n = el; n && n !== document.documentElement; n = n.parentElement){
+      const c = getComputedStyle(n).backgroundColor;
+      if (c && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent') return c; }
+    return getComputedStyle(document.body).backgroundColor || 'rgb(255,255,255)'; };
+  const bare = box.classList.contains('bare');
   const seen = [];
   for (const el of box.querySelectorAll('.wt,.ws,.wn,input,button')){
     const cs = getComputedStyle(el), r = el.getBoundingClientRect();
     seen.push({ k: el.tagName.toLowerCase() + (el.className ? '.' + String(el.className).trim().split(/\s+/)[0] : ''),
-      fg: cs.color, bg: cs.backgroundColor === 'rgba(0, 0, 0, 0)' ? cardBg : cs.backgroundColor,
+      fg: cs.color, bg: cs.backgroundColor === 'rgba(0, 0, 0, 0)' ? behind(el) : cs.backgroundColor,
       size: parseFloat(cs.fontSize), w: Math.round(r.width), h: Math.round(r.height) });
   }
-  return { cardBg, seen };
+  return { cardBg: behind(box), bare, seen };
 });
 
 const PAGES = ['plans.html','index.html','arcade.html','exits.html'];
@@ -76,10 +88,18 @@ for (const f of PAGES){
      type scale is a decision somebody could reasonably make, so a harness
      that goes red over half a pixel would be crying wolf about the wrong
      thing and would eventually be silenced along with the real assertion. */
-  const fp = JSON.stringify(r.seen.map(x => [x.k, x.fg, x.bg]));
-  if (fingerprint === null) fingerprint = { f, fp };
-  else ck(fp === fingerprint.fp,
-    `the card is a different COLOUR on ${f} than on ${fingerprint.f} — it is reading the page's variables again`);
+  /* A BARE slot is exempt from this one, and only this one. It has
+     deliberately given up its own chrome to sit inside a host card, so "does
+     it look identical everywhere" is not a question being asked of it — while
+     "is it readable where it landed" still is, and is checked above on the
+     background actually behind it. Every slot that paints its own card is
+     still held to looking the same on all of them. */
+  if (!r.bare){
+    const fp = JSON.stringify(r.seen.map(x => [x.k, x.fg, x.bg]));
+    if (fingerprint === null) fingerprint = { f, fp };
+    else ck(fp === fingerprint.fp,
+      `the card is a different COLOUR on ${f} than on ${fingerprint.f} — it is reading the page's variables again`);
+  }
   for (const x of r.seen) ck(x.size >= 12, `${f}: ${x.k} is set at ${x.size}px`);
 }
 
@@ -139,6 +159,42 @@ await p.waitForTimeout(300);
 await p.screenshot({path:'shot-waitlist.png'});
 
 ck(!errs.length, 'page errors: ' + errs.join(' · ').slice(0,180));
+
+/* ── AND THE SHAPE OF THE FIELD, ON A PHONE ────────────────────────────────
+   The input carries flex:1 1 170px, which in the row layout means "at least
+   170px WIDE, take the rest". Below 560px the container becomes a column, and
+   in a column that basis is a HEIGHT: 170px of it, plus grow. So on every
+   phone that reached this site, the one control that captures an address was
+   drawn as a 330px-tall empty box with the placeholder floating in the middle
+   of it, on every page carrying a slot.
+
+   Nothing caught it because nothing was measuring the SHAPE of a control —
+   only whether it existed and whether it posted. A field can exist, post
+   correctly, and still look broken enough that nobody types in it. */
+{
+  const ph = await b.newPage({ viewport:{width:390,height:844}, hasTouch:true, isMobile:true,
+    deviceScaleFactor:2 });
+  for (const page of ['plans.html','index.html']){
+    await ph.goto(B + page); await ph.waitForTimeout(700);
+    const m = await ph.evaluate(() => {
+      const i = document.querySelector('.wl .wf input'), btn = document.querySelector('.wl .wf button');
+      if (!i) return null;
+      const a = i.getBoundingClientRect(), b = btn.getBoundingClientRect();
+      return { h: Math.round(a.height), w: Math.round(a.width),
+               bh: Math.round(b.height), stacked: Math.abs(a.left - b.left) < 2 };
+    });
+    ck(m, `${page}: no waitlist field on a phone at all`);
+    if (!m) continue;
+    /* a single-line text input. 44 is the tap target floor, 72 is generous
+       for one line of 16px text with padding — 330 is a paragraph box. */
+    ck(m.h >= 44 && m.h <= 72, `${page}: the email field is ${m.h}px tall on a phone — one line of text is not a box`);
+    ck(m.bh >= 44, `${page}: the submit button is ${m.bh}px on a phone`);
+    ck(m.stacked, `${page}: the field and the button did not stack on a phone`);
+    ck(m.w > 200, `${page}: the field is only ${m.w}px wide on a 390px screen`);
+  }
+  await ph.close();
+}
+
 await b.close();
 if (F.length){ console.log('\nFAIL:'); F.forEach(f=>console.log(' -', f)); process.exit(1); }
-console.log('\nPASS — the card owns its own colours on every page it lands on, it posts, it remembers, and it is honest when it fails');
+console.log('\nPASS — the card owns its own colours on every page it paints one, it is readable on the card it sits inside where it does not, it is one line tall on a phone, it posts, it remembers, and it is honest when it fails');

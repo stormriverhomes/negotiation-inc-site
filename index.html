@@ -975,11 +975,24 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  background:#1f5fd0;border:1.5px solid #1f5fd0;color:#fff;font-size:13px;font-weight:650;letter-spacing:0;text-transform:none}
 .wl .wf button:hover{background:#1a4fb0;border-color:#1a4fb0;color:#fff;transform:none;box-shadow:none}
 /* side by side, a phone gives the address field about nine characters. Stack. */
+/* ── flex:1 1 170px MEANS SOMETHING ELSE IN A COLUMN ──────────────────────
+   The input carries flex:1 1 170px, which in the row layout is "at least
+   170px wide, take the rest". Turn the container into a column and the basis
+   becomes a HEIGHT — 170px of it, plus grow — so on every phone on the site
+   the one control that captures an address was drawn as a 330px-tall empty
+   box with the placeholder floating in the middle of it. Found in a
+   screenshot, not by a harness: nothing was measuring the shape of a field,
+   only whether it existed. */
 @media(max-width:560px){.wl .wf{flex-direction:column;align-items:stretch}
- .wl .wf input,.wl .wf button{width:100%}}
+ .wl .wf input,.wl .wf button{width:100%;flex:0 0 auto}}
 .wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:#4a5162}
 .wl .wn.ok{color:#12633e} .wl .wn.bad{color:#a32a20}
 .wl.done{border-color:#bfe0cd;background:#eaf6f0}
+/* bare: the slot is inside a card that already has a border, a background and
+   a heading of its own, so it brings none of those and only contributes the
+   sentence and the field */
+.wl.bare{border:0;background:none;padding:0;border-radius:0}
+.wl.bare .ws{margin-top:0}
 </style>
 <script>
 (function(){
@@ -997,7 +1010,15 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  var LINE='The desk is <b>free and finished</b> \u2014 pricing, the seven exits, the comparison, the print. '+
    'The paid tiers are being wired to a payment rail. Leave an address and you get <b>one</b> email the day they '+
    'open, with the founding price on it.';
- function formHTML(tier, line){ return '<div class="wl"><span class="wt">'+esc(tier)+' opens soon.</span>'+
+ /* ── A SLOT THAT SITS INSIDE SOMETHING ELSE ───────────────────────────────
+    The founding offer used to say "Claim a place" with a grey box directly
+    beneath it headed "The paid desk opens soon." — a page arguing with itself
+    about whether it is selling, which is exactly how it read to the first
+    person who looked at it. There is now one block, not two: the offer states
+    the price, and the field under it is the way to take it. A bare slot drops
+    the heading, because the card it lives in already has one. */
+ function formHTML(tier, line, bare){ return '<div class="wl'+(bare?' bare':'')+'">'+
+   (bare ? '' : '<span class="wt">'+esc(tier)+' opens soon.</span>')+
    '<span class="ws">'+(line||LINE)+'</span>'+
    '<form class="wf"><input type="email" required placeholder="you@example.com" aria-label="Your email" '+
    'autocomplete="email" spellcheck="false"><button type="submit" class="btn p sm">Tell me when it opens</button></form>'+
@@ -1029,7 +1050,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   for(var k=0;k<slots.length;k++){
    var el=slots[k], tier=el.getAttribute('data-waitlist')||'Paid plans';
    var from=el.getAttribute('data-from')||'plans';
-   el.innerHTML = sent() ? doneHTML() : formHTML(tier, el.getAttribute('data-line'));
+   el.innerHTML = sent() ? doneHTML() : formHTML(tier, el.getAttribute('data-line'), el.hasAttribute('data-bare'));
    if(!sent()) wire(el.firstChild, from);
   }
  }

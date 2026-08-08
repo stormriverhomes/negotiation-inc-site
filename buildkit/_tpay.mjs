@@ -73,6 +73,13 @@ const site = http.createServer((req,res)=>{
     if (u.pathname === '/api/checkout'){ LASTCHECKOUT = JSON.parse(b||'{}');
       return j(res,200,{ ok:true, url:'/office.html?paid=1' }); }
     if (u.pathname === '/api/portal') return j(res,200,{ ok:true, url:'/office.html?portal=1' });
+    /* Section A builds with NOTHING configured, and the page is right to ask
+       the server whether accounts exist — that question is the whole fix for
+       the batch where the account layer was dead on the live site. A 404 here
+       is a console error the page cannot suppress, and section A asserts
+       there are none, so this stub has to answer. Section B bakes the values
+       in and never asks. */
+    if (u.pathname.startsWith('/api/')) return j(res,200,{ ok:true, accounts:false });
     const p = u.pathname === '/' ? '/office.html' : u.pathname;
     const f = OUT_ABS + p;
     if (fs.existsSync(f) && fs.statSync(f).isFile()){

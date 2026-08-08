@@ -23,6 +23,12 @@ const ok = (name, pass, x) => { n++; if (!pass){ bad++;
   else console.log('✓ ' + name); };
 
 const site = http.createServer((req, res) => {
+  /*__API_STUB__*/ /* a static directory is a deployment with no accounts configured, and saying
+     so is the honest answer to /api/config — a 404 is a console error the page
+     cannot suppress and the harness cannot tell from a real one */
+  if (/^\/api\//.test(req.url)){ res.writeHead(200, {'content-type':'application/json'});
+    return res.end(JSON.stringify({ ok:true, accounts:false })); }
+
   const u = new URL(req.url, 'http://x');
   let p = u.pathname === '/' ? '/index.html' : u.pathname;
   if (!/\.[a-z0-9]+$/i.test(p)) p += '.html';

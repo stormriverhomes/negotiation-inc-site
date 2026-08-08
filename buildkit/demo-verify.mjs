@@ -5,7 +5,13 @@
 import { chromium } from 'playwright';
 import http from 'http'; import fs from 'fs'; import path from 'path';
 const MIME={'.html':'text/html','.js':'text/javascript','.png':'image/png','.woff2':'font/woff2'};
-const srv=http.createServer((q,r)=>{ let f=path.join('dist',decodeURIComponent(q.url.split('?')[0].split('#')[0]));
+const srv=http.createServer((q,r)=>{
+  /*__API_STUB__*/ /* a static directory is a deployment with no accounts configured, and saying
+     so is the honest answer to /api/config — a 404 is a console error the page
+     cannot suppress and the harness cannot tell from a real one */
+  if (/^\/api\//.test(q.url)){ r.writeHead(200, {'content-type':'application/json'});
+    return r.end(JSON.stringify({ ok:true, accounts:false })); }
+ let f=path.join('dist',decodeURIComponent(q.url.split('?')[0].split('#')[0]));
   if(f.endsWith('/'))f+='index.html';
   if(!fs.existsSync(f)||fs.statSync(f).isDirectory()){r.writeHead(404);return r.end('nope');}
   r.writeHead(200,{'content-type':MIME[path.extname(f)]||'application/octet-stream'});
@@ -27,9 +33,15 @@ R.A = await p.evaluate(()=>({
     const g=c.getContext('2d'); const d=g.getImageData(0,0,c.width,c.height).data;
     const seen=new Set(); for(let i=0;i<d.length;i+=4) seen.add(d[i]+','+d[i+1]+','+d[i+2]);
     return seen.size > 6; }).length }));
-ck(R.A.cards===5, 'A: the floor does not carry five deals');
-ck(R.A.drawn===5, `A: only ${R.A.drawn} of the houses actually drew something`);
-ck(R.A.links.every(h=>/^desk\.html#demo=[a-z]+$/.test(h)), 'A: a card does not open a demo: '+R.A.links.join(' '));
+/* six doors now: five houses on the desk, and the land play, which opens the
+   room the desk's eighth-exit refusal points at. The land card is drawn from
+   the same canvas pipeline as the houses, so `drawn` still counts all six. */
+ck(R.A.cards===6, `A: the floor carries ${R.A.cards} deals, not six`);
+ck(R.A.drawn===6, `A: only ${R.A.drawn} of the six scenes actually drew something`);
+ck(R.A.links.filter(h=>/^desk\.html#demo=[a-z]+$/.test(h)).length===5,
+   'A: five cards must open a desk sheet: '+R.A.links.join(' '));
+ck(R.A.links.includes('land.html#demo=land'),
+   'A: the land card no longer opens the Land Desk: '+R.A.links.join(' '));
 
 // ── B · the landing sends people here, not into an empty sheet ─────────────
 await p.goto(B+'/'); await p.waitForTimeout(800);

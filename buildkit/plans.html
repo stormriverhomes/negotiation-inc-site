@@ -401,23 +401,23 @@ tr.soonrow td b{font-weight:650}
     careful with.</p>
   </div>
 <!--LIVE--><a class="btn p" id="fnd-cta" href="office.html?join=underwriter">Take a place →</a><!--/LIVE-->
-<!--SOON--><a class="btn p" href="#waitlist">Claim a place →</a><!--/SOON-->
- </div>
- </div>
-
 <!--SOON-->
- <!-- The widget writes "<tier> opens soon." — so this slot was producing
-      "Solo, Underwriter and The Office opens soon.", which is ungrammatical
-      and, sitting directly under a founding offer that says "claim a place",
-      reads as a page arguing with itself about whether it is selling. The
-      whole block disappears on a live build; until then it says one clean
-      thing, and it says what is actually true: the desk works now, the rail
-      is the part being wired. -->
- <div id="waitlist" style="max-width:640px;margin:26px auto 0"
-   data-waitlist="The paid desk"
-   data-line="The desk is <b>free and finished</b> and works today &mdash; pricing, the seven exits, the comparison, the print. The paid tiers are wired to a payment rail that is being switched on. Leave an address and you get <b>one</b> email the day it opens, with the founding price on it."
-   data-from="plans"></div>
+ <!-- ── ONE BLOCK, NOT TWO ───────────────────────────────────────────────
+      This card said "Claim a place →" and pointed at a grey box directly
+      underneath it headed "The paid desk opens soon." So the page named a
+      price, offered to take it, and then told you it was not open — three
+      moves, in that order, inside one screen. The offer and the way to take
+      it are now the same block, and the box is gone.
+
+      The wording is the honest version of what claiming a place means before
+      the rail is switched on: your address, and the founding price comes to
+      it on day one. Nothing is charged and nothing pretends to be. -->
+ <div id="waitlist" data-waitlist="The paid desk" data-bare data-from="plans-founding"
+   data-line="Leave your address and you have the place: <b>one</b> email the day it opens, with this price on it and nothing else. No card, and nothing charged now."
+   style="margin-top:4px"></div>
 <!--/SOON-->
+ </div>
+ </div>
 
  <div class="billing"><b>Monthly or yearly</b><span class="save">Two months free on annual</span>
   <span>·</span><span>Cancel in one click — no contract, no call</span></div>
