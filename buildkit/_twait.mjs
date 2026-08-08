@@ -134,6 +134,27 @@ const kept = await p.evaluate(()=>!!document.querySelector('.wl.done'));
 console.log('after reload:', kept);
 ck(kept, 'a reload asks somebody who already signed up to sign up again');
 
+/* ── A LINK CAN SAY WHERE IT WAS POSTED ────────────────────────────────────
+   The only honest attribution this product will ever have: a tag in the URL,
+   carried into the record only when somebody chooses to submit the form. No
+   cookie, no beacon, no page-view counter — the privacy page promises there is
+   no anonymous telemetry hiding behind its sentences, and this must not become
+   the thing that makes that untrue. So the tag is asserted on the POST BODY,
+   which only exists because a person pressed a button. */
+{
+  await p.goto(B + 'plans.html'); await p.evaluate(()=>localStorage.clear());
+  await p.goto(B + 'plans.html?r=Reddit/r%20eal%20estate!!'); await p.waitForTimeout(700);
+  await p.evaluate(()=>{ window.__hit=null; window.fetch = async (u,o)=>{ window.__hit={u,body:o.body}; return {ok:true}; }; });
+  await p.fill('#waitlist input','tagged@example.com');
+  await p.click('#waitlist button'); await p.waitForTimeout(400);
+  const src = await p.evaluate(()=>{ try { return JSON.parse(window.__hit.body).from; } catch(e){ return null; } });
+  ck(/-r-/.test(String(src)), `a tagged link did not tag the capture — got ${src}`);
+  ck(/^[a-z0-9_-]+$/.test(String(src)),
+     `the tag reached the record unsanitised: ${src} — it becomes a column somebody reads`);
+  ck(String(src).length <= 40, `the tag is ${String(src).length} characters, which is somebody else's problem later`);
+  await p.evaluate(()=>localStorage.clear());
+}
+
 /* ── the failure path is the one that matters ───────────────────────────────
    A form that says "thanks" when the request failed loses the address AND the
    person, because they will not do it twice. It must say so, and it must not

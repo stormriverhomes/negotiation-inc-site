@@ -58,7 +58,12 @@ const b0 = await chromium.launch();
 
 const PAGES = [
   { f: 'index.html',  from: 'landing' },
-  { f: 'plans.html',  from: 'plans'   },
+  /* the plans capture used to be a separate grey box below the founding offer,
+     tagged 'plans'. It lives INSIDE that offer now — one block instead of a
+     page arguing with itself about whether it is selling — and says so, which
+     is worth more on the ops page than knowing only that it was "the plans
+     page". */
+  { f: 'plans.html',  from: 'plans-founding' },
   { f: 'arcade.html', from: 'arcade'  },
   { f: 'exits.html',  from: 'course'  },
 ];
@@ -111,7 +116,12 @@ const PAGES = [
   }
   out.B_sources = GOT.map(g => g.from);
   const want = PAGES.map(p => p.from);
-  for (const w of want) if (out.B_sources.indexOf(w) < 0)
+  /* a PREFIX, not an equality: a link carrying ?r=reddit appends -r-reddit to
+     the source, and this assertion is about which surface the address came
+     from, not about whether a campaign was named. Written as equality it would
+     go red the first time somebody posted a tagged link, which is the day this
+     check matters most. */
+  for (const w of want) if (!out.B_sources.some(s => String(s).split('-r-')[0] === w))
     bad.push(`B: an address from "${w}" arrived untagged — the source that converts cannot be known`);
   if (GOT.some(g => g.email !== 'smoke@example.com'))
     bad.push('B: the address that arrived is not the address that was typed');

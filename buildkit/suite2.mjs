@@ -176,7 +176,15 @@ const NAMES = [
    at all: it trains you to skim past red. So the two that legitimately take
    their time are named, and everything else still fails fast — a harness that
    hangs is a bug and should be caught, not accommodated. */
-const SLOW = { _tpay: 900000, _tcap: 900000 };
+/* _tstamp is the third: it runs publish.mjs SIX times on purpose — twice to
+   prove a rebuild of untouched sources agrees with itself, once with a page
+   edited, once with it put back, and once at the live stage. A build is about
+   forty seconds on its own and a good deal more with five other Chromiums
+   competing, so under a wide board it blew a 300s budget and reported RED for
+   a clock rather than for a fault. It also STARVES its neighbours while it
+   runs — _tconfig and _tauth2 both roughly doubled beside it — so if a board
+   looks slow, this is why. */
+const SLOW = { _tpay: 900000, _tcap: 900000, _tstamp: 900000 };
 const BUDGET = n => SLOW[n] || 300000;
 
 const BATCH = Number(process.argv[2] || 6);

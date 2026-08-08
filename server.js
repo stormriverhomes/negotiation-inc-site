@@ -1832,7 +1832,37 @@ async function opsData(){
     } catch(e){ return null; }
   };
   const since = d => new Date(Date.now() - d * 86400000).toISOString();
-  const [people, wk, day1, solo, uw, off, trialing] = await Promise.all([
+  /* ── THE ONLY FUNNEL THERE IS RIGHT NOW ──────────────────────────────────
+     Before launch nothing can be bought, so the waitlist IS the funnel — and
+     this page showed accounts, plans, spend, errors and founding places while
+     saying nothing at all about the one number that moves. Finding out how
+     many addresses came in meant opening Supabase.
+
+     The breakdown by source is what makes it actionable. Every capture already
+     records which surface it came from, and a link can carry a campaign tag,
+     so "the Reddit post brought eleven and the plans page brought two" is a
+     question this can answer WITHOUT a single byte of telemetry: nothing is
+     recorded unless somebody chose to type their address into a form. The
+     privacy page promises there is no anonymous tracking hiding behind its
+     sentences, and that promise is worth more than an analytics dashboard. */
+  const listCount = q => countOf('waitlist', q);
+  const listSources = async () => {
+    const SB = (process.env.SUPABASE_URL || '').replace(/\/+$/, '');
+    const K = process.env.SUPABASE_SERVICE_KEY || '';
+    if (!SB || !K) return null;
+    try {
+      const r = await fetch(`${SB}/rest/v1/waitlist?select=source&order=created_at.desc&limit=500`,
+        { headers:{ apikey:K, authorization:'Bearer ' + K } });
+      if (!r.ok) return null;
+      const rows = await r.json();
+      const by = new Map();
+      for (const row of rows) by.set(row.source || 'unknown', (by.get(row.source || 'unknown') || 0) + 1);
+      return [...by.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8)
+        .map(([k, v]) => ({ source: k, n: v }));
+    } catch(e){ return null; }
+  };
+  const [people, wk, day1, solo, uw, off, trialing,
+         listAll, listDay, listWk, listBy] = await Promise.all([
     countOf('profiles'),
     countOf('profiles', 'created_at=gte.' + since(7)),
     countOf('profiles', 'created_at=gte.' + since(1)),
@@ -1840,6 +1870,10 @@ async function opsData(){
     countOf('profiles', 'plan=eq.underwriter'),
     countOf('profiles', 'plan=in.(the office,office)'),
     countOf('profiles', 'trial=not.is.null&plan=is.null'),
+    listCount(),
+    listCount('created_at=gte.' + since(1)),
+    listCount('created_at=gte.' + since(7)),
+    listSources(),
   ]);
   /* MRR from the prices actually charged, not from the plans page — the page
      is marketing and this is the books. Unknown price means unknown MRR, said
@@ -1853,6 +1887,7 @@ async function opsData(){
     uptimeH: +(process.uptime() / 3600).toFixed(1),
     people: { total: people, newToday: day1, newThisWeek: wk, trialing },
     plans: { solo, underwriter: uw, office: off, mrr },
+    list: { on: LIST_ON, total: listAll, today: listDay, week: listWk, by: listBy },
     billing: bill,
     today: { calls: day.n, usd: +day.usd.toFixed(3), accounts: day.by.size,
              budgetUsd: LIM.dailyUsd, ceilingUsd: hardUsd(),
@@ -2019,6 +2054,25 @@ td.r,th.r{text-align:right;white-space:nowrap}
  ${card('New this week', n(d.people.newThisWeek))}
  ${card('Webhook', d.billing.hook, d.billing.hook === 'on' ? 'signing secret set' : 'plans will not update', d.billing.hook === 'on' ? 'good' : 'bad')}
 </div>
+
+<h2>The list</h2>
+<div class="g">
+ ${d.list.on
+   ? card('Addresses', n(d.list.total), `${n(d.list.today)} today · ${n(d.list.week)} this week`,
+          (d.list.today || 0) > 0 ? 'good' : '')
+   : card('The list', 'off', 'no Supabase — nothing can be captured', 'bad')}
+ ${card('Where they came from',
+        (d.list.by && d.list.by.length) ? d.list.by[0].source : '—',
+        (d.list.by && d.list.by.length)
+          ? d.list.by.map(x => x.source + ' ' + x.n).join(' · ')
+          : 'nobody yet')}
+</div>
+<div class="ctl"><p>Every capture records the surface it came from, and a link
+ carrying <span class="mono">?r=name</span> tags it — so
+ <span class="mono">negotiationinc.com/plans?r=reddit</span> arrives here as
+ <span class="mono">plans-founding-r-reddit</span>. Nothing is recorded unless
+ somebody typed their address in: there is no page tracking on this site and
+ the privacy page says so in as many words.</p></div>
 
 <h2>Today's spend</h2>
 <div class="g">

@@ -405,9 +405,18 @@ tr.soonrow td b{font-weight:650}
 h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
 </style>
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="Negotiation Inc">
 <meta property="og:title" content="Plans · Negotiation Inc">
 <meta property="og:description" content="Pricing a property is free forever. A plan buys back the half hour: the photo condition read, comps pulled and scored, the lender packet, and a portfolio that remembers.">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://negotiationinc.com/og/page-plans.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Plans · Negotiation Inc">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Plans · Negotiation Inc">
+<meta name="twitter:description" content="Pricing a property is free forever. A plan buys back the half hour: the photo condition read, comps pulled and scored, the lender packet, and a portfolio that remembers.">
+<meta name="twitter:image" content="https://negotiationinc.com/og/page-plans.png">
+<meta property="og:url" content="https://negotiationinc.com/plans">
+<link rel="canonical" href="https://negotiationinc.com/plans">
 </head>
 <body>
 
@@ -1381,11 +1390,29 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
     });
   });
  }
+ /* ── WHERE DID THEY ACTUALLY COME FROM ────────────────────────────────────
+    A link carrying ?r=reddit tags every address captured on that visit, so the
+    ops page can say "eleven from the Reddit post, two from the plans page"
+    without a single byte of tracking: nothing is recorded unless somebody
+    chooses to type their address into a form. The privacy page promises there
+    is no anonymous telemetry hiding behind its sentences, and that promise is
+    worth more than an analytics dashboard.
+
+    Sanitised here and again on the server, and short, because it becomes a
+    column somebody reads. */
+ function tag(){
+  try {
+   var m = /[?&]r=([^&]{1,24})/.exec(location.search);
+   if (!m) return '';
+   var t = decodeURIComponent(m[1]).toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 16);
+   return t ? '-r-' + t : '';
+  } catch(e){ return ''; }
+ }
  function paint(){
   var slots=document.querySelectorAll('[data-waitlist]');
   for(var k=0;k<slots.length;k++){
    var el=slots[k], tier=el.getAttribute('data-waitlist')||'Paid plans';
-   var from=el.getAttribute('data-from')||'plans';
+   var from=(el.getAttribute('data-from')||'plans')+tag();
    el.innerHTML = sent() ? doneHTML() : formHTML(tier, el.getAttribute('data-line'), el.hasAttribute('data-bare'));
    if(!sent()) wire(el.firstChild, from);
   }

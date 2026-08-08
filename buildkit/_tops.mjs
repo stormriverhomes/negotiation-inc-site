@@ -32,10 +32,17 @@ const B = `http://127.0.0.1:${PORT}`;
    exercised rather than skipped as null */
 const counts = { profiles: 41, 'plan=eq.solo': 7, 'plan=eq.underwriter': 3 };
 const stub = http.createServer((q, r) => {
+  /* the waitlist source breakdown is a GET, not a HEAD count */
+  if (q.url.includes('waitlist') && q.url.includes('select=source')){
+    r.writeHead(200, { 'content-type':'application/json' });
+    return r.end(JSON.stringify([{source:'plans-founding-r-reddit'},{source:'plans-founding-r-reddit'},
+      {source:'index'},{source:'plans-founding'},{source:'plans-founding-r-reddit'}]));
+  }
   let total = counts.profiles;
   for (const [k, v] of Object.entries(counts)) if (k !== 'profiles' && q.url.includes(k)) total = v;
   if (q.url.includes('plan=in.')) total = 1;
   if (q.url.includes('trial=not.is.null')) total = 5;
+  if (q.url.includes('waitlist')) total = 12;
   if (q.url.includes('created_at=gte')) total = 4;
   r.writeHead(200, { 'content-range': `0-0/${total}`, 'content-type':'application/json' });
   r.end('[]');
@@ -213,6 +220,35 @@ const get = (p) => fetch(B + p).then(async r => ({ status:r.status, ct:r.headers
   const held = JSON.parse((await get('/api/ops?k=' + TOKEN)).text);
   ok('and reading the page does not clear the pause', held.control.paused === true, held.control);
   await post({ action:'resume' });
+}
+
+/* ── THE LIST, WHICH IS THE WHOLE FUNNEL UNTIL PAYMENTS ARE ON ─────────────
+   This page showed accounts, plans, spend, errors and founding places and said
+   nothing about the one number that actually moves before launch. Finding out
+   how many addresses had come in meant opening Supabase — which is the same
+   failure the whole page exists to fix.
+
+   The breakdown is what makes it worth looking at, and it is honest: every row
+   is somebody who chose to type their address into a form. There is no page
+   tracking on this site, the privacy page says so in as many words, and this
+   must not quietly become the thing that makes that untrue. */
+{
+  const d = JSON.parse((await get('/api/ops?k=' + TOKEN)).text);
+  ok('ops reports the list at all', !!d.list, Object.keys(d));
+  ok('and how many addresses there are', d.list.total === 12, d.list);
+  ok('and how many arrived today', d.list.today === 4, d.list);
+  ok('and where they came from, commonest first',
+     Array.isArray(d.list.by) && d.list.by[0].source === 'plans-founding-r-reddit' && d.list.by[0].n === 3,
+     d.list.by);
+  ok('and it carries the campaign tag through, so a post can be told from a page',
+     d.list.by.some(x => /-r-reddit$/.test(x.source)), d.list.by);
+  /* the reply is a tally and must never become a list of people */
+  const body = JSON.stringify(d);
+  ok('and no address of any kind is in the reply', !/@/.test(body), (body.match(/.{20}@.{20}/) || [])[0]);
+
+  const page = (await get('/ops?k=' + TOKEN)).text;
+  ok('the page draws it', /The list/.test(page) && /plans-founding-r-reddit/.test(page), '');
+  ok('and says out loud that nothing is tracked', /no page tracking/i.test(page), '');
 }
 
 srv.kill(); stub.close();

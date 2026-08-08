@@ -241,12 +241,46 @@ async function minifyInline(html, label){
   if (!r.code) throw new Error(label + ': minify produced nothing');
   return html.replace(m[0], '<script>' + r.code + '</script>');
 }
-// og tags for the three human-shared pages — link previews are the funnel's
-// first impression, and a bare URL preview reads as abandonware
-const OG = (t, d) => `<meta property="og:type" content="website">
+/* ══ LINK PREVIEWS ═════════════════════════════════════════════════════════
+   These tags carried a title and a description and NO IMAGE, on every page.
+   summary — not summary_large_image — so every share of this site on X,
+   LinkedIn, Slack, Reddit, Discord or iMessage rendered as a grey text box
+   with a favicon. The forty share cards in og/ are for the arcade's deeds;
+   the product's own pages had none.
+
+   That is a strange thing for a product whose entire argument is a document.
+   A person deciding whether to click is looking at one rectangle, and ours
+   was empty, next to competitors' screenshots.
+
+   Each page now gets a real 1200x630 card, drawn from the site's own type and
+   the site's own paper — with the sheet on it, because the sheet is the
+   argument. And a canonical, because /desk and /desk.html are both served and
+   a search engine has no way to know they are the same page. */
+const SITE = (process.env.NI_SITE_URL || 'https://negotiationinc.com').replace(/\/+$/, '');
+const OGCARDS = new Set();          // filled in below, once the cards are drawn
+const OG = (t, d, slug) => {
+  const key = slug === undefined ? null : (slug || 'site');
+  /* A page with no card of its own borrows the nearest one that means the same
+     thing rather than falling back to the front door. The three cabinets are
+     the arcade; the legal pages are the company. */
+  const NEAR = { 'comp-run':'arcade', 'daily-street':'arcade', 'exit-drill':'arcade' };
+  const img = !key ? 'site'
+    : OGCARDS.has(key) ? key
+    : OGCARDS.has(NEAR[key]) ? NEAR[key] : 'site';
+  return `<meta property="og:type" content="website">
+<meta property="og:site_name" content="Negotiation Inc">
 <meta property="og:title" content="${t}">
 <meta property="og:description" content="${d}">
-<meta name="twitter:card" content="summary">\n`;
+<meta property="og:image" content="${SITE}/og/page-${img}.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${t}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${t}">
+<meta name="twitter:description" content="${d}">
+<meta name="twitter:image" content="${SITE}/og/page-${img}.png">
+${key === null ? '' : `<meta property="og:url" content="${SITE}/${key === 'site' ? '' : key}">
+<link rel="canonical" href="${SITE}/${key === 'site' ? '' : key}">`}\n`;
+};
 
 // ── the typeface ───────────────────────────────────────────────────────────
 // Georgia is on every machine, which is exactly the problem: a page set in the
@@ -293,6 +327,96 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 </style>
 `;
 
+/* ══ THE CARD EVERY SHARED LINK SHOWS ══════════════════════════════════════
+   Drawn as a page and photographed, not painted into a canvas — the deed
+   cards are canvas because they are pixel art and have to be; this is
+   typography, and typography belongs to the thing that already knows how to
+   set it. It uses the site's own face, off the built copy, so the card cannot
+   drift away from the pages it advertises.
+
+   Each card carries the sheet, small, on the right. Not decoration: the sheet
+   IS the argument — a stranger scrolling past a link has four seconds, and
+   four numbers and a verdict make the case faster than any sentence could.
+   The one number in green is the only green on the card, because green means
+   money that pays and it means nothing else anywhere in this product. */
+{
+  const CARDS = {
+    site:    ['Underwriting · est. of record', 'Know what to pay before you call.',
+              'Eight ways out of a property deal, all of them priced — seven against the house, the eighth against the dirt — with the arithmetic shown every time.'],
+    desk:    ['The desk · underwriting worksheet', 'Price a property in three steps.',
+              'The two hardest numbers in underwriting get done properly, and nothing is calculated until you say so.'],
+    plans:   ['Plans', 'Pricing a property is free.',
+              'A plan buys back the half hour: the condition read off your photographs, the comps pulled and scored, the lender packet with your name on it.'],
+    exits:   ['The eight exits', 'The same house is worth eight different maximums.',
+              'Wholesale, flip, wholetail, buy and hold, BRRRR, subject-to, novation, land. The gap between the best and the worst is usually the whole margin.'],
+    arcade:  ['The arcade · free, no account', 'Or train the instinct the fun way.',
+              'Three cabinets running the desk’s own arithmetic, with the clock and the money turned into a game.'],
+    land:    ['The land desk', 'Dirt is not a house with the house removed.',
+              'Frontage, slope, utilities, the flood zone at the exact coordinates, and the lots that actually sold.'],
+    demo:    ['See how it works', 'Five sheets, already worked.',
+              'Every exit priced or refused, every number showing where it came from. Nothing here is a mock-up.'],
+  };
+  const cardPage = (eyebrow, head, sub) => `<!doctype html><html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Fraunces';src:url('file://${path.resolve(out, 'fonts/fraunces.woff2')}') format('woff2-variations');
+ font-weight:100 900;font-style:normal;font-variation-settings:'WONK' 0}
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1200px;height:630px;background:#fff;overflow:hidden;
+ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+ color:#101725;display:grid;grid-template-columns:1fr 396px}
+.l{padding:64px 52px 56px 68px;display:flex;flex-direction:column}
+.k{font-size:14px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#6b7488}
+h1{font-family:'Fraunces',Georgia,serif;font-variation-settings:'WONK' 0;font-weight:700;
+ font-size:60px;line-height:1.06;letter-spacing:-.022em;margin-top:20px;max-width:14ch}
+.s{font-size:21px;line-height:1.5;color:#3f4759;margin-top:22px;max-width:44ch}
+.f{margin-top:auto;display:flex;align-items:center;gap:14px;font-size:16px;color:#6b7488}
+.f b{font-family:'Fraunces',Georgia,serif;font-weight:700;color:#101725;font-size:19px;letter-spacing:-.01em}
+.f b em{font-style:normal;color:#1f5fd0;font-size:12px;font-weight:800;letter-spacing:.14em;vertical-align:3px}
+.r{background:#f6f8fb;border-left:1px solid #dfe4ec;padding:46px 40px;display:flex;flex-direction:column;justify-content:center}
+.tk{background:#fff;border:1px solid #c9d0dc;border-radius:14px;padding:20px 20px 18px;
+ box-shadow:0 2px 10px rgba(16,23,37,.06)}
+.tkh{font-size:10.5px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#6b7488;
+ display:flex;justify-content:space-between;border-bottom:1.5px solid #101725;padding-bottom:8px}
+.row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid #eef1f6}
+.row .lb{font-size:10.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:#6b7488}
+.row .vl{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:19px;font-variant-numeric:tabular-nums}
+.win{margin-top:14px;background:#eaf6f0;border:1px solid #bfe0cd;border-radius:11px;padding:13px 15px}
+.win .k2{font-size:9.5px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:#12633e}
+.win .big{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:38px;color:#12633e;
+ letter-spacing:-.02em;line-height:1.05;margin-top:2px;font-variant-numeric:tabular-nums}
+.win .p{font-size:12.5px;color:#3f4759;margin-top:5px;line-height:1.4}
+</style></head><body>
+<div class="l">
+ <div class="k">${eyebrow}</div>
+ <h1>${head}</h1>
+ <div class="s">${sub}</div>
+ <div class="f"><b>NEGOTIATION <em>INC</em></b><span>negotiationinc.com</span></div>
+</div>
+<div class="r"><div class="tk">
+ <div class="tkh"><span>Form D-1 · 1128 Marrow Lane</span></div>
+ <div class="row"><span class="lb">Asking</span><span class="vl">$184,500</span></div>
+ <div class="row"><span class="lb">ARV</span><span class="vl">$291,000</span></div>
+ <div class="row"><span class="lb">Repairs</span><span class="vl">$41,300</span></div>
+ <div class="row" style="border-bottom:0"><span class="lb">The fix and flip</span><span class="vl">01</span></div>
+ <div class="win"><div class="k2">This house pays you</div><div class="big">$23,280</div>
+  <div class="p">as the flip — and $14,000 as a wholesale you never own. One house, two right answers.</div></div>
+</div></div></body></html>`;
+
+  const cp = await b.newPage({ viewport:{ width:1200, height:630 }, deviceScaleFactor:1 });
+  for (const [slug, [k, h, s]] of Object.entries(CARDS)){
+    await cp.setContent(cardPage(k, h, s), { waitUntil:'load' });
+    /* the face has to be THERE before the shutter, or the card ships in
+       Georgia and looks like a different company */
+    await cp.evaluate(() => document.fonts.ready);
+    await cp.waitForTimeout(120);
+    await cp.screenshot({ path: path.join(out, 'og', `page-${slug}.png`) });
+    OGCARDS.add(slug);
+  }
+  await cp.close();
+  if (!OGCARDS.has('site'))
+    throw new Error('the default link-preview card was not drawn — every share would fall back to nothing');
+}
+
 /* ══ THE BANKROLL, INJECTED ═══════════════════════════════════════════════
    arcade/bank.mjs is the one place the money is defined, and it is unit-tested
    under node. The four surfaces that touch it are standalone classic-script
@@ -317,7 +441,7 @@ html = html.replace('</head>', ICONS() + '</head>');
 if (BASE) html = html.replace('</head>', `<meta name="ni-share-base" content="${BASE}/d">\n</head>`);
 else html = html.replace('</head>', `<meta name="ni-share-base" content="d">\n</head>`);
 html = html.replace('</head>', OG('Comp Run · Negotiation Inc',
-  'Eight eras of ground, a daily street, and a phone that rings. The instinct, trained the fun way.') + '</head>');
+  'Eight eras of ground, a daily street, and a phone that rings. The instinct, trained the fun way.', 'comp-run') + '</head>');
 html = bankInto(html, 'portfolio.html (Comp Run)');
 html = await minifyInline(html, 'index');
 fs.writeFileSync(path.join(out, 'comp-run.html'), html);
@@ -331,7 +455,7 @@ fs.writeFileSync(path.join(out, 'comp-run.html'), html);
 let street = fs.readFileSync('daily-street.html', 'utf8');
 street = street.replace('</head>', ICONS() + '</head>');
 street = street.replace('</head>', OG('The Daily Street · Negotiation Inc',
-  'Three streets, three minutes, one sealed offer each. The same houses for everybody who plays today.') + '</head>');
+  'Three streets, three minutes, one sealed offer each. The same houses for everybody who plays today.', 'daily-street') + '</head>');
 for (const must of ['The Daily Street', 'href="arcade.html"', 'How it works'])
   if (!street.includes(must)) throw new Error('daily-street.html lost: ' + must);
 if (/fonts\.googleapis|fonts\.gstatic|https?:\/\/cdn/.test(street)) throw new Error('daily-street.html reaches off-origin');
@@ -349,7 +473,7 @@ course = course.replace(/href="the-eight-exits\.html(#[a-z]*)?"/g, (m, h) => `hr
 course = course.replace('</head>', ICONS() + '</head>');
 course = course.replace('</head>', FONTS + '</head>');
 course = course.replace('</head>', OG('The Eight Exits · Negotiation Inc',
-  'Every way out of a property deal, with the arithmetic shown. Fifteen minutes. No email, nothing to buy.') + '</head>');
+  'Every way out of a property deal, with the arithmetic shown. Fifteen minutes. No email, nothing to buy.', 'exits') + '</head>');
 course = await minifyInline(course, 'exits');
 fs.writeFileSync(path.join(out, 'exits.html'), course);
 
@@ -360,7 +484,7 @@ desk = desk.replace(/the-eight-exits\.html/g, 'exits.html');
 desk = desk.replace('</head>', ICONS() + '</head>');
 desk = desk.replace('</head>', FONTS + '</head>');
 desk = desk.replace('</head>', OG('The Desk · Negotiation Inc',
-  'Type what you know about a property. The sheet runs every exit, shows its working, and says what it is estimating.') + '</head>');
+  'Type what you know about a property. The sheet runs every exit, shows its working, and says what it is estimating.', 'desk') + '</head>');
 /* Rules that took a pass each to establish and would cost nothing to undo by
    accident. Asserted on the SOURCE, before minification, because the whole
    point is to catch an edit — not a mangled identifier.
@@ -839,7 +963,7 @@ if (fs.existsSync('priors.js')) {
   land = land.replace('</head>', ICONS() + '</head>');
   land = land.replace('</head>', FONTS + '</head>');
   land = land.replace('</head>', OG('The Land Desk · Negotiation Inc',
-    'The eighth exit needs dirt. Price the dirt: what the finished lot sells for, what it costs to get there, and the most you can pay — with the working shown.') + '</head>');
+    'The eighth exit needs dirt. Price the dirt: what the finished lot sells for, what it costs to get there, and the most you can pay — with the working shown.', 'land') + '</head>');
   land = await minifyInline(land, 'land');
   fs.writeFileSync(path.join(out, 'land.html'), land);
 }
@@ -928,7 +1052,7 @@ for (const never of ['not part of the page', 'Notes back to Design', 'manila', '
                      'href="exits.html"', '>Course<', 'Start the course'])
   if (landing.includes(never)) throw new Error('index.html still contains a retired device: ' + never);
 landing = landing.replace('</head>', OG('Negotiation Inc',
-  'Price every exit on one property, ranked against the seller, with the arithmetic shown. No account, nothing leaves your browser.') + '</head>');
+  'Price every exit on one property, ranked against the seller, with the arithmetic shown. No account, nothing leaves your browser.', '') + '</head>');
 // No script to minify on the landing any more — revision 3 has no behaviour
 // beyond links, which is its own kind of correct for a front door.
 fs.writeFileSync(path.join(out, 'index.html'), landing);
@@ -941,7 +1065,7 @@ plans = plans.replace(/the-eight-exits\.html/g, 'exits.html');
 plans = plans.replace('</head>', ICONS() + '</head>');
 plans = plans.replace('</head>', FONTS + '</head>');
 plans = plans.replace('</head>', OG('Plans · Negotiation Inc',
-  'Pricing a property is free forever. A plan buys back the half hour: the photo condition read, comps pulled and scored, the lender packet, and a portfolio that remembers.') + '</head>');
+  'Pricing a property is free forever. A plan buys back the half hour: the photo condition read, comps pulled and scored, the lender packet, and a portfolio that remembers.', 'plans') + '</head>');
 /* the page sells; one sentence at the top says it is pre-launch. Both have to
    survive, and the per-row hedging has to stay gone. */
 /* Four tiers, and the two prices that carry the model. If a price string
@@ -1136,7 +1260,7 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
         throw new Error(`${file} lost the promise it exists to make: ${promise}`);
     doc = doc.replace('</head>', ICONS() + '</head>');
     doc = doc.replace('</head>', FONTS + '</head>');
-    doc = doc.replace('</head>', OG(title, desc) + '</head>');
+    doc = doc.replace('</head>', OG(title, desc, file.replace('.html', '')) + '</head>');
     fs.writeFileSync(path.join(out, file), doc);
   }
 }
@@ -1206,7 +1330,7 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
   hub = hub.replace('</head>', ICONS() + '</head>');
   hub = hub.replace('</head>', FONTS + '</head>');
   hub = hub.replace('</head>', OG('The Arcade · Negotiation Inc',
-    'Cabinets that train the read: Comp Run, the daily street, and the drills. Free, no account.') + '</head>');
+    'Cabinets that train the read: Comp Run, the daily street, and the drills. Free, no account.', 'arcade') + '</head>');
   for (const must of ['comp-run.html', 'daily-street.html', 'exit-drill.html'])
     if (!hub.includes(must)) throw new Error('arcade.html lost a cabinet: ' + must);
   hub = bankInto(hub, 'arcade-hub.html');
@@ -1221,7 +1345,7 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
   demo = demo.replace('</head>', ICONS() + '</head>');
   demo = demo.replace('</head>', FONTS + '</head>');
   demo = demo.replace('</head>', OG('See how it works · Negotiation Inc',
-    'Six properties that do not exist, each with a different right answer — five houses and one piece of dirt. Open one and the real software prices it.') + '</head>');
+    'Six properties that do not exist, each with a different right answer — five houses and one piece of dirt. Open one and the real software prices it.', 'demo') + '</head>');
   /* ── THE FLOOR AND THE SHEETS CANNOT DRIFT APART ─────────────────────────
      Every card on this page promises a scenario that exists. The five house
      keys are read out of the desk's own DEMOS table, so adding a card
@@ -1258,7 +1382,7 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
   drill = drill.replace('</head>', ICONS() + '</head>');
   drill = drill.replace('</head>', FONTS + '</head>');
   drill = drill.replace('</head>', OG('Exit Drill · Negotiation Inc',
-    'Sixty seconds, one house at a time: flip it, hold it, take the payments, run the listing, or walk.') + '</head>');
+    'Sixty seconds, one house at a time: flip it, hold it, take the payments, run the listing, or walk.', 'exit-drill') + '</head>');
   drill = bankInto(drill, 'exit-drill.html');
   fs.writeFileSync(path.join(out, 'exit-drill.html'), drill);
 }
@@ -2356,11 +2480,29 @@ const WAITLIST = `<style>
     });
   });
  }
+ /* ── WHERE DID THEY ACTUALLY COME FROM ────────────────────────────────────
+    A link carrying ?r=reddit tags every address captured on that visit, so the
+    ops page can say "eleven from the Reddit post, two from the plans page"
+    without a single byte of tracking: nothing is recorded unless somebody
+    chooses to type their address into a form. The privacy page promises there
+    is no anonymous telemetry hiding behind its sentences, and that promise is
+    worth more than an analytics dashboard.
+
+    Sanitised here and again on the server, and short, because it becomes a
+    column somebody reads. */
+ function tag(){
+  try {
+   var m = /[?&]r=([^&]{1,24})/.exec(location.search);
+   if (!m) return '';
+   var t = decodeURIComponent(m[1]).toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 16);
+   return t ? '-r-' + t : '';
+  } catch(e){ return ''; }
+ }
  function paint(){
   var slots=document.querySelectorAll('[data-waitlist]');
   for(var k=0;k<slots.length;k++){
    var el=slots[k], tier=el.getAttribute('data-waitlist')||'Paid plans';
-   var from=el.getAttribute('data-from')||'plans';
+   var from=(el.getAttribute('data-from')||'plans')+tag();
    el.innerHTML = sent() ? doneHTML() : formHTML(tier, el.getAttribute('data-line'), el.hasAttribute('data-bare'));
    if(!sent()) wire(el.firstChild, from);
   }
@@ -2558,6 +2700,50 @@ await b.close();
     + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     + PUBLIC_PAGES.map(p => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${day}</lastmod></url>`).join('\n')
     + '\n</urlset>\n');
+
+  /* ── EVERY PAGE A STRANGER MIGHT SHARE ────────────────────────────────────
+     The link preview is the first impression the funnel makes, and until this
+     build there was not one: title, description, and no image, on every page,
+     with twitter:card set to `summary` — the small one. So a link to this
+     product landed in a group chat, a subreddit or a LinkedIn post as a grey
+     box with a favicon in it, next to competitors' screenshots.
+
+     Three things are asserted, because all three fail silently and none of
+     them fails in a browser:
+       · the card is named AND the file is actually there — a 404 in an
+         og:image is worse than no og:image, because the scraper caches the
+         miss and shows nothing for days
+       · the page names its own clean address as canonical: /desk and
+         /desk.html are both served, and nothing else tells a search engine
+         they are one page
+       · there is a plain meta description, which is what a search result
+         actually prints. og:description is a different tag read by different
+         software, and two pages had one and not the other. */
+  for (const page of PUBLIC_PAGES){
+    const f = (page || 'index') + '.html';
+    const q = path.join(out, f);
+    let d = fs.readFileSync(q, 'utf8');
+
+    const img = (d.match(/og:image["'] content=["']([^"']+)/) || [])[1];
+    if (!img) throw new Error(`${f}: no link-preview image — every share of this page is a grey box`);
+    const local = img.replace(SITE_URL, '').replace(/^\//, '');
+    if (!fs.existsSync(path.join(out, local)))
+      throw new Error(`${f}: names ${local} as its preview and the file was not built`);
+    if (!/twitter:card["'] content=["']summary_large_image/.test(d))
+      throw new Error(`${f}: the preview card is set to the small one, and a small card is a favicon`);
+
+    const want = `${SITE_URL}/${page}`;
+    const canon = (d.match(/rel=["']canonical["'] href=["']([^"']+)/) || [])[1];
+    if (canon !== want) throw new Error(`${f}: canonical is ${canon || 'missing'}, should be ${want}`);
+
+    /* a description written once, used by both kinds of reader */
+    if (!/<meta name=["']description["']/i.test(d)){
+      const od = (d.match(/og:description["'] content=["']([^"']*)/) || [])[1];
+      if (!od) throw new Error(`${f}: no description of any kind — the search result would be a guess`);
+      d = d.replace('</head>', `<meta name="description" content="${od}">\n</head>`);
+      fs.writeFileSync(q, d);
+    }
+  }
 
   /* Allow everything: nothing on this site is secret, and the things that ARE
      secret are refused by the server rather than asked about politely. The one
