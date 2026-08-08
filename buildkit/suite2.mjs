@@ -108,21 +108,6 @@ const NAMES = [
      and every synced sheet on the server — which the sync layer then restored
      on the next sign-in. The privacy page promises deletion in three rows. */
   '_tdelete',
-  /* No password reset, no resend, and no emailRedirectTo — so every
-     confirmation link went wherever Supabase's Site URL pointed. And the whole
-     auth module is a template literal in publish.mjs, which means one eaten
-     backslash throws at PARSE time and silently deletes every auth function on
-     the page. Assertion one is that the module parses. */
-  '_tauth2',
-  /* every number on /ops already existed and none of it was ever shown, so
-     "how is the business doing" and "is anything broken" were both answered by
-     reading source. It fails closed on a missing token and names nobody — and
-     until now a route that threw produced a blank 500 and no signal at all. */
-  '_tops',
-  /* Stripe retries a declined card for two weeks and then cancels. Through all
-     of it the customer keeps the product and nobody tells them, so the
-     cancellation arrives as the product breaking. */
-  '_tdunning',
 ];
 /* ── WHAT IS DELIBERATELY *NOT* HERE ────────────────────────────────────────
    · _tlive — signs up a real person against the real Supabase project. It

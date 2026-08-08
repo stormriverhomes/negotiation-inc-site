@@ -308,66 +308,6 @@ export function mountBilling(app){
     }
   });
 
-  /* ══ IS THIS CARD ACTUALLY WORKING ═══════════════════════════════════════
-     Stripe retries a declined card for about two weeks and then cancels the
-     subscription. During those two weeks the customer keeps the product —
-     which is right, `past_due` is in LIVE_STATUS on purpose — and NOBODY TELLS
-     THEM. Then one morning it cancels, they drop to free, and from where they
-     are sitting the product broke. That is a cancellation you caused and did
-     not have to.
-
-     No new column, no migration: Stripe already knows, and this asks it. The
-     answer is the subscription's own status plus the date the retries run out,
-     so the account panel can say the true thing with a real deadline on it.
-
-     It reports on the CALLER'S OWN subscription and nobody else's — whoIs()
-     establishes that first, and the customer id is looked up from the uid
-     rather than taken from the request. */
-  app.get('/api/billing/state', async (req, res) => {
-    if (!PAY_ON) return res.json({ ok:true, state:'unconfigured' });
-    const who = await whoIs(req);
-    if (!who) return res.status(401).json({ ok:false, error:'Sign in first.' });
-    const cust = await customerOf(who.uid);
-    if (!cust) return res.json({ ok:true, state:'none' });
-    try {
-      const subs = await stripe('GET',
-        `/v1/subscriptions?limit=10&status=all&customer=${encodeURIComponent(cust)}`);
-      const all = subs.data || [];
-      /* ── WHAT COUNTS AS LIVE, AND WHAT COUNTS AS WORTH SAYING ────────────
-         Not the same set, on purpose, and it is the same distinction as
-         tierOf/entitled elsewhere: LIVE_STATUS decides what somebody is still
-         ENTITLED to, and `unpaid` is correctly not in it — Stripe has stopped
-         retrying and the money is not coming.
-
-         But reporting only on LIVE_STATUS meant an `unpaid` subscription came
-         back as "none", and "none" renders nothing at all — so the one person
-         whose subscription has actually failed was the one person told
-         nothing. This set is wider than that one BECAUSE it is only used to
-         choose a sentence. */
-      const SPEAKABLE = new Set(['active','trialing','past_due','unpaid','incomplete']);
-      const live = all.filter(s => SPEAKABLE.has(s.status));
-      /* the worst live status is the one worth saying: a customer with two
-         subscriptions, one healthy and one failing, still has a problem */
-      const rank = { past_due:3, unpaid:3, incomplete:2, trialing:1, active:0 };
-      let worst = 'active', at = null, cancels = false;
-      for (const s of live){
-        if ((rank[s.status] || 0) > (rank[worst] || 0)) worst = s.status;
-        if (s.cancel_at_period_end) cancels = true;
-        if (s.current_period_end) at = Math.max(at || 0, s.current_period_end);
-      }
-      if (!live.length){
-        const gone = all.find(s => s.status === 'canceled');
-        return res.json({ ok:true, state: gone ? 'canceled' : 'none' });
-      }
-      res.json({ ok:true, state: worst, cancelsAtPeriodEnd: cancels,
-                 periodEnd: at ? new Date(at * 1000).toISOString().slice(0, 10) : null });
-    } catch(e){
-      /* Stripe being unreachable is not "your card failed" — saying so would
-         alarm somebody whose card is fine, which is worse than saying nothing */
-      res.json({ ok:true, state:'unknown' });
-    }
-  });
-
   /* ── the webhook ──────────────────────────────────────────────────────────
      express.raw, because a signature is over the BYTES. Parse the body first
      and re-serialise it and the signature will not match — which is the

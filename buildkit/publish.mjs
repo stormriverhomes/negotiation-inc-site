@@ -1634,27 +1634,11 @@ async function token(){
 }
 
 /* ── signing up and in ─────────────────────────────────────────────────── */
-/* ── WHERE A CONFIRMATION LINK GOES ────────────────────────────────────────
-   Supabase sends it to the project's Site URL, which defaults to
-   localhost:3000 and is easy to leave that way — the link works perfectly for
-   whoever set the project up and for nobody else. Passing emailRedirectTo
-   explicitly means the link points at the page it came from, on whatever
-   origin that is, so a preview deploy and production each send people back to
-   themselves. (The address must still be on Supabase's Redirect URLs
-   allowlist; anything else is refused, which is the correct behaviour and the
-   reason this is not a security hole.) */
-const authBack = (page) => {
-  try { return new URL(page, location.origin).toString(); }
-  catch(e){ return undefined; }
-};
-
 async function authSignUp(email, password, name){
   if (!SB_ON) return { ok:false, offline:true };
   try {
     const r = await fetch(\`\${SB.url}/auth/v1/signup\`, { method:'POST', headers: sbHead(),
-      body: JSON.stringify({ email, password, data:{ name },
-                             options:{ emailRedirectTo: authBack('office.html?confirmed=1') },
-                             gotrue_meta_security:{} }) });
+      body: JSON.stringify({ email, password, data:{ name } }) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) return { ok:false, error: authSay(j) };
     /* With e-mail confirmation switched on Supabase returns a user and no
@@ -1950,79 +1934,6 @@ window.__authBoot = authBoot;
 window.__syncSoon = syncSoon;
 window.__authSignIn = authSignIn;
 window.__authSignUp = authSignUp;
-/* ── THE THREE DOORS THAT WERE NOT THERE ───────────────────────────────────
-   A product with accounts and no password reset is a product that loses a
-   customer permanently the first time somebody forgets one — and they will,
-   because this is a tool you open on a Tuesday every few weeks, which is
-   exactly the interval at which people forget passwords.
-
-   Supabase does all three; none of them was wired.
-
-   Note what these DO NOT do: none of them says whether the address exists.
-   "No account with that email" is a free membership check for anybody with a
-   list, so all three answer the same way whatever happened — which is also
-   the honest answer, because from here we genuinely do not know whether the
-   mail was delivered. */
-async function authRecover(email){
-  if (!SB_ON) return { ok:false, offline:true };
-  try {
-    const r = await fetch(\`\${SB.url}/auth/v1/recover\`, { method:'POST', headers: sbHead(),
-      body: JSON.stringify({ email, options:{ emailRedirectTo: authBack('office.html?reset=1') } }) });
-    /* a 429 is Supabase's rate limit and it is a real answer, not a failure of
-       ours: saying "try again in a minute" is better than a shrug */
-    if (r.status === 429) return { ok:false, error:'Too many attempts just now — wait a minute and try again.' };
-    return { ok: r.ok || r.status === 200 };
-  } catch(e){ return { ok:false, error:'Could not reach the server.' }; }
-}
-async function authResend(email){
-  if (!SB_ON) return { ok:false, offline:true };
-  try {
-    const r = await fetch(\`\${SB.url}/auth/v1/resend\`, { method:'POST', headers: sbHead(),
-      body: JSON.stringify({ type:'signup', email,
-                             options:{ emailRedirectTo: authBack('office.html?confirmed=1') } }) });
-    if (r.status === 429) return { ok:false, error:'Too many attempts just now — wait a minute and try again.' };
-    return { ok: r.ok };
-  } catch(e){ return { ok:false, error:'Could not reach the server.' }; }
-}
-/* Setting the new one. Supabase puts a recovery token in the URL FRAGMENT, so
-   it never reaches a server log — ours or anybody's — and the page has to read
-   it out of location.hash and then remove it, because a token left in the
-   address bar is a token in the next screenshot. */
-function authResetToken(){
-  try {
-    const h = new URLSearchParams(String(location.hash || '').replace(/^#/, ''));
-    const t = h.get('access_token'), type = h.get('type');
-    if (t && (type === 'recovery' || type === 'signup')) return { token:t, type };
-    const e = h.get('error_description');
-    /* a literal + is a space in a query fragment. split/join rather than a
-       regex: this block lives inside a template literal, so a backslash gets
-       eaten on the way through and /\+/ shipped as /+/ — "nothing to repeat",
-       which threw at parse time and took the whole auth module with it. */
-    if (e) return { error: e.split('+').join(' ') };
-  } catch(err){}
-  return null;
-}
-async function authSetPassword(token, password){
-  if (!SB_ON) return { ok:false, offline:true };
-  try {
-    const r = await fetch(\`\${SB.url}/auth/v1/user\`, { method:'PUT',
-      headers: { ...sbHead(), authorization:'Bearer ' + token },
-      body: JSON.stringify({ password }) });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) return { ok:false, error: authSay(j) };
-    /* the recovery token IS a session — signing them straight in is the
-       difference between "your password is changed, now go and use it" and
-       being where they were trying to get to */
-    saveSess({ access_token: token, refresh_token: j.refresh_token || null,
-               expires_at: Date.now() + 3600 * 1000, user: j });
-    return { ok:true, user:j };
-  } catch(e){ return { ok:false, error:'Could not reach the server.' }; }
-}
-window.__authRecover = authRecover;
-window.__authResend = authResend;
-window.__authResetToken = authResetToken;
-window.__authSetPassword = authSetPassword;
-
 window.__authSignOut = authSignOut;
 window.__authOn = () => SB_ON;
 window.__mergeSheets = mergeSheets;
@@ -2313,41 +2224,7 @@ for (const f of ['index.html','desk.html','office.html','plans.html','exits.html
      and were shipping the card's stylesheet and its script to fill nothing.
      The four that do are the four the funnel lands on. */
   const wantsWaitlist = !LIVE && /data-waitlist=/.test(doc);
-  /* ── A REPLACEMENT STRING IS NOT A STRING ────────────────────────────────
-     String.replace treats $&, $`, $', $$ and $1 in the REPLACEMENT as
-     patterns, not as characters. These three blocks are JavaScript, and
-     JavaScript is full of dollars and backticks — the moment the auth module
-     gained a template literal whose text survives to the page, one `$` + a
-     backtick meant "insert everything before the match here", which silently
-     ate the opening of the block before it and shipped a `catch` with no
-     `try`. The whole account layer threw at parse time on the ONLY builds
-     that have an account layer, so the unconfigured build looked fine.
-
-     A replacer FUNCTION has no such patterns. Nothing else about this line
-     changes, and now nothing that gets injected can corrupt what it lands in. */
-  /* ── AND IT GOES AT THE *LAST* </body>, NOT THE FIRST ────────────────────
-     String.replace with a string replaces the first match, and the first match
-     is wherever the characters happen to appear — including inside a comment
-     in the page's own JavaScript. A comment in office.html that used the words
-     "appended before </body>" put the entire account layer INTO THE MIDDLE OF
-     A COMMENT, truncating the main script at that point and leaving the
-     closing brace of a `try` block stranded. The page threw at parse time,
-     every auth function became undefined, and it happened only on builds that
-     have an account layer — so the unconfigured build looked perfect.
-
-     There is exactly one closing </body> in a document. Assert that, and split
-     on the LAST one, and a page can talk about its own markup safely. */
-  {
-    const at = doc.lastIndexOf('</body>');
-    if (at < 0) throw new Error(f + ': no </body> to append the account script to');
-    /* prose may mention it; markup may not have two of them */
-    const closers = (doc.match(/<\/body\s*>/gi) || []).length;
-    if (closers > 1 && /<\/body\s*>[\s\S]*<\/body\s*>/i.test(doc.replace(/\/\*[\s\S]*?\*\//g, '')))
-      throw new Error(f + ': two </body> tags in the markup — which one closes the document?');
-    doc = doc.slice(0, at)
-        + KNOWSYOU + (needsAuth ? NIAUTH : '') + (wantsWaitlist ? WAITLIST : '')
-        + doc.slice(at);
-  }
+  doc = doc.replace('</body>', KNOWSYOU + (needsAuth ? NIAUTH : '') + (wantsWaitlist ? WAITLIST : '') + '</body>');
   fs.writeFileSync(q, doc);
 }
 
@@ -2376,13 +2253,7 @@ assertAccountAndBilling();
     for (const f of ['index.html','desk.html','office.html','plans.html','exits.html','arcade.html',
                      'demo.html','exit-drill.html','terms.html','privacy.html','refunds.html','land.html']){
       const d = fs.readFileSync(path.join(out, f), 'utf8');
-      /* the needles have to be unique to the WAITLIST, and 'ni-wait-v1' is
-         not: it is a localStorage key, and office.html lists it among the keys
-         that "delete everything" clears. The pre-launch half of this guard had
-         already been bitten by exactly that and fixed; this half had not, so
-         the only two harnesses that build with NI_STAGE=live went red and the
-         live build could not be produced at all. */
-      if (/data-waitlist=|opens soon|Tell me when it opens|querySelectorAll\('\[data-waitlist\]'\)/i.test(d))
+      if (/data-waitlist|opens soon|Tell me when it opens|ni-wait-v1/i.test(d))
         throw new Error(`${f}: a live build still carries the waitlist — it catches people who came to buy`);
     }
     if (/window\.NI_LIVE=false/.test(built))
