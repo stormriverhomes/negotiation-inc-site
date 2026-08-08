@@ -2545,6 +2545,45 @@ await b.close();
     'User-agent: *\nAllow: /\n\nSitemap: ' + SITE_URL + '/sitemap.xml\n');
 }
 
+/* ══ NO PAGE NAMES THE MACHINE IT IS RUNNING ON ════════════════════════════
+   The lender packet — a document a customer PRINTS AND HANDS TO A BANK —
+   shipped with "negotiation-inc-site.onrender.com/plans" written across the
+   upsell block. Wrong address, and an advertisement for the fact that this is
+   a side project on a platform-as-a-service.
+
+   It survived because nothing was looking. A hostname is exactly the sort of
+   thing that gets typed once, early, while the custom domain is still being
+   argued with, and then never re-read: it is not a bug, it does not throw, it
+   simply says the wrong name in front of the person you most want to impress.
+
+   So the build refuses. A dev host in a built page is always a mistake — the
+   only reason to name one is that the code has not decided what it is yet,
+   and a page that has not decided is not a page that ships. Comments are
+   exempt on purpose: the prose that explains WHY emailRedirectTo has to be
+   set must be free to say the word "localhost". */
+{
+  const HOSTS = [
+    [/onrender\.com/i,               'the hosting provider'],
+    [/https?:\/\/localhost/i,        'a localhost URL'],
+    [/https?:\/\/127\.0\.0\.1/,      'a loopback URL'],
+    [/negotiation-inc-site\./i,      'the pre-domain service name'],
+  ];
+  /* strip both comment forms first, so the explanation of a rule is never
+     mistaken for a breach of it */
+  const decomment = s => s.replace(/<!--[\s\S]*?-->/g, ' ').replace(/\/\*[\s\S]*?\*\//g, ' ');
+  /* the demo pages live one directory down and are just as printable */
+  const pages = fs.readdirSync(out).filter(f => f.endsWith('.html'))
+    .concat(fs.existsSync(path.join(out, 'd'))
+      ? fs.readdirSync(path.join(out, 'd')).filter(f => f.endsWith('.html')).map(f => 'd/' + f) : []);
+  for (const f of pages){
+    const body = decomment(fs.readFileSync(path.join(out, f), 'utf8'));
+    for (const [re, what] of HOSTS){
+      const m = body.match(re);
+      if (m) throw new Error(`${f} names ${what} (${m[0]}) — a built page must only ever say negotiationinc.com`);
+    }
+  }
+}
+
 /* ══ THE BUILD STAMP ═══════════════════════════════════════════════════════
    Three batches in a row were built, tested, packaged and never reached the
    internet, and nobody could tell — the site looked like a site, the health
@@ -2562,7 +2601,19 @@ await b.close();
    a git sha would tell you which commit exists rather than which bytes are
    being served. */
 {
-  const files = fs.readdirSync(out).filter(f => /\.(html|js|css|json|xml|txt)$/i.test(f)).sort();
+  /* ── THE STAMP MAY NOT HASH ITSELF ───────────────────────────────────────
+     build.json from the PREVIOUS run was sitting in the output directory and
+     going into the digest, so the id was a function of the last build as well
+     as this one. Three builds of untouched sources produced three different
+     ids, which quietly cost the stamp the only property that makes it worth
+     having: same bytes, same id. It also meant build.json always showed as
+     modified, so the deploy script's "nothing to push, the repo already
+     matches" branch could never once have been reached.
+
+     An instrument that reads differently every time you look at it is not
+     measuring the thing you pointed it at. */
+  const files = fs.readdirSync(out)
+    .filter(f => /\.(html|js|css|json|xml|txt)$/i.test(f) && f !== 'build.json').sort();
   const h = crypto.createHash('sha256');
   for (const f of files){ h.update(f); h.update(fs.readFileSync(path.join(out, f))); }
   const id = h.digest('hex').slice(0, 12);

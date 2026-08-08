@@ -59,15 +59,25 @@ await pg.waitForTimeout(1100);
 {
   const m = await pg.evaluate(() => {
     const out = {}, $ = id => document.getElementById(id);
+    /* ── PAINT, NOT THE ATTRIBUTE ─────────────────────────────────────────
+       This harness used to read $('g-have').hidden and call that an answer.
+       It is not one: the way back out of the recover screen sat INSIDE
+       #g-pwwrap, which recover hides, so setMode set hidden = false on a
+       link that painted at zero height and the assertion passed while the
+       screen was a dead end. An element's own flag says nothing about
+       whether a person can see it — only the box does. */
+    const paints = id => { const e = $(id); if (!e) return false;
+      return e.getBoundingClientRect().height > 0 && !!e.offsetParent; };
     window.__setGateMode('in');
-    out.in = { forgot: !$('g-forgot').hidden, go: $('g-go').innerText.trim() };
+    out.in = { forgot: paints('g-forgot'), go: $('g-go').innerText.trim() };
     window.__setGateMode('recover');
-    out.recover = { go: $('g-go').innerText.trim(), pwHidden: $('g-pwwrap').hidden };
+    out.recover = { go: $('g-go').innerText.trim(), pwHidden: $('g-pwwrap').hidden,
+                    back: paints('g-have'), backText: $('g-have').textContent.trim() };
     window.__setGateMode('reset');
     out.reset = { go: $('g-go').innerText.trim(), emailHidden: $('g-email').style.display === 'none',
-                  haveHidden: $('g-have').hidden };
+                  back: paints('g-have'), signup: paints('g-forgot') };
     window.__setGateMode('up');
-    out.up = { go: $('g-go').innerText.trim(), forgot: !$('g-forgot').hidden };
+    out.up = { go: $('g-go').innerText.trim(), forgot: paints('g-forgot'), have: paints('g-have') };
     return out;
   });
   ok('signing in offers a way out of a forgotten password', m.in.forgot, m.in);
@@ -133,8 +143,18 @@ await pg.waitForTimeout(1100);
   }
   ok('recover asks for an address and not a password', m.recover.pwHidden, m.recover);
   ok('reset asks for a password and not an address', m.reset.emailHidden, m.reset);
-  ok('and reset offers no way to wander off into sign-up', m.reset.haveHidden, m.reset);
   ok('making an account is not offered a password reset', !m.up.forgot, m.up);
+  /* ── NEITHER ARRIVED-AT SCREEN IS A DEAD END ────────────────────────────
+     recover and reset both hide the tab strip on purpose, so the strip
+     cannot be the way back. If the link is not DRAWN, the only exit from
+     either screen is the browser's own back button — and a reset link from
+     an email is exactly the thing people click after it has expired. */
+  ok('the recover screen draws a way back to signing in', m.recover.back, m.recover);
+  ok('and it is worded as a return, not as a second signup',
+     /back to signing in/i.test(m.recover.backText), m.recover.backText);
+  ok('the reset screen draws one too, for an expired link', m.reset.back, m.reset);
+  ok('and offers no password reset from inside the password reset',
+     m.reset.signup === false, m.reset);
 }
 
 /* ── 3 · every outbound link points at THIS origin, not at localhost:3000 ──*/

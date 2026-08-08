@@ -319,9 +319,10 @@ input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blu
 /* signing in leaves only Email above it, so the divider has nothing to
    divide — it becomes a line for its own sake */
 #g-pwwrap.tight{margin-top:14px;padding-top:0;border-top:0}
-#g-pwwrap .haveacc{margin-top:10px;font-size:13px;text-align:right}
-#g-pwwrap .haveacc a{color:var(--blue);text-decoration:none;font-weight:600}
-#g-pwwrap .haveacc a:hover{text-decoration:underline}
+.haveacc{margin-top:10px;font-size:13px;text-align:right}
+.haveacc[hidden]{display:none}
+.haveacc a{color:var(--blue);text-decoration:none;font-weight:600}
+.haveacc a:hover{text-decoration:underline}
 .gate .go{width:100%;justify-content:center;margin-top:18px}
 .gate .fine{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--wash);
  font-size:12.5px;color:var(--soft);line-height:1.5}
@@ -592,14 +593,26 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   <div id="g-pwwrap" hidden>
    <label for="g-pw">A password <span style="color:var(--faint)">&mdash; six characters or more</span></label>
    <input id="g-pw" type="password" placeholder="something you will remember" autocomplete="new-password" minlength="6">
-   <div class="haveacc"><a href="#" id="g-have">I already have an account &rarr;</a>
-    <!-- A product with accounts and no password reset loses a customer
-         permanently the first time somebody forgets one — and they will:
-         this is a tool you open on a Tuesday every few weeks, which is
-         exactly the interval at which people forget passwords. -->
-    <a href="#" id="g-forgot" hidden>I forgot my password &rarr;</a>
-    <a href="#" id="g-resend" hidden>Send the confirmation again &rarr;</a></div>
   </div>
+  <!-- ── THE WAY OUT LIVES OUTSIDE THE THING IT ESCAPES ────────────────────
+       This row used to be INSIDE #g-pwwrap. The recover screen hides that
+       wrapper — correctly, because recover asks for an address and not a
+       password — and it took the only way back with it. setMode dutifully
+       set have.hidden = false and the link painted at zero height, so the
+       reset screen was a dead end: nothing on it returned you to signing in
+       except the browser's own back button, and a form that can only be
+       escaped by leaving reads as a form that trapped you.
+
+       Same shape as the tab strip that was `hidden` and still drawn: an
+       element's own hidden flag says nothing about whether a person can see
+       it. The harness now measures paint, not the attribute. -->
+  <div class="haveacc" id="g-haverow" hidden><a href="#" id="g-have">I already have an account &rarr;</a>
+   <!-- A product with accounts and no password reset loses a customer
+        permanently the first time somebody forgets one — and they will:
+        this is a tool you open on a Tuesday every few weeks, which is
+        exactly the interval at which people forget passwords. -->
+   <a href="#" id="g-forgot" hidden>I forgot my password &rarr;</a>
+   <a href="#" id="g-resend" hidden>Send the confirmation again &rarr;</a></div>
   <div class="err" id="g-err">A name and an email, and the desk is yours.</div>
   <button class="btn p go" type="submit" id="g-go">Create my workspace &rarr;</button>
   <div class="fine" style="margin-top:12px" id="g-fine"><b>Where this lives:</b> on this device, in this
@@ -759,6 +772,8 @@ let RESET_TOKEN = null;  // only ever set by arriving from a link in an email
 window.__authDoorInit = function(on){
   if (!on) return;
   const w = document.getElementById('g-pwwrap'); if (w) w.hidden = false;
+  /* the row of ways-out only exists where there is something to go back to */
+  const hr = document.getElementById('g-haverow'); if (hr) hr.hidden = false;
   const tabs = document.getElementById('g-tabs');
   if (tabs) tabs.hidden = false;      // two doors exist, so the strip appears
   const fine = document.getElementById('g-fine');
@@ -812,7 +827,10 @@ window.__authDoorInit = function(on){
     /* the tab strip now says which door you are at, so this link is redundant
        on the two modes that HAVE tabs. It survives as the way back from
        recover and reset, where the strip is deliberately hidden. */
-    if (have){ have.hidden = (m === 'up' || m === 'in' || m === 'reset');
+    /* reset gets one too. You arrive there from a link in an email, and the
+       link expires \u2014 so the screen a person is most likely to reach with a
+       dead token was the one screen with no way off it. */
+    if (have){ have.hidden = (m === 'up' || m === 'in');
       have.textContent = 'Back to signing in \u2192'; }
     if (fg) fg.hidden = (m !== 'in');
     if (rs) rs.hidden = true;

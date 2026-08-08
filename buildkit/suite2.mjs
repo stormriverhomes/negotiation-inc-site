@@ -141,6 +141,12 @@ const NAMES = [
      no way to make one — and the door fell back to a local-only workspace
      that looked completely normal. The pages ask the server now. */
   '_tconfig',
+  /* The stamp is the instrument that answers "did my push land", and it was
+     hashing the PREVIOUS build.json along with the output — so three builds
+     of untouched sources gave three different ids, and the deploy script's
+     "nothing to push" branch could never fire. A gauge whose reading changes
+     when you look again is not measuring what you pointed it at. */
+  '_tstamp',
 ];
 /* ── WHAT IS DELIBERATELY *NOT* HERE ────────────────────────────────────────
    · _tlive — signs up a real person against the real Supabase project. It
