@@ -106,6 +106,60 @@ h1 em{font-style:italic;color:var(--blue)}
 .t-e{color:var(--green);border-color:#bfe0cd;background:var(--green-soft)}
 .t-s{color:var(--est);border-color:var(--est-line);background:var(--est-soft)}
 .t-n{color:var(--soft);border-color:var(--line-2);background:var(--wash)}
+/* ══ THE READOUT, LIVE ══════════════════════════════════════════════════════
+   Eight buttons and one panel. The panel has three shapes, because the
+   software has three ways of not answering and they are not the same thing:
+     · a figure it WANTS       — slate, the colour this product paints a
+                                 NEEDED value. Not a warning; a gap.
+     · not this house          — red, which in here only ever means a refusal
+     · not this desk           — blue, the product's own voice: go next door
+   Collapsing those into one "error" state would be the exact dishonesty the
+   page is arguing against. */
+.rlive{color:var(--green)!important;font-weight:700}
+.rlive::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+ background:var(--green);margin-right:6px;vertical-align:1px}
+.chipwrap{padding:12px 14px 13px;background:var(--wash);border-bottom:1px solid var(--line);
+ border-top:1px solid var(--line)}
+.chiph{font-size:11.5px;line-height:1.45;color:var(--soft);margin-bottom:9px}
+.chiph b{color:var(--ink);font-weight:650}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{font-family:var(--sans);font-size:13px;font-weight:650;letter-spacing:0;
+ padding:8px 13px;border-radius:var(--r-pill);border:1px solid var(--line-2);background:#fff;
+ color:var(--mid);cursor:pointer;min-height:36px;transition:background .12s,color .12s,border-color .12s}
+.chips button:hover{border-color:var(--soft);color:var(--ink)}
+.chips button[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.chips button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.vpanel{padding:18px 16px 20px;min-height:238px}
+.vk{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.15em;
+ text-transform:uppercase;color:var(--soft)}
+.vfig{font-family:var(--serif);font-weight:700;font-size:46px;line-height:1;letter-spacing:-.03em;
+ color:var(--green);font-variant-numeric:tabular-nums;margin-top:5px}
+.vlines{margin-top:14px;border-top:1px solid var(--line)}
+.vline{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:8px 0;
+ border-bottom:1px solid #f1f4f8;font-size:13.5px;color:var(--mid)}
+.vline b{color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vsay{font-size:14px;line-height:1.5;color:var(--ink);margin-top:12px}
+.vsay b{font-weight:650}
+/* the three ways of not answering */
+.vno .vk{color:var(--red,#b3372c)}
+.vno .vhead{font-family:var(--serif);font-weight:700;font-size:26px;line-height:1.16;
+ letter-spacing:-.02em;margin-top:8px}
+.vwhy{border-radius:var(--r-in);padding:13px 15px;margin-top:14px;font-size:13.5px;line-height:1.5;
+ color:var(--mid)}
+.vno.k-need .vk{color:var(--est)}
+.vno.k-need .vwhy{background:var(--est-soft);border:1px solid var(--est-line)}
+.vno.k-no .vk{color:#b3372c}
+.vno.k-no .vwhy{background:#faeeec;border:1px solid #f0d2ce}
+.vno.k-else .vk{color:var(--blue)}
+.vno.k-else .vwhy{background:var(--blue-soft);border:1px solid var(--blue-line)}
+.vfoot{font-size:12.5px;color:var(--soft);margin-top:12px}
+.vfoot a{font-weight:650;text-decoration:none}
+@media(max-width:900px){
+ .chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+ .chips button{flex:0 0 auto;white-space:nowrap;min-height:40px}
+ .vpanel{min-height:212px}
+ .vfig{font-size:40px}
+}
 .exits{padding:4px 0}
 .ex{display:grid;grid-template-columns:26px 1fr auto;gap:12px;align-items:center;
  padding:9px 14px;border-bottom:1px solid var(--line);font-size:14.5px}
@@ -511,43 +565,38 @@ img,canvas,svg.art{border-radius:var(--r-card)}
   </div>
  </div>
 
- <!-- not a mock: this is the desk's own layout and the desk's own arithmetic,
-      run on one house, so the first thing a visitor sees is the product -->
- <div class="readout">
-  <div class="rh"><span>Form D-1 · 1128 Marrow Lane</span><span>Ranked by fit</span></div>
+ <!-- ══ THE READOUT IS LIVE ═══════════════════════════════════════════════
+      It was real product markup and completely inert — on a page whose whole
+      claim is "press this and it shows you the arithmetic". Claude Design's
+      answer was better than the one I had proposed: not a field to type into,
+      but the EIGHT EXITS AS BUTTONS, with the refusals as the payload. Press
+      the wholetail and the software tells you, in its own words, why it will
+      not price this house that way. Nobody else's calculator does that, and it
+      was nowhere on the page that sells it.
+
+      EVERY FIGURE AND EVERY REASON BELOW CAME OUT OF desk.html, priced on this
+      exact sheet — ask 184,500, ARV 291,000, repairs 41,300, no rent. The
+      design arrived with a set computed from the 70% rule, and the engine's
+      own verdict on the flip says why that was the one number it could not
+      use: "The 70% rule would say $162,400 — the gap is your margin for being
+      wrong." Advertising it would have put the competitor's method on the
+      front door. v3.mjs holds the two together. ═══════════════════════════ -->
+ <div class="readout" id="ro">
+  <div class="rh"><span>Form D-1 · 1128 Marrow Lane</span><span class="rlive">Live</span></div>
   <div class="givens">
    <div class="given"><div class="k">Asking price</div><div class="v">$184,500<span class="tag t-e">Entered</span></div></div>
    <!-- ARV is the first acronym on the page and it appeared with no gloss, on
         the one panel a beginner is actually looking at while they read the
-        paragraph beside it. Three words fix it. The desk itself keeps the
-        short label, because by then you have been told. -->
+        paragraph beside it. Three words fix it. -->
    <div class="given"><div class="k">ARV — sells for, fixed up</div><div class="v">$291,000<span class="tag t-e">Entered</span></div></div>
    <div class="given"><div class="k">Repairs</div><div class="v">$41,300<span class="tag t-s">Estimate</span></div></div>
    <div class="given"><div class="k">Monthly rent</div><div class="v">—<span class="tag t-n">Needed</span></div></div>
   </div>
-  <div class="exits">
-   <!-- These five rows mirror what desk.html actually returns for this exact
-        sheet (ask 249,500 · ARV 291,000 · repairs 41,300, estate). If an exit's
-        arithmetic or a refusal gate moves, this hero has to move with it — a
-        landing that advertises a ranking the product no longer produces is the
-        precise dishonesty this page is selling against. Checked by v3.mjs. -->
-   <div class="ex best"><span class="r">01</span><span class="nm">The fix and flip</span><span class="f yes">$23,280 <em>profit</em></span></div>
-   <div class="ex"><span class="r">02</span><span class="nm">The BRRRR</span><span class="f yes">$0 <em>of yours left in it</em></span></div>
-   <div class="ex"><span class="r">03</span><span class="nm">The wholesale</span><span class="f yes">$14,000 <em>fee</em></span></div>
-   <div class="ex"><span class="r">&middot;</span><span class="nm">The wholetail <b class="pill no">Refused</b></span><span class="f na">not priced <em>repairs are 14% of ARV</em></span></div>
-   <div class="ex na"><span class="r">&middot;</span><span class="nm">The buy and hold</span><span class="f na">not priced <em>needs monthly rent</em></span></div>
+  <div class="chipwrap">
+   <div class="chiph">The eight exits &mdash; tap one. <b>Three price. Two want a figure. Two say not this house.</b></div>
+   <div class="chips" id="chips" role="tablist" aria-label="The eight exits"></div>
   </div>
-  <!-- The reason anybody opened the page, said once, in the colour the desk
-       uses for money. The red was doing half the job: a reader could see which
-       exits fail before they could see that two of them pay. -->
-  <div class="payline">
-   <div class="pl">This house pays you</div>
-   <div class="pv">$23,280</div>
-   <div class="ps">as <b>the fix and flip</b> — and <b>$14,000</b> as a wholesale you never own.
-    The same house, two right answers, a nine-thousand-dollar difference between them.</div>
-  </div>
-  <div class="rfoot"><b>Confidence: medium.</b> Two figures entered, one estimated —
-   every band widens by 12% until the repair bid comes back.</div>
+  <div class="vpanel" id="vp" role="region" aria-live="polite"></div>
  </div>
 </div>
 
@@ -607,7 +656,14 @@ img,canvas,svg.art{border-radius:var(--r-card)}
         is being criticised, so the page's second-best line was spent on them
         for nothing. The best line was already sitting in the paragraph
         underneath doing nothing; it needs no prior knowledge at all. -->
-   <h2>One number is a guess wearing a suit.</h2>
+   <!-- This said "One number is a guess wearing a suit." It is the kind of line
+        that sounds written rather than meant, and the same construction was
+        already on this page eight hundred words later — "a flip wearing a
+        disguise" — which is what makes it read as a tic rather than a voice.
+        The plain sentence is also the truer one: the claim is not that other
+        people's numbers are dressed up, it is that there is no single number
+        to dress up in the first place. -->
+   <h2>There is no single right price.</h2>
    <p>The exit you pick changes the price by tens of thousands on the same house — so a single
       "max offer" is hiding the only decision that actually matters. The sheet prices every exit,
       ranks them against the seller's situation, and never rounds a hole in your data into a
@@ -747,7 +803,7 @@ img,canvas,svg.art{border-radius:var(--r-card)}
   </div>
   <!-- ══ CUT: THE CALCULATOR-vs-SPREADSHEET-vs-THIS TRIO ══════════════════
        Three cards, 140 words, arguing against two tools by name. It made the
-       same point as "One number is a guess wearing a suit" further up, in a
+       same point as "There is no single right price" further up, in a
        different costume — and it made it to a reader who has, by assumption,
        used a real-estate calculator and built their own model. The person this
        page is now written for has done neither, so the section spent its
@@ -933,4 +989,94 @@ img,canvas,svg.art{border-radius:var(--r-card)}
  if (motionOK && !small) start();
 })();
 </script>
+<script>
+/* ══ THE EIGHT EXITS, PRESSABLE ════════════════════════════════════════════
+   Every figure, every ledger line and every reason below was read out of
+   desk.html priced on this exact sheet — ask 184,500, ARV 291,000, repairs
+   41,300, no rent — and not written by hand. v3.mjs re-prices that sheet in
+   the real engine and holds this table to it, so an exit whose arithmetic or
+   whose refusal gate moves takes the front door with it. A landing page that
+   advertises a ranking the product no longer produces is the precise
+   dishonesty this page is selling against.
+
+   The design that arrived proposed figures from the 70% rule. The engine's own
+   verdict on the flip is why they could not be used: "The 70% rule would say
+   $162,400 — the gap is your margin for being wrong." That number is what this
+   product exists to beat, and it would have been the headline. */
+(function(){
+ var EX = [
+  { id:'flip', n:'Fix and flip', k:'ok', lab:'The most you can pay', fig:'$191,140',
+    lines:[['What it is worth once it is done','$291,000'],
+           ['Less what it needs','−$41,300'],
+           ['Less selling it, holding it, and the profit you are doing this for','−$58,560']],
+    /* The build guard demands this panel keep 23,280, 14,000 and the phrase
+       naming the gap between them, and it was right to: the old payline made
+       this product's whole argument in one sentence, and moving the figures
+       behind two separate button presses quietly retired it. It is back, and
+       it now also teaches the control — a person who reads this knows there
+       is something to press and what pressing it will do. */
+    say:'They are asking <b>$184,500</b>, and this exit can go to <b>$191,140</b> — so there is room, and at that price you clear <b>$23,280</b> if the repair bid holds. Press <b>Wholesale</b> and the same house pays <b>$14,000</b> on a deal you never own: two right answers, a nine-thousand-dollar difference between them.' },
+  { id:'brrrr', n:'BRRRR', k:'ok', lab:'The most you can pay', fig:'$169,950',
+    lines:[['What the bank lends against $291,000','$218,250'],
+           ['Less what it needs','−$41,300'],
+           ['Less carrying it while you do the work','−$7,000']],
+    say:'Buy at or under this and the refinance hands every dollar back out — <b>$0 of yours left in the deal</b>. The appraiser has to agree, and the rent still has to cover the new payment.' },
+  { id:'wholesale', n:'Wholesale', k:'ok', lab:'The most you can pay', fig:'$154,400',
+    lines:[['What a cash buyer can pay for it','$162,400'],
+           ['Less the fee you keep','−$8,000']],
+    say:'Contract at or under <b>$154,400</b> and assign at $162,400. In the middle of the band your fee is <b>$14,000</b> — on a house you never own.' },
+  { id:'hold', n:'Buy and hold', k:'need', lab:'Wants a figure', head:'It needs a monthly rent.',
+    why:'This exit prices off what the property rents for, and there is no rent on the sheet. The desk does not invent what you did not give it. It names the figure it wants instead.',
+    foot:'Give it a rent and it prices in the same breath as the other three.' },
+  { id:'subto', n:'Subject-to', k:'need', lab:'Wants a figure', head:'It needs the payment on the existing loan.',
+    why:'Subject-to is a bet on the payment rather than on the price, so it wants the PITI and the rent. Neither is on this sheet, and without them there is nothing to take over.',
+    foot:'Two figures, and this one prices too.' },
+  { id:'wholetail', n:'Wholetail', k:'no', lab:'Will not price', head:'Not this house.',
+    why:'Repairs are 14% of ARV — past the 8% where “light work” stops being light. A wholetail is clean it and list it. This is a renovation, and pricing it as a wholetail would hand you a number you would then go and offer.',
+    foot:'Not a missing figure. There is no figure that makes this the right play here.' },
+  { id:'novation', n:'Novation', k:'no', lab:'Will not price', head:'Not this house either.',
+    why:'Same 14%. You cannot run a retail listing on a house that is not retail yet — a novation is a light-work play, and this one is a renovation with paperwork.',
+    foot:'Two of the eight say no on this sheet, and both say why.' },
+  { id:'land', n:'The land play', k:'else', lab:'Not this desk', head:'There is a house on it.',
+    why:'The eighth exit prices dirt, and dirt is not a house with the house removed — frontage, slope, utilities and what finished lots actually sold for. It has its own desk.',
+    foot:'<a href="land.html">Open the Land Desk →</a>' }
+ ];
+ var chips = document.getElementById('chips'), vp = document.getElementById('vp');
+ if (!chips || !vp) return;
+ var esc = function(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;'); };
+ function paint(id){
+  var e = null, i;
+  for (i = 0; i < EX.length; i++) if (EX[i].id === id) e = EX[i];
+  if (!e) e = EX[0];
+  var kids = chips.children;
+  for (i = 0; i < kids.length; i++)
+    kids[i].setAttribute('aria-selected', String(kids[i].getAttribute('data-x') === e.id));
+  var h;
+  if (e.k === 'ok'){
+   h = '<div class="vk">' + esc(e.lab) + ' · ' + esc(e.n) + '</div>'
+     + '<div class="vfig">' + esc(e.fig) + '</div><div class="vlines">';
+   for (i = 0; i < e.lines.length; i++)
+    h += '<div class="vline"><span>' + esc(e.lines[i][0]) + '</span><b>' + esc(e.lines[i][1]) + '</b></div>';
+   h += '</div><div class="vsay">' + e.say + '</div>';
+   vp.className = 'vpanel';
+  } else {
+   h = '<div class="vk">' + esc(e.lab) + ' · ' + esc(e.n) + '</div>'
+     + '<div class="vhead">' + esc(e.head) + '</div>'
+     + '<div class="vwhy">' + e.why + '</div>'
+     + '<div class="vfoot">' + e.foot + '</div>';
+   vp.className = 'vpanel vno k-' + e.k;
+  }
+  vp.innerHTML = h;
+ }
+ for (var j = 0; j < EX.length; j++){
+  var b = document.createElement('button');
+  b.type = 'button'; b.textContent = EX[j].n; b.setAttribute('data-x', EX[j].id);
+  b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', 'false');
+  b.onclick = (function(id){ return function(){ paint(id); }; })(EX[j].id);
+  chips.appendChild(b);
+ }
+ paint('flip');
+})();
+</script>
+
 </body></html>

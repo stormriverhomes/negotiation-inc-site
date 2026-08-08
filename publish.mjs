@@ -1142,22 +1142,47 @@ for (const must of ['Know what to pay', 'href="demo.html"', 'href="arcade.html"'
 // looks like it sells courses. The material lives on as the optional
 // walk-through a new workspace is offered. If a link to it reappears out here,
 // that decision has been undone by accident and the build should say so.
-/* The landing must describe the same product the desk ships. A refusal is a
-   small pill beside the name and a quiet "not priced" where the figure goes —
-   not a red sentence the size of the money, which is how the first attempt
-   ended up emphasising the two exits that fail over the two that pay. */
-if (!/class="pill no">Refused/.test(landing))
-  throw new Error('index.html: the refusal is not a pill the way the desk draws it');
-if (/class="f no"/.test(landing))
-  throw new Error('index.html: a refusal is shouting in the money column again');
-if (!/class="f yes"/.test(landing)) throw new Error('index.html: the money stopped being green');
+/* ── THE HERO READOUT IS PRESSABLE NOW, AND THE OLD RULES STILL APPLY ──────
+   These three guards were written for five static rows and named the markup
+   of that version, so they went red the moment the readout became eight
+   buttons and a panel. The RULES they were protecting are unchanged and are
+   the reason the first attempt at this hero had to be redrawn: a refusal must
+   never be louder than the money, or the eye lands on the exits that fail
+   before the ones that pay, and the landing looks nothing like the product it
+   is advertising. Restated against the markup that exists. */
+if (!/class="vfig"/.test(landing))
+  throw new Error('index.html: the hero readout has no figure — the money left the front door');
+{
+  const px = (re) => { const m = landing.match(re); return m ? parseFloat(m[1]) : null; };
+  const money   = px(/\.vfig\{[^}]*?font-size:([\d.]+)px/);
+  const refusal = px(/\.vno \.vhead\{[^}]*?font-size:([\d.]+)px/);
+  if (money === null || refusal === null)
+    throw new Error('index.html: cannot measure the readout — the figure or the refusal lost its rule');
+  if (!(refusal < money))
+    throw new Error(`index.html: a refusal is set at ${refusal}px against ${money}px of money. `
+      + 'A refusal is the smallest thing on the panel, not the biggest.');
+  if (!/\.vfig\{[^}]*?color:var\(--green\)/.test(landing))
+    throw new Error('index.html: the money stopped being green');
+  /* the three ways of NOT answering are three different facts, and the page
+     paints them apart on purpose: a figure it wants, a house it refuses, and a
+     desk next door. If they collapse into one state the page is telling the
+     same lie every other calculator tells. */
+  for (const k of ['k-need', 'k-no', 'k-else'])
+    if (!landing.includes(k))
+      throw new Error('index.html: the readout lost its "' + k + '" state — the kinds of refusal have been flattened into one');
+  const chips = (landing.match(/id:'[a-z]+', ?n:'/g) || []).length;
+  if (chips !== 8)
+    throw new Error(`index.html: the readout offers ${chips} exits and there are eight`);
+}
 for (const never of ['not part of the page', 'Notes back to Design', 'manila', 'seam-paper',
                      'href="exits.html"', '>Course<', 'Start the course'])
   if (landing.includes(never)) throw new Error('index.html still contains a retired device: ' + never);
 landing = landing.replace('</head>', OG('Negotiation Inc',
   'Price every exit on one property, ranked against the seller, with the arithmetic shown. No account, nothing leaves your browser.', '') + '</head>');
-// No script to minify on the landing any more — revision 3 has no behaviour
-// beyond links, which is its own kind of correct for a front door.
+/* The landing has behaviour again — the eight exits are pressable and the
+   verdict panel re-renders from a table read out of desk.html. It is left
+   unminified on purpose: it is four kilobytes, and it is the one script on
+   this site a curious person might actually View Source on. */
 fs.writeFileSync(path.join(out, 'index.html'), landing);
 
 

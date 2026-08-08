@@ -77,9 +77,32 @@ out.paper=paper;
 // refusal gate moved and the marketing did not. A page selling "every number
 // shows its working" cannot advertise a working the product disowns — so the
 // hero's exits and figures are checked against desk.html running the same sheet.
-const heroRows = await q.evaluate(()=>[...document.querySelectorAll('.ex')].map(e=>{
-  const s=[...e.querySelectorAll('span')].map(x=>x.textContent.trim());
-  return { nm:s[1], fig:s[2] }; }));
+/* ── THE HERO IS A CONTROL NOW, SO THIS DRIVES IT ─────────────────────────
+   It used to read five static rows out of the markup. The readout is eight
+   buttons and a panel that re-renders, so reading markup would test the table
+   in the source rather than what a person actually sees — and the whole point
+   of this file is that the front door and the engine cannot drift apart.
+
+   Every chip gets pressed and the rendered panel is read back. That is a
+   stronger check than the one it replaces: it exercises the same path the
+   visitor does, so a panel that throws, or a chip wired to the wrong entry,
+   fails here rather than in front of somebody. */
+const heroRows = await q.evaluate(async () => {
+  const out = [];
+  const chips = [...document.querySelectorAll('#chips button')];
+  for (const c of chips){
+    c.click();
+    await new Promise(r => setTimeout(r, 40));
+    const vp = document.getElementById('vp');
+    const kind = /k-no/.test(vp.className) ? 'no'
+               : /k-need/.test(vp.className) ? 'need'
+               : /k-else/.test(vp.className) ? 'else' : 'priced';
+    const fig = (vp.querySelector('.vfig') || {}).textContent || '';
+    out.push({ nm: c.textContent.trim(), kind, fig: fig.trim(),
+               why: (vp.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 200) });
+  }
+  return out;
+});
 /* The sheet is READ OUT OF THE DESK rather than pinned here. It was pinned,
    at 249,500, and when the worked example moved to an asking price the deal
    could survive, this harness went on driving the old one and reported the
@@ -109,7 +132,8 @@ const truth = await (async () => {
     const EX=exitsFor().map(x=>Object.assign(x,fitFor(x)));
     EX.sort((a,c)=>{ if(a.na!==c.na) return a.na?1:-1; return (c.fit??-1)-(a.fit??-1); });
     return EX.map(x=>({ nm:x.nm, refused:!!x.refused, na:!!x.na,
-      key:x.key==null?null:Math.round(x.key).toLocaleString('en-US') })); }, SHEET);
+      key:x.key==null?null:Math.round(x.key).toLocaleString('en-US'),
+      ceil:x.ceil==null?null:Math.round(x.ceil).toLocaleString('en-US') })); }, SHEET);
   await d.close(); return r;
 })();
 out.hero = { shown:heroRows, deskSays:truth.slice(0,5) };
@@ -117,24 +141,52 @@ out.hero = { shown:heroRows, deskSays:truth.slice(0,5) };
    way the desk draws it, so the name read off the page is "The wholetail
    Refused". Strip the pill before matching — the cross-check is about the
    ranking agreeing, not about the badge markup. */
-const cleanNm = n => String(n).replace(/\s*(refused|not priced|runs on estimates|recommended)\s*$/i,'').trim();
-const byName = Object.fromEntries(truth.map(x=>[x.nm,x]));
-for (const row of heroRows) {
-  const t = byName[cleanNm(row.nm)];
-  ck(!!t, `hero advertises "${cleanNm(row.nm)}", which the desk does not produce`);
-  if (!t) continue;
-  /* the word is "Refused" now, and it is red on both pages — this cross-check
-     cares that the landing agrees with the desk, not which tense it uses */
-  /* A refusal now reads as a pill on the NAME and "not priced" in the figure
-     column, which is how the desk draws it — so the check looks in both. */
-  if (t.refused) ck(/refus/i.test(row.nm) || /not priced/i.test(row.fig),
-    `hero shows ${cleanNm(row.nm)} priced at "${row.fig}" but the desk refuses it`);
-  else if (t.na)  ck(/needs/i.test(row.fig),   `hero prices ${row.nm} but the desk says it needs more input`);
-  else ck(row.fig.includes(t.key), `hero shows ${row.nm} at ${row.fig}; the desk says $${t.key}`);
+const byName = Object.fromEntries(truth.map(x => [x.nm.replace(/^The /, '').toLowerCase(), x]));
+/* the chips are named the way a person says them; the engine prefixes "The" */
+const key = n => String(n).replace(/^The /, '').toLowerCase();
+
+for (const row of heroRows){
+  const t = byName[key(row.nm)];
+  /* the land play is the one chip the DESK does not produce: it prices dirt
+     and this sheet is a house, so it sends you next door. That is a fact
+     about the product, and the panel has a state for it. */
+  if (!t){
+    ck(key(row.nm) === 'land play',
+       `hero offers "${row.nm}", which the desk does not produce and which is not the land play`);
+    ck(row.kind === 'else',
+       `hero draws the land play as "${row.kind}" — it is not a refusal and not a missing figure, it is another desk`);
+    continue;
+  }
+  if (t.refused)
+    ck(row.kind === 'no', `desk REFUSES ${t.nm}; hero draws it as "${row.kind}"`);
+  else if (t.na)
+    ck(row.kind === 'need', `desk says ${t.nm} needs more input; hero draws it as "${row.kind}"`);
+  else {
+    ck(row.kind === 'priced', `desk PRICES ${t.nm}; hero draws it as "${row.kind}"`);
+    /* the panel states the CEILING — the most you can pay — because that is
+       what the headline asks and what this product's grammar calls the answer.
+       The old hero showed the profit, which is a different quantity. */
+    ck(row.fig.includes(t.ceil),
+       `hero shows ${t.nm} at "${row.fig}"; the desk's ceiling is $${t.ceil}`);
+  }
 }
-// the winner the hero highlights must be the winner the desk ranks first
-{ const best = await q.evaluate(()=>document.querySelector('.ex.best span:nth-child(2)')?.textContent.trim());
-  ck(best === truth[0].nm, `hero crowns "${best}"; the desk ranks "${truth[0].nm}" first`); }
+/* every exit the desk produces has to be reachable from the front door */
+for (const t of truth)
+  ck(heroRows.some(r => key(r.nm) === key(t.nm)),
+     `the desk produces ${t.nm} and the hero has no chip for it`);
+
+// the panel the page OPENS on must be the exit the desk ranks first
+{ const first = await q.evaluate(async () => {
+    document.getElementById('vp').innerHTML = '';
+    location.reload();
+    return null; });
+  const q2 = await b.newPage({viewport:{width:1280,height:1000}});
+  await q2.goto(B + '/index.html'); await q2.waitForTimeout(800);
+  const opened = await q2.evaluate(() =>
+    ([...document.querySelectorAll('#chips button')].find(x => x.getAttribute('aria-selected') === 'true') || {}).textContent || null);
+  await q2.close();
+  ck(opened && key(opened) === key(truth[0].nm),
+     `hero opens on "${opened}"; the desk ranks "${truth[0].nm}" first`); }
 // the dashboard reads real saves
 const o=await b.newPage({viewport:{width:1280,height:1000}});
 await o.goto(B+'/desk.html#example'); await o.waitForTimeout(900);
