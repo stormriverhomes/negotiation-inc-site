@@ -59,14 +59,46 @@ a{color:var(--blue)}
 /* contour rings — a surveyor's sketch, not a picture pretending to be one */
 #ground::before{content:'';position:absolute;inset:-20%;background:
  repeating-radial-gradient(circle at 40% 45%, transparent 0 54px, rgba(232,237,245,.045) 54px 55px);}
-.floor{position:absolute;left:0;right:0;bottom:0;height:34px;background:#fff;
- border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 14px;
+.floor{position:absolute;left:0;right:0;bottom:0;min-height:34px;background:#fff;
+ border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:6px 14px;
  font-size:11px;color:var(--soft);z-index:6}
 .floor b{color:var(--mid);font-weight:700}
-.floor .cam{margin-left:auto;font-size:10.5px}
+.floor .cam{margin-left:auto;font-size:10.5px;white-space:nowrap}
+/* ── GOOGLE'S CREDIT, IN OUR TYPE, ON PAPER ───────────────────────────────
+   Cesium writes its credits into #credits and we do not fight it — we dress
+   it. The rule from the brief holds either way: this band is opaque paper
+   outside the render, so the attribution is legible over any terrain and no
+   chip can enter it. What is styled here is size and colour only; the text
+   and its links are Google's, unaltered. */
+#credits{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;min-width:0;
+ font-size:10.5px;line-height:1.4;color:var(--soft)}
+#credits img{height:15px;width:auto;vertical-align:middle}
+#credits a{color:var(--soft);text-decoration:none}
+#credits a:hover{text-decoration:underline}
+#credits .cesium-credit-lightbox-overlay{z-index:40}
+#credits ul,#credits li{list-style:none;display:inline;margin:0;padding:0}
 /* the header card — paper, floating on the ground */
 .hcard{position:absolute;top:18px;left:18px;z-index:5;background:#fff;border:1px solid var(--line);
- border-radius:var(--r-card);padding:13px 17px 12px;box-shadow:0 10px 34px rgba(4,8,14,.45);max-width:420px}
+ border-radius:var(--r-card);padding:13px 17px 12px;box-shadow:0 10px 34px rgba(4,8,14,.45);max-width:420px;
+ transition:max-width .18s ease,padding .18s ease}
+/* ── FOLDED ───────────────────────────────────────────────────────────────
+   Not hidden — folded. The address stays, because a picture of ground with
+   no address on it is a screenshot of nowhere, and the control that put it
+   away is the control that brings it back, in the same place. */
+.hcard.fold{max-width:min(320px,52vw);padding:9px 40px 9px 13px}
+.hcard.fold #hbody{display:none}
+.hcard.fold .k{font-size:9px;opacity:.62}
+.hcard.fold h1{font-size:14.5px;line-height:1.25;margin-top:1px;
+ display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hfold{position:absolute;top:8px;right:8px;width:30px;height:30px;display:grid;place-items:center;
+ border:1px solid var(--line);border-radius:9px;background:var(--wash);cursor:pointer;padding:0}
+.hfold:hover{border-color:var(--line-ink);background:#fff}
+.hfold:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.hfx{display:block;width:10px;height:6px;
+ background:no-repeat center/10px 6px url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%234a5162' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+ transition:transform .18s ease}
+.hcard.fold .hfx{transform:rotate(180deg)}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .hcard .k{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
 .hcard h1{font-family:var(--serif);font-size:24px;font-weight:700;letter-spacing:-.01em;margin-top:2px}
 .hcard .sub{font-size:12px;color:var(--soft);margin-top:3px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -75,13 +107,83 @@ a{color:var(--blue)}
 .hcard input{font:inherit;font-size:13.5px;border:1px solid var(--line-ink);border-radius:9px;
  padding:7px 10px;width:100%;margin-top:9px;background:var(--wash)}
 .hcard input:focus{outline:none;border-color:var(--blue);background:#fff}
+/* ── A PLACEHOLDER IS NOT A FIGURE ────────────────────────────────────────
+   The ledger's inputs are set in the ledger's own weight, so an empty field
+   showing "298,000" read exactly like an entered one — a bold, dark number
+   sitting beside a red NEEDED tag, which is the sheet contradicting itself
+   in the one place it must not. Placeholders are now visibly a suggestion:
+   lighter, unemphatic, and never mistakable for something somebody typed. */
+input::placeholder{color:#9aa3b2;font-weight:400;opacity:1}
+.lrow input::placeholder,.conc input::placeholder,.ask .big input::placeholder{font-weight:400;color:#a8b0bd}
 /* the parcel sketch */
-#parcel{position:absolute;inset:0;z-index:1}
+/* the sheet is docked over the right 466px of the ground, so the drawing is
+   given the ground the sheet is NOT standing on. Centering it in the whole
+   width would put a third of the parcel under a white card. */
+#parcel{position:absolute;inset:0 466px 0 0;width:auto;height:100%;z-index:1}
+@media(max-width:1000px){ #parcel{inset:0;width:100%} }
+/* every stroke in the plan is a DRAWN LINE, not a scaled shape: without this
+   a 1.4-unit stroke becomes thirteen pixels at desktop scale and a survey pin
+   reads as a landing pad */
+#plan *{vector-effect:non-scaling-stroke}
 /* non-scaling-stroke: the viewBox stretches to the viewport, and without it
    the dashes stretch too — 1.6px of survey line became forty-pixel slabs */
 #parcel polygon{fill:rgba(232,237,245,.03);stroke:var(--ground-ink);stroke-opacity:.55;
  stroke-width:1.6;stroke-dasharray:7 6;vector-effect:non-scaling-stroke}
 #parcel .refline{stroke:var(--ground-refusal);stroke-opacity:.95;stroke-width:2.2;stroke-dasharray:4 4}
+/* ══ THE RAIL ══════════════════════════════════════════════════════════════
+   Sticky at the top of the sheet, because the sheet scrolls independently and
+   a rail you have to scroll back to find is a rail nobody uses. It DESCRIBES
+   where you are; it never decides where you may be. */
+.rail2{position:sticky;top:-18px;z-index:9;background:#fff;margin:-18px -20px 4px;
+ padding:14px 20px 10px;border-bottom:1px solid var(--line)}
+.rrow{display:flex;gap:6px;align-items:stretch}
+.rph{flex:1;min-width:0;text-align:left;cursor:pointer;font:inherit;background:var(--wash);
+ border:1px solid var(--line);border-radius:10px;padding:6px 8px 6px;
+ transition:opacity .28s ease,border-color .28s ease,background .28s ease}
+.rph.on{background:var(--blue-soft);border-color:var(--blue-line)}
+.rph.lat{opacity:.46}
+.rph.lat.on{opacity:1}
+.rph:hover{border-color:var(--line-ink)}
+.rph .rn{font-size:9.5px;font-weight:800;color:var(--soft);margin-right:4px}
+.rph.on .rn{color:var(--blue)}
+.rph .rname{font-size:8.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rph.on .rname{color:var(--ink)}
+.rph .rcount{display:block;font-size:11.5px;font-weight:700;color:var(--mid);
+ font-variant-numeric:tabular-nums;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rph.on .rcount{color:var(--ink)}
+.rph .rtrk{display:block;height:2px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:5px}
+.rph .rtrk i{display:block;height:100%;background:var(--line-ink);
+ transition:width .38s cubic-bezier(.2,.7,.2,1)}
+.rph.on .rtrk i{background:var(--blue)}
+.rnext{display:flex;align-items:baseline;gap:8px;width:100%;margin-top:8px;text-align:left;
+ cursor:pointer;font:inherit;background:var(--wash);border:1px solid var(--line);
+ border-radius:9px;padding:7px 10px}
+.rnext:hover{border-color:var(--line-ink)}
+.rnext .k{font-size:8.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.rnext .s{font-size:12.5px;color:var(--ink);font-weight:600;overflow:hidden;
+ text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.rnext .a{margin-left:auto;font-size:12px;color:var(--blue);font-weight:700}
+/* a region is a chapter of one document, never a screen */
+.region{padding-top:14px;margin-top:12px;border-top:1px solid var(--line)}
+.region:first-of-type{border-top:0;margin-top:0;padding-top:4px}
+.region .rh{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+ color:var(--soft);margin-bottom:8px}
+/* LATENT: present, dimmed, legible as waiting. Not hidden, not disabled —
+   the rows are there and the arithmetic is what has not arrived. */
+.region.latent{opacity:.46;transition:opacity .32s ease}
+.region.latent:hover,.region.latent:focus-within{opacity:.72}
+.ledger.dim .num{color:var(--soft)}
+.clears.dimfig{color:var(--line-ink)}
+.big2 .n{font-weight:650}
+/* the ground answers the phase it is on */
+.chip{transition:opacity .32s cubic-bezier(.2,.7,.2,1)}
+.sbar{position:absolute;z-index:4;display:flex;align-items:center;gap:8px;transform:translateY(-50%);
+ pointer-events:none;color:var(--ground-ink);opacity:.72;font-size:10px;font-weight:700;
+ letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.sbar i{display:block;height:6px;border:1px solid currentColor;border-top:0;opacity:.85}
+.planwhy{margin-top:8px;font-size:11px;line-height:1.5;color:var(--soft);max-width:44ch}
+.planwhy b{color:var(--ink)}
 /* anchored chips: white pill on a 1px leader; the dot is the truth */
 .chip{position:absolute;z-index:4;transform:translate(-50%,-100%)}
 /* the spec's collision rule, v1: the dot never moves; the chip slides along
@@ -103,7 +205,18 @@ a{color:var(--blue)}
 /* ground controls — pills over the render, dark grammar */
 .gctl{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);display:flex;gap:8px;z-index:5}
 .gctl button{font-size:12.5px;font-weight:650;color:var(--ground-ink);background:var(--ground-pill);
- border:1px solid var(--ground-pill-line);border-radius:999px;padding:8px 16px;cursor:not-allowed;opacity:.75}
+ border:1px solid var(--ground-pill-line);border-radius:999px;padding:8px 16px;cursor:pointer}
+.gctl button[disabled]{cursor:not-allowed;opacity:.55}
+/* ── THE GROUND IS A PRESS, NOT AN AMBUSH ─────────────────────────────────
+   Loading Google's photorealistic tiles on arrival spent a billed session on
+   every drive-by, burnt the daily cap on people who came to type numbers,
+   and — worst — FAILED SILENTLY: a rate-limited visitor got the sketch with
+   no explanation, which reads as "the maps thing is buggy". A button makes
+   every state sayable: raising, resting, out for the day, no WebGL. And
+   summoning the earth on purpose feels better than sometimes receiving it. */
+.gctl .raise{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+.gctl .raise:hover{background:var(--blue-deep)}
+.gctl .raise[disabled]{opacity:.85;cursor:default}
 /* the docked worksheet */
 .sheet{position:absolute;top:18px;right:18px;bottom:52px;width:430px;z-index:5;overflow:auto;
  background:#fff;border:1px solid var(--line);border-radius:var(--r-card);
@@ -111,6 +224,12 @@ a{color:var(--blue)}
 .sheet .k{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--soft)}
 .ask .big{font-family:var(--serif);font-size:31px;font-weight:700;letter-spacing:-.02em;display:flex;
  align-items:center;gap:10px}
+/* the ask is the headline and it is typed in place — it wears the headline's
+   own type, not a browser-default 13px box (which iOS would also zoom) */
+.ask .big input{font:inherit;font-size:24px;width:9ch;border:1px solid transparent;border-radius:9px;
+ padding:2px 7px;background:transparent;font-variant-numeric:tabular-nums;box-sizing:content-box}
+.ask .big input:hover{border-color:var(--line-ink);background:var(--wash)}
+.ask .big input:focus{outline:none;border-color:var(--blue);background:#fff}
 .ask .sub{font-size:12px;color:var(--soft);margin-top:2px}
 .play{border-top:1px solid var(--line);margin-top:14px;padding-top:13px}
 .clears{font-family:var(--serif);font-size:42px;font-weight:700;letter-spacing:-.02em;color:var(--green);line-height:1.05}
@@ -138,6 +257,46 @@ a{color:var(--blue)}
  text-align:left;background:transparent;font-variant-numeric:tabular-nums;padding:1px 2px;box-sizing:content-box}
 .conc input:hover{border-color:var(--line-ink);background:#fff}
 .conc input:focus{outline:none;border-color:var(--blue);background:#fff}
+/* ── the lot bench: the way in to the one figure nothing prices without ──
+   Same grammar as the ledger it feeds — small rows, tags, one suggestion
+   with its basis stated. Deliberately not the house workbench shrunk: five
+   fields per comp, no adjusters, because the land sheet has not earned the
+   knobs yet. */
+.lots{margin-top:8px;border:1px solid var(--line);border-radius:var(--r-in);background:var(--wash);padding:10px 12px}
+.lots .lh{display:flex;align-items:baseline;gap:8px}
+.lots .lh .k{flex:1}
+.lots .lrowc{display:grid;grid-template-columns:1fr 62px 52px 52px 24px;gap:6px;margin-top:7px;align-items:center}
+.lots .lrowc input{font:inherit;font-size:12.5px;border:1px solid var(--line-ink);border-radius:7px;
+ padding:5px 7px;background:#fff;min-width:0}
+.lots .lrowc input:focus{outline:none;border-color:var(--blue)}
+.lots .lrowc .x{border:none;background:none;color:var(--soft);cursor:pointer;font-size:13px;padding:2px}
+.lots .lrowc .x:hover{color:var(--red)}
+.lots .lwhy{grid-column:1/-1;font-size:10.5px;color:var(--soft);margin-top:-2px;display:flex;gap:6px;align-items:baseline}
+.lots .lwhy .sc{font-weight:800;font-size:10px;border-radius:999px;padding:1px 6px;background:#fff;border:1px solid var(--line-ink)}
+.lots .ladd{margin-top:8px;font:inherit;font-size:12px;font-weight:650;color:var(--blue);
+ border:1px dashed var(--blue-line);border-radius:8px;background:#fff;padding:6px 10px;cursor:pointer;width:100%}
+.lots .lsay{margin-top:9px;font-size:12.5px;line-height:1.5;color:var(--mid)}
+/* ── SITE WORK, BY LINE ───────────────────────────────────────────────────
+   The land analogue of the condition panel, and deliberately NOT sliders.
+   On a house, condition is a share of the finished value, so a slider says
+   "how bad is it" and the dollars fall out of the ARV. A driveway costs what
+   a driveway costs — it does not scale with what the finished lot sells for,
+   and a slider from zero to an invented ceiling would be pretending we know
+   a range we do not. So: named lines, real dollars, each one a quote you
+   either have or do not. */
+.sitel{display:grid;grid-template-columns:1fr 92px 20px;gap:5px 8px;align-items:center;margin-top:6px}
+.sitel label{font-size:12.5px;color:var(--mid)}
+.sitel input{font:inherit;font-size:12.5px;text-align:right;border:1px solid var(--line-ink);
+ border-radius:7px;padding:5px 7px;background:#fff;min-width:0}
+.sitel input:focus{outline:none;border-color:var(--blue)}
+.sitel .e{border:none;background:none;cursor:pointer;padding:0;font-size:8.5px;font-weight:800;
+ letter-spacing:.1em;color:var(--soft)}
+.sitesum{display:flex;align-items:baseline;gap:8px;margin-top:9px;padding-top:8px;
+ border-top:1px solid var(--line);font-size:12.5px}
+.sitesum b{margin-left:auto;font-weight:750;font-variant-numeric:tabular-nums}
+.lots .lsay b{font-weight:750;color:var(--ink)}
+.lots .ltake{margin-top:7px;display:flex;gap:8px;align-items:center}
+.lotlink{font-size:11px;font-weight:650;color:var(--blue);background:none;border:none;cursor:pointer;padding:0}
 .firm{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
 .firm .fh{display:flex;align-items:center;gap:8px}
 .firm p{font-size:12.5px;color:var(--mid);line-height:1.55;margin-top:6px}
@@ -147,6 +306,30 @@ a{color:var(--blue)}
 .facts input,.facts select{font:inherit;font-size:13px;width:100%;border:1px solid var(--line-ink);
  border-radius:8px;padding:6px 8px;margin-top:3px;background:#fff}
 .facts input:focus,.facts select:focus{outline:none;border-color:var(--blue)}
+/* ── THE DROPDOWNS WERE THE ONLY BROWSER FURNITURE ON THE SHEET ────────────
+   `font:inherit` sets the family, and then the platform overrides the rest:
+   a <select> ships its own weight, its own line-height and a chevron drawn by
+   the operating system, so four fields in the middle of a typeset ledger
+   looked like they came from somewhere else. Worse, the native control does
+   not shrink its text, so "Scattered trees, light brush" and "Unknown — price
+   a septic" were CUT OFF mid-word.
+
+   appearance:none takes the platform styling off, the chevron is drawn here
+   in the sheet's own ink, and the right padding is the room the chevron sits
+   in — so the longest option ends before it rather than under it. */
+.facts select{
+ -webkit-appearance:none;-moz-appearance:none;appearance:none;
+ font-weight:inherit;line-height:1.35;color:var(--ink);
+ padding-right:28px;text-overflow:ellipsis;
+ background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%234a5162' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+ background-repeat:no-repeat;background-position:right 10px center;background-size:10px 6px}
+.facts select:hover{border-color:var(--mid)}
+/* Firefox keeps a focus ring on the text itself; and an option list is drawn
+   by the OS, so it is told the colours rather than styled */
+.facts select:-moz-focusring{color:transparent;text-shadow:0 0 0 var(--ink)}
+.facts select option{font-weight:400;color:#101725;background:#fff}
+/* a chosen value and an unchosen one are different states and now look it */
+.facts select:invalid,.facts select.empty{color:var(--soft)}
 .sfoot{border-top:1px solid var(--line);margin-top:14px;padding-top:12px;display:flex;gap:10px;flex-wrap:wrap}
 .fine{font-size:11.5px;color:var(--soft);line-height:1.55;margin-top:10px}
 /* the phone: ground on top, chip rail pinned to it, sheet below */
@@ -156,7 +339,11 @@ a{color:var(--blue)}
  .hcard{top:12px;left:12px;padding:10px 13px 9px;border-radius:14px}
  .hcard h1{font-size:16.5px}
  .hcard .sub{font-size:10.5px;gap:6px}
- .hcard input{font-size:12px;padding:5px 8px;margin-top:6px}
+ /* every input holds 16px on a phone — one pixel under it and iOS Safari
+    zooms the page on focus, which reads as the layout breaking */
+ .hcard input,.lrow input,.conc input,.facts input,.facts select{font-size:16px}
+ .hcard input{padding:5px 8px;margin-top:6px}
+ .lrow input[data-k="months"]{width:38px}
  #ground{position:relative;inset:auto;height:46vh;min-height:300px}
  .floor{position:static;height:auto;padding:8px 14px}
  .sheet{position:static;width:auto;margin:0;border-radius:0;box-shadow:none;border-left:none;border-right:none}
@@ -176,6 +363,35 @@ a{color:var(--blue)}
  .clears{font-size:36px}
 }
 @media(min-width:1001px){ .dotn{display:none} }
+/* ── the site-work benchmarks ──────────────────────────────────────────────
+   Slate, not gold: pressing one of these is taking an ESTIMATE, and the
+   product's rule is that an estimate is marked, never flagged. A refusal —
+   the well, the tap — sits in the same slate, because "we will not guess this"
+   is not a warning either. It is the sheet keeping its promise. */
+.sbwrap{margin:-2px 0 9px;padding-left:2px}
+.sbc{display:flex;flex-wrap:wrap;gap:6px}
+.sbc button{display:inline-flex;align-items:baseline;gap:7px;cursor:pointer;font:inherit;
+ border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 11px;color:var(--soft);
+ font-size:11.5px;text-align:left}
+.sbc button:hover{border-color:var(--ink);color:var(--ink)}
+.sbc button b{font-size:12.5px;color:var(--ink);font-variant-numeric:tabular-nums}
+.sbcall{font-size:11.5px;line-height:1.55;color:var(--soft);background:var(--wash);
+ border:1px solid var(--line);border-radius:10px;padding:8px 11px}
+.sbcall b{color:var(--ink)}
+.sbneed{font-size:11.5px;color:var(--soft);font-style:italic}
+.sbnote{font-size:11px;line-height:1.5;color:var(--soft);margin-top:5px;max-width:52ch}
+.sbmore{border:0;background:none;padding:0;cursor:pointer;font:inherit;font-size:11px;
+ font-weight:700;color:var(--soft);text-decoration:underline;text-underline-offset:2px}
+.sbmore:hover{color:var(--ink)}
+.sbrest{display:block;margin-top:4px}
+.facts .fsay{font-size:11.5px;color:var(--soft);margin:2px 0 9px;line-height:1.5}
+.facts label em{font-style:normal;font-weight:600;color:var(--soft);opacity:.75;
+ display:block;font-size:9px;letter-spacing:.06em;text-transform:uppercase;margin-top:1px}
+.lwall{font-size:12px;line-height:1.55;color:var(--soft);background:var(--wash);
+ border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-top:9px}
+.lwall b{color:var(--ink)}
+.lwall .btn{margin-top:9px;display:inline-flex}
+.ladd .cnt{font-weight:600;color:var(--soft);font-size:11px;margin-left:6px}
 .seam{background:#fff;border-top:1px solid var(--line);padding:13px 18px;font-size:12.5px;color:var(--soft)}
 .seam a{font-weight:650}
 </style>
@@ -183,21 +399,42 @@ a{color:var(--blue)}
 <body>
 <div class="stage">
  <div id="ground">
-  <svg id="parcel" preserveAspectRatio="none" viewBox="0 0 100 100" aria-hidden="true">
+  <!-- xMidYMid meet, NOT none. Under `none` the viewBox stretches to the
+       container, so one unit across is not one unit down — and a driveway
+       drawn north-south would read shorter than the same driveway drawn
+       east-west. That is fine for wallpaper and fatal for a scale drawing. -->
+  <svg id="parcel" preserveAspectRatio="xMidYMid meet" viewBox="0 0 100 100" aria-hidden="true">
    <polygon points="26,32 62,24 84,46 66,72 34,74 22,52"/>
+   <g id="plan"></g>
   </svg>
   <div id="chips"></div>
-  <div class="gctl" aria-hidden="true">
-   <button type="button" title="The camera arrives with the 3D ground">Orbit</button>
-   <button type="button" title="The camera arrives with the 3D ground">Tilt</button>
-   <button type="button" title="The camera arrives with the 3D ground">Reset north</button>
+  <div class="gctl">
+   <button type="button" id="raise" class="raise">Raise the 3D ground</button>
+   <button type="button" disabled title="The camera arrives with the 3D ground">Orbit</button>
+   <button type="button" disabled title="The camera arrives with the 3D ground">Tilt</button>
+   <button type="button" disabled title="The camera arrives with the 3D ground">Reset north</button>
   </div>
-  <div class="hcard">
+  <!-- ── THE CARD HAS TO BE ABLE TO GET OUT OF THE WAY ────────────────────
+       420px of white card sits over the top-left of the ground. On a sketch
+       that costs a corner of a drawing we drew. Over Google's photorealistic
+       tiles — which is the whole reason anyone raises the 3D ground — it
+       covers the parcel you paid a session to look at.
+       So: one control, always in the same place, that folds it down to its
+       address line. It remembers, and raising the 3D ground folds it for you
+       the first time, because at that moment you have just said what you
+       want to look at. -->
+  <div class="hcard" id="hcard">
+   <button type="button" id="hfold" class="hfold" aria-expanded="true"
+     aria-controls="hbody" title="Fold the panel away from the ground">
+     <span class="hfx" aria-hidden="true"></span><span class="sr">Fold the panel</span></button>
    <div class="k">Negotiation Inc · The Land Desk</div>
    <h1 id="h-addr">A parcel, priced with the working shown</h1>
-   <div class="sub"><span id="h-sub">Type the parcel below — one lump figure opens the play</span>
-    <span class="cov" id="h-cov">Ground · sketch</span></div>
-   <input id="in-addr" type="text" maxlength="90" placeholder="Address or parcel — e.g. 1847 Saddleback Pass, Wimberley TX" autocomplete="off">
+   <div id="hbody">
+    <div class="sub"><span id="h-sub">Type the parcel below — one lump figure opens the play</span>
+     <span class="cov" id="h-cov">Ground · sketch</span></div>
+    <input id="in-addr" type="text" maxlength="90" placeholder="Address or parcel — e.g. 1847 Saddleback Pass, Wimberley TX" autocomplete="off">
+    <div class="planwhy" id="planwhy"></div>
+   </div>
   </div>
  </div>
  <div class="rail" id="rail"></div>
@@ -212,27 +449,152 @@ a{color:var(--blue)}
 </div>
 
 <script>
+/*__TIER_GRAMMAR__*/
 /*__LAND_ENGINE__*/
 
 /* ── the sheet's state, with the desk's three words ───────────────────────
    raw holds strings exactly as typed; est marks a figure the owner called a
    guess. Typing is ENTERED by default — pressing the tag flips it — and an
    empty figure is NEEDED, which is a state, not an absence. */
+/* Declared HERE, above the first render, and not down beside the code that
+   fills it in: renderGround() reads G3.on on the very first paint, and a
+   `let` declared later in the file is in its temporal dead zone at that
+   moment — which throws, silently, inside the function that draws the floor. */
+let G3 = { on:false, viewer:null, tileset:null, center:null, orbiting:false, tiltIdx:1 };
 const KEY='ni-land-v1';
-let S={ addr:'', raw:{}, est:{}, months:'9', sewer:'unknown', access:'unverified',
-        zoning:'', slope:'', frontage:'', fema:'', zoningEst:true, slopeEst:true, frontageEst:true };
+let SLIDE=null;   // the price being tried — a question, not a figure, so never saved
+/* near the two prices that matter, you are ON them; elsewhere, round money */
+const trySnap=(v,ceil,ask)=>{ if(Math.abs(v-ceil)<=600) return ceil;
+ if(ask!==null&&Math.abs(v-ask)<=600) return ask; return Math.round(v/500)*500; };
+const tryLine=(m,at,askV)=>{ const c=m.clearsAt(at);
+ const cls=c>=m.target?'var(--green)':c>=0?'var(--gold)':'var(--red)';
+ return '<b>'+fmt(at)+'</b> → the play clears <b style="color:'+cls+'">'+fmt(c)+'</b>'
+  +(at===m.ceiling?' — your ceiling, to the dollar':c>=m.target?' — clears your target'
+    :c>=0?' — thinner than your $'+m.target.toLocaleString('en-US')+' target':' — you would pay to own this problem')
+  +(askV!==null?'<span style="color:var(--soft)"> · their number is '+fmt(askV)+'</span>':''); };
+/* ── ONE SHAPE, ONE PLACE ─────────────────────────────────────────────────
+   This literal was written out three times — here, in the worked example's
+   reset, and in Start clean — so every field added to the sheet had to be
+   remembered three times. It was not: `lots` and `site` were missing from
+   two of them, and pressing the demo left S.site undefined for the next
+   keystroke to throw on. A blank sheet is one function now. */
+/* ── THE FACTS EARN THEIR PLACE ────────────────────────────────────────────
+   `slope` was a free-text box and `trees` did not exist, and between them they
+   priced nothing: they were captions on a picture. They are bands now, because
+   a band is what a benchmark can be computed from, and a benchmark you can
+   press is the difference between a panel a beginner uses and one they close.
+   `driveFt` and `poleFt` are here for the same reason and no other — a drive
+   is priced by the foot and so is a wire, and neither can be guessed from
+   acreage. Nothing is asked for on this sheet that does not move a number. */
+const blank = () => ({ addr:'', raw:{}, est:{}, months:'9', sewer:'unknown', access:'unverified',
+  zoning:'', slope:'', trees:'', frontage:'', fema:'', zoningEst:true, frontageEst:true,
+  lots:[], lotsOpen:false, site:[], siteOpen:false, siteWhy:[] });
+let S = blank();
 try{ const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s&&typeof s==='object') S=Object.assign(S,s); }catch(e){}
+/* localStorage is writable by anything that ever ran on this origin — the
+   lots are typed on the way in, the same discipline as the bankroll */
+S.lots = (Array.isArray(S.lots)?S.lots:[]).slice(0,8).map(c=>({
+  price:String((c&&c.price)??'').slice(0,20), acres:String((c&&c.acres)??'').slice(0,20),
+  months:String((c&&c.months)??'').slice(0,20), dist:String((c&&c.dist)??'').slice(0,20) }));
+S.lotsOpen = !!S.lotsOpen;
+S.site = (Array.isArray(S.site)?S.site:[]).slice(0,10).map(x=>({
+  id:String((x&&x.id)??'').slice(0,20), v:String((x&&x.v)??'').slice(0,20),
+  est: !!(x&&x.est) }));
+S.siteOpen = !!S.siteOpen;
+/* folded, and whether raising the 3D ground has already folded it once — the
+   automatic fold is a courtesy, so it happens the first time and then never
+   overrules a person who has deliberately opened it back up */
+S.hFold = !!S.hFold;
+S.hFoldAuto = !!S.hFoldAuto;
+S.siteWhy = (Array.isArray(S.siteWhy)?S.siteWhy:[]).slice(0,10).map(x=>String(x).slice(0,20));
 const save=()=>{ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} };
+
+/* ══ THIS ROOM KNOWS WHO IS IN IT ══════════════════════════════════════════
+   It did not. `grep` for tierOf, entitled or signedIn in this file returned
+   nothing at all, and the page was not on the build's list of pages that get
+   the account script appended — so the Land Desk was an island with no
+   account, no masthead and no wall.
+
+   That was not a cosmetic gap. plans.html promises, in a bullet somebody is
+   asked to pay against: "The comp workbench — score sales yourself. Three in
+   this browser, twelve a week with a free account." The sold-lot bench below
+   is a comp workbench on a different asset, and it handed a stranger EIGHT,
+   scored, free, while the house sheet two clicks away told the same person
+   they had three. A pricing page a second room contradicts is worse than a
+   missing feature: it teaches people the pricing page is decorative.
+
+   The grammar is the shared one, injected above, so the two rooms cannot
+   drift. tierOf() paints; entitled() decides; and the allowance is the SAME
+   meter the house bench spends, because one promise with one number is worth
+   more than two meters that each need explaining. */
+function signedIn(){ try { const a = JSON.parse(localStorage.getItem('ni-account-v1'));
+  return a && typeof a === 'object' && typeof a.name === 'string' && a.name ? a : null; } catch(e){ return null; } }
+function previewTier(){
+  if (typeof window === 'undefined' || window.NI_LIVE === true) return null;
+  let v = null; try { v = localStorage.getItem('ni-preview-plan'); } catch(e){}
+  if (v === null) return null;
+  const k = String(v).trim().toLowerCase();
+  if (!k || k === 'free') return 0;
+  return TIERS[k] || 1;
+}
+/* there is no demo mode in this room — the worked example is a sheet you can
+   type over, not a sealed showroom — so `demo` is always false here */
+const tierOf   = () => tierFor(signedIn(), { demo:false, preview:previewTier() });
+const premium  = () => tierOf() >= 1;
+const entitled = n => entitledFor(signedIn(), n, { demo:false });
+
+/* ceiling 8, not 24: a lot bench with two dozen rows is a spreadsheet, and
+   acreage country rarely has two dozen honest comparables anyway */
+const LOT_CEILING = 8;
+function lotRoom(){
+  return benchRoom({ paid: premium(), acct: signedIn(),
+    quota: (signedIn() && typeof window.__compAllowance === 'function')
+      ? window.__compAllowance() : null,
+    used: (S.lots||[]).length, ceiling: LOT_CEILING });
+}
+/* the meter is spent when a lot is ADDED — never on a render, never on an
+   edit. A meter that ticks when you look at the screen is a meter people
+   learn to resent. */
+function spendLot(){
+  if (premium() || !signedIn()) return;
+  if (typeof window.__compUse !== 'function') return;
+  Promise.resolve(window.__compUse(1)).then(q => { if (q) renderSheet(); }).catch(()=>{});
+}
 const $=id=>document.getElementById(id);
 const numOf=k=>{ const v=parseFloat(String(S.raw[k]||'').replace(/[^0-9.]/g,'')); return Number.isFinite(v)&&v>0?v:null; };
 const inp=k=>{ const v=numOf(k); return v===null?null:{ v, prov:S.est[k]?'estimate':'entered' }; };
 const fmt=v=>'$'+Math.round(v).toLocaleString('en-US');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
+/* the bands, in the words the chip on the dirt uses — short enough to sit on
+   a pill, specific enough to be worth choosing between */
+const gradeLab = id => ({ flat:'flat to gentle', roll:'rolling · 5–12%',
+  steep:'steep · 12–25%', severe:'severe · 25%+' })[id] || '—';
+const treeLab  = id => ({ open:'open pasture', scatter:'scattered trees',
+  wooded:'wooded', heavy:'heavy timber' })[id] || '—';
+/* everything the benchmarks price from, gathered once so the panel and the
+   sheet can never be looking at two different parcels */
+function benchCtx(){
+  const n = k => { const v = parseFloat(String(S.raw[k]||'').replace(/[^0-9.]/g,''));
+    return Number.isFinite(v) && v > 0 ? v : null; };
+  return { acres:n('acres'), driveFt:n('driveFt'), poleFt:n('poleFt'),
+           grade:S.slope, trees:S.trees, sewer:S.sewer };
+}
+
 function model(){
+ /* months and carryMo were never passed, so the engine's carry arm — tested,
+    documented, correct — multiplied nothing by nothing while the ledger row
+    said "site work + carry, 9 mo". A months box that changes no number is
+    worse than no box: it teaches people the sheet does not mean what it says. */
+ const mo = parseFloat(String(S.months).replace(/[^0-9.]/g,''));
  return landModel({
   asking:inp('asking'), acres:inp('acres'), finished:inp('finished'),
   siteLump:inp('lump'), target:inp('target'),
+  /* siteCarryOf has taken an ITEMS array since the first commit — "early it
+     is a LUMP, later it is ITEMS, and the moment items exist they win" — and
+     no surface ever built one. This is that surface. */
+  site: siteItems(),
+  months:(Number.isFinite(mo)&&mo>0)?{v:mo,prov:'entered'}:null, carryMo:inp('carryMo'),
   sewer:S.sewer, access:S.access,
  });
 }
@@ -243,36 +605,144 @@ function model(){
 const TAG=(p,t)=>'<span class="tag '+(p==='nd'?'nd':p==='es'?'es':'en')+'">'+t+'</span>';
 function chipData(m){
  const acres=inp('acres');
+ /* ── ANCHORS, RE-PLACED FOR A DRAWING THAT NOW MEANS SOMETHING ────────────
+    These six were hand-tuned against a ground that was empty and a viewBox
+    that STRETCHED — the pills could go anywhere because nothing was underneath
+    them, and the dots were never really on the polygon they appeared to touch.
+    Both of those changed. The sketch is a scale drawing now and the dot lands
+    where the geometry is, so the anchors are placed against the two obstacles
+    that do not move — the header card over the top-left, the sheet docked
+    right — and against the marks they must not bury. */
  return [
-  { at:[38,30], lab:'Acreage',  val:acres?acres.v+' ac':'—', tag:acres?(S.est.acres?['es','ESTIMATE']:['en','ENTERED']):['nd','NEEDED'] },
-  { at:[58,22], lab:'Zoning',   val:S.zoning||'county code', tag:S.zoning?(S.zoningEst?['es','ESTIMATE']:['en','ENTERED']):['nd','NEEDED'] },
-  { at:[24,46], lab:'FEMA flood', val:S.fema||'look it up',  tag:S.fema?['en','fema.gov']:['nd','NEEDED'] },
-  { at:[52,56], lab:'Slope',    val:S.slope||'—',            tag:S.slope?(S.slopeEst?['es','ESTIMATE']:['en','ENTERED']):['nd','NEEDED'] },
-  /* 64% keeps the chip clear of the docked sheet at every desktop width —
-     the dot never moves; the chip is the thing that slides to free space */
-  { at:[64,62], lab:'Frontage', val:S.frontage||'—',         tag:S.frontage?(S.frontageEst?['es','ESTIMATE']:['en','ENTERED']):['nd','NEEDED'] },
-  { at:[40,70], lab:'Utilities',
+  { at:[46,46], lab:'Acreage',  val:acres?acres.v+' ac':'—', tag:acres?(S.est.acres?['es','ESTIMATE']:['en','ENTERED']):['nd','NEEDED'] },
+  { at:[70,28], lab:'Zoning',   val:S.zoning||'county code', tag:S.zoning?(S.zoningEst?['es','ESTIMATE']:['en','ENTERED']):['nd','NEEDED'] },
+  { at:[28,56], lab:'FEMA flood', val:S.fema||'look it up',  tag:S.fema?['en','fema.gov']:['nd','NEEDED'] },
+  { at:[52,66], lab:'Slope',    val:gradeLab(S.slope),       tag:S.slope?['en','ENTERED']:['nd','NEEDED'] },
+  /* the dot never moves; the chip is the thing that slides to free space */
+  { at:[74,52], lab:'Frontage', val:S.frontage||'—',         tag:S.frontage?(S.frontageEst?['es','ESTIMATE']:['en','ENTERED']):['nd','NEEDED'] },
+  { at:[40,76], lab:'Utilities',
     val:S.sewer==='yes'?'sewer on record':S.sewer==='septic'?'septic priced':'no sewer on record',
     tag:S.sewer==='unknown'?['nd','NEEDED']:['en','ENTERED'] },
  ];
 }
+/* ══ THE PLAN, DRAWN TO SCALE ══════════════════════════════════════════════
+   Every mark comes back from sitePlan() already at its true size, so this
+   function does no arithmetic — it only paints. That split is deliberate: the
+   geometry is the part that can be wrong in a way that matters, so it lives in
+   the engine where the test suite can hold it to the foot. */
+const PLAN_TONE = { faint:'.22', mid:'.45', strong:'.8', refusal:'.95' };
+function planMark(k){
+  const col = k.tone === 'refusal' ? 'var(--ground-refusal)' : 'var(--ground-ink)';
+  const op  = PLAN_TONE[k.tone] || '.5';
+  const common = 'stroke="'+col+'" stroke-opacity="'+op+'" stroke-width="'+(k.width||1.3)
+    + '" vector-effect="non-scaling-stroke"' + (k.dash ? ' stroke-dasharray="'+k.dash+'"' : '');
+  const t = '<title>'+esc(k.lab||'')+'</title>';
+  if (k.kind === 'rect')
+    return '<rect x="'+k.x+'" y="'+k.y+'" width="'+k.w+'" height="'+k.h+'" '+common
+      + ' fill="'+col+'" fill-opacity="'+(k.tone==='faint'?'.05':k.tone==='mid'?'.12':'.09')+'">'+t+'</rect>';
+  if (k.kind === 'path')
+    return '<path d="'+k.d+'" fill="none" '+common+'>'+t+'</path>'
+      + (k.pole ? '<circle cx="'+k.pole[0]+'" cy="'+k.pole[1]+'" r="1.4" fill="'+col
+                  +'" fill-opacity="'+op+'" stroke="none"/>' : '');
+  /* a run too long for the frame: a stub pointing the right way, with the
+     distance in the label — never a shortened line pretending to be the run */
+  if (k.kind === 'ray')
+    return '<path d="'+k.d+'" fill="none" '+common+'>'+t+'</path>'
+      + '<circle cx="'+k.tip[0]+'" cy="'+k.tip[1]+'" r="1.1" fill="none" stroke="'+col
+      + '" stroke-opacity="'+op+'" stroke-dasharray="1.6 1.6"/>';
+  if (k.kind === 'pins')
+    return '<g '+common+' fill="none">'+t+k.at.map(p =>
+      '<path d="M'+(p[0]-1.5)+','+p[1]+' L'+(p[0]+1.5)+','+p[1]
+        +' M'+p[0]+','+(p[1]-1.5)+' L'+p[0]+','+(p[1]+1.5)+'"/>').join('')+'</g>';
+  if (k.kind === 'unknown'){
+    /* the only warm colour on the dirt, and it means what red means on paper:
+       we will not put a confident dot where nobody knows the answer */
+    const h = k.size;
+    return '<g '+common+' fill="none">'+t
+      + '<rect x="'+k.x+'" y="'+k.y+'" width="'+h+'" height="'+h+'" stroke-dasharray="3 3" stroke-opacity=".5"/>'
+      + '<path d="M'+(k.x+h*0.28)+','+(k.y+h*0.28)+' L'+(k.x+h*0.72)+','+(k.y+h*0.72)
+      + ' M'+(k.x+h*0.72)+','+(k.y+h*0.28)+' L'+(k.x+h*0.28)+','+(k.y+h*0.72)+'"/></g>';
+  }
+  return '';
+}
+/* the sketch is a SQUARE laid inside a rectangle, so a chip anchored to a
+   feature has to be placed from the drawing's box rather than the container's.
+   The dot is still the truth; it is now the truth about the geometry. */
+function planBox(){
+  /* measured off the SVG itself, never re-derived from the container — the two
+     would drift the moment a media query changed one and not the other, and a
+     chip whose dot has drifted off its feature is worse than no chip */
+  const g = $('ground'), sv = $('parcel'); if (!g || !sv) return null;
+  /* getBoundingClientRect, NOT offsetLeft/offsetTop: those are HTMLElement
+     properties and an <svg> does not have them, so the arithmetic came out
+     NaN and every chip was placed at left:NaN% — which the browser silently
+     drops, taking all six chips off the ground with it. */
+  const gr = g.getBoundingClientRect(), sr = sv.getBoundingClientRect();
+  const w = gr.width, h = gr.height;
+  if (!w || !h || !sr.width || !sr.height) return null;
+  const S = Math.min(sr.width, sr.height);
+  return { S, ox: (sr.left - gr.left) + (sr.width - S) / 2,
+              oy: (sr.top - gr.top) + (sr.height - S) / 2, w, h };
+}
+function planPct(x, y){
+  const b = planBox(); if (!b) return [x, y];
+  return [ (b.ox + x / 100 * b.S) / b.w * 100, (b.oy + y / 100 * b.S) / b.h * 100 ];
+}
+function renderPlan(){
+  const box = $('plan'); if (!box) return null;
+  const ctx = benchCtx();
+  const p = sitePlan({ ...ctx, priced: siteItems().map(x => x.id) });
+  box.innerHTML = p.marks.map(planMark).join('');
+  return p;
+}
+
 function renderGround(m){
  const C=chipData(m);
- $('chips').innerHTML=C.map(c=>
-  '<div class="chip'+(c.at[0]>58?' flip':'')+'" style="left:'+c.at[0]+'%;top:'+c.at[1]+'%">'
+ const P=renderPlan();
+ /* the chip rides the DRAWING now, not the container — so a dot that marks the
+    slope sits on the same ground the slope is drawn on, at every width */
+ const at=c=>planPct(c.at[0], c.at[1]);
+ $('chips').innerHTML=C.map(c=>{ const [px,py]=at(c);
+  return '<div class="chip'+(c.at[0]>=66?' flip':'')+'" style="left:'+px.toFixed(2)+'%;top:'+py.toFixed(2)+'%">'
   +'<span class="pill"><span class="lab">'+esc(c.lab)+'</span><span class="val">'+esc(c.val)+'</span>'
-  +TAG(c.tag[0],c.tag[1])+'</span><span class="leader"></span><span class="dot"></span></div>').join('')
-  +C.map((c,i)=>'<div class="dotn" style="left:'+c.at[0]+'%;top:'+(c.at[1]+7)+'%">'+(i+1)+'</div>').join('');
+  +TAG(c.tag[0],c.tag[1])+'</span><span class="leader"></span><span class="dot"></span></div>'; }).join('')
+  +C.map((c,i)=>{ const [px,py]=at({at:[c.at[0], c.at[1]+7]});
+    return '<div class="dotn" style="left:'+px.toFixed(2)+'%;top:'+py.toFixed(2)+'%">'+(i+1)+'</div>'; }).join('')
+  /* ── THE SCALE BAR ──────────────────────────────────────────────────────
+     A drawing with a scale bar is a drawing. Without one it is a picture, and
+     a picture of somebody's land that looks measured but is not would be the
+     single most off-brand thing this product could put on a screen. */
+  +(P && P.bar ? (()=>{ const b=planBox(); if(!b) return '';
+      const len = P.bar.units / 100 * b.S;
+      const [lx,ly] = planPct(24, 84);
+      return '<div class="sbar" style="left:'+lx.toFixed(2)+'%;top:'+ly.toFixed(2)+'%">'
+        +'<i style="width:'+len.toFixed(1)+'px"></i>'
+        +'<span>'+P.bar.ft.toLocaleString('en-US')+' ft</span></div>'; })() : '');
+ $('planwhy').innerHTML = P ? (P.scale
+   /* the caption names what was measured. The well's refusal is the loudest
+      label in the set and it is not a measurement, so it does not lead — it
+      has its own mark on the dirt and its own line in the sheet. */
+   ? '<b>Drawn to scale.</b> ' + esc(P.marks.filter(k=>k.tone!=='refusal')
+       .map(k=>k.lab).filter(Boolean).slice(0,3).join(' · ')
+       || 'the boundary, at ' + P.bar.ft + ' ft to the bar — price a line and it appears here')
+   : esc(P.why)) : '';
  $('rail').innerHTML=C.map((c,i)=>
   '<span class="pill"><span class="n">'+(i+1)+'</span><span class="lab">'+esc(c.lab)+'</span>'
   +'<span class="val">'+esc(c.val)+'</span>'+TAG(c.tag[0],c.tag[1])+'</span>').join('');
  $('h-addr').textContent=S.addr||'A parcel, priced with the working shown';
  const a=inp('acres');
  $('h-sub').textContent=(a? a.v+' acres':'')+(S.addr&&a?' · ':'')+(S.addr?'as typed — the pin arrives with the 3D ground':'Type the parcel below — one lump figure opens the play');
- /* the floor: no imagery, no credit — credit belongs to imagery. The strip
-    is still the floor: opaque, solid to the collision system, always there. */
+ /* ── THE FLOOR IS NOT REDRAWN ONCE IT CARRIES ATTRIBUTION ────────────────
+    This function runs on every keystroke that re-prices the sheet, and it
+    used to rewrite the floor unconditionally. With the ground up, that tore
+    out the credit container mid-session — the tiles kept rendering and the
+    attribution vanished, which is a terms violation caused by typing in a
+    text box. The floor belongs to the ground once the ground is there. */
+ if (G3.on) return;
+ /* no imagery, no credit — credit belongs to imagery. The strip is still the
+    floor: opaque, solid to the collision system, always there. */
  $('floor').innerHTML='<b>The sheet prices without the ground.</b> This is a surveyor’s sketch — '
-  +'the photorealistic 3D parcel arrives here, and its attribution with it.'
+  +'one press below raises the photorealistic 3D parcel, and its attribution arrives with it.'
   +'<span class="cam" id="camtext">flat · sketch</span>';
 }
 
@@ -283,23 +753,195 @@ const tagFor=(k,allowNeed)=>{ const v=numOf(k);
  return '<button type="button" class="tagbtn" data-tag="'+k+'" title="Entered or estimate — press to flip">'
    +(S.est[k]?TAG('es','ESTIMATE'):TAG('en','ENTERED'))+'</button>'; };
 
+
+/* ══ THE WALK ══════════════════════════════════════════════════════════════
+   The complaint this answers, in the founder's words: "it doesn't take you
+   through the process before arriving at the number." Both halves matter, and
+   the second half was the real offence — the ceiling was on screen before you
+   had typed anything.
+
+   THE LEDGER NEVER BREAKS. The house desk splits into steps because it is four
+   different conversations ending in eight ranked exits. This room is ONE
+   subtraction:
+
+       finished lot − their ask − site work − carry − cost of sale = clears
+
+   Chopping that into four screens would fix the pacing by destroying the thing
+   that makes it good, which is that you can see the whole subtraction at once.
+   So nothing is hidden and nothing is locked. A rail names four phases and
+   paces attention down one sheet, and a row that cannot be computed yet sits
+   LATENT — present, dimmed, legible as waiting rather than missing.
+
+   LATENCY IS ARITHMETIC, NOT UI. A region is latent when the figures it needs
+   do not exist, and it stops being latent the moment they do. No step is
+   locked; pressing any phase goes there. The number is not a screen you reach,
+   it is the bottom of the same subtraction, and it cannot resolve until the
+   rows above it do. That is what fixes the complaint without a wizard. */
+const PHASES = [
+  /* `short` is what the rail says and `name` is what the region says. Four
+     full names do not fit across a 430px sheet, and a truncated label is a
+     worse map than a terse one. */
+  { n:'①', key:1, short:'Parcel',  name:'The parcel',      sub:'what you are looking at' },
+  { n:'②', key:2, short:'Becomes', name:'What it becomes', sub:'the ARV of dirt' },
+  { n:'③', key:3, short:'Takes',   name:'What it takes',   sub:'the site work' },
+  { n:'④', key:4, short:'Number',  name:'The number',      sub:'what you can pay' },
+];
+let PHASE = 1, phaseHold = 0;
+
+/* what each phase has to show for itself, in the units the phase is about */
+function phaseState(m){
+  const facts = [inp('acres'), S.zoning, S.slope, S.trees, S.frontage, S.fema,
+                 S.sewer !== 'unknown' ? 1 : null].filter(Boolean).length;
+  const priced = siteItems().length;
+  const fin = inp('finished');
+  const done = m.refused === null;
+  return [
+    { pct: facts / 7 * 100, count: facts + ' of 7', latent:false },
+    { pct: fin ? 100 : 0,   count: fin ? fmt(fin.v) : 'needed', latent:false },
+    { pct: Math.min(100, priced / 8 * 100),
+      count: priced ? priced + ' of 8 lines' : (numOf('lump') ? 'one lump' : 'needed'),
+      latent: false },
+    { pct: done ? 100 : 0,
+      count: done ? (m.clears !== null ? fmt(m.clears) : fmt(m.ceiling)) : 'latent',
+      latent: !done },
+  ];
+}
+/* the next unfilled thing — named, so the walk always has somewhere to go
+   without ever refusing to let you go somewhere else */
+function nextStep(m){
+  const need = k => !numOf(k);
+  if (!inp('acres'))       return { p:1, say:'Acres — it sets the scale for everything below' };
+  if (!S.slope)            return { p:1, say:'How the ground falls — it prices the earthwork' };
+  if (!S.trees)            return { p:1, say:'What is standing on it — it prices the clearing' };
+  if (!inp('finished'))    return { p:2, say:'What a finished lot sells for — nothing prices without it' };
+  if (!siteItems().length && need('lump'))
+    return { p:3, say:'Site work — one lump figure is enough to open the play' };
+  if (need('driveFt'))     return { p:1, say:'Driveway run — the drive is priced by the foot' };
+  if (need('poleFt'))      return { p:1, say:'Feet to the nearest pole — so is the wire' };
+  const unpriced = SITE_LINES.find(l => siteNum(siteVal(l.id)) === null
+    && (benchFor(l.id, benchCtx()).chips || []).length);
+  if (unpriced)            return { p:3, say:unpriced.lab + ' — a benchmark is waiting' };
+  if (!inp('asking'))      return { p:1, say:'Their asking price — or leave it, and your ceiling stands alone' };
+  if (S.access === 'unverified') return { p:1, say:'Road access — a lot you cannot reach is not a lot' };
+  return { p:4, say:'Nothing is waiting — the sheet is as firm as your figures are' };
+}
+function goPhase(k){
+  PHASE = k; phaseHold = Date.now() + 700;
+  const el = document.querySelector('[data-region="' + k + '"]');
+  const sh = $('sheet');
+  if (el && sh){
+    const top = el.offsetTop - 8;
+    if (typeof sh.scrollTo === 'function') sh.scrollTo({ top, behavior:'smooth' });
+    else sh.scrollTop = top;
+  }
+  renderSheet();
+}
+/* the phase follows the scroll, because the sheet is one document and the rail
+   describes where you ARE rather than deciding where you may be */
+function phaseFromScroll(){
+  if (Date.now() < phaseHold) return;
+  const sh = $('sheet'); if (!sh) return;
+  let p = 1;
+  sh.querySelectorAll('[data-region]').forEach(el => {
+    if (el.getBoundingClientRect().top - sh.getBoundingClientRect().top <= 90)
+      p = +el.getAttribute('data-region');
+  });
+  if (p !== PHASE){ PHASE = p; railPaint(); groundPhase(); }
+}
+/* repaint the rail alone — re-rendering the whole sheet on a scroll tick would
+   tear the thumb off the slider and reset every input's caret */
+function railPaint(){
+  document.querySelectorAll('[data-ph]').forEach(el => {
+    const on = +el.dataset.ph === PHASE;
+    el.classList.toggle('on', on);
+  });
+}
+
+function railHTML(m){
+  const st = phaseState(m), nx = nextStep(m);
+  return '<div class="rail2">'
+   + '<div class="rrow">' + PHASES.map((p,i) => {
+      const s = st[i];
+      return '<button type="button" class="rph' + (p.key===PHASE?' on':'') + (s.latent?' lat':'')
+        + '" data-ph="' + p.key + '" data-go="' + p.key + '">'
+        + '<span class="rn">' + p.n + '</span><span class="rname">' + esc(p.short) + '</span>'
+        + '<span class="rcount">' + esc(s.count) + '</span>'
+        + '<span class="rtrk"><i style="width:' + Math.round(s.pct) + '%"></i></span></button>';
+    }).join('') + '</div>'
+   + '<button type="button" class="rnext" data-go="' + nx.p + '">'
+     + '<span class="k">Next</span><span class="s">' + esc(nx.say) + '</span><span class="a">→</span>'
+   + '</button></div>';
+}
+
 function renderSheet(){
  const m=model();
- let out='';
+ const priced = m.refused === null;
+ let out=railHTML(m);
 
- const ask=inp('asking');
+ /* ── ① THE PARCEL — what you are looking at ──────────────────────────────
+    The facts used to be at the BOTTOM of this sheet, under the answer. They
+    are the first thing anybody knows about a parcel and the thing four of the
+    site-work benchmarks are computed from, so they are the first thing asked
+    for. */
+ out+='<div class="region" data-region="1"><div class="rh">'+PHASES[0].n+' The parcel · '+PHASES[0].sub+'</div>';
  out+='<div class="ask"><div class="k">What they’re asking</div>'
   +'<div class="big num">'+rowIn('asking','214,000')+tagFor('asking',true)+'</div>'
-  +'<div class="sub num">'+(m.refused===null&&m.perAcre!==null? fmt(m.perAcre).slice(0)+' per acre · ':'')
-  +(ask?'':'no ask yet — your ceiling stands alone')+'</div></div>';
+  +'<div class="sub num">'+(priced&&m.perAcre!==null? fmt(m.perAcre)+' per acre · ':'')
+  +(inp('asking')?'':'no ask yet — your ceiling stands alone')+'</div></div>';
+ out+=factsHTML();
+ out+='</div>';
 
- out+='<div class="play"><div class="k">The land play · finish the lot and sell</div>';
- if(m.refused){
-  out+='<div class="refuse" style="margin-top:9px"><b>Not priced — '+esc(m.refused.why)+'.</b> '+esc(m.refused.say)+'</div>';
+ /* ── ② WHAT IT BECOMES — the one figure nothing prices without ────────── */
+ out+='<div class="region" data-region="2"><div class="rh">'+PHASES[1].n+' What it becomes · '+PHASES[1].sub+'</div>'
+  +'<div class="lrow big2"><span class="n">Finished lot, sold <button type="button" class="lotlink" id="lots-toggle">'
+  +(S.lotsOpen?'hide the sold lots':(S.lots&&S.lots.length?'sold lots ('+S.lots.length+')':'price it from sold lots'))+'</button></span>'
+  +'<span class="f"><span class="num">$</span>'+rowIn('finished','298,000')+tagFor('finished',true)+'</span></div>'
+  +(S.lotsOpen?lotBench():'')
+  +(inp('finished')?'':'<div class="lsay">Nothing on this sheet prices without it — it is the ARV of dirt. '
+    +'Two sold lots priced above and the bench will suggest a figure you can adopt.</div>')
+  +'</div>';
+
+ /* ── ③ WHAT IT TAKES — the site work and the time ─────────────────────── */
+ out+='<div class="region" data-region="3"><div class="rh">'+PHASES[2].n+' What it takes · '+PHASES[2].sub+'</div>'
+  +'<div class="lrow"><span class="n">Site work <button type="button" class="lotlink" id="site-toggle">'
+  +(S.siteOpen?'hide the lines':(siteItems().length?'priced by line ('+siteItems().length+')':'price it by line'))+'</button></span>'
+  +'<span class="f"><span class="num">− $</span>'
+  +(priced&&siteItems().length
+     ? '<span class="num" style="font-weight:700">'+fmt(m.site).replace('$','')+'</span>'
+     : rowIn('lump','41,500')+tagFor('lump',true))+'</span></div>'
+  +(S.siteOpen?siteBench(m):'')
+  /* carry is its own line because it is its own decision: TIME. */
+  +'<div class="lrow"><span class="n">Carry, <input inputmode="numeric" data-k="months" value="'+esc(S.months)+'" style="width:30px;text-align:center"> mo × $'
+  +'<input inputmode="decimal" data-k="carryMo" value="'+esc(S.raw.carryMo||'')+'" placeholder="0" style="width:5ch;text-align:right">/mo</span>'
+  +'<span class="f"><span class="num">'+(priced&&m.carry>0?'− '+fmt(m.carry):'in site work')+'</span></span></div>'
+  +(priced&&S.sewer==='unknown'
+    ?'<div class="lsub">↳ inside it: septic install, unconfirmed<span class="num">$18,000</span>'+TAG('nd','NEEDED')+'</div>':'')
+  +'</div>';
+
+ /* ── ④ THE NUMBER — the bottom of the same subtraction ─────────────────
+    LATENT, not hidden. The rows are there, dimmed, and the figure cannot
+    resolve until the ones above it do — which is precisely why the number no
+    longer arrives before you have typed anything. */
+ out+='<div class="region'+(priced?'':' latent')+'" data-region="4"><div class="rh">'
+   +PHASES[3].n+' The number · '+PHASES[3].sub+'</div>';
+ if(!priced){
+  out+='<div class="refuse"><b>Not priced — '+esc(m.refused.why)+'.</b> '+esc(m.refused.say)+'</div>'
+    +'<div class="ledger dim">'
+    +['Finished lot, sold','Their ask','Site work + carry','Cost of sale, 7%']
+      .map(l=>'<div class="lrow"><span class="n">'+l+'</span><span class="f"><span class="num">—</span></span></div>').join('')
+    +'</div>'
+    +'<div class="clears num dimfig">—</div>'
+    +'<div class="clears-sub">the subtraction is here and waiting; it resolves the moment the rows above it do</div>';
  } else {
+  out+='<div class="ledger">'
+   +'<div class="lrow"><span class="n">Finished lot, sold</span><span class="f"><span class="num">'+fmt(m.finished)+'</span></span></div>'
+   +'<div class="lrow"><span class="n">Their ask</span><span class="f"><span class="num">'+(inp('asking')?'− '+fmt(inp('asking').v):'—')+'</span></span></div>'
+   +'<div class="lrow"><span class="n">Site work + carry</span><span class="f"><span class="num">− '+fmt(m.siteCarry)+'</span></span></div>'
+   +'<div class="lrow"><span class="n">Cost of sale, 7%</span><span class="f"><span class="num">− '+fmt(m.saleCost)+'</span></span></div>'
+   +'</div>';
   if(m.clears!==null){
    out+='<div class="clears num'+(m.clears<0?' neg':'')+'">'+fmt(m.clears)+'</div>'
-    +'<div class="clears-sub">what the play clears at their number, after everything below'
+    +'<div class="clears-sub">what the play clears at their number, after everything above'
     +(m.spread?' · estimates swing it ±'+fmt(m.spread).slice(1):'')+'</div>';
    if(!m.reaches) out+='<div class="refuse"><b>The play doesn’t price at their number.</b> '
     +'The most this play can pay and still clear '+fmt(m.target)+' is <b>'+fmt(m.ceiling)+'</b> — '
@@ -309,32 +951,49 @@ function renderSheet(){
    out+='<div class="clears num">'+fmt(m.ceiling)+'</div>'
     +'<div class="clears-sub">the most you can pay and still clear '+fmt(m.target)+' — they haven’t named a number, so yours stands alone</div>';
   }
- }
-
- out+='<div class="ledger">'
-  +'<div class="lrow"><span class="n">Finished lot, sold</span><span class="f"><span class="num">$</span>'+rowIn('finished','298,000')+tagFor('finished',true)+'</span></div>'
-  +'<div class="lrow"><span class="n">Their ask</span><span class="f"><span class="num">'+(inp('asking')?'− '+fmt(inp('asking').v):'—')+'</span></span></div>'
-  +'<div class="lrow"><span class="n">Site work + carry, <input inputmode="numeric" data-k="months" value="'+esc(S.months)+'" style="width:30px;text-align:center"> mo</span>'
-  +'<span class="f"><span class="num">− $</span>'+rowIn('lump','41,500')+tagFor('lump',true)+'</span></div>';
- if(m.refused===null&&S.sewer==='unknown')
-  out+='<div class="lsub">↳ inside it: septic install, unconfirmed<span class="num">$18,000</span>'+TAG('nd','NEEDED')+'</div>';
- out+='<div class="lrow"><span class="n">Cost of sale, 7%</span><span class="f"><span class="num">'
-  +(m.refused===null?'− '+fmt(m.saleCost):'—')+'</span></span></div>'
-  +'</div>';
-
- if(m.refused===null)
   out+='<div class="conc num">To clear $<input inputmode="decimal" data-k="target" aria-label="Profit target" value="'+esc(S.raw.target||'')+'" placeholder="'
    +m.target.toLocaleString('en-US')+'">, buy at <b>'+fmt(m.ceiling)+'</b> or less.</div>';
-
- if(m.refused===null&&m.firm.length){
-  out+='<div class="firm"><div class="fh"><span class="k">Before this prices firm</span>'+TAG('nd','NEEDED')+'</div>'
-   +m.firm.map(f=>'<p>'+esc(f.say)+'</p>').join('')+'</div>';
+  /* the price is a thing you can hold — a question you ask with your thumb,
+     and it writes no state */
+  const askV=inp('asking')?inp('asking').v:null;
+  const lo=Math.max(5000, m.ceiling-Math.max(25000,m.target));
+  const hi=Math.max(askV||0, m.ceiling)+15000;
+  const at=trySnap(Math.min(hi,Math.max(lo,SLIDE!==null?SLIDE:m.ceiling)), m.ceiling, askV);
+  out+='<div class="conc num" style="margin-top:8px"><div style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)">If you buy it at…</div>'
+   +'<input type="range" id="tryprice" min="'+lo+'" max="'+hi+'" step="100" value="'+at+'" aria-label="Try a purchase price" style="width:100%;margin:8px 0 6px;accent-color:var(--blue)">'
+   +'<div style="font-size:13px">'+tryLine(m, at, askV)+'</div></div>';
+  if(m.firm.length)
+   out+='<div class="firm"><div class="fh"><span class="k">Before this prices firm</span>'+TAG('nd','NEEDED')+'</div>'
+    +m.firm.map(f=>'<p>'+esc(f.say)+'</p>').join('')+'</div>';
  }
+ out+='</div>';
 
- out+='<div class="facts"><span class="k">The parcel</span><div class="grid">'
-  +'<div><label>Acres</label>'+ '<input inputmode="decimal" data-k="acres" value="'+esc(S.raw.acres||'')+'" placeholder="2.61"></div>'
+ out+='<p class="fine">Every figure says where it came from — typed figures are yours, estimates widen the answer, '
+  +'and a missing figure refuses rather than guesses. Cost of sale is 7% of the finished value: listing commission '
+  +'plus seller-side closing, the same constant the desk’s flip uses. None of this is a survey, a perc test or a '
+  +'title read — it is the arithmetic that tells you whether those are worth paying for.</p>';
+
+ $('sheet').innerHTML=out;
+ wire();
+ renderGround(m);
+ groundPhase();
+}
+
+/* the parcel's facts, as their own block so the walk can put them first */
+function factsHTML(){
+ const opts=(list,cur)=>list.map(o=>'<option value="'+o.id+'"'+(cur===o.id?' selected':'')+'>'+esc(o.lab)+'</option>').join('');
+ const priced = SITE_LINES.filter(l=>{ const b=benchFor(l.id, benchCtx()); return b.chips&&b.chips.length; }).length;
+ return '<div class="facts">'
+  +'<div class="fsay">Four of these price the site work below — '+priced+' of 8 lines are carrying a benchmark right now.</div>'
+  +'<div class="grid">'
+  +'<div><label>Acres <em>prices survey, clearing</em></label><input inputmode="decimal" data-k="acres" value="'+esc(S.raw.acres||'')+'" placeholder="2.61"></div>'
+  +'<div><label>Slope / terrain <em>prices earthwork, drive</em></label><select data-f="slope">'
+   +'<option value="">Not looked at yet</option>'+opts(GRADES.map(g=>({id:g.id,lab:g.lab})), S.slope)+'</select></div>'
+  +'<div><label>What is standing on it <em>prices clearing</em></label><select data-f="trees">'
+   +'<option value="">Not looked at yet</option>'+opts(TREES.map(t=>({id:t.id,lab:t.lab})), S.trees)+'</select></div>'
+  +'<div><label>Driveway run, feet <em>prices the drive</em></label><input inputmode="decimal" data-k="driveFt" value="'+esc(S.raw.driveFt||'')+'" placeholder="300"></div>'
+  +'<div><label>Feet to the nearest pole <em>prices the power</em></label><input inputmode="decimal" data-k="poleFt" value="'+esc(S.raw.poleFt||'')+'" placeholder="400"></div>'
   +'<div><label>Zoning</label><input data-f="zoning" value="'+esc(S.zoning)+'" placeholder="RR — rural res."></div>'
-  +'<div><label>Slope / terrain</label><input data-f="slope" value="'+esc(S.slope)+'" placeholder="11% avg · falls NE"></div>'
   +'<div><label>Road frontage</label><input data-f="frontage" value="'+esc(S.frontage)+'" placeholder="212 ft on Saddleback"></div>'
   +'<div><label>FEMA flood (<a href="https://msc.fema.gov/portal/search" target="_blank" rel="noopener">fema.gov</a>)</label>'
   +'<input data-f="fema" value="'+esc(S.fema)+'" placeholder="Zone X · minimal"></div>'
@@ -346,15 +1005,45 @@ function renderSheet(){
    +'<option value="unverified"'+(S.access==='unverified'?' selected':'')+'>Not verified yet</option>'
    +'<option value="verified"'+(S.access==='verified'?' selected':'')+'>Verified — deeded or frontage</option></select></div>'
   +'</div></div>';
+}
 
- out+='<p class="fine">Every figure says where it came from — typed figures are yours, estimates widen the answer, '
-  +'and a missing figure refuses rather than guesses. Cost of sale is 7% of the finished value: listing commission '
-  +'plus seller-side closing, the same constant the desk’s flip uses. None of this is a survey, a perc test or a '
-  +'title read — it is the arithmetic that tells you whether those are worth paying for.</p>';
+/* ── THE GROUND ANSWERS THE PHASE IT IS ON ────────────────────────────────
+   It does not animate progress; it accumulates information. Phase 1 the chips
+   are inventory and all six are lit. Phase 2 only acreage stays lit, because
+   per-acre is the basis for what the lot becomes. Phase 3 the parcel stops
+   being the subject and the PLAY is — the chips fall back and the drawing is
+   the thing. Phase 4 everything re-lights: the whole play is in shot as the
+   figure lands. */
+/* one place decides what the card looks like, so the button, the boot and the
+   automatic fold cannot disagree about it */
+function paintFold(){
+  const c = $('hcard'), b = $('hfold'); if (!c) return;
+  c.classList.toggle('fold', !!S.hFold);
+  if (b){
+    b.setAttribute('aria-expanded', S.hFold ? 'false' : 'true');
+    b.title = S.hFold ? 'Open the panel' : 'Fold the panel away from the ground';
+    const sr = b.querySelector('.sr'); if (sr) sr.textContent = S.hFold ? 'Open the panel' : 'Fold the panel';
+  }
+}
+/* the 3D ground is the one moment where the card is definitely in the way:
+   the person just spent a billed session to look at the dirt */
+function foldForGround(){
+  if (S.hFoldAuto) return;              // only ever once, and never again
+  S.hFoldAuto = true; S.hFold = true;
+  save(); paintFold();
+}
 
- $('sheet').innerHTML=out;
- wire();
- renderGround(m);
+function groundPhase(){
+  const g = $('ground'); if (!g) return;
+  g.setAttribute('data-phase', String(PHASE));
+  const keep = { 1:null, 2:'Acreage', 3:null, 4:null };
+  document.querySelectorAll('#chips .chip').forEach(el => {
+    const lab = (el.querySelector('.lab')||{}).textContent || '';
+    let op = 1;
+    if (PHASE === 2) op = lab === keep[2] ? 1 : 0.34;
+    else if (PHASE === 3) op = 0.2;
+    el.style.opacity = String(op);
+  });
 }
 
 function wire(){
@@ -368,31 +1057,301 @@ function wire(){
   el.onchange=()=>{ renderSheet(); };
   el.onkeydown=e=>{ if(e.key==='Enter') el.blur(); };
  });
+ const tp=$('tryprice');
+ if(tp){
+  /* input repaints ONLY the readout line — re-rendering the whole sheet on
+     every drag tick would tear the thumb out of your hand */
+  tp.oninput=()=>{ const m2=model(); if(m2.refused)return;
+   const askV=inp('asking')?inp('asking').v:null;
+   SLIDE=trySnap(+tp.value, m2.ceiling, askV);
+   tp.nextElementSibling.innerHTML=tryLine(m2, SLIDE, askV); };
+ }
+ document.querySelectorAll('[data-go]').forEach(el=>{
+   el.onclick=()=>goPhase(+el.dataset.go); });
+ const hf=$('hfold');
+ if(hf) hf.onclick=()=>{ S.hFold=!S.hFold; save(); paintFold(); };
+ paintFold();
+ const st=$('site-toggle');
+ if(st) st.onclick=()=>{ S.siteOpen=!S.siteOpen; save(); renderSheet(); };
+ document.querySelectorAll('[data-site]').forEach(el=>{
+   const commit=()=>{ const id=el.dataset.site;
+     let r=(S.site||[]).find(x=>x.id===id);
+     if(!r){ r={id,v:'',est:true}; S.site.push(r); }
+     r.v=el.value.slice(0,20); save(); renderSheet(); };
+   el.onchange=commit; el.onkeydown=e=>{ if(e.key==='Enter') el.blur(); }; });
+ document.querySelectorAll('[data-siteest]').forEach(el=>{
+   el.onclick=()=>{ const r=(S.site||[]).find(x=>x.id===el.dataset.siteest);
+     if(r){ r.est=!r.est; save(); renderSheet(); } }; });
+ const lt=$('lots-toggle');
+ if(lt) lt.onclick=()=>{ S.lotsOpen=!S.lotsOpen;
+   /* opening the bench seeds the first row, and that row is a comp — so it
+      goes through the same door every other one does, or the wall is one
+      row wider than it says it is */
+   if(S.lotsOpen&&!(S.lots||[]).length&&lotRoom().room>0){
+     S.lots=[{price:'',acres:'',months:'',dist:''}]; spendLot(); }
+   save(); renderSheet(); };
+ const la=$('lots-add');
+ if(la) la.onclick=()=>{
+   if(S.lots.length>=LOT_CEILING||lotRoom().room<=0) return;
+   S.lots.push({price:'',acres:'',months:'',dist:''}); spendLot(); save(); renderSheet(); };
+ document.querySelectorAll('[data-lotx]').forEach(el=>{
+   el.onclick=()=>{ S.lots.splice(+el.dataset.lotx,1); save(); renderSheet(); }; });
+ document.querySelectorAll('[data-lot]').forEach(el=>{
+   const commit=()=>{ const c=S.lots[+el.dataset.li]; if(!c) return;
+     c[el.dataset.lot]=el.value.slice(0,20); save(); renderSheet(); };
+   el.onchange=commit; el.onkeydown=e=>{ if(e.key==='Enter') el.blur(); }; });
+ const tk=$('lots-take');
+ if(tk) tk.onclick=()=>{
+   const acres=inp('acres');
+   const out=lotComps(lotRows(), acres?acres.v:null);
+   if(!out.suggest) return;
+   S.raw.finished=Math.round(out.suggest.value).toLocaleString('en-US');
+   /* three sales make it yours; two keep the band wide — the engine widens
+      an ESTIMATE by W_FINISHED, and two lots have not earned the narrow */
+   S.est.finished = out.n < 3;
+   save(); renderSheet(); };
  document.querySelectorAll('[data-tag]').forEach(el=>{
   el.onclick=()=>{ const k=el.dataset.tag; S.est[k]=!S.est[k]; save(); renderSheet(); };
  });
  document.querySelectorAll('[data-f]').forEach(el=>{
   const k=el.dataset.f;
-  el.onchange=()=>{ if(k==='sewer'||k==='access') S[k]=el.value;
+  /* "Not looked at yet" is a state, not a choice — it wears the soft ink the
+     rest of the sheet gives an unanswered field, so a glance down the column
+     tells you what is still open */
+  const mark=()=>{ if(el.tagName==='SELECT') el.classList.toggle('empty', !el.value); };
+  mark();
+  el.onchange=()=>{ if(k==='sewer'||k==='access'||k==='slope'||k==='trees') S[k]=el.value;
    else { S[k]=el.value; if(k!=='fema') S[k+'Est']=true; }
+   mark(); save(); renderSheet(); };
+ });
+ /* ── PRESSING A BENCHMARK ────────────────────────────────────────────────
+    It lands as an ESTIMATE, always, and the flip is right there beside it.
+    A rule of thumb is not a quote and the sheet must never paint one as
+    though it were: the engine widens the whole answer for every estimated
+    line, which is the honest consequence of pressing this. */
+ document.querySelectorAll('[data-sw]').forEach(el=>{
+  el.onclick=()=>{ const id=el.dataset.sw; const i=(S.siteWhy||[]).indexOf(id);
+   if(i>=0) S.siteWhy.splice(i,1); else S.siteWhy.push(id);
    save(); renderSheet(); };
  });
+ document.querySelectorAll('[data-sb]').forEach(el=>{
+  el.onclick=()=>{ const [id,i]=el.dataset.sb.split(':');
+   const b=benchFor(id, benchCtx()); const c=b.chips&&b.chips[+i]; if(!c) return;
+   let r=(S.site||[]).find(x=>x.id===id);
+   if(!r){ r={id,v:'',est:true}; S.site.push(r); }
+   r.v=String(Math.round(c.v)); r.est=true;
+   save(); renderSheet(); };
+ });
+}
+
+/* ── SITE WORK, BY LINE ────────────────────────────────────────────────────
+   siteCarryOf() has taken an items array since the first commit and no screen
+   ever built one, so the sheet's largest variable stayed a single gut figure
+   long after the person had quotes in hand.
+
+   The eight lines are what a raw parcel actually has to buy to become a lot.
+   They are not sliders: a site cost is a QUOTE, not a share of the finished
+   value, and a slider running to an invented ceiling would be decoration
+   pretending to be an estimate. Each line is a figure you have or do not,
+   and each carries the same entered/estimate tag as everything else here.
+
+   The septic line is named `septic` on purpose: the engine stops adding its
+   own $18,000 allowance the moment an item with that id exists, which is
+   exactly the handover from "we assumed and said so" to "you priced it". */
+const SITE_LINES = [
+  { id:'access',  lab:'Driveway & access' },
+  { id:'clear',   lab:'Clearing & grubbing' },
+  { id:'septic',  lab:'Septic or sewer tap' },
+  { id:'water',   lab:'Well or water tap' },
+  { id:'power',   lab:'Power drop' },
+  { id:'survey',  lab:'Survey & platting' },
+  { id:'permit',  lab:'Permits & engineering' },
+  { id:'drain',   lab:'Drainage & erosion' },
+];
+const siteNum=v=>{ const x=parseFloat(String(v??'').replace(/[^0-9.]/g,'')); return Number.isFinite(x)&&x>0?x:null; };
+function siteItems(){
+  if (!S.siteOpen) return [];
+  return (S.site||[]).map(x=>({ id:x.id, v:siteNum(x.v), prov:x.est?'estimate':'entered' }))
+                     .filter(x=>x.v!==null);
+}
+function siteVal(id){ const r=(S.site||[]).find(x=>x.id===id); return r?r.v:''; }
+function siteEst(id){ const r=(S.site||[]).find(x=>x.id===id); return !!(r&&r.est); }
+function siteBench(m){
+  const items = siteItems();
+  const tot = items.reduce((t,x)=>t+x.v, 0);
+  const ctx = benchCtx();
+  /* ── THE BENCHMARK, OR THE PHONE CALL ────────────────────────────────────
+     Eight empty boxes with an em-dash for a placeholder is a panel a beginner
+     opens once. Each line now either carries a figure they can press — priced
+     from the facts they gave, with the assumption named — or says plainly that
+     it is a phone call and hands them the words to say. The refusals are not
+     the weak lines here; they are the strongest. A well is unguessable and
+     saying so is worth more than a confident average would be. */
+  const benchHTML = l => {
+    if (siteNum(siteVal(l.id)) !== null) return '';       // they have a figure; get out of the way
+    const b = benchFor(l.id, ctx);
+    let h = '';
+    if (b.chips && b.chips.length)
+      h += '<div class="sbc">'+b.chips.map((c,i)=>
+        '<button type="button" data-sb="'+l.id+':'+i+'" title="'+esc(c.why)+'">'
+        +'<span>'+esc(c.t)+'</span><b>'+fmt(c.v)+'</b></button>').join('')+'</div>';
+    else if (b.call)
+      h += '<div class="sbcall"><b>This one is a phone call.</b> '+esc(b.call.why)
+        +' Ring <b>'+esc(b.call.who)+'</b> and ask '+esc(b.call.ask)+'</div>';
+    else if (b.needs)
+      h += '<div class="sbneed">Needs the '+esc(b.needs)+' below — then it prices itself.</div>';
+    /* ── AVAILABLE, NOT IN THE WAY ───────────────────────────────────────
+       Every one of these notes is load-bearing — "grubbed, not mulched" is the
+       difference between a quote that works and one that leaves stumps under
+       the foundation. Eight of them at once is a wall, and a wall is a panel
+       nobody reads at all. So the sentence that would cost somebody money
+       stays visible and the paragraph behind it opens on a press. */
+    if (b.note){
+      const cut = b.note.search(/[.!?]\s+[A-Z]/);
+      const lead = cut > 0 ? b.note.slice(0, cut+1) : b.note;
+      const rest = cut > 0 ? b.note.slice(cut+1).trim() : '';
+      const open = (S.siteWhy||[]).indexOf(l.id) >= 0;
+      h += '<div class="sbnote">'+esc(lead)
+        + (rest ? ' <button type="button" class="sbmore" data-sw="'+l.id+'">'
+            +(open?'less':'why')+'</button>'+(open?'<span class="sbrest">'+esc(rest)+'</span>':'') : '')
+        + '</div>';
+    }
+    return h ? '<div class="sbwrap">'+h+'</div>' : '';
+  };
+  const rows = SITE_LINES.map(l=>
+    '<div class="sitel"><label for="si-'+l.id+'">'+esc(l.lab)+'</label>'
+    +'<input id="si-'+l.id+'" data-site="'+l.id+'" inputmode="decimal" placeholder="—" value="'+esc(siteVal(l.id))+'">'
+    +(siteNum(siteVal(l.id))!==null
+      ? '<button type="button" class="e" data-siteest="'+l.id+'" title="Entered or estimate — press to flip">'
+        +(siteEst(l.id)?'<span class="tag es">E</span>':'<span class="tag en">✓</span>')+'</button>'
+      : '<span></span>')
+    +'</div>'+benchHTML(l)).join('');
+  const say = items.length
+    ? '<div class="sitesum"><span>'+items.length+' line'+(items.length===1?'':'s')+' priced — '
+      +'these replace the lump above</span><b>'+fmt(tot)+'</b></div>'
+      +(S.sewer==='unknown' && !items.some(x=>x.id==='septic')
+        ? '<div class="lsay">No sewer on record and no septic line priced, so the sheet is still '
+          +'carrying its own $18,000 allowance inside the total. Price the line and that assumption goes away.</div>'
+        : '')
+    : '<div class="lsay">Early on, one lump figure above is enough. When the quotes arrive, price them '
+      +'here and they take over from it — a sum of quotes outranks a gut figure, the same way a '
+      +'contractor\u2019s bid outranks a slider on the house sheet.</div>';
+  return '<div class="lots"><div class="lh"><span class="k">Site work, by line</span></div>'+rows+say+'</div>';
+}
+
+/* ── THE LOT BENCH ─────────────────────────────────────────────────────────
+   The refusal has promised this door since the first commit: "Comps for
+   finished lots nearby are the way in." The engine's lotComps() carries the
+   three lessons the house bench learned the hard way; this renders its rows
+   and lands its suggestion on the finished figure with one press.
+
+   n ≥ 3 sold lots land the figure as ENTERED — the same rule as the house
+   bench: you derived it, so the sheet stops treating the hardest figure as a
+   guess. Exactly two land it as an ESTIMATE, because two sales are a line,
+   not a cluster, and the band should stay wide until a third makes it one. */
+function lotRows(){
+  const num=v=>{ const x=parseFloat(String(v??'').replace(/[^0-9.]/g,'')); return Number.isFinite(x)?x:null; };
+  return (S.lots||[]).map(c=>({ price:num(c.price), acres:num(c.acres), months:num(c.months), dist:num(c.dist) }));
+}
+function lotBench(){
+  const acres = inp('acres');
+  const out = lotComps(lotRows(), acres ? acres.v : null);
+  const row = (c,i) => {
+    const r = out.rows[i] || {};
+    return '<div class="lrowc">'
+      +'<input data-lot="price" data-li="'+i+'" inputmode="decimal" placeholder="sold for — 300,000" value="'+esc(c.price||'')+'" aria-label="Sold price">'
+      +'<input data-lot="acres" data-li="'+i+'" inputmode="decimal" placeholder="acres" value="'+esc(c.acres||'')+'" aria-label="Acres">'
+      +'<input data-lot="months" data-li="'+i+'" inputmode="decimal" placeholder="mo" value="'+esc(c.months||'')+'" title="Months since it sold" aria-label="Months ago">'
+      +'<input data-lot="dist" data-li="'+i+'" inputmode="decimal" placeholder="mi" value="'+esc(c.dist||'')+'" title="Miles from the subject" aria-label="Miles away">'
+      +'<button type="button" class="x" data-lotx="'+i+'" title="Remove" aria-label="Remove this lot">✕</button>'
+      +(r.ok ? '<span class="lwhy"><span class="sc">'+r.score+'</span>'+esc((r.why||[]).join(' · '))
+          +(r.perAcre?'<span style="margin-left:auto">'+fmt(r.perAcre)+'/ac</span>':'')+'</span>'
+        : r.noPrice ? '<span class="lwhy">a lot that sold for nothing did not sell — put the real price in</span>' : '')
+      +'</div>';
+  };
+  let say='';
+  if (out.suggest){
+    const s2=out.suggest;
+    say = '<div class="lsay">'+out.n+' sold lots, weighted by how much each deserves to be believed, say '
+      +'<b>'+fmt(s2.value)+'</b>'
+      +(s2.perAcre?' — '+fmt(s2.perAcre)+' an acre across your '+acres.v+' acres':' — read as whole lots; add acreages and it prices per acre')
+      +'. The spread runs '+fmt(s2.lo)+' to '+fmt(s2.hi)+'.</div>'
+      +'<div class="ltake"><button type="button" class="btn sm" id="lots-take">Use '+fmt(s2.value)+'</button>'
+      +'<span style="font-size:11px;color:var(--soft)">'+(out.n>=3
+        ? 'lands as <b>entered</b> — you derived it from sales you scored'
+        : 'lands as an <b>estimate</b> — two sales are a line, not a cluster; a third firms it')+'</span></div>';
+  } else if (out.n === 1){
+    say = '<div class="lsay">One sold lot is a data point, not a value. A second draws the line.</div>';
+  } else {
+    say = '<div class="lsay">The hardest figure on this sheet is what a FINISHED lot actually sells for nearby. '
+      +'County records and closed listings both carry them — two or three, priced here, beat any guess.</div>';
+  }
+  /* ── THE WALL SAYS WHICH WALL IT IS ────────────────────────────────────
+     Three different people arrive here and the old bench treated all three
+     the same — it treated them as paid. Each rung names its own number and
+     its own next step, so a registered member is never told they are still a
+     guest, and a guest is sent to the thing that would actually help them
+     (an account) rather than to a price list. */
+  const R = lotRoom();
+  let add;
+  if (R.room > 0){
+    add = '<button type="button" class="ladd" id="lots-add">+ add a sold lot'
+      + (R.rung === 'paid' ? ''
+         : R.rung === 'account'
+           ? ' <span class="cnt">' + (R.cap - R.used) + '/' + R.cap + ' left this week</span>'
+           : ' <span class="cnt">' + (S.lots||[]).length + '/' + FREE_IN_BROWSER + '</span>')
+      + '</button>';
+  } else if (R.rung === 'paid'){
+    add = '<div class="lsay">Eight sold lots is the bench. If you need a ninth, the answer is '
+      + 'usually a tighter definition of the neighbourhood, not another sale.</div>';
+  } else if (R.rung === 'account'){
+    add = '<div class="lwall"><b>That is this week\u2019s ' + R.cap + ' comparable sales.</b> '
+      + 'The allowance is shared with the house sheet\u2019s comp workbench \u2014 it is one '
+      + 'number across the product. It resets weekly, or a plan lifts it for good.'
+      + '<a class="btn sm" href="plans.html">See plans</a></div>';
+  } else if (R.rung === 'account-unknown'){
+    /* signed in, but the week's balance could not be read. The degrade is
+       deliberate; telling a member to go and make an account is not. */
+    add = '<div class="lwall"><b>Three sold lots in this browser, for now.</b> '
+      + 'You are signed in, but this week\u2019s allowance could not be read just then \u2014 so the '
+      + 'bench is holding to the offline limit rather than guessing in your favour. Reload and it '
+      + 'will ask again; nothing you have scored goes anywhere either way.</div>';
+  } else {
+    add = '<div class="lwall"><b>Three sold lots in this browser.</b> '
+      + 'A free account carries twelve comparable sales a week, across the house sheet and this '
+      + 'one, and remembers them on every device. No card.'
+      + '<a class="btn sm" href="desk.html#account">Make an account</a></div>';
+  }
+  return '<div class="lots"><div class="lh"><span class="k">Sold lots nearby</span></div>'
+    +(S.lots||[]).map(row).join('')
+    + add
+    +say+'</div>';
 }
 
 /* ── the worked example — the Wimberley parcel from the design ────────────
    The same figures the engine's test suite holds to the design doc's ledger,
    so the page, the module and the mock cannot drift apart. */
-$('demo').onclick=()=>{
- S={ addr:'1847 Saddleback Pass, Wimberley TX',
-  raw:{ asking:'214,000', acres:'2.61', finished:'298,000', lump:'41,500', target:'' },
-  est:{ finished:true, lump:true }, months:'9', sewer:'unknown', access:'unverified',
-  zoning:'RR — rural res.', zoningEst:true, slope:'11% avg · falls NE', slopeEst:true,
-  frontage:'212 ft on Saddleback', frontageEst:true, fema:'Zone X · minimal' };
+function loadWorked(){
+ S=Object.assign(blank(), { addr:'1847 Saddleback Pass, Wimberley TX',
+  raw:{ asking:'214,000', acres:'2.61', finished:'298,000', lump:'41,500', target:'',
+        driveFt:'300', poleFt:'400' },
+  est:{ finished:true, lump:true },
+  zoning:'RR — rural res.', slope:'roll', trees:'scatter',
+  frontage:'212 ft on Saddleback', fema:'Zone X · minimal' });
  save(); $('in-addr').value=S.addr; renderSheet();
-};
+}
+$('demo').onclick=loadWorked;
+/* ── #demo=land ────────────────────────────────────────────────────────────
+    The demo floor links straight in. Same rule the desk's scenario links
+    follow: an explicit request to see THIS parcel overwrites without asking,
+    because there is nothing of yours on a sheet you arrived at by clicking a
+    demo. The hash is dropped so a refresh is your sheet, not the showroom's. */
+if ((location.hash||'').toLowerCase() === '#demo=land'){
+ loadWorked();
+ try { history.replaceState(null, '', location.pathname); } catch(e){}
+}
 $('clear').onclick=()=>{
- S={ addr:'', raw:{}, est:{}, months:'9', sewer:'unknown', access:'unverified',
-  zoning:'', slope:'', frontage:'', fema:'', zoningEst:true, slopeEst:true, frontageEst:true };
+ S=blank();
  save(); $('in-addr').value=''; renderSheet();
 };
 $('in-addr').value=S.addr;
@@ -400,6 +1359,295 @@ $('in-addr').oninput=()=>{ S.addr=$('in-addr').value; save(); };
 $('in-addr').onchange=()=>renderSheet();
 
 renderSheet();
+/* the sketch is a square inside a rectangle, so every anchor moves when the
+   window does — chips, dots and the scale bar all re-place on resize */
+let planT=null;
+window.addEventListener('resize', ()=>{ clearTimeout(planT);
+  planT=setTimeout(()=>{ if(!G3.on) renderGround(model()); }, 120); });
+/* the rail describes where you are, so it follows the sheet's own scroll —
+   and repaints the rail ALONE, because re-rendering on a scroll tick would
+   tear the thumb off the slider and reset every caret on the page */
+(function(){ const sh=$('sheet'); if(!sh) return;
+  let t=null;
+  const on=()=>{ if(t) return; t=setTimeout(()=>{ t=null; phaseFromScroll(); }, 90); };
+  sh.addEventListener('scroll', on, { passive:true });
+  window.addEventListener('scroll', on, { passive:true });
+})();
+
+/* ══ THE GROUND, WHEN IT ARRIVES ═══════════════════════════════════════════
+   Everything above works on the sketch and never learns otherwise. This block
+   asks the server whether the 3D ground is open — /api/land/config — and only
+   on a yes does it load CesiumJS and stand Google's photorealistic tiles
+   under the same chips. Every failure lands back on the sketch, because the
+   arithmetic never depended on the ground.
+
+   The rules it keeps, from the committed design and Google's terms:
+     · attribution renders in the FLOOR — the opaque paper band under the
+       glass. Cesium's whole credit system is pointed there (creditContainer),
+       so no chip, pill or panel can ever sit on it.
+     · one visit is ONE root-tile session. Nothing here re-requests the root.
+     · mid-flight, chips collapse to their dots; labels return 350ms after
+       the camera settles — the dot is the truth, and it never leaves the
+       dirt it marks.
+     · no parcel boundary is drawn on the real ground. The sketch's dashed
+       polygon is an illustration; on real terrain it would be an invented
+       property line, and this product does not invent facts. The boundary
+       arrives when county parcel data does. */
+const CESIUM_V = '1.132';
+const CESIUM_BASE = 'https://cesium.com/downloads/cesiumjs/releases/' + CESIUM_V + '/Build/Cesium/';
+
+async function groundUp(){
+ const btn = $('raise');
+ btn.disabled = true; btn.textContent = 'Standing the ground up…';
+ const stay = (msg) => { btn.textContent = msg; /* stays disabled: the answer IS the state */ };
+ let cfg = null;
+ try { cfg = await (await fetch('/api/land/config')).json(); }
+ catch(e){ return stay('The ground could not be reached — the sketch still prices'); }
+ if (!cfg || !cfg.ok){
+  if (cfg && cfg.why === 'quota'){
+   $('floor').innerHTML = '<b>Out of 3D sessions for today.</b> The ground comes back at midnight UTC. '
+    + 'Nothing else is waiting on it — the sheet prices without it.'
+    + '<span class="cam">flat · quota</span>';
+   return stay('Out of 3D sessions today — back at midnight UTC');
+  }
+  if (cfg && cfg.why === 'rate')
+   return stay('The ground is resting this hour — the sketch still prices');
+  /* ── THE ONE REFUSAL THAT IS A DOOR ───────────────────────────────────
+     Every other failure here is weather. This one is a decision, so it says
+     what it costs (nothing), what it needs (an account), and does not pretend
+     the drawing is a consolation prize — it is drawn to scale either way. */
+  if (cfg && cfg.why === 'account'){
+   $('floor').innerHTML = '<b>The photorealistic ground comes with an account.</b> '
+    + 'Free, no card. The drawing beside it is to scale either way, and it prices without it.'
+    + '<a href="desk.html#account" style="margin-left:10px;font-weight:650">Make an account</a>'
+    + '<span class="cam">flat · sketch</span>';
+   return stay('The 3D ground comes with a free account');
+  }
+  if (cfg && cfg.why === 'share')
+   return stay('That is your share of today’s 3D ground — back at midnight UTC');
+  if (cfg && cfg.why === 'origin')
+   return stay('The ground could not be reached from here');
+  return stay('The 3D ground is not switched on here');
+ }
+ try {
+  await new Promise((ok, no) => {
+   const c = document.createElement('link'); c.rel='stylesheet'; c.href=CESIUM_BASE+'Widgets/widgets.css';
+   document.head.appendChild(c);
+   const s = document.createElement('script'); s.src=CESIUM_BASE+'Cesium.js';
+   s.onload=ok; s.onerror=no; document.head.appendChild(s);
+  });
+  window.CESIUM_BASE_URL = CESIUM_BASE;
+
+  /* the floor grows a credit slot before the viewer exists, so Cesium's
+     credits have somewhere honest to land from the first frame */
+  $('floor').innerHTML = '<div id="credits" style="display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden"></div>'
+   + '<span class="cam" id="camtext"></span>';
+
+  const host = document.createElement('div');
+  host.id = 'cesium-host'; host.style.cssText = 'position:absolute;inset:0;z-index:0';
+  $('ground').prepend(host);
+
+  /* ── THE FLOOR CARRIES ONE PRODUCT'S CREDIT, AND IT IS NOT OURS ─────────
+     Cesium puts its own ion watermark in the credit container by default.
+     On this page that is a third logo nobody asked for, sitting in the band
+     reserved for the people whose imagery this actually is. Cleared before
+     the viewer exists; Google's credits are untouched. */
+  Cesium.CreditDisplay.cesiumCredit = new Cesium.Credit('');
+
+  const v = new Cesium.Viewer(host, {
+   animation:false, timeline:false, baseLayerPicker:false, geocoder:false,
+   homeButton:false, sceneModePicker:false, navigationHelpButton:false,
+   fullscreenButton:false, selectionIndicator:false, infoBox:false,
+   creditContainer: document.getElementById('credits'),
+   baseLayer: false, skyAtmosphere: false, contextOptions:{ webgl:{ failIfMajorPerformanceCaveat:false } },
+  });
+  v.scene.globe.show = false;
+  /* with the globe hidden, Cesium's default backdrop is a starfield — space,
+     which is the one place this product is definitively not. The backdrop is
+     the ground token, so the seam between "tiles not loaded yet" and "tiles"
+     is a shade, not a genre. */
+  if (v.scene.skyBox) v.scene.skyBox.show = false;
+  v.scene.sun.show = false; v.scene.moon.show = false;
+  v.scene.backgroundColor = Cesium.Color.fromCssColorString('#0A0F18');
+  /* the official helper, not a hand-built URL: it owns the session token
+     Google's tiles hand back on the root request and re-attaches it to every
+     child, and it registers Google's credit with the display for us. A
+     hand-rolled fromUrl() loads the root and then quietly renders nothing. */
+  Cesium.GoogleMaps.defaultApiKey = cfg.key;
+  const tileset = await Cesium.createGooglePhotorealistic3DTileset({ showCreditsOnScreen: true });
+  v.scene.primitives.add(tileset);
+  G3.on = true; G3.viewer = v; G3.tileset = tileset;
+
+  /* the sketch yields to the ground; the chips stay, and ride it */
+  $('parcel').style.display = 'none';
+  btn.remove();
+  document.querySelectorAll('.gctl button').forEach(b => b.disabled = false);
+  $('h-cov').textContent = 'Ground · 3D';
+  foldForGround();      // and the panel gets out of the way of what you paid to see
+
+  wireCamera(v);
+  await flyHome();
+  chipsRide(v);
+ } catch(e){
+  /* any failure — WebGL, a blocked CDN, tiles refusing — is the flat page,
+     with the floor saying so in the no-coverage grammar */
+  G3.on = false;
+  const h = document.getElementById('cesium-host'); if (h) h.remove();
+  $('parcel').style.display = '';
+  $('floor').innerHTML = '<b>No 3D ground in this session.</b> The sketch stands in, and the read still stands — '
+   + 'the sheet prices without the ground.<span class="cam">flat · fallback</span>';
+  stay('The 3D ground could not stand up here');
+ }
+}
+
+/* address → coordinate → camera. The pin is the fallback the geocoder offers
+   by name, so the same box takes "1847 Saddleback Pass" and "29.99, -98.09". */
+async function flyHome(){
+ if (!G3.on) return;
+ let lat = 30.0005, lon = -98.0980;                         // Wimberley TX — the worked example's hills
+ if (S.addr && S.addr.trim().length >= 6){
+  try { const g = await (await fetch('/api/land/geo?q=' + encodeURIComponent(S.addr))).json();
+        if (g && g.ok){ lat = g.lat; lon = g.lon;
+          $('h-sub').textContent = (inp('acres') ? inp('acres').v + ' acres · ' : '') + 'pin: ' + (g.matched || S.addr); } }
+  catch(e){}
+ }
+ G3.center = { lat, lon, h: 0 };
+ const v = G3.viewer;
+ const dest = Cesium.Cartesian3.fromDegrees(lon, lat - 0.0028, 420);
+ const look = { heading: 0, pitch: Cesium.Math.toRadians(-52), roll: 0 };
+ /* ── ARRIVE FIRST, THEN FLY ───────────────────────────────────────────────
+    flyTo is an animation, and an animation only advances while the browser
+    is handing out frames. A tab that is not in front gets none — so a page
+    that only reaches its subject at the END of a fly-in can be left parked
+    on Cesium's default view of the whole planet, staring at a starfield,
+    with every chip drawn correctly around a parcel the camera never went to.
+    setView puts the camera where it belongs immediately; the fly is then
+    pure decoration, and the arrival never depends on it. Raced against a
+    timeout for the same reason: nothing downstream may hang on a frame. */
+ v.camera.setView({ destination: dest, orientation: look });
+ await Promise.race([
+   new Promise(done => v.camera.flyTo({ destination: dest, orientation: look,
+     duration: 2.2, complete: done, cancel: done })),
+   new Promise(done => setTimeout(done, 4000)),
+ ]);
+ G3.center.h = await groundHeight(v, lon, lat);
+}
+
+/* ── THE DOTS HAVE TO BE ON THE DIRT, NOT UNDER IT ────────────────────────
+   A chip anchored at ellipsoid height 0 in the Texas Hill Country is buried
+   about three hundred metres below the ground it is describing, and projects
+   to a point that slides wildly as the camera tilts. Once the tiles are
+   there, the ground's own height is the only honest anchor — so it is asked
+   for, once, from the tileset itself. Zero is the fallback, and a fallback
+   that is visibly wrong is better than a guess that looks right. */
+async function groundHeight(v, lon, lat){
+ /* the clamp can only answer once tiles are actually under the point, and
+    the fly-in finishes before they are. Asked again, patiently, rather than
+    once and wrongly — a chip anchored at zero is a chip in the wrong place. */
+ for (let i = 0; i < 8; i++){
+  try {
+   const out = await v.scene.clampToHeightMostDetailed([Cesium.Cartesian3.fromDegrees(lon, lat, 0)]);
+   if (out && out[0]){
+    const h = Cesium.Cartographic.fromCartesian(out[0]).height;
+    if (Number.isFinite(h) && Math.abs(h) > 0.5) return h;
+   }
+  } catch(e){}
+  await new Promise(r => setTimeout(r, 800));
+ }
+ return 0;
+}
+
+/* ── the chips ride the camera ────────────────────────────────────────────
+   Six ground points offset from the pin — approximate spots on and around
+   the parcel, not survey corners, which is why no boundary joins them. Each
+   frame they project to the screen; the CHIP div (pill + leader + dot) moves
+   as one, so the dot stays glued to its dirt. While the camera moves, pills
+   collapse to dots; 350ms after it settles they return. */
+function chipsRide(v){
+ const M = 0.0000090;                                        // ≈ degrees per metre
+ const OFF = [[-45,30],[25,55],[-70,-10],[10,0],[55,-15],[-15,-55]];
+ let hideT = null, moving = false;
+ const box = $('chips');
+ const setMoving = m => {
+  moving = m;
+  box.querySelectorAll('.chip .pill').forEach(p => p.style.opacity = m ? '0' : '1');
+ };
+ v.camera.moveStart.addEventListener(() => { clearTimeout(hideT); setMoving(true); });
+ v.camera.moveEnd.addEventListener(() => { clearTimeout(hideT); hideT = setTimeout(() => setMoving(false), 350); });
+ v.scene.postRender.addEventListener(() => {
+  if (!G3.center) return;
+  const chips = box.querySelectorAll('.chip');
+  const W = $('ground').clientWidth, H = $('ground').clientHeight;
+  chips.forEach((el, i) => {
+   const o = OFF[i % OFF.length];
+   const c = Cesium.SceneTransforms.worldToWindowCoordinates(v.scene,
+     Cesium.Cartesian3.fromDegrees(G3.center.lon + o[0]*M, G3.center.lat + o[1]*M, G3.center.h || 0));
+   if (!c || c.x < -40 || c.x > W+40 || c.y < 20 || c.y > H+40){ el.style.visibility='hidden'; return; }
+   el.style.visibility = '';
+   el.style.left = (c.x / W * 100) + '%';
+   el.style.top  = (c.y / H * 100) + '%';
+  });
+ });
+}
+
+/* orbit · tilt · reset — the three pills come alive */
+function wireCamera(v){
+ const btns = document.querySelectorAll('.gctl button');
+ let orbitTick = null;
+ btns[0].onclick = () => {                                   // Orbit
+  if (!G3.center) return;
+  G3.orbiting = !G3.orbiting;
+  clearInterval(orbitTick);
+  /* ── AROUND THE PARCEL, NOT AROUND THE PLANET ──────────────────────────
+     camera.rotate(UNIT_Z) rotates the camera's POSITION about the axis its
+     reference frame is centred on — and the default frame is centred at the
+     middle of the Earth. One press swept the camera along the 30th parallel
+     at hundreds of kilometres a second: terrain streaming past, parcel gone,
+     which a person reports — correctly — as "the maps thing is buggy". The
+     `center` the old code computed and then never used was the tell.
+     lookAt() re-centres the frame on the parcel; heading walks; the frame is
+     released the moment the orbit stops, or every later fly would still be
+     shackled to it. */
+  if (G3.orbiting){
+   const center = Cesium.Cartesian3.fromDegrees(G3.center.lon, G3.center.lat, G3.center.h || 0);
+   const range = Math.max(120, Cesium.Cartesian3.distance(v.camera.position, center));
+   const pitch = v.camera.pitch;
+   let heading = v.camera.heading;
+   orbitTick = setInterval(() => {
+    if (!G3.orbiting){ clearInterval(orbitTick); return; }
+    heading += Cesium.Math.toRadians(0.22);
+    v.camera.lookAt(center, new Cesium.HeadingPitchRange(heading, pitch, range));
+   }, 33);
+  } else {
+   v.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+  }
+ };
+ btns[1].onclick = () => {                                   // Tilt: 30 → 52 → 74
+  if (!G3.center) return;
+  const T = [30, 52, 74]; G3.tiltIdx = (G3.tiltIdx + 1) % 3; G3.orbiting = false;
+  v.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+  const t = T[G3.tiltIdx];
+  v.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(G3.center.lon, G3.center.lat - 0.0028 * (t/52), 180 + 340*(t/52)),
+   orientation:{ heading: v.camera.heading, pitch: Cesium.Math.toRadians(-t), roll: 0 }, duration: 1.1 });
+ };
+ btns[2].onclick = () => { G3.orbiting = false;
+  v.camera.lookAtTransform(Cesium.Matrix4.IDENTITY); flyHome(); };  // Reset north
+ setInterval(() => {
+  const el = $('camtext'); if (!el || !G3.on) return;
+  const h = Math.round(Cesium.Math.toDegrees(v.camera.heading)) % 360;
+  const p = Math.round(-Cesium.Math.toDegrees(v.camera.pitch));
+  el.textContent = 'camera ' + (h < 23 || h > 337 ? 'N' : h < 68 ? 'NE' : h < 113 ? 'E' : h < 158 ? 'SE'
+    : h < 203 ? 'S' : h < 248 ? 'SW' : h < 293 ? 'W' : 'NW') + ' ' + Math.abs(h) + '° · tilt ' + p + '°';
+ }, 500);
+}
+
+/* the address box re-flies the camera on commit, when the ground is up */
+$('in-addr').addEventListener('change', () => { if (G3.on) flyHome(); });
+
+{ const btn = $('raise');
+  if (location.protocol === 'file:'){ btn.disabled = true; btn.textContent = 'The 3D ground needs the live site'; }
+  else btn.onclick = () => groundUp();
+}
 </script>
 </body>
 </html>

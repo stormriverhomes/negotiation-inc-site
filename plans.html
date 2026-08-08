@@ -81,7 +81,20 @@ h1 em{font-style:normal;color:var(--blue)}
  border:1px solid var(--gold-soft);background:var(--gold-soft);border-radius:var(--r-pill);
  font-size:13.5px;color:var(--gold)}
 .prelaunch b{color:#5f4813;font-weight:700;white-space:nowrap}
-/* The founding offer. One hundred places at a price that never moves, which is
+/* The founding offer. Twenty-five places at a held price for twelve months.
+   It was a hundred places at a permanent discount, and the arithmetic on that
+   was worse than it looked: against the list price it forgoes eight thousand a
+   month FOREVER — ninety-six thousand a year, every year, or sixteen per cent
+   of a fifty-thousand MRR target given away before the first customer arrives.
+   Seats 26–100 buy no evidence the first 25 did not already buy, so the tail
+   of that offer was pure cost.
+
+   Twenty-five at $79 for a year costs $15,000 in total and then heals. It is
+   also the more honest offer: "forever" from a company with no entity yet is a
+   promise a reader half-discounts anyway, and a term you can actually keep is
+   worth more than one you cannot. The old note follows, because the reasoning
+   about SCARCITY still holds — it is the DURATION that was the mistake.
+   The founding offer. Twenty-five places at a price that holds for a year, which is
    the only honest form of urgency: the number is finite and checkable, and the
    people who take it are the ones who tell you what to build next. */
 .topgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,.7fr);
@@ -222,7 +235,33 @@ h1 em{font-style:normal;color:var(--blue)}
 .spot .saves b{color:var(--green);font-weight:700}
 
 /* ── the matrix ── */
+/* ── THE COLUMN NOBODY ON A PHONE COULD SEE ────────────────────────────────
+   `overflow:hidden` on a 444px table inside a 338px phone did exactly what it
+   says: The Office column — the £249 tier, the highest-value plan on the page
+   — was clipped off the right edge with NO WAY TO REACH IT. Not scrolled past;
+   unreachable. Every Office figure in every feature row was invisible on the
+   device most people open a link on.
+
+   The fix is the standard one for a comparison table that cannot fit: the
+   feature name STAYS while the plans swipe. A pricing table you have to scroll
+   is survivable; one whose most expensive column does not exist is not. */
 .matrix{margin:30px 0 0;border:1px solid var(--line-2);border-radius:var(--r-card);overflow:hidden}
+.mscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:720px){
+  /* the row's name is the axis — losing it while swiping makes the numbers
+     meaningless, so it stays put and the plans move under it */
+  th:first-child,td:first-child{position:sticky;left:0;z-index:2;background:#fff;
+   box-shadow:1px 0 0 var(--line)}
+  tbody tr:hover td:first-child{background:var(--wash)}
+  table{font-size:13.5px}
+  th,td{padding:10px 11px}
+  th:first-child,td:first-child{width:auto;min-width:186px}
+  /* and it has to LOOK swipeable, or a scroll nobody discovers is a scroll
+     that may as well be hidden */
+  .mscroll{position:relative}
+  .mhint{display:block}
+}
+.mhint{display:none;font-size:11.5px;color:var(--soft);padding:8px 14px 0;letter-spacing:.02em}
 .matrix .mh{padding:16px 20px;border-bottom:1px solid var(--line);background:var(--wash)}
 .matrix h2{font-size:22px}
 .matrix .mh p{font-size:13.5px;color:var(--soft);margin-top:3px}
@@ -283,7 +322,11 @@ td:first-child b{font-weight:650;color:var(--ink)}
 
 
 footer{border-top:1px solid var(--line);margin-top:64px;padding:24px 0 46px;font-size:13.5px;color:var(--soft)}
-footer a{color:var(--mid);text-decoration:none;margin-right:18px}
+/* inline links with no vertical padding: at 360px this row wraps to three
+   lines about five pixels apart, and a thumb aimed at Privacy lands on Terms.
+   inline-block plus padding makes each one a 27px target and costs nothing on
+   a wide screen, where the row does not wrap at all. */
+footer a{display:inline-block;padding:5px 0;color:var(--mid);text-decoration:none;margin-right:18px}
 footer a:hover{color:var(--ink)}
 @media(max-width:900px){
   .cards{grid-template-columns:1fr}
@@ -361,11 +404,14 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 
  <div class="founding">
   <div>
-   <div class="k">The founding hundred</div>
-   <h3>$49 a month for Underwriter — for as long as you stay.</h3>
-   <p>One hundred places. Take one and the price never moves, whatever it becomes later. In
-    exchange we want the thing money cannot buy at this stage: what breaks, what is missing,
-    and what you would have paid for instead.</p>
+   <div class="k">The founding twenty-five</div>
+   <h3>$79 a month for Underwriter, for your first year.</h3>
+   <p>Twenty-five places, and then it closes. In exchange we want the thing money cannot buy at
+    this stage: what breaks, what is missing, and what you would have paid for instead. On the
+    day it renews you go to whatever Underwriter costs then — you will hear from us thirty days
+    before, and cancelling is one click, as it is on every plan. <b>We would rather tell you the
+    real term than promise you forever</b>, which is a word a company this young should be
+    careful with.</p>
   </div>
 
 <a class="btn p" href="#waitlist">Claim a place →</a>
@@ -418,7 +464,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
     <div class="wr you"><i></i><i></i><i></i></div></div>
    <div class="wg"><div class="wgl"><span>Your photos read the condition</span><em>all 17, each with the picture it came from</em></div>
     <div class="wr done"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-   <div class="wg"><div class="wgl"><span>The comps arrive pulled and scored</span><em>all 48, adjusted and explained</em></div>
+   <div class="wg"><div class="wgl"><span>The comps arrive pulled</span><em>up to ten sales, on our key — you score them</em></div>
     <div class="wr done"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
    <div class="wg"><div class="wgl"><span>The assumptions start where normal is</span><em>all 7, yours to move</em></div>
     <div class="wr done"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
@@ -504,8 +550,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <div class="pbh">Everything in Solo, plus</div>
    <ul>
     <li><i>✓</i><span><b>The photo condition read</b> — drop the walk-through pictures, get seventeen line items back with a number on each</span></li>
-    <li><i>✓</i><span><b>Comps pulled and scored</b> for the address in one click, already adjusted — on your own RentCast key, which you paste in once and we never see</span></li>
-    <li><i>✓</i><span>Address-level values and rents from that same key — an address, not a ZIP average</span></li>
+    <li><i>✓</i><span><b>Comps pulled for the address</b> in one click, already adjusted for size, beds, baths, time and condition — <b>on our key</b>, no vendor account to open. Forty a month on Underwriter, a hundred and twenty on The Office. They arrive <b>unscored</b>: the comparability score and the ARV stay yours</span></li>
+    <li><i>✓</i><span>Address-level values and rents — an address, not a ZIP average. Paste your own RentCast key and these run on yours instead, billed to you at their price</span></li>
     <li><i>✓</i><span><b>Offer letters and the text message</b>, written from the winning exit in the seller's language</span></li>
     <li><i>✓</i><span><b>The written comparison</b> — the case for each deal in prose you can forward. Every figure in it is one from your own table; a draft carrying anything else is refused rather than shown to you</span></li>
     <li><i>✓</i><span><b>The street brief</b> — what the block is actually doing. Tract-level income, tenure and vacancy from the census, the FEMA flood zone at the exact coordinates, and what has been permitted or planned nearby, <b>each claim carrying the page it came from</b>. The forty minutes of browser tabs, in about fifteen seconds</span></li>
@@ -616,9 +662,12 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <h3>Comps pulled, scored and adjusted</h3>
    <p>Type the address; recent sales arrive on the workbench already adjusted for size, beds, baths,
     time and condition, each with a comparability score and the reasons for it. It runs on
-    <b>your own RentCast key</b> — pasted in once, kept in your browser, never sent to us — so the
-    data is billed to you at their price rather than resold to you at ours. It is still not an
-    AVM: the range is drawn from the sales you keep, and the ARV is the one you set.</p>
+    <b>our key</b>, so there is no vendor account to open and nothing to paste — forty pulls a month
+    on Underwriter, a hundred and twenty on The Office, counted and shown. If you would rather it
+    ran on <b>your own RentCast key</b>, paste it in and it does: kept in your browser, never sent
+    to us, billed to you at their price. That is also how the free desk pulls comps.
+    Either way it is still not an AVM: the sales arrive <b>unscored</b>, the range is drawn from the
+    ones you keep, and the ARV is the one you set.</p>
    <div class="saves"><b>Saves ~10 minutes</b>, and the band gets narrower with every comp</div>
   </div>
  </div>
@@ -857,7 +906,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    everything your browser can do on its own; Underwriter is everything that needs our data
    or our AI.</b></p>
  </div>
- <table>
+ <div class="mhint">Swipe the plans — the row names stay put.</div>
+<div class="mscroll"><table>
   <thead><tr>
    <th>Feature</th><th>Free</th><th>Solo</th><th class="hi">Underwriter</th><th>The Office</th>
   </tr></thead>
@@ -866,9 +916,9 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    <tr class="sec"><td colspan="5">What it is worth</td></tr>
    <tr><td><b>The comp workbench</b><small>score sales yourself, adjusted and weighted</small></td>
      <td><span class="y">✓</span><small>3 in a browser · 12 a week with a free account</small></td><td><span class="y">✓</span><small>unlimited</small></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>Comps pulled for the address</b><small>your own RentCast key, wired in — the sheet reads them, scores them and adjusts them</small></td>
+   <tr><td><b>Comps pulled for the address</b><small>on our key, metered — or paste your own and it runs on that instead. Either way the sheet adjusts them and you score them</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
-   <tr><td><b>Address-level values and rents</b><small>the same key, the same panel — an address, not a ZIP average</small></td>
+   <tr><td><b>Address-level values and rents</b><small>your own RentCast key, in the same panel — an address, not a ZIP average</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr><td><b>The street brief</b><small>the census tract — not the ZIP — the FEMA flood zone at the exact coordinates, and what has been permitted or planned nearby, each with the page it came from</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="y">✓</span><small>40 a month</small></td><td><span class="y">✓</span><small>120 a month</small></td></tr>
@@ -936,7 +986,9 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
         They are listed, marked, and dated to nothing. ─────────────────────-->
    <tr class="soonrow"><td><b>Seats and roles</b><small>in build — The Office is one person running volume until it lands, and the price says so</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="soon">in build</span></td></tr>
-   <tr class="soonrow"><td><b>Shared assumption sets</b><small>in build — one model for the whole desk</small></td>
+   <tr><td><b>One assumption set for every deal</b><small>rate, refinance LTV, DSCR floor, selling costs, holding period, target profit and operating costs — set once, and every property on the desk reprices, including the ones you open next. With an account they follow you to the phone</small></td>
+     <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
+   <tr class="soonrow"><td><b>One assumption set across the seats</b><small>in build — the set above is per person; sharing it across an office needs seats, which are the row above this one</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="soon">in build</span></td></tr>
    <tr class="soonrow"><td><b>Pipeline across the office</b><small>in build — by stage and by spread</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi"><span class="n">—</span></td><td><span class="soon">in build</span></td></tr>
@@ -957,6 +1009,8 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">60</td><td>180</td></tr>
    <tr><td><b>Reading the paperwork, a month</b><small>drop the listing screenshots — the sheet fills itself, and every figure quotes the line it came from</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">80</td><td>240</td></tr>
+   <tr><td><b>Comps pulled and scored, a month</b><small>type the address and the recent sales arrive on our key — no vendor account, nothing to set up. They land <b>unscored</b>: the comparability score and the ARV stay yours. On the free desk, bring your own RentCast key instead</small></td>
+     <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">40</td><td>120</td></tr>
    <tr class="sec"><td colspan="5">The walk-through and the arcade</td></tr>
    <tr><td><b>The eight lessons, with live controls</b><small>free forever, no account</small></td>
      <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
@@ -964,7 +1018,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      <td><span class="y">✓</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
 
   </tbody>
- </table>
+ </table></div>
 </div>
 
 <!-- ══ the objections ═══════════════════════════════════════════════════════ -->
@@ -1003,8 +1057,11 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  </div>
  <div class="q">
   <h4>Where do the comps come from?</h4>
-  <p>Public records and licensed feeds, never scraped from a portal that forbids it. You can also
-   bring your own data key, in which case the lookups are yours and we never see them.</p>
+  <p>Public records and licensed feeds, never scraped from a portal that forbids it. On Underwriter
+   and The Office the pull runs on <b>our</b> RentCast key and is metered — forty a month, or a
+   hundred and twenty. You can also paste in <b>your own</b> key, on any tier including the free
+   desk, in which case the lookups are billed to you by RentCast and we never see the key or the
+   results. Whichever way they arrive, they arrive <b>unscored</b>.</p>
  </div>
  <div class="q">
   <h4>What happens when the trial ends?</h4>
@@ -1060,9 +1117,9 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
      <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
      <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
-   <span class="wk">One hundred places</span>
+   <span class="wk">Twenty-five places</span>
    <span class="wt">Take a founding place</span>
-   <span class="wd">$49 a month for Underwriter, held for as long as you stay &mdash; and the price never moves, whatever it becomes later.</span>
+   <span class="wd">$79 a month for Underwriter, held for your first year &mdash; then whatever Underwriter costs at renewal, told to you thirty days before.</span>
    <span class="wgo">Take a place <em>&rarr;</em></span>
   </a>
  </div>
@@ -1133,25 +1190,36 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 })();
 </script>
 <style>
-.wl{border:1px solid var(--line-2,#c9d0dc);border-radius:16px;background:#fff;padding:15px 17px;text-align:left}
-.wl .wt{display:block;font-family:var(--serif,Georgia),serif;font-size:17px;font-weight:700;color:var(--ink,#101725)}
-.wl .ws{display:block;font-size:12.5px;line-height:1.55;color:var(--mid,#4a5162);margin-top:5px}
-.wl .ws b{color:var(--ink,#101725)}
+.wl{border:1px solid #c9d0dc;border-radius:16px;background:#fff;padding:15px 17px;text-align:left}
+.wl .wt{display:block;font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:700;color:#101725}
+.wl .ws{display:block;font-size:12.5px;line-height:1.55;color:#3f4759;margin-top:5px}
+.wl .ws b{color:#101725}
 .wl .wf{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
 /* 16px, not 14 — under 16px iOS Safari zooms the whole page the moment the
    field takes focus, which on the one form that is the entire pre-launch
    funnel is a real cost. And 44px of height because this was a 30px target
    on a phone, which is smaller than a fingertip. */
 .wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;
- min-height:44px;border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
-.wl .wf input:focus{outline:none;border-color:var(--blue,#1f5fd0);box-shadow:0 0 0 3px var(--blue-soft,#eaf0fc)}
-.wl .wf button{flex:none;cursor:pointer;min-height:44px;padding-left:18px;padding-right:18px}
+ min-height:44px;border:1px solid #c9d0dc;background:#fff;color:#101725}
+.wl .wf input::placeholder{color:#6b7488;opacity:1}
+.wl .wf input:focus{outline:none;border-color:#1f5fd0;box-shadow:0 0 0 3px #eaf0fc}
+/* The card sets its own 16px corner and the field beside this button sets its
+   own 10px one — but the button borrowed .btn from whatever page it landed on,
+   and on the arcade, the course and the drill that class is square. So the one
+   form the entire pre-launch funnel runs through was shipping a rounded field
+   sitting against a sharp button, on three pages, and nothing greps for it
+   because a square corner is an absence. The widget states its own corner. */
+/* and the button's fill too, for the same reason: the arcade's blue is a
+   lighter one, chosen to sit on a dark page, and white on it measured 4.71 */
+.wl .wf button{flex:none;cursor:pointer;min-height:44px;padding-left:18px;padding-right:18px;border-radius:10px;
+ background:#1f5fd0;border:1.5px solid #1f5fd0;color:#fff;font-size:13px;font-weight:650;letter-spacing:0;text-transform:none}
+.wl .wf button:hover{background:#1a4fb0;border-color:#1a4fb0;color:#fff;transform:none;box-shadow:none}
 /* side by side, a phone gives the address field about nine characters. Stack. */
 @media(max-width:560px){.wl .wf{flex-direction:column;align-items:stretch}
  .wl .wf input,.wl .wf button{width:100%}}
-.wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:var(--soft,#677187)}
-.wl .wn.ok{color:var(--green,#177a4d)} .wl .wn.bad{color:var(--red,#b3372c)}
-.wl.done{border-color:var(--green-line,#bfe0cd);background:var(--green-soft,#eaf6f0)}
+.wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:#4a5162}
+.wl .wn.ok{color:#12633e} .wl .wn.bad{color:#a32a20}
+.wl.done{border-color:#bfe0cd;background:#eaf6f0}
 </style>
 <script>
 (function(){

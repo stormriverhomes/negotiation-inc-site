@@ -1,0 +1,322 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Terms · Negotiation Inc</title>
+<meta name="description" content="The agreement between you and Negotiation Inc: what the software does, what it costs, what it is not, and what happens if something goes wrong.">
+<style>
+:root{
+  --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --faint:#6f7681;
+  --line:#e4e8ef; --line-2:#c9d0dc; --wash:#f6f8fb;
+  --blue:#1f5fd0; --blue-deep:#153872; --blue-soft:#eaf0fc; --blue-line:#c3d4f5;
+  --green:#177a4d; --green-soft:#eaf6f0; --green-line:#bfe0cd;
+  --gold:#8a6a1f; --gold-soft:#fbf6e9; --gold-line:#e8dcb8;
+  --red:#a8332a; --red-soft:#fcf0ee; --red-line:#f0cdc7;
+  --r-btn:12px; --r-card:18px; --r-in:12px; --r-pill:999px;
+  --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+html,body{background:#fff}
+body{font-family:var(--sans);color:var(--ink);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-height:1.15}
+a{color:var(--blue)}
+.wrap{max-width:1250px;margin:0 auto;padding:0 26px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+
+header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(255,255,255,.94);
+ backdrop-filter:blur(8px);z-index:20}
+.mast{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:13px 0;flex-wrap:wrap}
+.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:inherit}
+.mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
+.mark .inc{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--blue)}
+.mark:hover .nm{color:var(--blue)}
+.masknav{display:flex;align-items:center;gap:18px;font-size:14px;flex-wrap:wrap}
+.masknav a{display:inline-flex;align-items:center;padding:6px 2px;line-height:1;color:var(--mid);text-decoration:none}
+.masknav a:hover{color:var(--ink)}
+.masknav a.on{color:var(--ink);font-weight:650;box-shadow:inset 0 -2px 0 var(--blue)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:14.5px;font-weight:650;
+ padding:11px 18px;border:1.5px solid var(--ink);border-radius:var(--r-btn);background:#fff;color:var(--ink);
+ text-decoration:none;cursor:pointer;transition:border-color .13s,color .13s,background .13s,transform .13s}
+.btn:hover{transform:translateY(-1px)}
+.btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* ── the document ─────────────────────────────────────────────────────────
+   A legal page is read in two ways and only two: skimmed by somebody deciding
+   whether to trust you, and searched by somebody with one specific question.
+   So: a short version at the top for the first reader, and a sticky contents
+   list for the second. Measure capped near 68 characters because these are the
+   longest paragraphs in the product and the eye needs the returns. */
+.doc{display:grid;grid-template-columns:230px minmax(0,1fr);gap:52px;
+ max-width:1050px;margin:0 auto;padding:0 26px 90px}
+@media(max-width:900px){.doc{grid-template-columns:1fr;gap:0}}
+
+.hero{max-width:1050px;margin:0 auto;padding:52px 26px 30px}
+.hero h1{font-size:clamp(34px,5.2vw,50px);margin:8px 0 12px}
+.hero .sub{font-size:17.5px;color:var(--mid);max-width:60ch}
+.stamp{margin-top:18px;display:inline-flex;align-items:center;gap:9px;font-size:13px;color:var(--soft);
+ border:1px solid var(--line);border-radius:var(--r-pill);padding:6px 14px;background:var(--wash)}
+.stamp b{color:var(--ink);font-weight:650}
+
+.toc{position:sticky;top:84px;align-self:start;font-size:13.5px;padding-top:6px}
+@media(max-width:900px){.toc{position:static;border:1px solid var(--line);border-radius:var(--r-card);
+ padding:16px 18px;margin-bottom:34px;background:var(--wash)}}
+.toc .lab{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
+ margin-bottom:10px}
+.toc ol{list-style:none;padding:0;margin:0;counter-reset:t}
+.toc li{counter-increment:t;margin:0 0 4px}
+.toc a{display:block;padding:6px 9px;border-radius:9px;color:var(--mid);text-decoration:none;line-height:1.35}
+/* Ten links two pixels apart, each 28px tall, is a list you scroll past rather
+   than use — and on a phone it is a list you cannot hit. Give them room. */
+@media(max-width:900px){.toc li{margin:0 0 2px}
+ .toc a{padding:11px 10px;min-height:44px;display:flex;align-items:center}}
+.toc a::before{content:counter(t) ".";color:var(--faint);margin-right:7px;font-variant-numeric:tabular-nums}
+.toc a:hover{background:var(--wash);color:var(--ink)}
+
+.body{max-width:68ch}
+section{scroll-margin-top:88px;padding:0 0 8px}
+section+section{margin-top:38px}
+section h2{font-size:24px;margin:0 0 12px;display:flex;gap:11px;align-items:baseline}
+section h2 .n{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--faint);
+ font-variant-numeric:tabular-nums;letter-spacing:.06em;flex:none;padding-top:3px}
+.body p{margin:0 0 13px;color:var(--mid)}
+.body p strong,.body li strong{color:var(--ink);font-weight:650}
+.body h3{font-size:16.5px;margin:20px 0 8px;font-family:var(--sans);font-weight:700;letter-spacing:-.005em}
+.body ul{margin:0 0 14px;padding-left:0;list-style:none}
+.body ul li{position:relative;padding-left:19px;margin:0 0 8px;color:var(--mid)}
+.body ul li::before{content:"";position:absolute;left:2px;top:10px;width:5px;height:5px;border-radius:50%;
+ background:var(--line-2)}
+.body ol{margin:0 0 14px;padding-left:20px}
+.body ol li{margin:0 0 8px;color:var(--mid)}
+
+.short{border:1.5px solid var(--blue-line);background:var(--blue-soft);border-radius:var(--r-card);
+ padding:22px 24px;margin:0 0 40px}
+.short .lab{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+ color:var(--blue-deep);margin-bottom:10px}
+.short p{color:var(--blue-deep);margin:0 0 10px}
+.short p:last-child{margin:0}
+.short ul li{color:var(--blue-deep)}
+.short ul li::before{background:var(--blue-line)}
+.short ul{margin-bottom:0}
+
+.note{border:1px solid var(--line);background:var(--wash);border-radius:var(--r-card);padding:17px 20px;margin:0 0 16px}
+.note p:last-child{margin:0}
+.warn{border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:var(--r-card);
+ padding:19px 22px;margin:0 0 16px}
+.warn .lab{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);
+ margin-bottom:8px}
+.warn p{color:#5c4712}
+.warn p:last-child{margin:0}
+
+table{width:100%;border-collapse:collapse;font-size:14px;margin:4px 0 18px;
+ border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
+th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+ color:var(--soft);padding:11px 14px;background:var(--wash);border-bottom:1px solid var(--line)}
+td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--mid);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td b{color:var(--ink);font-weight:650}
+
+.contact{border:1.5px solid var(--line-2);border-radius:var(--r-card);padding:22px 24px;margin-top:30px}
+.contact h3{margin-top:0;font-family:var(--serif);font-size:19px;font-weight:700}
+.crumb{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.crumb a{font-size:13px;padding:7px 13px;border:1px solid var(--line);border-radius:var(--r-pill);
+ color:var(--mid);text-decoration:none;background:#fff}
+.crumb a:hover{border-color:var(--line-2);color:var(--ink)}
+.crumb a.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+footer{border-top:1px solid var(--line);padding:26px 0 46px;font-size:13.5px;color:var(--soft)}
+/* inline links with no vertical padding: at 360px this row wraps to three
+   lines about five pixels apart, and a thumb aimed at Privacy lands on Terms.
+   inline-block plus padding makes each one a 27px target and costs nothing on
+   a wide screen, where the row does not wrap at all. */
+footer a{display:inline-block;padding:5px 0;color:var(--mid);text-decoration:none;margin-right:18px}
+footer a:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<header><div class="wrap"><div class="mast">
+ <a class="mark" href="index.html"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+ <nav class="masknav">
+  <a href="desk.html">The desk</a>
+  <a href="demo.html">See how it works</a>
+  <a href="exits.html">The eight exits</a>
+  <a href="arcade.html">The arcade</a>
+  <a href="plans.html">Plans</a>
+  <a class="btn p" href="desk.html#new">Price a property →</a>
+ </nav>
+</div></div></header>
+
+<div class="hero">
+ <div class="eyebrow">Terms of service</div>
+ <h1>The agreement</h1>
+ <p class="sub">The rules that apply when you use Negotiation Inc. Written to be read, not to be survived.</p>
+ <div class="stamp">Effective <b>2 August 2026</b></div>
+ <div class="crumb"><a href="terms.html" class="on">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Billing &amp; refunds</a></div>
+</div>
+
+<div class="doc">
+ <aside class="toc"><div class="lab">On this page</div><ol><li><a href="#who">Who this is between</a></li><li><a href="#what">What the service actually does</a></li><li><a href="#account">Your account</a></li><li><a href="#plans">Plans, trials and payment</a></li><li><a href="#yours">What you may do with it</a></li><li><a href="#nots">What you may not do</a></li><li><a href="#content">Your work stays yours</a></li><li><a href="#advice">This is not advice</a></li><li><a href="#data">Where the numbers come from, and what that means</a></li><li><a href="#changes">Changes to the service</a></li><li><a href="#term">Suspension, closure and getting your work out</a></li><li><a href="#warranty">Warranties</a></li><li><a href="#liability">Limitation of liability</a></li><li><a href="#indemnity">Indemnity</a></li><li><a href="#law">Disputes and governing law</a></li><li><a href="#edits">Changes to these terms</a></li><li><a href="#contact">Getting hold of us</a></li></ol></aside>
+ <main class="body">
+<div class="short"><div class="lab">The short version</div>
+ <ul>
+  <li><b>Pricing a property is free and needs no account.</b> That part of the desk runs entirely in your browser and we never see it.</li>
+  <li><b>Your deals are yours.</b> We do not claim any ownership of what you type in, and we do not train models on it.</li>
+  <li><b>This is a calculator, not an adviser.</b> Nothing here is financial, investment, legal, tax or appraisal advice, and no number it produces is a valuation.</li>
+  <li><b>Cancel whenever you like</b> and keep working to the end of the period you paid for.</li>
+  <li><b>If we break it, we owe you what you paid us</b> in the last twelve months, and no more. Section 15 says that in the usual language.</li>
+ </ul>
+ </div>
+<section id="who">
+<h2><span class="n">01</span>Who this is between</h2>
+<p>StormRiver Real Estate LLC, a Georgia limited liability company trading as Negotiation Inc (&ldquo;<b>Negotiation Inc</b>&rdquo;, &ldquo;<b>we</b>&rdquo;, &ldquo;<b>us</b>&rdquo;) makes underwriting software for people buying and selling residential property &mdash; the desk, the comparison workbench, the eight-exits course and the arcade, together the &ldquo;<b>service</b>&rdquo;.</p>
+<p>These terms are the agreement between us and you, whether you use the free desk with no account, hold a free account, or pay for a plan. Using the service means you accept them. If you are using it for a company, you are telling us you are allowed to accept them on that company's behalf.</p>
+<p>You need to be at least 18. The service is not built for, marketed to, or usable by children.</p>
+</section>
+
+<section id="what">
+<h2><span class="n">02</span>What the service actually does</h2>
+<p>You type in what a house costs, what it needs and what it might sell for. The software runs the arithmetic on eight exits &mdash; wholesale, flip, wholetail, hold, BRRRR, subject-to, novation and lease option &mdash; and shows you which one clears, by how much, and how far the inputs can move before it stops clearing.</p>
+<p>It shows its working. Every figure on the page can be traced to a number you entered or an assumption you can see and change. Where a plan adds automated comparable sales, a photo condition read or a written comparison, those are labelled as estimates and their sources are named on the page that produced them.</p>
+<h3>The free desk keeps nothing</h3>
+<p>Used without an account, the desk stores your work in your own browser and nothing is transmitted to us. Clearing your browser data deletes it. There is no copy on our side to recover, because there was never a copy on our side.</p>
+</section>
+
+<section id="account">
+<h2><span class="n">03</span>Your account</h2>
+<p>An account gives your work a home: it syncs, it survives the browser, and it holds more than one property. To open one we need a name and an email address.</p>
+<ul>
+  <li>Keep your login details to yourself. Anything done through your account is treated as done by you.</li>
+  <li>Tell us at <a href="mailto:support@negotiationinc.com">support@negotiationinc.com</a> if you think someone else is in it.</li>
+  <li>One account is for one person. Team seats are what The&nbsp;Office plan is for &mdash; sharing a single login around an office is a breach of these terms and, more practically, it makes the audit trail useless.</li>
+  <li>Give us an address you actually read. Billing notices, price changes and security notices go there.</li>
+</ul>
+</section>
+
+<section id="plans">
+<h2><span class="n">04</span>Plans, trials and payment</h2>
+<p>The desk is free forever with no card and no expiry. Paid plans are set out on the <a href="plans.html">plans page</a>, and the price shown there when you subscribe is the price you pay.</p>
+<h3>The trial</h3>
+<p>New accounts get fourteen days of the full product. When it ends, you are not charged and nothing is deleted &mdash; the account drops to the free desk and your sheets stay where they are, with the paid features closed until you subscribe.</p>
+<h3>Billing</h3>
+<p>Subscriptions run monthly or annually, in advance, and renew automatically until cancelled. Payments are handled by Stripe; we never see or hold your card number. Prices are exclusive of sales tax and VAT, which are added where the law requires it.</p>
+<h3>If a price changes</h3>
+<p>We will tell you by email at least 30 days before a price change affects you, and you can cancel before it takes effect. Where we have published a promise that a price is locked for existing subscribers &mdash; as we have for the Underwriter plan &mdash; we keep it.</p>
+<p>Cancellation, refunds and what happens to unpaid invoices are set out on the <a href="refunds.html">billing and refunds page</a>, which is part of this agreement.</p>
+</section>
+
+<section id="yours">
+<h2><span class="n">05</span>What you may do with it</h2>
+<p>While your account is in good standing we give you a personal, non-exclusive, non-transferable right to use the service for your own property business &mdash; including work you do for clients, and including printing the lender packet and putting it in front of a lender, partner or seller.</p>
+<p>The output is yours to use commercially. We do not ask for a credit line, a watermark or a share of the deal.</p>
+</section>
+
+<section id="nots">
+<h2><span class="n">06</span>What you may not do</h2>
+<ul>
+  <li>Resell, sublicense, white-label or rent access to the service, or run it as a service for other people, unless we have agreed that in writing.</li>
+  <li>Scrape, spider or bulk-extract the service, or run automated requests against it beyond ordinary use.</li>
+  <li>Reverse-engineer it, or copy its interface or data model to build a competing product.</li>
+  <li>Share one login between people. Buy the seats.</li>
+  <li>Use it to break the law &mdash; including fair-housing law, consumer-protection law, and the licensing rules that apply to real estate, mortgage brokering and appraisal where you operate.</li>
+  <li>Upload photographs or documents you have no right to upload.</li>
+  <li>Interfere with the service or with anyone else's use of it.</li>
+</ul>
+<p>If you do any of this we may suspend or close the account. Where the breach is one that can be fixed and did not cause harm, we will ask you to fix it first.</p>
+</section>
+
+<section id="content">
+<h2><span class="n">07</span>Your work stays yours</h2>
+<p>Everything you put into the service &mdash; addresses, figures, notes, photographs, comparable sales you enter &mdash; remains yours. We claim no ownership of it.</p>
+<p>You give us the narrow permission we need to run the product: to store your work, show it back to you, sync it between your devices, and pass what a feature needs to the provider that powers that feature &mdash; a photograph to the model that reads condition, an address to the comparables provider. That permission exists only to deliver the feature you asked for and ends when you delete the data.</p>
+<h3>We do not train on your deals</h3>
+<p>Your sheets, photographs and notes are not used to train any machine-learning model, ours or anyone else's, and are not sold, licensed or handed to data brokers. The <a href="privacy.html">privacy page</a> sets out exactly who touches what.</p>
+<h3>Anonymous market statistics</h3>
+<p>We may compute aggregate statistics across the service &mdash; for example, the typical spread on flips in a metro this quarter &mdash; and publish or use them. These are computed so that no individual, property or deal can be identified from them, and any figure that could identify a single user or address is excluded rather than published.</p>
+<h3>The software is ours</h3>
+<p>The service, its interface, its arithmetic, its artwork and its writing belong to us. Nothing here transfers any of it to you.</p>
+</section>
+
+<section id="advice">
+<h2><span class="n">08</span>This is not advice</h2>
+<div class="warn"><div class="lab">Read this one properly</div>
+<p><b>Negotiation Inc is a calculator and an education tool. It is not a financial adviser, an investment adviser, a mortgage broker, a real estate broker, an attorney, an accountant or an appraiser, and nothing it produces is advice from any of those.</b></p>
+<p>We are not licensed to give you personalised financial, investment, legal, tax or valuation advice, and we do not. The figures the software produces are arithmetic performed on assumptions you chose. They are not a recommendation to buy, sell, finance or refinance anything.</p></div>
+<p>In particular:</p>
+<ul>
+  <li><b>An ARV is not an appraisal.</b> It is an estimate built from comparable sales and adjustments that are shown to you on the page. It is not a Uniform Standards of Professional Appraisal Practice appraisal, it is not a broker price opinion, and it must not be represented as either to a lender, a court, an insurer or a seller.</li>
+  <li><b>A repair estimate is not a contractor's bid.</b> It is a cost model across seventeen systems. Get a bid.</li>
+  <li><b>A condition read from photographs is a guess made by a machine that has seen photographs.</b> It cannot see behind a wall, under a floor, or into a panel. It is a starting point for an inspection, not a substitute for one.</li>
+  <li><b>Subject-to, novation and lease-option strategies carry legal and lender risk</b> &mdash; including due-on-sale clauses, disclosure obligations and licensing rules that differ by state. The course explains how they work. It does not tell you they are legal where you are. Ask a lawyer in your state before you use one.</li>
+</ul>
+<p>Property investment can lose money, including more than you put in where borrowing is involved. Every decision you make using this software is yours, and you are responsible for the professional advice you seek before making it.</p>
+</section>
+
+<section id="data">
+<h2><span class="n">09</span>Where the numbers come from, and what that means</h2>
+<p>Some figures in the service are supplied by third parties: comparable sales and rent estimates come from RentCast, aerial and street-level imagery comes from Google Maps, and the photo condition read and written comparison are produced by Anthropic's models. Others are our own priors, built from public data and stated as ranges.</p>
+<p>Third-party data may be incomplete, out of date or wrong, and machine-generated text can be confidently mistaken. <b>We do not warrant the accuracy of any of it.</b> Where a figure comes from outside, the page that shows it says so, and where a figure is an estimate the page says that too. Check anything you are about to act on against the county record, the MLS or a person with a licence.</p>
+<p>Where a feature depends on a third party, its availability depends on that third party. If a provider changes its terms, its prices or its availability we may have to change or withdraw the feature; if that removes something material from a plan you are paying for, you may cancel and we will refund the unused part of the period.</p>
+</section>
+
+<section id="changes">
+<h2><span class="n">10</span>Changes to the service</h2>
+<p>We improve the product continuously, which means it changes. Features get added, moved and occasionally removed. We will not remove something material from a paid plan without telling paying subscribers by email first, and giving them the option in the paragraph above.</p>
+<p>We aim to keep the service available, but we do not promise it will never be down. Maintenance, provider outages and things outside our control happen. There is no uptime guarantee on any plan.</p>
+</section>
+
+<section id="term">
+<h2><span class="n">11</span>Suspension, closure and getting your work out</h2>
+<p>You can close your account at any time from the account panel or by writing to <a href="mailto:support@negotiationinc.com">support@negotiationinc.com</a>.</p>
+<p>We may suspend or close an account for a serious breach of section 6, for non-payment after we have asked, or where we are legally required to. Except where the law prevents it, we will tell you and say why.</p>
+<p>Before your data goes, you can export all of it &mdash; every sheet, comp and note &mdash; as a file, at any time, from within the product. After closure we keep it for 30 days in case you come back, then delete it. If you want it gone immediately, ask and we will do that instead.</p>
+<p>Sections 7 (your work), 8 (not advice), 12 to 16 and anything else that by its nature should outlive the agreement, do.</p>
+</section>
+
+<section id="warranty">
+<h2><span class="n">12</span>Warranties</h2>
+<p>The service is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo;. To the fullest extent the law allows, we disclaim all warranties, express or implied, including merchantability, fitness for a particular purpose, non-infringement, and any warranty that the service will be uninterrupted, error-free, or that any figure it produces will be accurate.</p>
+<p>Some jurisdictions do not allow the exclusion of certain warranties. Where that is true of yours, this section applies to the greatest extent it is permitted to, and your statutory rights as a consumer are unaffected.</p>
+</section>
+
+<section id="liability">
+<h2><span class="n">13</span>Limitation of liability</h2>
+<p>To the fullest extent the law allows, we are not liable for any indirect, incidental, special, consequential or punitive loss, or for lost profit, lost revenue, lost opportunity, lost data or the cost of substitute services, arising out of or connected with the service &mdash; including where a deal you underwrote here loses money.</p>
+<p><b>Our total liability to you for all claims in any twelve-month period is limited to the amount you actually paid us in that period, or one hundred US dollars if you paid us nothing.</b></p>
+<p>Nothing in these terms limits liability for death or personal injury caused by negligence, for fraud or fraudulent misrepresentation, or for anything else that cannot lawfully be limited.</p>
+</section>
+
+<section id="indemnity">
+<h2><span class="n">14</span>Indemnity</h2>
+<p>You agree to cover us against claims, losses and reasonable legal costs arising from your use of the service in breach of these terms or of the law &mdash; including any claim that something you uploaded infringed someone's rights, and any claim arising from how you presented the software's output to a third party.</p>
+</section>
+
+<section id="law">
+<h2><span class="n">15</span>Disputes and governing law</h2>
+<p>These terms are governed by the laws of the State of Georgia, without regard to its conflict-of-laws rules. Disputes go to the state and federal courts located in Georgia, and we each agree to that jurisdiction.</p>
+<p>Before filing anything, write to <a href="mailto:support@negotiationinc.com">support@negotiationinc.com</a> with what happened and what you want. Most things are a misunderstanding and a refund, and we would rather find that out in an email than in a filing.</p>
+<p>If you are a consumer resident in a country whose law gives you the right to bring proceedings in your own courts, that right is unaffected by this section.</p>
+</section>
+
+<section id="edits">
+<h2><span class="n">16</span>Changes to these terms</h2>
+<p>We may update these terms. If a change materially affects your rights, we will email account holders at least 30 days before it takes effect and the date at the top of this page will change. Continuing to use the service after that date means the new version applies. If you would rather not accept it, cancel before it takes effect and we will refund the unused part of the period you have paid for.</p>
+<p>Older versions are kept and available on request &mdash; you should be able to see what you agreed to at the time.</p>
+</section>
+
+<section id="contact">
+<h2><span class="n">17</span>Getting hold of us</h2>
+<div class="contact"><h3>Contact</h3>
+<p>General and account questions &mdash; <a href="mailto:support@negotiationinc.com">support@negotiationinc.com</a><br>
+Privacy, exports and deletion &mdash; <a href="mailto:privacy@negotiationinc.com">privacy@negotiationinc.com</a></p>
+<p style="margin-top:10px">We answer email. It is a small company and that is the whole support department, which means it is also the fastest route to whoever can actually change something.</p></div>
+</section>
+ </main>
+</div>
+
+<footer><div class="wrap">
+ <a href="index.html">Home</a><a href="desk.html">The desk</a><a href="plans.html">Plans</a>
+ <a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Billing &amp; refunds</a>
+ <span style="display:block;margin-top:10px">Negotiation Inc — the sheet shows its working.</span>
+</div></footer>
+
+</body></html>

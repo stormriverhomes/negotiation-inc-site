@@ -971,12 +971,60 @@ function exportAll(){
     return (d.props||[]).length;
   } catch(e){ return -1; }
 }
-function wipeAll(){
+/* ── AND THIS USED TO BE THE WHOLE OF "DELETE EVERYTHING" ──────────────────
+   It clears this browser. That is all it has ever been able to do, and for a
+   signed-out person it is the correct and complete answer: there is nowhere
+   else the work exists.
+
+   For a signed-IN person it was a lie, and a specific one. The auth user, the
+   profile and every synced sheet stayed on the server — and mergeSheets()
+   treats a remote sheet with no local twin as a sheet from another device, so
+   signing back in restored all of it. The privacy page promises deletion in
+   three rows with retention periods next to them. */
+function wipeLocal(){
   for (const k of ['ni-account-v1','ni-desk-v3','ni-desk-v2','ni-desk-case','ni-cmp-v1',
                    'ni-exits-v1','ni-portfolio-v2','ni-offer-course','ni-course-hidden',
-                   'ni-trial-hushed','ni-drill-best','ni-rail','ni-tray','ni-preview-plan'])
+                   'ni-trial-hushed','ni-drill-best','ni-rail','ni-tray','ni-preview-plan',
+                   'ni-land-v1','ni-wait-v1','ni-session-v1'])
     try { localStorage.removeItem(k); } catch(e){}
+}
+/* The server half. It is asked FIRST and the browser is only cleared if it
+   said yes, because the failure that matters here is telling somebody their
+   data is gone while it is still sitting in a table. If the call fails they
+   keep their local copy, they are still signed in, and they are told plainly
+   — which is recoverable. The other way round is not. */
+async function wipeAll(say){
+  const signed = (() => { try { return !!JSON.parse(localStorage.getItem('ni-session-v1')||'null'); }
+                          catch(e){ return false; } })();
+  if (signed){
+    if (say) say('Deleting the account and every sheet on the server…');
+    let r = null;
+    try {
+      const t = (typeof window.__authToken === 'function') ? await window.__authToken() : null;
+      const res = await fetch('/api/account/delete', { method:'POST',
+        headers: t ? { 'content-type':'application/json', authorization:'Bearer ' + t }
+                   : { 'content-type':'application/json' }, body:'{}' });
+      r = await res.json().catch(() => null);
+      if (!res.ok || !r || !r.ok){
+        /* Two facts, and they come from two places. The SERVER knows which
+           rows would not go; only the BROWSER knows that it has therefore left
+           everything here alone. Showing the server's sentence on its own —
+           which the first version did — tells somebody their deletion half
+           worked and leaves them guessing about the copy in front of them. */
+        if (say) say(((r && r.say) ? r.say + ' ' : 'The server would not confirm the deletion. ')
+          + 'Nothing was deleted from this browser either, so your work is exactly where it was.', true);
+        return false;
+      }
+    } catch(e){
+      if (say) say('Could not reach the server, so nothing was deleted anywhere. '
+        + 'Your work is exactly where it was.', true);
+      return false;
+    }
+    if (typeof window.__authSignOut === 'function') { try { await window.__authSignOut(); } catch(e){} }
+  }
+  wipeLocal();
   location.href = 'office.html';
+  return true;
 }
 function wireAcct(){
  const box = $('rn-acct'); if (!box) return;
@@ -1003,7 +1051,12 @@ function wireAcct(){
      : `${n} propert${n===1?'y':'ies'} written to a file.`, n < 0); };
  const del = $('ac-del'); let delT = null;
  if (del) del.onclick = () => {
-   if (del.dataset.armed){ clearTimeout(delT); wipeAll(); return; }
+   if (del.dataset.armed){ clearTimeout(delT);
+     del.disabled = true; del.textContent = 'Deleting…';
+     wipeAll(say).then(ok => { if (!ok){ del.disabled = false;
+       delete del.dataset.armed; del.classList.remove('armed');
+       del.textContent = 'Delete everything'; } });
+     return; }
    del.dataset.armed = '1'; del.classList.add('armed');
    del.textContent = 'Delete the account and every sheet?';
    say('This cannot be undone. Export first if you want a copy.', true);
@@ -1666,10 +1719,24 @@ function mergeSheets(local, remote){
   for (const r of (remote || [])){
     const at = Date.parse(r.updated) || 0;
     const cur = by.get(r.pid);
-    if (!cur || at > cur.at) by.set(r.pid, { p: cleanProp(r.blob), at, from:'remote' });
+    /* the RAW blob is kept beside the cleaned prop: cleanProp() builds a fresh
+       property and copies only the keys it knows, so anything workspace-level
+       riding along — the assumptions — is stripped before it can be read */
+    if (!cur || at > cur.at) by.set(r.pid, { p: cleanProp(r.blob), raw: r.blob, at, from:'remote' });
   }
   const out = [...by.values()].sort((a,b) => b.at - a.at).slice(0, 40).map(x => x.p);
-  return { props: out, pulled: [...by.values()].filter(x => x.from === 'remote').length };
+  /* ── AND THE ASSUMPTIONS COME BACK WITH THE NEWEST SHEET ─────────────────
+     They are workspace-level, not per-property, so "last write wins per
+     property" does not answer the question on its own — the newest sheet
+     anywhere is the one that saw them last, and that is the answer. Only from
+     a REMOTE row: a local one is already in P.adv, and re-applying it would
+     overwrite a change made in this tab a second ago. Every value is
+     re-validated against the slider that drew it on the way in. */
+  let adv = null;
+  const newest = [...by.values()].sort((a,b) => b.at - a.at)[0];
+  if (newest && newest.from === 'remote' && typeof window.__advRead === 'function')
+    adv = window.__advRead(newest.raw && newest.raw.adv);
+  return { props: out, adv, pulled: [...by.values()].filter(x => x.from === 'remote').length };
 }
 
 /* ── the boot pass ─────────────────────────────────────────────────────────
@@ -1721,6 +1788,11 @@ async function syncSheets(){
       const m = mergeSheets(P.props, remote);
       if (m.pulled){
         P.props = m.props;
+        /* the assumptions this account last set, on whichever device set them.
+           Assigned INTO the existing object rather than replacing it, because
+           S.adv is the same object by reference and half the arithmetic on the
+           desk is already holding it. */
+        if (m.adv) Object.assign(P.adv, m.adv);
         P.active = Math.max(0, Math.min(P.active, P.props.length - 1));
         loadInto(P.active); save();
         if (typeof window.__render === 'function') window.__render();
@@ -1973,82 +2045,6 @@ try{ authBoot(); }catch(e){ try{ console.warn('auth', e); }catch(_){} }
    Stripe, and arriving from the plans page with a tier already chosen */
 try{ afterStripe(); }catch(e){}
 try{ joinFromQuery(); }catch(e){}
-})();
-</script>
-<style>
-.wl{border:1px solid var(--line-2,#c9d0dc);border-radius:16px;background:#fff;padding:15px 17px;text-align:left}
-.wl .wt{display:block;font-family:var(--serif,Georgia),serif;font-size:17px;font-weight:700;color:var(--ink,#101725)}
-.wl .ws{display:block;font-size:12.5px;line-height:1.55;color:var(--mid,#4a5162);margin-top:5px}
-.wl .ws b{color:var(--ink,#101725)}
-.wl .wf{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
-/* 16px, not 14 — under 16px iOS Safari zooms the whole page the moment the
-   field takes focus, which on the one form that is the entire pre-launch
-   funnel is a real cost. And 44px of height because this was a 30px target
-   on a phone, which is smaller than a fingertip. */
-.wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;
- min-height:44px;border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
-.wl .wf input:focus{outline:none;border-color:var(--blue,#1f5fd0);box-shadow:0 0 0 3px var(--blue-soft,#eaf0fc)}
-.wl .wf button{flex:none;cursor:pointer;min-height:44px;padding-left:18px;padding-right:18px}
-/* side by side, a phone gives the address field about nine characters. Stack. */
-@media(max-width:560px){.wl .wf{flex-direction:column;align-items:stretch}
- .wl .wf input,.wl .wf button{width:100%}}
-.wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:var(--soft,#677187)}
-.wl .wn.ok{color:var(--green,#177a4d)} .wl .wn.bad{color:var(--red,#b3372c)}
-.wl.done{border-color:var(--green-line,#bfe0cd);background:var(--green-soft,#eaf6f0)}
-</style>
-<script>
-(function(){
- var SUPPORT='support@negotiationinc.com', KEY='ni-wait-v1';
- function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
-   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
- function sent(){ try{ return localStorage.getItem(KEY)==='1'; }catch(e){ return false; } }
- function doneHTML(){ return '<div class="wl done"><span class="wt">You are on the list.</span>'+
-   '<span class="ws">You will get one email the day it opens, and nothing else.</span></div>'; }
- /* The default sentence is written for somebody standing on the plans page,
-    who has just read a price. A person who has been playing the arcade for
-    ten minutes has not, and the same paragraph read to them is a non-sequitur
-    that costs the capture. So a slot may carry its own line, and the ones that
-    sit at the end of a game or a lesson do. */
- var LINE='The desk is <b>free and finished</b> \u2014 pricing, the seven exits, the comparison, the print. '+
-   'The paid tiers are being wired to a payment rail. Leave an address and you get <b>one</b> email the day they '+
-   'open, with the founding price on it.';
- function formHTML(tier, line){ return '<div class="wl"><span class="wt">'+esc(tier)+' opens soon.</span>'+
-   '<span class="ws">'+(line||LINE)+'</span>'+
-   '<form class="wf"><input type="email" required placeholder="you@example.com" aria-label="Your email" '+
-   'autocomplete="email" spellcheck="false"><button type="submit" class="btn p sm">Tell me when it opens</button></form>'+
-   '<div class="wn" role="status"></div></div>'; }
- function wire(box, from){
-  var f=box.querySelector('form'), note=box.querySelector('.wn');
-  if(!f) return;
-  function say(t,bad){ if(note){ note.textContent=t; note.className='wn'+(bad?' bad':' ok'); } }
-  f.addEventListener('submit', function(ev){
-   ev.preventDefault();
-   var i=f.querySelector('input'), btn=f.querySelector('button');
-   var email=(i.value||'').trim().slice(0,160);
-   if(!/^[^@\s]+@[^@\s.]+\.[^@\s]{2,}$/.test(email)) return say('That does not look like an email address.',true);
-   btn.disabled=true; say('Adding you\u2026');
-   fetch('/api/list',{method:'POST',headers:{'content-type':'application/json'},
-     body:JSON.stringify({email:email,from:from||'plans'})})
-    .then(function(r){
-      if(r.ok){ try{localStorage.setItem(KEY,'1');}catch(e){} box.outerHTML=doneHTML(); return; }
-      throw new Error('list');
-    })
-    .catch(function(){
-      say('The list is not reachable right now \u2014 email '+SUPPORT+' and you will be added by hand.',true);
-      btn.disabled=false;
-    });
-  });
- }
- function paint(){
-  var slots=document.querySelectorAll('[data-waitlist]');
-  for(var k=0;k<slots.length;k++){
-   var el=slots[k], tier=el.getAttribute('data-waitlist')||'Paid plans';
-   var from=el.getAttribute('data-from')||'plans';
-   el.innerHTML = sent() ? doneHTML() : formHTML(tier, el.getAttribute('data-line'));
-   if(!sent()) wire(el.firstChild, from);
-  }
- }
- if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',paint); else paint();
 })();
 </script>
 </body></html>

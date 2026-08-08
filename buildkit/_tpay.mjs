@@ -255,6 +255,45 @@ const page = async () => { const p = await b0.newPage();
   await p.close();
 }
 
+/* ══ H · A REFUSAL THAT NAMES A DOOR OPENS IT ═══════════════════════════════
+   The server now refuses a second subscription to somebody who already has
+   one: office.html's joinFromQuery() fires startCheckout() straight off
+   ?join=underwriter with no plan check, so a stale bookmark used to bill an
+   existing subscriber twice a month, indefinitely, with the product looking
+   completely normal. The refusal says the change belongs in the billing
+   portal — and saying that while making them go and find it is how a correct
+   answer still loses a customer. So the sentence carries the button. */
+{
+  const p = await page();
+  await p.goto(BASE + '/office.html'); await p.waitForTimeout(900);
+  const r = await p.evaluate(() => {
+    if (typeof window.__payNote !== 'function') return { no:'payNote' };
+    let opened = 0;
+    const n = window.__payNote('This account is already on underwriter.', 'bad',
+      { label:'Manage your plan', fn: () => { opened++; } });
+    const btn = n.querySelector('button');
+    if (!btn) return { text:n.textContent, btn:false };
+    btn.click();
+    return { btn:true, label:btn.textContent, opened,
+             says: n.textContent.indexOf('already on underwriter') >= 0,
+             after: btn.textContent, disabled: btn.disabled };
+  });
+  out.H_refusal = r;
+  if (r.no) bad.push('H: payNote is not exposed, so the refusal cannot carry an action');
+  else {
+    if (!r.btn) bad.push('H: an "already subscribed" refusal is a dead end — no way to the portal');
+    if (r.opened !== 1) bad.push(`H: the button did not open the portal (${r.opened} times)`);
+    if (!r.says) bad.push('H: the refusal stopped saying what was wrong once it grew a button');
+    if (!r.disabled) bad.push('H: the button can be clicked twice, which opens two portal sessions');
+  }
+  /* and an ordinary refusal stays a plain sentence rather than growing a
+     button to nowhere */
+  const plain = await p.evaluate(() =>
+    !window.__payNote('Sign in first.', 'bad').querySelector('button'));
+  if (!plain) bad.push('H: every refusal grew a portal button, including ones the portal cannot fix');
+  await p.close();
+}
+
 await b0.close(); sb.close(); site.close();
 /* leave the tree the way it was found */
 execFileSync('node', ['publish.mjs'], { cwd:'/home/claude', stdio:'ignore', env:{ ...process.env, OUT } });

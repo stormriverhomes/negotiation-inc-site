@@ -32,6 +32,7 @@
 
 import express from 'express';
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { MODEL, SYSTEM, TOOL, LINES, LINE_IDS, RARELY_VISIBLE, userBlock } from './prompt.js';
 import * as CMP from './compare.js';
@@ -1183,9 +1184,212 @@ app.post('/api/list', express.json({ limit: '4kb' }), async (req, res) => {
    priors. Proxied rather than called from the page so the address never
    picks up a third-party key requirement, and so the FEMA read can join the
    same answer later — the server is where facts get computed. */
+/* ── WHERE A KEY REQUEST IS ALLOWED TO COME FROM ──────────────────────────
+   Comma-separated origins in NI_ALLOW_ORIGIN. UNSET MEANS NO CHECK, on
+   purpose: this file has to keep working on a laptop and inside a harness
+   that serves from 127.0.0.1 on a random port, and a guard that cannot be
+   turned off in development is a guard people delete in production. The
+   deployment sets it; the default is the honest one for everywhere else. */
+const ALLOW_ORIGIN = String(process.env.NI_ALLOW_ORIGIN || '')
+  .split(',').map(x => x.trim().replace(/\/+$/, '')).filter(Boolean);
+
+/* ══ COMPS, ON OUR KEY ═════════════════════════════════════════════════════
+   The workbench has always been able to import candidate sales from RentCast,
+   and until now it did it BRING-YOUR-OWN-KEY, in the browser. That was the
+   right answer for one reason and the wrong answer for another.
+
+   Right: RentCast's free tier is fifty requests a month. A shared key behind a
+   public site would be spent in an afternoon, so the free desk cannot have one
+   and BYOK is the only honest way to offer it there. That stays exactly as it
+   was.
+
+   Wrong: plans.html sells "the comps arrive pulled and scored" under
+   Underwriter, and they did not arrive — the customer still had to go and get
+   a vendor account, generate a key, paste it into their own browser, and live
+   inside somebody else's fifty-a-month. A pricing page that names something
+   the product does not do is the one bug this codebase has build guards for,
+   and it was on the page people pay from.
+
+   And RentCast say, in their own documentation, that API keys "should never be
+   exposed in any client-side, front-end or publicly-accessible code." Asking a
+   paying customer to do the thing the vendor warns against is not a feature.
+
+   So: paid gets it on our key, server-side, metered per account, exactly like
+   every other paid feature. Free keeps BYOK. The key is an environment
+   variable and it is never in this file, the repository, or any response.
+
+   THEIR ESTIMATE IS STILL DISCARDED. The endpoint returns a value estimate
+   alongside the comparables and we read only the comparables. The claim of the
+   workbench is that you arrive at your own ARV from sales you scored yourself;
+   printing somebody else's AVM at the top of it would make that sentence
+   false, and the sentence is the product. */
+const RENTCAST_KEY = process.env.RENTCAST_KEY || '';
+/* what one request costs us, charged into the SAME daily budget the model
+   calls spend from — one ceiling protects the whole bill rather than each
+   vendor having a private allowance nobody is watching. Defaults to the
+   free plan's overage rate, which is the most expensive tier: a budget that
+   assumes the cheap plan under-counts exactly when it matters. */
+const RENTCAST_USD = (() => { const v = Number(process.env.NI_RENTCAST_USD);
+  return Number.isFinite(v) && v >= 0 ? v : 0.20; })();
+
+/* ══ DELETING AN ACCOUNT, WHICH USED TO BE A LIE ═══════════════════════════
+   The hub's "Delete everything" button called wipeAll(), which loops over a
+   list of localStorage keys and removes them. That is the whole of what it
+   did. The Supabase auth user, the profile row and every synced sheet stayed
+   exactly where they were — and because the sync layer treats a remote sheet
+   with no local twin as "a sheet from another device", signing back in put
+   all of them back. The button emptied a browser and called it deletion.
+
+   The privacy page promises deletion in three separate rows, with retention
+   periods. So this was not a missing feature, it was a written promise the
+   software broke, which is the one category of bug this product cannot have.
+
+   It has to be here rather than in the browser: removing an auth user needs
+   the service role key, and that key exists in exactly one process. The
+   browser can only ask.
+
+   ORDER MATTERS, AND IT IS SHEETS → USAGE → PROFILE → USER. Deleting the auth
+   user first would revoke the token the other three deletes authenticate
+   with, and leave the rows orphaned with nobody left who can name them. Each
+   step is reported separately so a partial failure says which part survived
+   rather than "something went wrong". */
+app.post('/api/account/delete', express.json({ limit: '1kb' }), async (req, res) => {
+  /* fail() is a per-route closure everywhere else in this file, and the first
+     version of this route reached for it as if it were global — which is a
+     ReferenceError inside the handler, i.e. a 500 with no body on the one
+     route whose job is to be trustworthy. Its own harness caught it. */
+  const fail = (code, why, extra) => { log('delete', code, why);
+    res.status(code).json({ ok:false, error:why, ...extra }); };
+  const ent = await entitlementOf(req, 0);     // an account, any plan, even none
+  if (!ent.ok) return fail(401,
+    ent.why === 'unconfigured' ? 'Accounts are not configured on this deployment.'
+                               : 'Sign in first — this deletes the account making the request.');
+  const uid = ent.uid;
+  const SB = (process.env.SUPABASE_URL || '').replace(/\/+$/, '');
+  const KEYSB = process.env.SUPABASE_SERVICE_KEY || '';
+  const H = { apikey: KEYSB, authorization: 'Bearer ' + KEYSB, 'content-type': 'application/json' };
+  const done = {};
+  const drop = async (name, url, method = 'DELETE') => {
+    try { const r = await fetch(url, { method, headers: { ...H, Prefer: 'return=minimal' } });
+      done[name] = r.ok ? 'gone' : ('http ' + r.status); return r.ok; }
+    catch (e) { done[name] = 'unreachable'; return false; }
+  };
+  const q = encodeURIComponent(uid);
+  await drop('sheets',  `${SB}/rest/v1/sheets?uid=eq.${q}`);
+  await drop('usage',   `${SB}/rest/v1/usage?uid=eq.${q}`);
+  await drop('profile', `${SB}/rest/v1/profiles?id=eq.${q}`);
+  /* the auth user last, and through the admin API — the only call in this
+     service that uses the service key as an ADMIN rather than as a bypass of
+     row-level policy, which is why it is named and logged */
+  const userGone = await drop('login', `${SB}/auth/v1/admin/users/${q}`);
+
+  const stubborn = Object.entries(done).filter(([, v]) => v !== 'gone').map(([k]) => k);
+  console.log(new Date().toISOString() + ' account delete ' + uid.slice(0, 8) + ' · '
+    + JSON.stringify(done));
+  if (stubborn.length) return res.status(207).json({ ok:false, deleted:done,
+    say: 'Some of it would not delete: ' + stubborn.join(', ')
+       + '. Nothing has been half-removed on purpose — email support@negotiationinc.com '
+       + 'and it will be finished by hand, today.' });
+  res.json({ ok:true, deleted:done });
+});
+
+app.post('/api/comps', express.json({ limit: '4kb' }), async (req, res) => {
+  const fail = (code, why, extra) => { log('comps', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
+  if (!RENTCAST_KEY) return fail(503, 'Pulling comps is not switched on for this deployment.');
+  { const g = gateFails(req, 'the comp pull'); if (g) return fail(g[0], g[1]); }
+
+  const ent = await entitlementOf(req, 2);
+  if (!ent.ok){
+    const SAY = {
+      unconfigured: 'Pulling comps is not switched on for this deployment.',
+      nosession:    'Pulling comps needs an account. Nothing was sent.',
+      noprofile:    'Pulling comps needs an account. Nothing was sent.',
+      lookup:       'The account could not be checked just now. Nothing was sent.',
+      free:         'Comps arrive pulled with Underwriter, and with the fourteen-day trial. On the free desk you can still bring your own RentCast key.',
+      lowtier:      'Comps arrive pulled with Underwriter. On this plan you can still bring your own RentCast key.',
+    };
+    const code = (ent.why === 'unconfigured' || ent.why === 'lookup') ? 503 : 403;
+    return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why, byok: true });
+  }
+
+  const meter = await meterFails(res, ent, 'aicomps', 'of these');
+  if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
+
+  { const b = budgetFails(ent.uid, 'The comp pull'); if (b) return fail(b[0], b[1], b[2]); }
+  if (!ipOk(req.ip || 'unknown'))
+    return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
+
+  const addr = String((req.body && req.body.address) || '').trim().slice(0, 160);
+  if (addr.length < 6) return fail(400, 'That is not enough address to look up. Street, city and ZIP work best.');
+
+  let j = null, status = 200;
+  if (MOCK){
+    /* the same shape RentCast returns, INCLUDING the value estimate — so the
+       test can prove the estimate is discarded rather than merely absent */
+    j = { price: 402000, priceRangeLow: 380000, priceRangeHigh: 424000,
+      comparables: [
+        { formattedAddress:'11 Mock Row', price:296000, squareFootage:1480, bedrooms:3, bathrooms:2,
+          lastSeenDate:new Date(Date.now() - 60*864e5).toISOString(), distance:0.31 },
+        { formattedAddress:'14 Mock Row', price:312000, squareFootage:1595, bedrooms:3, bathrooms:2,
+          lastSeenDate:new Date(Date.now() - 120*864e5).toISOString(), distance:0.72 },
+        { formattedAddress:'2 No Price Lane', price:0, squareFootage:1500, bedrooms:3, bathrooms:2,
+          lastSeenDate:new Date().toISOString(), distance:0.4 },
+      ] };
+  } else
+  try {
+    const u = new URL('https://api.rentcast.io/v1/avm/value');
+    u.searchParams.set('address', addr);
+    u.searchParams.set('compCount', '10');
+    const r = await fetch(u, { headers: { 'X-Api-Key': RENTCAST_KEY, accept:'application/json' },
+                               signal: AbortSignal.timeout(15000) });
+    status = r.status;
+    if (r.ok) j = await r.json();
+  } catch(e){
+    return fail(502, 'The comp source did not answer. Nothing was spent from your allowance.');
+  }
+  /* the money is charged only for a request that actually reached them, and
+     the meter is only counted for one that came back with sales */
+  if (status === 404) { charge(ent.uid, {}, RENTCAST_USD);
+    return fail(404, 'There is no record at that address. Try the full street address with the ZIP.'); }
+  if (status === 429) return fail(429, 'The comp source is rate-limiting us this minute. Try again shortly.');
+  if (status === 401 || status === 403)
+    return fail(503, 'Pulling comps is not switched on for this deployment.');
+  if (!j) { charge(ent.uid, {}, RENTCAST_USD);
+    return fail(502, 'The comp source returned ' + status + '.'); }
+
+  const raw = Array.isArray(j.comparables) ? j.comparables : [];   // and NOTHING else off this reply
+  charge(ent.uid, {}, RENTCAST_USD);
+  if (!raw.length) return fail(404, 'No comparable sales came back near that address.');
+
+  const monthsSince = d => { const t = Date.parse(d); if (!Number.isFinite(t)) return '';
+    return String(Math.max(0, Math.round((Date.now() - t) / 2629800000))); };
+  const rows = raw.slice(0, 12).map((c, i) => ({
+    id: 'rc' + i + Math.random().toString(36).slice(2, 6),
+    addr: String(c.formattedAddress || c.addressLine1 || 'Comparable ' + (i + 1)).slice(0, 90),
+    price: c.price ? String(Math.round(c.price)) : '',
+    sqft:  c.squareFootage ? String(Math.round(c.squareFootage)) : '',
+    beds:  c.bedrooms  != null ? String(c.bedrooms)  : '',
+    baths: c.bathrooms != null ? String(c.bathrooms) : '',
+    sold:  monthsSince(c.lastSeenDate || c.listedDate || c.removedDate),
+    dist:  c.distance != null ? (Math.round(c.distance * 100) / 100).toFixed(2) : '',
+    cond: 0, use: true, src: 'rentcast',
+  })).filter(c => c.price && c.sqft);
+  if (!rows.length) return fail(404, 'The sales that came back had no price or floor area on them.');
+
+  await countUse(ent.uid, 'aicomps');
+  const used = await usedThisMonth(ent.uid, 'aicomps');
+  meterRelease(ent.uid, 'aicomps');
+  res.json({ ok:true, rows, month: { used: used === NOMETER ? null : used, cap: meter.cap,
+    left: (used === NOMETER || meter.cap <= 0) ? null : Math.max(0, meter.cap - used) } });
+});
+
 const TILES_KEY = process.env.GOOGLE_TILES_KEY || '';
-const TILES_CAP = N('NI_TILES_DAY_CAP', 150);
-let tiles = { day: new Date().toISOString().slice(0, 10), n: 0 };
+const TILES_CAP  = N('NI_TILES_DAY_CAP', 150);   // the soft budget: sharing starts here
+/* the ceiling nobody gets past. Twice the budget, so a fair share has somewhere
+   to be fair IN — a share enforced at the ceiling is just a race with extra
+   arithmetic. */
+const TILES_HARD = N('NI_TILES_DAY_HARD', 0) || TILES_CAP * 2;
+let tiles = { day: new Date().toISOString().slice(0, 10), n: 0, by: new Map() };
 /* ── THE ONE ENDPOINT THAT HANDS OUT A KEY ────────────────────────────────
    This had no per-IP limit while /api/land/geo directly below it did, which is
    the wrong way round: the geocoder is free and this one costs $6 per thousand
@@ -1214,10 +1418,52 @@ function tileOk(ip){
   if (tileHits.size > 5000) for (const [k, v] of tileHits) if (!v.some(t => t > win)) tileHits.delete(k);
   return true;
 }
-app.get('/api/land/config', (req, res) => {
+app.get('/api/land/config', async (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
-  if (tiles.day !== today) tiles = { day: today, n: 0 };
+  if (tiles.day !== today) tiles = { day: today, n: 0, by: new Map() };
+  if (!tiles.by) tiles.by = new Map();
   if (!TILES_KEY) return res.json({ ok:false, why:'unconfigured' });
+
+  /* ── THE GROUND IS WORTH AN ACCOUNT NOW, AND IT WAS NOT BEFORE ──────────
+     This endpoint hands a Google Maps key to whoever asks, and every yes is
+     about six dollars a thousand on somebody's card. It was open because the
+     3D ground was the only thing making this room feel real: the sketch was
+     wallpaper, so the imagery was carrying the demo.
+
+     That changed. The sketch is a SCALE DRAWING now — it answers every figure
+     on the sheet, refuses when it has no acreage to scale from, and draws the
+     play at its true size. It is the better demo, and it costs nothing. So the
+     photorealistic ground can sit behind the one rung that has always been
+     free and has always been worth asking for.
+
+     AN ACCOUNT, NOT A PLAN. need=0 means any real profile passes — this is a
+     cost control and a reason to sign up, not a paid feature, and pricing it
+     as one would be a lie about what the plans buy.
+
+     It fails CLOSED, unlike the comp allowance, and the difference is who
+     pays for being wrong: a meter that cannot be read costs somebody three
+     comps, and a key handed to a stranger costs money on every request until
+     somebody notices. */
+  const ent = await entitlementOf(req, 0);
+  if (!ent.ok){
+    log('land config refused', ent.why);
+    return res.status(403).json({ ok:false, why:'account',
+      error:'The photorealistic ground comes with an account — free, no card. '
+          + 'The drawing prices without it, and is drawn to scale either way.' });
+  }
+
+  /* ── AND ONLY FROM THIS SITE ──────────────────────────────────────────
+     A referrer restriction in the Google console stops the key being USED
+     elsewhere; it does nothing about the harvesting, and a script with a
+     stolen session should not be able to collect it from a terminal either.
+     Absent Origin AND Referer is a non-browser caller. */
+  const from = String(req.get('origin') || req.get('referer') || '');
+  if (ALLOW_ORIGIN.length && !ALLOW_ORIGIN.some(o => from.startsWith(o))){
+    log('land config refused origin', from.slice(0, 60) || '(none)');
+    return res.status(403).json({ ok:false, why:'origin',
+      error:'That request did not come from this site.' });
+  }
+
   /* checked BEFORE the counter moves, so a blocked caller cannot spend the
      allowance it is being refused */
   if (!tileOk(req.ip || 'unknown')){
@@ -1225,8 +1471,32 @@ app.get('/api/land/config', (req, res) => {
     return res.status(429).json({ ok:false, why:'rate',
       error:'That is a lot of map in one hour from one place. The flat drawing still works.' });
   }
-  if (tiles.n >= TILES_CAP){ log('land config 429 quota', tiles.n); return res.json({ ok:false, why:'quota' }); }
-  tiles.n++;
+  /* ── FAIR SHARE, THE SAME SHAPE THE AI BUDGET USES ─────────────────────
+     One global counter means the first person through the door can flatten
+     the map for everybody else for the rest of the day — which is not a
+     budget, it is a race. Under the cap nobody is refused; over it, only the
+     accounts above their share of it are. */
+  /* ── A SOFT BUDGET WITH A HARD CEILING ABOVE IT ────────────────────────
+     The first version put the fair share UNDER a single cap, and the test
+     showed what that actually does: the greedy account takes the cap, and the
+     second account through the door is refused because of it — which is the
+     exact race the share was added to prevent. A share needs room to work in.
+     So TILES_CAP is the soft budget where sharing STARTS, and the ceiling
+     above it is what nobody gets past. Same shape as the AI day budget, and
+     for the same reason. */
+  if (tiles.n >= TILES_HARD){
+    log('land config 429 ceiling', tiles.n);
+    return res.status(429).json({ ok:false, why:'quota' });
+  }
+  const heads = Math.max(1, tiles.by.size);
+  const mine = tiles.by.get(ent.uid) || 0;
+  if (tiles.n >= TILES_CAP && mine >= TILES_CAP / heads){
+    log('land config 429 share', mine + '/' + Math.round(TILES_CAP / heads));
+    return res.status(429).json({ ok:false, why:'share',
+      error:'That is this account\u2019s share of today\u2019s 3D ground. It resets at midnight UTC, '
+          + 'and the drawing prices without it.' });
+  }
+  tiles.n++; tiles.by.set(ent.uid, mine + 1);
   log('land config ok', tiles.n + '/' + TILES_CAP);
   res.json({ ok:true, key: TILES_KEY });
 });
@@ -1310,10 +1580,32 @@ if (SB_URL && SB_KEY) setTimeout(() => { checkGrants().then(g => {
 /* ══ HEALTH ════════════════════════════════════════════════════════════════
    Enough to diagnose a deploy, and nothing that helps anybody attack it: no
    key, no code, no counts by IP. */
+/* ── WHICH BUILD IS ACTUALLY RUNNING ───────────────────────────────────────
+   publish.mjs signs its output and drops build.json beside the pages. Three
+   batches in a row were built, tested, packaged and never pushed, and there
+   was no way to tell from outside: the site looked like a site and this
+   endpoint said "on" to everything it knew about.
+
+   Read once at boot, deliberately. The file cannot change under a running
+   process — a deploy is a new process — so re-reading it per request would be
+   a filesystem hit on the one endpoint that must never be slow, in exchange
+   for information that cannot have changed. */
+const BUILD = (() => {
+  for (const p of ['build.json', path.join(__dirname, 'build.json'),
+                   path.join(__dirname, '..', 'build.json')]){
+    try { const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+      if (j && j.id) return { id:String(j.id).slice(0,32), at:String(j.at||'').slice(0,32),
+                              stage:String(j.stage||'').slice(0,12) }; } catch(e){}
+  }
+  /* unstamped is a FACT, not an error: an older deploy predates the stamp, and
+     saying so is more useful than an empty object that reads like a bug here */
+  return { id:'unstamped', at:'', stage:'' };
+})();
+
 app.get('/api/health', (_req, res) => {
   rollDay();
   checkGrants();                      // refreshes in the background; never blocks
-  res.json({ ok:true, service:'negotiation-inc', mock:MOCK,
+  res.json({ ok:true, service:'negotiation-inc', mock:MOCK, build:BUILD,
     read:    ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
     compare: ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
     street:  ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK))
@@ -1322,6 +1614,7 @@ app.get('/api/health', (_req, res) => {
     object:  ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
     intake:  ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
     land: TILES_KEY ? (tiles.n >= TILES_CAP ? 'quota' : 'on') : 'flat',
+    comps:   ((ACCESS || ACCOUNTS_ON()) && (RENTCAST_KEY || MOCK)) ? 'on' : 'byok',
     gate: ACCESS ? 'code+account' : ACCOUNTS_ON() ? 'account' : 'none',
     list: LIST_ON ? 'on' : 'off',
     /* named columns only when something IS open — a health endpoint that lists

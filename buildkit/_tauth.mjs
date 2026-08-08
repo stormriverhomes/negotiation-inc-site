@@ -61,8 +61,13 @@ const site=http.createServer((q,r)=>{
   if(!fs.existsSync(f)||fs.statSync(f).isDirectory()){r.writeHead(404);return r.end('');}
   let d=fs.readFileSync(f);
   if(f.endsWith('.html')){
-    d=d.toString().replace('window.NI_LIVE=false;',
-      `window.NI_LIVE=false;window.NI_SUPABASE_URL=${JSON.stringify(SBURL)};window.NI_SUPABASE_ANON="anon";`);
+    /* the stage flag is `false` before launch and `true` after, and this
+       matched only the pre-launch spelling — so against a live build the
+       replace silently missed, Supabase was never injected, __authOn() went
+       false, and the password field this harness exists to test stayed
+       hidden. A harness that hard-codes one stage can only audit one stage. */
+    d=d.toString().replace(/window\.NI_LIVE=(?:true|false);/,
+      m => `${m}window.NI_SUPABASE_URL=${JSON.stringify(SBURL)};window.NI_SUPABASE_ANON="anon";`);
   }
   r.writeHead(200,{'content-type':MIME[path.extname(f)]||'application/octet-stream'});
   r.end(d);

@@ -351,6 +351,16 @@ h1{font-family:var(--serif);font-size:34px;font-weight:700;letter-spacing:-.015e
 .agh h4{font-family:var(--serif);font-size:16px;font-weight:700;margin:0}
 .agh span{font-size:12px;color:var(--soft)}
 .agb{display:grid;grid-template-columns:repeat(auto-fit,minmax(218px,1fr));gap:12px 16px;margin-top:12px}
+/* ── the line that says what the seven numbers govern ─────────────────────
+   Deliberately quiet: it is a fact about the panel, not a control on it, so
+   it reads as a caption rather than competing with the sliders above it. */
+.ascope{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;
+ margin-top:4px;padding:11px 14px;border:1px solid var(--line);border-radius:var(--r-card);
+ background:var(--wash);font-size:12.5px;line-height:1.5;color:var(--mid)}
+.ascope .asl{flex:1 1 320px;min-width:0}
+.ascope .asl b{color:var(--ink);font-weight:650}
+.ascope .asr{flex:0 1 auto;color:var(--soft);font-size:12px}
+.ascope .rst{flex:none}
 .assume{background:#fff;border:1px solid var(--line);border-radius:var(--r-card);padding:12px 14px 11px;
  transition:border-color .12s,box-shadow .12s}
 .assume:hover{border-color:var(--line-ink)}
@@ -661,6 +671,9 @@ body.comparing .compare,body.boxing .buybox,body.lettering .letters,body.bulking
  border-top:1px solid var(--line)}
 .dk-room.ok{color:var(--green);font-weight:650} .dk-room.no{color:var(--red);font-weight:650}
 .dk-room{color:var(--faint)}
+/* the attribution rides in the same line at a quieter weight: the figure is
+   still the figure, it just stops pretending to belong to the exit above it */
+.dk-room i{font-style:normal;font-weight:400;color:var(--soft);font-size:11.5px}
 .dk-c{font-weight:700;text-transform:capitalize}
 .dk .bxchip,.slot .bxchip{margin-top:7px;justify-self:start;align-self:start}
 /* ── the table: two slots and the word between them ── */
@@ -1045,6 +1058,9 @@ body.traytight .tray{padding-bottom:11px}
 .cmp-r .v{font-size:15px;font-weight:650;color:var(--ink);font-variant-numeric:tabular-nums}
 .cmp-r .v.win{color:var(--green);position:relative}
 .cmp-r .v.win::after{content:'✓';font-size:11px;color:var(--green);margin-left:6px;vertical-align:1px}
+/* a room or spread below zero is a number you have to talk somebody down by,
+   never a quieter version of a gain — the sign gets the refusal colour */
+.cmp-r .v .neg{color:var(--red)}
 .cmp-r .dash{color:var(--faint);font-weight:400}
 .cmp-grid.is-demo{opacity:.97}
 .cmp-verdict{margin-top:18px;padding:17px 20px;border-radius:14px;border:1px solid var(--green-line);
@@ -1102,7 +1118,18 @@ body.traytight .tray{padding-bottom:11px}
 .cwh h3{font-family:var(--serif);font-size:20px;font-weight:700}
 .cwh p{font-size:13px;color:var(--soft);margin-top:3px;max-width:56ch}
 .subj{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:14px}
+/* the audit popover anchors to whatever box the chip sits in, and these three
+   are the only read-fillable figures that are NOT `.field` rows */
+.subj>span{position:relative;display:block}
 .subj label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--soft)}
+/* a subject figure read from a photograph wears the same mark as one in the
+   sheet — marked rather than flagged, and it opens the same quotation */
+.subj .sjr{margin-left:6px;vertical-align:1px;display:inline-flex;align-items:center;gap:3px;
+ border:1px solid var(--est-line);background:var(--est-soft);color:var(--est);cursor:pointer;
+ border-radius:var(--r-pill);padding:1px 6px 1px 5px;font:inherit;font-size:9px;font-weight:700;
+ letter-spacing:.08em;line-height:1.5}
+.subj .sjr:hover{border-color:var(--est)}
+.subj .sjr svg{flex:none}
 .subj input{width:100%;margin-top:4px;border:1px solid var(--line-ink);border-radius:var(--r-in);
  background:#fff;padding:9px 11px;font-family:var(--sans);font-size:14.5px;font-variant-numeric:tabular-nums;
  color:var(--ink);outline:none}
@@ -1210,6 +1237,17 @@ body.traytight .tray{padding-bottom:11px}
 .shape input{font-family:var(--sans);font-size:13.5px;font-weight:700;color:#fff;width:46px;
  text-align:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);
  border-radius:var(--r-btn);padding:5px 6px}
+/* ── 16px, OR iOS ZOOMS THE PAGE ──────────────────────────────────────────
+   This file states the rule in three other places and then broke it here: bed
+   and bath are 13.5px, so tapping either one on an iPhone zooms the whole
+   condition panel and leaves the reader stranded mid-sheet. It reads as the
+   layout breaking, and it is the panel that drives the repair figure. The
+   desktop size is deliberate — the strip is a caption, not a form — so the
+   correction is a phone rule rather than a bigger number everywhere. */
+@media(max-width:640px){
+  .shape input{font-size:16px;width:56px;padding:8px 6px;min-height:44px}
+  .shape .f label{font-size:13px}
+}
 .shape input:focus{outline:none;border-color:#8fb4ff;background:rgba(143,180,255,.14)}
 .shape label{font-size:12.5px;color:#b9c8de}
 .shape .say{font-size:12px;color:#8ea4c4;margin-left:auto;text-align:right}
@@ -1417,10 +1455,96 @@ body.traytight .tray{padding-bottom:11px}
  font-variant-numeric:tabular-nums;font-size:17px;font-weight:650;color:var(--ink);outline:none;padding:2px 0}
 .frow input::placeholder{color:#aab1c0;font-weight:400;font-size:13px}
 /* state tags: squared, mono — a filing notation, not a SaaS pill */
+.sronly{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* ── THE INTAKE ───────────────────────────────────────────────────────────
+   One door above the comp workbench. It has to invite a drag without
+   shouting on a screen that is mostly a form, so: dashed, quiet, and the
+   whole card is the target. */
+.intake{margin:0 0 14px}
+.idrop{display:flex;width:100%;box-sizing:border-box;align-items:center;gap:14px;text-align:left;
+ background:var(--card);border:1.5px dashed var(--line-ink);border-radius:var(--r-card);
+ padding:15px 18px;cursor:pointer;font-family:inherit;color:inherit}
+.idrop:hover{border-color:var(--blue)}
+.idrop.over{background:var(--blue-soft);border-style:solid;border-color:var(--blue)}
+.idrop .t{display:block;font-size:14px;font-weight:600}
+.idrop .s{display:block;font-size:12.5px;color:var(--soft);margin-top:2px;line-height:1.4}
+.idrop .br{font-size:12.5px;font-weight:600;color:var(--blue);border:1px solid var(--line-ink);
+ border-radius:var(--r-pill);padding:6px 12px;white-space:nowrap}
+.icard{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:13px 16px}
+.icard .h{font-size:13.5px;font-weight:600}
+.icard .sub{font-size:12.5px;color:var(--soft);margin-top:2px;line-height:1.45}
+.ibar{position:relative;height:3px;background:var(--line);border-radius:2px;margin-top:12px;overflow:hidden}
+.ibar i{position:absolute;inset:0 auto 0 0;width:30%;background:var(--est);border-radius:2px;
+ animation:ni-slide 1.4s ease-in-out infinite}
+@keyframes ni-slide{from{transform:translateX(-110%)}to{transform:translateX(340%)}}
+@media(prefers-reduced-motion:reduce){ .ibar i{animation:none;width:100%;background:var(--est-line)} }
+.irow{display:flex;align-items:center;gap:14px;margin-top:8px;flex-wrap:wrap}
+.irow button,.irow a{border:0;background:none;padding:0;cursor:pointer;font:inherit;font-size:12.5px;
+ font-weight:600;color:var(--blue);text-decoration:none}
+.irow .m{margin-left:auto;font-size:11.5px;color:var(--soft);font-weight:400}
+.ibad{background:var(--red-soft);border:1px solid var(--red-line);border-radius:var(--r-card);padding:14px 16px}
+.ibad .h{font-size:14px;font-weight:700;color:var(--red)}
+.ibad .b{font-size:13px;color:var(--mid);line-height:1.5;margin-top:4px}
+.iquiet{background:var(--est-soft);border:1px solid var(--est-line);border-radius:var(--r-card);padding:14px 16px}
+.iquiet .cap{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--est)}
+.iquiet .q{font-size:13px;color:var(--mid);margin-top:5px;line-height:1.45}
+/* the transcript: available, never in the way */
+.idraw{position:fixed;top:0;right:0;bottom:0;width:min(400px,92vw);z-index:70;display:flex;
+ flex-direction:column;background:var(--card);border-left:1px solid var(--line);
+ box-shadow:-18px 0 50px rgba(16,23,37,.12)}
+.idraw .dh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;
+ border-bottom:1px solid var(--line)}
+.idraw .db{overflow:auto;padding:12px 16px;flex:1;font-size:13px;line-height:1.55}
+.idraw .db div{padding:3px 8px;margin:0 -8px;border-radius:6px;white-space:pre-wrap}
+.idraw .db .used{background:var(--est-soft)}
+.idraw .db .hit{background:var(--blue-soft)}
+.idraw .df{padding:10px 16px;border-top:1px solid var(--line);font-size:11.5px;color:var(--soft);line-height:1.5}
+@media(max-width:640px){ .idraw{top:auto;left:0;right:0;bottom:0;width:auto;height:72vh;
+  border-left:0;border-top:1px solid var(--line);border-radius:18px 18px 0 0} }
+.field{position:relative}
 .stchip{flex:none;font-size:9.5px;font-weight:700;letter-spacing:.09em;padding:3px 8px;border:1px solid;border-radius:var(--r-pill)}
 .st-entered{background:var(--green-soft);color:var(--green);border-color:var(--green-line)}
 .st-estimate{background:var(--est-soft);color:var(--est);border-color:var(--est-line)}
 .st-needed{background:#eef0f4;color:var(--soft);border-color:var(--line)}
+/* ── READ: MARKED, NOT FLAGGED ────────────────────────────────────────────
+   Same slate as an estimate, because that is what it is — a figure the sheet
+   was handed rather than one you typed. The camera says where from, and the
+   chip is a BUTTON because the receipt is one click away and nothing may
+   depend on hover. */
+.st-photo{display:inline-flex;align-items:center;gap:4px;font:inherit;font-size:9.5px;font-weight:700;
+ letter-spacing:.09em;background:var(--est-soft);color:var(--est);border:1px solid var(--est-line);
+ border-radius:var(--r-pill);padding:3px 8px;cursor:pointer}
+.st-photo:hover{border-color:var(--est);}
+.st-photo svg{flex:none}
+/* the audit popover: the line the figure came from, verbatim */
+.audit{position:absolute;right:0;top:calc(100% + 8px);width:300px;z-index:50;text-align:left;
+ background:var(--card);border:1px solid var(--line-ink);border-radius:12px;padding:12px 14px;
+ box-shadow:0 12px 32px rgba(16,23,37,.14)}
+.audit .cap{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--est)}
+.audit .q{margin-top:8px;background:var(--est-soft);border:1px solid var(--est-line);border-radius:8px;
+ padding:8px 10px;font-size:13.5px;line-height:1.45}
+.audit .b{margin-top:8px;font-size:12.5px;color:var(--mid);line-height:1.5}
+.audit button{border:0;background:none;padding:0;margin-top:8px;cursor:pointer;font:inherit;
+ font-size:12.5px;font-weight:600;color:var(--blue)}
+@media(max-width:640px){ .audit{position:fixed;left:12px;right:12px;bottom:12px;top:auto;width:auto;
+  border-radius:14px;padding:14px 16px;box-shadow:0 18px 44px rgba(16,23,37,.22);z-index:80} }
+/* ── the landing choreography ─────────────────────────────────────────────
+   From the design, to the millisecond: the figure rises 6px and fades over
+   380ms; the chip follows 120ms later; the row washes slate and decays over
+   1.5s. Reduced motion keeps the wash and drops every transform, because the
+   wash is the part that says WHICH rows changed and that information is not
+   decoration. */
+@keyframes ni-land{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes ni-chip{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
+@keyframes ni-wash{0%{background:transparent}10%{background:var(--est-soft)}40%{background:var(--est-soft)}100%{background:transparent}}
+@keyframes ni-still{from{opacity:0}to{opacity:1}}
+.field.landing{animation:ni-wash 1.5s ease-out both;border-radius:10px}
+.field.landing .frow input{animation:ni-land .38s cubic-bezier(.2,.7,.2,1) both}
+.field.landing .stchip{animation:ni-chip .18s cubic-bezier(.2,.7,.2,1) .12s both}
+@media(prefers-reduced-motion:reduce){
+  .field.landing{animation:ni-wash 2.2s ease-out both}
+  .field.landing .frow input,.field.landing .stchip{animation:ni-still .25s both}
+}
 /* estimate quick-fills: the intake that writes the number FOR you, honestly */
 .est{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
 .est .cap{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-bottom:5px}
@@ -1543,6 +1667,7 @@ details.loan .grid{margin-top:11px}
 .exit-h .keyfig{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em;white-space:nowrap}
 .exit-h .keyfig.neg{color:var(--red)}
 .exit-h .keyfig.pay{color:var(--green)}
+.exit-h .keyif{font-size:11px;line-height:1.35;color:var(--gold,#8a6612);margin-top:2px}
 
 /* ── the payday line ─────────────────────────────────────────────────────── */
 .payday{margin-top:14px;border:1px solid var(--green-line);border-radius:var(--r-card);
@@ -1623,6 +1748,13 @@ details.loan .grid{margin-top:11px}
 .xb-v{font-family:var(--serif);font-size:28px;font-weight:700;letter-spacing:-.025em;
  line-height:1.05;margin-top:3px;font-variant-numeric:tabular-nums}
 .xb-v.pay{color:var(--green)}
+/* the "…if they came down" note: gold, because it is a condition on a figure,
+   which is what this product's gold has always meant — not a refusal (red),
+   not money that pays (green) */
+.xb-if{margin-top:8px;padding:9px 12px;border:1px solid var(--gold-line,#e6d9ae);
+ background:var(--gold-soft,#fbf6e9);color:var(--gold,#8a6612);border-radius:var(--r-in);
+ font-size:12.5px;line-height:1.55;max-width:62ch}
+.xb-if b{font-weight:750}
 .xb-fit{text-align:right}
 /* the fit, as a ring — a number out of 100 wants a shape, not a sentence */
 .xb-ring{position:relative;width:52px;height:52px;margin-top:5px;margin-left:auto;border-radius:50%;
@@ -1645,8 +1777,12 @@ details.loan .grid{margin-top:11px}
 .oxp-b:hover{border-color:var(--ink);transform:translateY(-1px)}
 .oxp-b .n{font-size:13px;font-weight:650;color:var(--mid)}
 .oxp-b .c{font-size:12.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
-.oxp-b .d{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
-.oxp-b .d.up{color:var(--green)} .oxp-b .d.dn{color:var(--red)}
+/* grey, deliberately: the gap between two ceilings is not money and not a
+   refusal, and this product's two colours are reserved for those two things */
+.oxp-b .d{font-size:10.5px;font-weight:650;font-variant-numeric:tabular-nums;color:var(--soft)}
+.oxp-b.on .d{color:var(--blue-deep);opacity:.7}
+.oxp-k2{font-size:12px;color:var(--soft);line-height:1.55;margin-top:9px;max-width:78ch}
+.oxp-k2 b{color:var(--mid);font-weight:650}
 .oxp-b.on{border-color:var(--blue);background:var(--blue-soft)}
 .oxp-b.on .n{color:var(--blue-deep)} .oxp-b.on .c{color:var(--blue-deep)}
 .oxp-b.rec::after{content:'rec';font-size:8px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
@@ -2281,6 +2417,8 @@ body.hasrail.railtight .trouble{left:64px}
   <!-- ══ THE COMP WORKBENCH ═══════════════════════════════════════════════
        Not an AVM. The sales-comparison approach with the arithmetic done and
        shown, ending in a number the user sets and therefore owns. ═══════ -->
+  <div class="intake" id="intake"></div>
+  <div id="intake-live" aria-live="polite" class="sronly"></div>
   <div class="cw" id="cw"></div>
   <div class="grid" id="fields-property"></div>
  </section>
@@ -2546,15 +2684,39 @@ function compRows(){
   const sSqft = compNum(S.subj?.sqft), sBeds = compNum(S.subj?.beds), sBaths = compNum(S.subj?.baths);
 
   return (S.comps || []).map(c => {
+    /* ── A BLANK IS NOT A ZERO, AND IT IS CERTAINLY NOT THE BEST CASE ──────
+       `compNum('') ?? 0` turned an EMPTY "months ago" into 0 and an empty
+       "miles away" into 0 — which are the two best values either field can
+       hold. So a comp with nothing but a sold price scored freshness 100 and
+       distance 100, outranked a fully documented one, took the largest weight
+       in the working range, and then had its why-line say "sold recently ·
+       same pocket" — facts the user never entered, printed as though read off
+       a record.
+
+       The tell was in the same line: it correctly said "size unknown", because
+       size has a real null path. Age and distance did not.
+
+       Unknown now stays unknown, scores the same neutral 60 the unknown size
+       already used, and SAYS unknown. */
     const price = compNum(c.price), sqft = compNum(c.sqft);
-    const months = Math.max(0, compNum(c.sold) ?? 0);
-    const dist = Math.max(0, compNum(c.dist) ?? 0);
+    const monthsRaw = compNum(c.sold), distRaw = compNum(c.dist);
+    const months = monthsRaw === null ? null : Math.max(0, monthsRaw);
+    const dist   = distRaw   === null ? null : Math.max(0, distRaw);
     const beds = compNum(c.beds), baths = compNum(c.baths);
-    const row = { ...c, price, sqft, months, dist, beds, baths, adj:{}, ok: price !== null };
+    /* ── #21 · A COMP THAT SOLD FOR NOTHING DID NOT SELL ───────────────────
+       `ok: price !== null` let a typed 0 through, and then `price ? gross/price
+       : 0` gave that row a gross-adjustment of 0 — the BEST possible value,
+       which suppressed the exact penalty that would have flagged it. It scored
+       98, was labelled "Best comp", and dragged the one-click ARV down by
+       about 40%. medianPPSF already required a positive price; this now agrees
+       with it. */
+    const row = { ...c, price, sqft, months, dist, beds, baths, adj:{},
+                  ok: price !== null && price > 0,
+                  noPrice: price !== null && !(price > 0) };
     if (!row.ok) { row.score = 0; row.adjusted = null; return row; }
 
     // ── the adjustments, each one named on the page ──
-    row.adj.time = price * (A.market/100) * (months/12);
+    row.adj.time = months === null ? 0 : price * (A.market/100) * (months/12);
     row.adj.size = (glaRate !== null && sSqft !== null && sqft !== null) ? (sSqft - sqft) * glaRate : 0;
     row.adj.beds = (sBeds !== null && beds !== null) ? (sBeds - beds) * A.bed : 0;
     row.adj.baths = (sBaths !== null && baths !== null) ? (sBaths - baths) * A.bath : 0;
@@ -2569,8 +2731,10 @@ function compRows(){
     row.adjusted = price + net;
 
     // ── comparability, 0–100, with the reasons kept ──
-    const sRec  = Math.max(0, 100 - months*(100/12));
-    const sDist = Math.max(0, 100 - dist*50);
+    /* the same neutral 60 an unknown size already scores — not 100, which is
+       what "we were not told" used to be worth */
+    const sRec  = months === null ? 60 : Math.max(0, 100 - months*(100/12));
+    const sDist = dist   === null ? 60 : Math.max(0, 100 - dist*50);
     const sSize = (sSqft && sqft) ? Math.max(0, 100 - Math.max(0, Math.abs(sSqft-sqft)/sSqft*100 - 5)*4) : 60;
     const sRoom = 100 - ((sBeds !== null && beds !== null ? Math.abs(sBeds-beds) : 0) * 22)
                       - ((sBaths !== null && baths !== null ? Math.abs(sBaths-baths) : 0) * 18);
@@ -2581,15 +2745,21 @@ function compRows(){
        rather than a slightly different house. Averaged in as one component of
        four, a two-mile comp could still score in the fifties; multiplied, it
        reads as what it is. The same applies to a sale over a year old. */
-    const loc = dist <= 0.5 ? 1 : dist <= 1 ? 0.92 : dist <= 1.5 ? 0.78 : 0.58;
-    const age = months <= 6 ? 1 : months <= 12 ? 0.94 : 0.74;
+    /* null slips through `dist <= 0.5` — it coerces to 0 — so a comp with NO
+       distance walked through the gate wearing the same-pocket multiplier,
+       and an undocumented comp could outrank a documented one sitting 1.6
+       miles away. The age gate already handled its unknown; this one now
+       matches it. The block above fixed exactly this class of bug in the
+       WEIGHTS and the gate quietly kept it. */
+    const loc = dist === null ? 0.9 : dist <= 0.5 ? 1 : dist <= 1 ? 0.92 : dist <= 1.5 ? 0.78 : 0.58;
+    const age = months === null ? 0.9 : months <= 6 ? 1 : months <= 12 ? 0.94 : 0.74;
     /* Comps needing modest total adjustment carry more weight — that is the
        one weighting rule the literature is unanimous about. */
     const penalty = Math.min(1, row.grossPc / 0.35);
     row.score = Math.round(Math.max(2, base * loc * age * (1 - 0.55*penalty)));
     row.why = [
-      months <= 3 ? 'sold recently' : months >= 9 ? `${Math.round(months)} months old` : `${Math.round(months)} months old`,
-      dist <= 0.3 ? 'same pocket' : dist >= 1 ? `${dist.toFixed(1)} mi away` : `${dist.toFixed(1)} mi away`,
+      months === null ? 'age unknown' : months <= 3 ? 'sold recently' : `${Math.round(months)} months old`,
+      dist === null ? 'distance unknown' : dist <= 0.3 ? 'same pocket' : `${dist.toFixed(1)} mi away`,
       (sSqft && sqft) ? (Math.abs(sSqft-sqft)/sSqft < 0.08 ? 'similar size'
         : `${sqft > sSqft ? 'bigger' : 'smaller'} by ${Math.abs(Math.round((sqft-sSqft)/sSqft*100))}%`) : 'size unknown',
       row.grossPc > 0.20 ? `heavy adjustment, ${Math.round(row.grossPc*100)}%` : null,
@@ -2782,8 +2952,16 @@ const groupPc = g => { const L = g.lines, tot = L.reduce((t,l)=>t+maxOf(l),0);
    offering the swap back only while the two genuinely disagree. That button
    appears because there is a decision to make, which is the only good reason
    for a button to exist. */
-const condTotalOf = arv => arv === null ? null
-  : LINES.reduce((t,l)=>t + arv*maxOf(l)*((S.sys[l.id]||0)/100), 0);
+/* cleanProp() is the primary guard and it does its job: a slider value off
+   disk that is not a number 0–100 is written back as 0. This is the second
+   layer, and it is here because of what a miss would cost rather than because
+   a miss is likely — one NaN out of this function prints "$NaN" where money
+   goes, and then every ceiling downstream inherits it. A pure function used in
+   five places should not be able to produce that whatever it is handed. */
+const condPc = id => { const v = Number(S.sys[id]);
+  return Number.isFinite(v) ? Math.max(0, Math.min(100, v)) : 0; };
+const condTotalOf = arv => (arv === null || !Number.isFinite(Number(arv))) ? null
+  : LINES.reduce((t,l)=>t + Number(arv)*maxOf(l)*(condPc(l.id)/100), 0);
 
 /** Push the panel's total into the repair estimate, unless a bid owns it.
  *  Returns true if it wrote. Callers render; this one only decides. */
@@ -2792,16 +2970,40 @@ function syncRepairs(){
   const arv = val('arv'); if (arv === null) return false;
   const tot = condTotalOf(arv);
   if (tot <= 0){
-    // everything reads sound: the honest repair number is nothing, not stale
-    if (S.est.repairs){ S.raw.repairs=''; S.est.repairs=false; S.prov.repairs=null; S.unc.repairs=null; }
+    /* A sound house needs $0 of work, and $0 is a KNOWN figure — not a missing
+       one. Clearing it to empty made the flip refuse for want of a repair
+       number, the rail fell through to whatever exit came next, and a user
+       clicking "Sound / nothing needed" watched the ceiling land on the same
+       figure heavy condition gave. He found it before we did.
+
+       A sound house is the best flip on the board and must show the highest
+       ceiling. So: write the zero, and say where it came from. */
+    if (S.est.repairs){
+      S.raw.repairs = '0'; S.est.repairs = true; S.unc.repairs = 0.05;
+      S.prov.repairs = 'the condition panel · every system reads sound, so the walk-through found nothing to do';
+      return true;
+    }
     return false;
   }
   const worst = LINES.slice().sort((p,q)=>
     arv*maxOf(q)*((S.sys[q.id]||0)/100) - arv*maxOf(p)*((S.sys[p.id]||0)/100))[0];
-  S.raw.repairs = (Math.round(tot/500)*500).toLocaleString('en-US');
+  /* ── ROUNDED ONCE, AND EVERYTHING READS THE SAME NUMBER ────────────────
+     This wrote the total rounded to the nearest $500 while the panel three
+     inches above rendered the EXACT figure and said "this total IS the repair
+     estimate — it is already on the sheet." On a 4,218 total the sheet
+     priced on 4,000 and the panel showed 4,218, and both claimed to be the
+     same quantity. Up to $250 of daylight between two renders of one number,
+     with every ceiling built on the rounded one, and the bid check adding a
+     third value on top by summing its own per-line rounding.
+
+     The rounding was cosmetic — a tidy figure in the box — so it moves to
+     where cosmetics belong. The sheet stores what the panel computed, and the
+     $500 tidying happens on the way to the screen. One number, three renders,
+     no daylight. */
+  S.raw.repairs = Math.round(tot).toLocaleString('en-US');
   S.est.repairs = true;
   S.unc.repairs = 0.15;      // a walk-through is a judgement, wider than a bid
-  S.prov.repairs = `the condition panel · ${(tot/arv*100).toFixed(1)}% of ARV, biggest line ` +
+  S.prov.repairs = `the condition panel${arv > 0 ? ` · ${(tot/arv*100).toFixed(1)}% of ARV` : ''}, biggest line ` +
     `${worst.lab.toLowerCase()} · type a bid over it and the bid wins`;
   return true;
 }
@@ -2910,8 +3112,13 @@ const PKEY = 'ni-desk-v3', OLDKEY = 'ni-desk-v2';
    between the desk and the hub, and is cleared by exactly the two things that
    should clear it — emptying the sheet, or starting a new one. */
 const newProp = (name) => ({ id: 'p' + Math.random().toString(36).slice(2, 9), updated: Date.now(),
-  name: name || '', addr:'', raw:{}, est:{}, prov:{}, unc:{}, noAsk:false, sample:null, offerExit:null,
+  name: name || '', addr:'', raw:{}, est:{}, prov:{}, unc:{}, noAsk:false, sample:null, caseLabel:null, offerExit:null,
   comps:[], subj:{sqft:'',beds:'',baths:''}, compAdj:{},
+  /* `src` is WHERE a figure came from, alongside `est` (how confident) and
+     `prov` (the sentence). Only one value so far — 'photo' — because that is
+     the only source that is neither typed nor derived. A figure read from a
+     photograph is an ESTIMATE that also has a receipt. */
+  src:{}, intake:null,
   sit:'unknown', sitPc:0, sys:Object.fromEntries(LINES.map(l=>[l.id,0])) });
 
 /* every field typed on the way back in — localStorage is writable by anything
@@ -2926,6 +3133,12 @@ function cleanProp(d){
   p.sit  = SIT_WHY[d.sit] ? d.sit : 'unknown';
   p.noAsk = d.noAsk === true;                       // typed, like everything else off disk
   p.sample = ['demo','arcade','lesson'].indexOf(d.sample) >= 0 ? d.sample : null;
+  /* Which lesson or cabinet these figures came from. This used to be ONE
+     GLOBAL string in localStorage, read by every property on the account — so
+     loading a worked example onto sheet A put "From a lesson · not a property"
+     on sheet B, sheet C, and on the lender packet printed from a real house.
+     A sample banner is a fact about a sheet, so it lives on the sheet. */
+  p.caseLabel = typeof d.caseLabel === 'string' ? d.caseLabel.slice(0,120) : null;
   /* which exit the offer is built for. null means "whichever wins" — most
      people never touch it, and the ones who do have already decided. */
   p.offerExit = typeof d.offerExit === 'string' && /^[a-z]{4,10}$/.test(d.offerExit) ? d.offerExit : null;
@@ -2959,18 +3172,128 @@ function cleanProp(d){
   p.subj = (d.subj && typeof d.subj === 'object')
     ? { sqft:str(d.subj.sqft,10), beds:str(d.subj.beds,6), baths:str(d.subj.baths,6) }
     : { sqft:'', beds:'', baths:'' };
+  /* ── the intake's two fields, typed like everything else ─────────────────
+     `src` is a map of fieldId → 'photo'. `intake` is the last read's receipt:
+     the transcript, what was quoted but not placed, and the notes. Both are
+     shown to a person, so both are strings from a store anything on this
+     origin could have written. */
+  p.src = {};
+  if (d.src && typeof d.src === 'object')
+    for (const k in d.src) if (d.src[k] === 'photo') p.src[k] = 'photo';
+  p.intake = null;
+  if (d.intake && typeof d.intake === 'object'){
+    const q = d.intake;
+    const quoted = o => { const out = {};
+      if (o && typeof o === 'object') for (const k in o){ const f = o[k];
+        if (f && typeof f === 'object' && typeof f.value === 'number' && Number.isFinite(f.value))
+          out[String(k).slice(0,12)] = { value:f.value, saw:String(f.saw||'').slice(0,160) }; }
+      return out; };
+    p.intake = {
+      transcript: String(q.transcript || '').slice(0, 6000),
+      context: quoted(q.context),
+      saw: quoted(q.saw),
+      notes: Array.isArray(q.notes) ? q.notes.slice(0,12).map(x=>String(x).slice(0,220)) : [],
+      dropped: Array.isArray(q.dropped) ? q.dropped.slice(0,12).map(x=>({
+        id: String((x&&x.id)||'').slice(0,12), why: String((x&&x.why)||'').slice(0,12),
+        value: (x && typeof x.value === 'number') ? x.value : null,
+        saw: String((x&&x.saw)||'').slice(0,160) })) : [],
+      at: typeof q.at === 'number' ? q.at : 0,
+    };
+  }
   p.compAdj = {};
+  /* the market rate is the one adjuster with a legitimate negative — a
+     falling market. The old floor of zero silently confiscated it on every
+     reload, so a −4 typed today priced comps as +3 tomorrow. */
   if (d.compAdj && typeof d.compAdj === 'object') for (const k in COMP_DEFAULTS){
-    const v = d.compAdj[k]; if (typeof v === 'number' && v >= 0 && v < 1e6) p.compAdj[k] = v; }
+    const v = d.compAdj[k];
+    if (typeof v !== 'number' || !Number.isFinite(v)) continue;
+    if (k === 'market'){ if (v > -50 && v < 50) p.compAdj[k] = v; }
+    else if (v >= 0 && v < 1e6) p.compAdj[k] = v; }
   p.sitPc = (typeof d.sitPc === 'number' && d.sitPc >= 0 && d.sitPc <= 100) ? d.sitPc : (SIT_PC[p.sit] || 0);
   if (d.sys && typeof d.sys === 'object') LINES.forEach(l => {
     const v = d.sys[l.id]; p.sys[l.id] = (typeof v === 'number' && v >= 0 && v <= 100) ? v : 0; });
-  for (const k in (d.f || {})) { const f = d.f[k]; if (!f || typeof f !== 'object') continue;
-    p.raw[k]  = typeof f.v === 'string' ? f.v.slice(0,40) : '';
-    p.est[k]  = !!f.e;
-    p.prov[k] = typeof f.p === 'string' ? f.p.slice(0,300) : null;
-    p.unc[k]  = (typeof f.u === 'number' && f.u >= 0 && f.u <= 1) ? f.u : null; }
+  /* ── TWO SHAPES ARRIVE HERE, AND ONLY ONE WAS EVER READ ──────────────────
+     save() serialises the money into an `f: {v,e,p,u}` map, and for a long
+     time this loop was the whole of the restore. But the cloud sync uploads
+     `blob: p` — the RAW IN-MEMORY PROP — and the file export writes
+     `props: P.props`, the same shape. Neither has an `f` key; newProp has
+     never created one. So the loop ran zero times on both of those paths and
+     every figure came back as NOTHING.
+
+     What that cost, precisely: type asking, ARV, repairs and rent on a laptop,
+     sign in on a phone, and the phone shows the sheet with its name, address,
+     comps and condition sliders — and all seven money fields reading NEEDED,
+     every exit refusing to price. The phone then pushes that gutted blob back
+     over the good row, so the laptop loses them too. Same for "Export
+     everything" → "Add from a file", which the storage-full banner recommends
+     as the RECOVERY procedure. Seven known figures and four provenance records
+     converted to unknown, silently, on every device, with no error.
+
+     So both shapes load. The `f` map wins where present, because that is what
+     localStorage holds; the flat shape is read otherwise, which also repairs
+     every blob already sitting on the server in the broken form. A loader that
+     only understood the format we happened to write was never the right shape
+     for something that leaves the browser. */
+  const readFig = (k, v, e, prov, unc) => {
+    p.raw[k]  = typeof v === 'string' ? v.slice(0,40) : (typeof v === 'number' && Number.isFinite(v) ? String(v) : '');
+    p.est[k]  = !!e;
+    p.prov[k] = typeof prov === 'string' ? prov.slice(0,300) : null;
+    p.unc[k]  = (typeof unc === 'number' && unc >= 0 && unc <= 1) ? unc : null;
+  };
+  if (d.f && typeof d.f === 'object'){
+    for (const k in d.f){ const f = d.f[k]; if (!f || typeof f !== 'object') continue;
+      readFig(k, f.v, f.e, f.p, f.u); }
+  } else if (d.raw && typeof d.raw === 'object'){
+    const est = (d.est && typeof d.est === 'object') ? d.est : {};
+    const prov= (d.prov && typeof d.prov === 'object') ? d.prov : {};
+    const unc = (d.unc && typeof d.unc === 'object') ? d.unc : {};
+    for (const k in d.raw) readFig(k, d.raw[k], est[k], prov[k], unc[k]);
+  }
   return p;
+}
+/* The one serialiser. save(), the sync and the file export all write through
+   this, so "the shape we store" and "the shape we send" cannot drift apart
+   again — which is the only reason the bug above was possible. */
+/* ── THE ASSUMPTIONS TRAVEL WITH THE WORK ──────────────────────────────────
+   Rate, LTV, DSCR floor, selling costs, holding period, target profit and
+   opex are one set for the whole workspace — change them once and every
+   property reprices. That much was already true. What was NOT true is that
+   they went anywhere: they lived in this browser's localStorage and nowhere
+   else, so an underwriter who set 8.25% and a 1.30 floor on a laptop opened
+   the desk on a phone and got the shipped 7.1% back, silently, with different
+   answers underneath it.
+
+   They ride in the sheet blob rather than in a table of their own. That is
+   deliberate: the blob is a free-form JSON column that already syncs, already
+   merges last-write-wins per property, and already survives a device going
+   offline. A second table would need a migration, a second policy and a
+   second merge rule to do exactly this. */
+function advWire(){
+  const out = {};
+  for (const k in DEFAULTS){ const v = (P.adv || {})[k];
+    out[k] = (typeof v === 'number' && Number.isFinite(v)) ? v : DEFAULTS[k]; }
+  return out;
+}
+/* and coming back the other way, every value is re-checked against the spec
+   that drew its slider — a number from a server is a claim, not a bound */
+function advRead(a){
+  if (!a || typeof a !== 'object') return null;
+  const out = {};
+  for (const k in DEFAULTS){ const v = a[k], sp = A_SPEC.find(x => x.id === k);
+    out[k] = (typeof v === 'number' && sp && v >= sp.min && v <= sp.max) ? v : DEFAULTS[k]; }
+  return out;
+}
+window.__advRead = advRead;
+
+function propWire(x){
+  return { adv: advWire(),
+    id:x.id, name:x.name, addr:x.addr, sit:x.sit, sitPc:x.sitPc, sys:x.sys, noAsk:!!x.noAsk,
+    sample:x.sample||null, caseLabel:x.caseLabel||null, offerExit:x.offerExit||null,
+    toName:x.toName||'', fin:x.fin||null, read:x.read||null, updated:x.updated||0,
+    comps:(x.comps||[]).slice(0,24), subj:x.subj||{}, compAdj:x.compAdj||{}, repairsOwn:!!x.repairsOwn,
+    src:x.src||{}, intake:x.intake||null,
+    f: Object.fromEntries([...FIELDS,...LOANFIELDS].map(y =>
+      [y.id, { v:x.raw[y.id]||'', e:!!x.est[y.id], p:x.prov[y.id]||null, u:x.unc[y.id]||null }])) };
 }
 /* ── THE BUY BOX ───────────────────────────────────────────────────────────
    Every investor already has one. It lives in their head, it is four or five
@@ -3118,20 +3441,84 @@ const SELLER_W = {
  urgent:    { mult:1.70, price:.26, speed:.44, certainty:.22, ease:.08 },
 };
 
-const S = { addr:'', raw:{}, est:{}, prov:{}, unc:{}, sit:'unknown', sitPc:0, sys:{}, noAsk:false, sample:null,
+const S = { addr:'', raw:{}, est:{}, prov:{}, unc:{}, sit:'unknown', sitPc:0, sys:{}, noAsk:false, sample:null, caseLabel:null,
             offerExit:null, toName:'', fin:null, read:null,
             comps:[], subj:{sqft:'',beds:'',baths:''}, compAdj:{}, compOpen:false,
             name:'', mode:P.mode, adv:P.adv, lev:Object.fromEntries(LEVERS.map(l=>[l.id,l.def])),
-            openId:null, userToggled:false, repairsOwn:false };
-function loadInto(i){
+            openId:null, userToggled:false, repairsOwn:false,
+            /* which condition lines the PERSON has dragged this session. Not
+               persisted — it exists to stop a photo read overwriting a hand
+               that is still on the sheet, which is the harm it was reported
+               for. It resets with the sheet, because somebody else's drags on
+               another property are not yours. */
+            sysOwn:{} };
+/* Declared HERE, not down beside applyCase, because loadInto() runs during
+   boot and now clears both. A `let` read by a function that runs earlier in
+   the script throws on the temporal dead zone — the whole desk, white, on
+   load. Two of these have moved up for that reason now; anything loadInto
+   touches belongs above loadInto. */
+let CASE = null, pending = null;
+let DEMO = null;                 // set by loadDemo(); cleared by loadInto()
+/* ── TWO DIFFERENT THINGS WERE ONE FUNCTION ────────────────────────────────
+   `loadInto` was doing two jobs that only look alike:
+
+     · A PERSON switches property. Everything that belongs to the sheet they
+       left should go — the demo flag, the worked-example banner, the letter
+       drafts, the photo tray.
+     · The ENGINE swaps sheets to price one. `priceProp` borrows S, prices a
+       different property, and puts S back; `renderCompare` does that for every
+       property on the bench, and the bulk panel does it per pasted row. That
+       is a transient internal loan, and it must leave no trace.
+
+   Sharing one function meant the second silently did the first's work: merely
+   opening Compare wiped every hand-edited letter draft and revoked the queued
+   walk-through photos, and — once the demo flag was cleared here — pricing a
+   second sheet inside a demo quietly ended the demo.
+
+   So: `swapInto` is the pure state move, and `loadInto` is that plus the
+   things a person leaving a sheet should lose. */
+/* The exact slice of S that swapInto owns. Snapshotting it lets the engine put
+   back WHAT WAS THERE rather than re-deriving it from a property — which is the
+   only way to survive a demo, because a demo lives in S and in no prop at all.
+   Add a field to swapInto and it belongs here in the same commit. */
+const S_SWAP = ['name','addr','raw','est','prov','unc','sit','sitPc','sys','noAsk',
+  'comps','subj','compAdj','openId','userToggled','repairsOwn','sample','caseLabel',
+  'offerExit','toName','fin','read','src','intake'];
+const holdS = () => { const o = { __active: P.active }; for (const k of S_SWAP) o[k] = S[k]; return o; };
+const putS  = (o) => { for (const k of S_SWAP) S[k] = o[k]; P.active = o.__active; };
+function swapInto(i){
   const p = P.props[Math.max(0, Math.min(P.props.length-1, i))];
   P.active = P.props.indexOf(p);
   S.name = p.name; S.addr = p.addr; S.raw = p.raw; S.est = p.est; S.prov = p.prov;
   S.unc = p.unc; S.sit = p.sit; S.sitPc = p.sitPc; S.sys = p.sys; S.noAsk = !!p.noAsk;
   S.comps = p.comps || []; S.subj = p.subj || {sqft:'',beds:'',baths:''}; S.compAdj = p.compAdj || {};
+  S.src = p.src || {}; S.intake = p.intake || null;
   S.openId = null; S.userToggled = false; S.repairsOwn = !!p.repairsOwn; S.sample = p.sample || null;
+  S.sysOwn = {};
+  S.caseLabel = p.caseLabel || null;
   S.offerExit = p.offerExit || null; S.toName = p.toName || ''; S.fin = p.fin || null;
   S.read = p.read || null;
+  return p;
+}
+function loadInto(i){
+  swapInto(i);
+  /* CASE is the in-flight worked example, which belongs to the sheet it was
+     applied to and to no other. Leaving that sheet ends it — without this the
+     global outlived the switch and the next property inherited its banner. */
+  CASE = null;
+  /* ── AND SO DOES THE DEMO ────────────────────────────────────────────────
+     `DEMO` is a global, and a global is a thing that escapes. It escaped three
+     ways: the property tabs switched sheets without clearing it, so every
+     later save() silently no-opped and a whole session's typing vanished on
+     reload; #open=N reached the real sheet with the flag still up; and the
+     demo banner went on describing a real house as "not a real property".
+
+     The flag was being cleared at each exit, one exit at a time, and a new
+     exit was always one refactor away. So it is cleared HERE — at the single
+     function a PERSON switching sheets goes through. The engine's own swap
+     (swapInto) deliberately does not, because pricing a sheet is not leaving
+     one. loadDemo() writes S directly and never comes through here. */
+  DEMO = null;
   /* a different property starts with an empty tray, and the old thumbnails
      are released rather than left holding blobs */
   if (typeof PHOTO === 'object' && PHOTO){
@@ -3146,8 +3533,22 @@ loadInto(P.active);
    persisted demo label. Sweep it on the way in — the strip must never dress a
    real sheet in a demo's banner. (Course labels like "3.2" are kept: a lesson
    writes real figures onto a real sheet, so its label is true tomorrow.) */
-try { const c = localStorage.getItem('ni-desk-case');
-      if (c && c.indexOf('demo:') === 0) localStorage.removeItem('ni-desk-case'); } catch(e){}
+/* MIGRATION · the label used to be one global string shared by every property
+   on the account, which is how a real sheet — and a printed lender packet —
+   ended up wearing another sheet's "not a property" banner. It is a per-sheet
+   field now. A visitor arriving with the old global gets it adopted onto the
+   ONE sheet that could plausibly own it (the active one, and only if that
+   sheet is already marked as a sample), and then the global is deleted so it
+   can never dress a second sheet again. */
+try {
+  const c = localStorage.getItem('ni-desk-case');
+  if (c){
+    const cur = P.props[P.active];
+    if (cur && cur.sample && c.indexOf('demo:') !== 0 && !cur.caseLabel)
+      cur.caseLabel = String(c).slice(0,120);
+    localStorage.removeItem('ni-desk-case');
+  }
+} catch(e){}
 let TROUBLE = null;              // null | 'quota' | 'blocked' | 'render'
 const save = () => {
   /* A demo is a showroom, not a sheet. It used to load straight over whatever
@@ -3164,16 +3565,13 @@ const save = () => {
   if (p) { p.updated = Date.now();
            p.name=S.name; p.addr=S.addr; p.raw=S.raw; p.est=S.est; p.prov=S.prov;
            p.unc=S.unc; p.sit=S.sit; p.sitPc=S.sitPc; p.sys=S.sys; p.noAsk=S.noAsk; p.sample=S.sample||null;
+           p.caseLabel=S.caseLabel||null;
            p.offerExit=S.offerExit||null; p.toName=S.toName||''; p.fin=S.fin||null; p.read=S.read||null;
-           p.comps=S.comps; p.subj=S.subj; p.compAdj=S.compAdj; p.repairsOwn=S.repairsOwn; }
+           p.comps=S.comps; p.subj=S.subj; p.compAdj=S.compAdj; p.repairsOwn=S.repairsOwn;
+           p.src=S.src; p.intake=S.intake; }
   P.mode = S.mode; P.adv = S.adv;
   localStorage.setItem(PKEY, JSON.stringify({ active:P.active, mode:P.mode, adv:P.adv, box:P.box,
-    props: P.props.map(x => ({ id:x.id, name:x.name, addr:x.addr, sit:x.sit, sitPc:x.sitPc, sys:x.sys, noAsk:!!x.noAsk,
-      sample:x.sample||null, offerExit:x.offerExit||null, toName:x.toName||'', fin:x.fin||null,
-      read:x.read||null, updated:x.updated||0,
-      comps:(x.comps||[]).slice(0,24), subj:x.subj||{}, compAdj:x.compAdj||{}, repairsOwn:!!x.repairsOwn,
-      f: Object.fromEntries([...FIELDS,...LOANFIELDS].map(y =>
-        [y.id, { v:x.raw[y.id]||'', e:!!x.est[y.id], p:x.prov[y.id]||null, u:x.unc[y.id]||null }])) })) }));
+    props: P.props.map(propWire) }));
   if (TROUBLE === 'quota' || TROUBLE === 'blocked') setTrouble(null);
   if (typeof window.__syncSoon === 'function') window.__syncSoon();
   return true;
@@ -3223,8 +3621,11 @@ function setTrouble(kind, err){
    that just broke. */
 function dumpSheets(){
   try {
-    const blob = new Blob([JSON.stringify({ saved:new Date().toISOString(),
-      active:P.active, mode:P.mode, adv:P.adv, props:P.props }, null, 1)], {type:'application/json'});
+    /* through the same serialiser as save() and the sync. This used to write
+       P.props raw, so the file the panel calls "yours to load back in" came
+       back with every money field blank. */
+    const blob = new Blob([JSON.stringify({ saved:new Date().toISOString(), v:2,
+      active:P.active, mode:P.mode, adv:P.adv, props:P.props.map(propWire) }, null, 1)], {type:'application/json'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'negotiation-inc-sheets.json';
@@ -3233,6 +3634,8 @@ function dumpSheets(){
   } catch(e){ /* if even this fails there is nothing honest left to offer */ }
 }
 window.__trouble = () => TROUBLE;
+/* the sync lives in its own file and needs the same serialiser the desk uses */
+window.__propWire = propWire;
 /* noAsk is a deliberate state, not an empty field: "they have not named a
    number" is different information from "I have not typed it yet", and the
    sheet stops asking for it rather than nagging. */
@@ -3318,16 +3721,27 @@ function priorChips(fid){
 function chipsFor(f){ return [...(priorChips(f.id)), ...(f.est||[])]; }
 function fieldHTML(f){
  const v = val(f.id), e = S.est[f.id] && v !== null;
- const st = v===null ? 'needed' : e ? 'estimate' : 'entered';
- const stTxt = { entered:'ENTERED', estimate:'ESTIMATE', needed:'NEEDED' }[st];
+ /* ── READ IS NOT A FOURTH CONFIDENCE, IT IS A SOURCE ─────────────────────
+    A figure read from a photograph is an ESTIMATE — it widens the bands and
+    it is not yours until you look at it — that also carries a receipt. So it
+    paints as its own chip and behaves as an estimate everywhere else, and
+    typing over it clears `src` in the same keystroke that clears `est`. */
+ const photo = v !== null && S.src[f.id] === 'photo';
+ const st = v===null ? 'needed' : photo ? 'photo' : e ? 'estimate' : 'entered';
+ const stTxt = { entered:'ENTERED', estimate:'ESTIMATE', needed:'NEEDED',
+   photo:'<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="3.2"/></svg>READ' }[st];
  const cv = vals();
  return `<div class="field ${st}" id="fb-${f.id}">
   <label>${f.lab}<a href="the-eight-exits.html${f.hint}" target="_blank" title="The lesson that defines this">?</a></label>
   <div class="frow">
    <input id="fi-${f.id}" inputmode="decimal" data-f="${f.id}" value="${esc(S.raw[f.id]||'')}" placeholder="${f.ph}" autocomplete="off">
-   <span class="stchip st-${st}">${stTxt}</span>
+   ${photo
+     ? `<button type="button" class="stchip st-photo" data-audit="${f.id}"
+          aria-label="Read from your photo — open the line it came from"
+          title="${esc(S.prov[f.id]||'')}">${stTxt}</button>`
+     : `<span class="stchip st-${st}">${stTxt}</span>`}
   </div>
-  ${e && S.prov[f.id] ? `<div class="prov">${esc(S.prov[f.id])}</div>` : ''}
+  ${(e || photo) && S.prov[f.id] ? `<div class="prov">${esc(S.prov[f.id])}</div>` : ''}
   ${(()=>{ const chips = chipsFor(f); if (v!==null || !chips.length) return '';
    /* the caption here used to read "rough it in — marked estimate, bands
       widen", above a row of buttons that each already say "≈". Saying it a
@@ -3361,6 +3775,19 @@ const ledHTML = led => !led ? '' : `<div class="led">${led.map(r => {
 /* ── the exits. Same arithmetic the course teaches; fit is the ranking. ──── */
 function exitsFor(){
  const a = vals();
+ /* ── ONE READING OF A ZERO ASK, HERE TOO ─────────────────────────────────
+    A house is not sold for nothing, so a 0 in the asking box is a placeholder
+    or a stray keystroke — and the sheet has an explicit state for "they have
+    not named a price". fitFor and offerModel both read it that way now; this
+    is where the EXITS have to as well, because the novation's whole figure is
+    computed against the ask. Left as a literal zero it produced a cheque
+    sized as though the seller were giving the house away, and that fantasy
+    number then ranked above every real exit on the sheet.
+
+    Nulled here rather than special-cased downstream, so `need('asking')`
+    catches it and the novation refuses with the same sentence it would give
+    an empty box — which is exactly what a zero in that box means. */
+ if (a.asking !== null && !(a.asking > 0)) a.asking = null;
  const V = S.adv, RATE = V.rate/100, mpd = mpdFor(RATE);
  const need = (...ids) => ids.filter(id => a[id]===null);
  const est = (...ids) => ids.some(id => a[id]!==null && S.est[id]);
@@ -3374,8 +3801,17 @@ function exitsFor(){
    else { const w = uncOf('arv','repairs'), e = w > 0;
      const ceil = 0.70*a.arv - a.repairs;
      const band0=[ceil-20000,ceil-8000], band=[ceil-20000*(1+w),ceil-8000*(1-w)];
-     EX.push({ id:'wholesale', nm:'The wholesale', keylab:'fee at the band’s middle',
-       key: band[1]<=0?null:14000, e, w, ceil:band0[1], band, band0, bandlab:'offer the seller between',
+     /* Nulling the key figure was half a refusal: the exit still shipped with a
+        band, so it still counted as priceable and the sidebar rail could read
+        its ceiling. An offer band whose top is at or below zero is not a
+        cautious offer, it is no offer — say so in a sentence like every other
+        refusal on this sheet. */
+     if (!(band0[1] > 0)){
+       EX.push({ id:'wholesale', nm:'The wholesale', na:true, refused:true, e:false, key:null,
+         reason:`A cash buyer works back from ${fmt(0.70*a.arv)} and takes ${fmt(a.repairs)} of work off that. What is left is not enough to pay the seller and leave you a fee, so there is no number to put in front of them. This is not a wholesale.` });
+     }
+     else EX.push({ id:'wholesale', nm:'The wholesale', keylab:'fee at the band’s middle',
+       key: 14000, e, w, ceil:band0[1], band, band0, bandlab:'offer the seller between',
        led:[ R('', 'What it is worth fixed up', a.arv, 'the ARV on your sheet'),
              R('×', 'The seventy per cent rule', '70%', 'what a cash buyer will pay for a finished house — it is how they keep their own margin'),
              S_('What a cash buyer sees in it', 0.70*a.arv),
@@ -3418,12 +3854,28 @@ function exitsFor(){
    if (m.length) EX.push(na('wholetail','The wholetail','your net, lightly fixed',m));
    else if (a.repairs > 0.08*a.arv)
      EX.push({ id:'wholetail', nm:'The wholetail', na:true, refused:true, e:false, key:null,
-       reason:`Repairs are ${Math.round(a.repairs/a.arv*100)}% of ARV — past the 8% where “light work” stops being light. This is a flip wearing a disguise.` });
+       reason: a.arv > 0
+         ? `Repairs are ${Math.round(a.repairs/a.arv*100)}% of ARV — past the 8% where “light work” stops being light. This is a flip wearing a disguise.`
+         /* an ARV of zero is a REAL zero, not a missing figure, and dividing by
+            it printed "Repairs are Infinity% of ARV" inside a refusal — a
+            sentence meant to explain something, saying nothing */
+         : `A finished value of ${fmt(0)} cannot carry ${fmt(a.repairs)} of work. Put the ARV in and this prices itself.` });
    else { const w = uncOf('arv','repairs'), e = w > 0;
      const asIs = a.arv - a.repairs*1.9, light = 0.4*a.repairs;
      const maxBuy = asIs*0.92 - 15000 - light - 3000;
      const bandFor = wx=>[maxBuy*(1-0.05-wx*0.5), maxBuy];
-     EX.push({ id:'wholetail', nm:'The wholetail', keylab:'net at the band’s top', key:15000, e, w,
+     /* The flip, the hold and the BRRRR each refuse a ceiling at or below zero.
+        This exit did not, and it was the worst place to miss it: its key figure
+        is the FIXED $15,000 target, so on a $20,000 house it printed a green
+        "$15,000 · net at the band’s top" beside a working that ends
+        "= The most you can pay for it  −$3,037". Green money on a purchase
+        price that does not exist, and the number was three-quarters of the
+        whole house. Same rule, said the same way. */
+     if (!(maxBuy > 0)){
+       EX.push({ id:'wholetail', nm:'The wholetail', na:true, refused:true, e:false, key:null,
+         reason:`A wholetail has to clear the ${fmt(15000)} it exists for out of a ${fmt(a.arv)} house, after the market discounts the work and after six weeks of carry. It does not — there is no purchase price that leaves the profit intact, so there is nothing to offer. At this value, tidy-and-relist is not a strategy.` });
+     }
+     else EX.push({ id:'wholetail', nm:'The wholetail', keylab:'net at the band’s top', key:15000, e, w,
        ceil:maxBuy, band:bandFor(w), band0:bandFor(0), bandlab:'pay no more than',
        led:[ R('', 'What it is worth once it is done', a.arv, 'the ARV on your sheet'),
              R('−', 'What it needs, at what the market charges you for it', a.repairs*1.9,
@@ -3460,11 +3912,34 @@ function exitsFor(){
              S_('The monthly payment a lender will allow', pay),
              S_('The loan that payment buys', loan, `at ${V.rate.toFixed(1)}% over thirty years`),
              R('÷', 'What a lender will actually lend', V.ltv + '%', 'the rest is your deposit'),
-             T_('The most you can pay for it', maxPrice, 'above this the rent stops covering the debt with room, and room is the whole strategy') ],
-       /* When the rent allows more than the house is worth, the rent is not
-          what is stopping you — the value is, and saying so is the difference
-          between a ceiling and a licence. */
-       verdict:(a.arv !== null && maxPrice > a.arv)
+             T_('The most you can pay for it', maxPrice,
+                a.repairs > 0
+                  ? 'this is what the RENT supports — the work is not in it, and it is the only ceiling on this sheet that has not paid for the work'
+                  : 'above this the rent stops covering the debt with room, and room is the whole strategy') ],
+       /* ── THE ONE CEILING THAT HAS NOT PAID FOR THE WORK ──────────────────
+          Every other exit on this sheet nets repairs out of "the most you can
+          pay for it". This one cannot: the figure is what the RENT services,
+          and repairs are capital on top of it. That is defensible arithmetic
+          and it was silent, which is not.
+
+          A pristine house and a wreck needing $150,000 returned the SAME
+          $209,514 ceiling, under the same six words the flip uses after it has
+          honestly subtracted the roof. Somebody reading the exits side by side
+          sees the hold paying more and concludes the hold pays more — and the
+          rail RANKS them against each other, so the exit that has not paid for
+          the work can outrank the ones that have.
+
+          The model is not changed. What it means is now said out loud, and the
+          all-in is named the moment it passes what the house is worth. */
+       allIn: a.repairs > 0 ? maxPrice + a.repairs : null,
+       verdict:(a.arv !== null && a.repairs > 0 && maxPrice + a.repairs > a.arv)
+         ? `That ${fmt(maxPrice)} is what the RENT services — the work is not in it. Add the `
+           + `${fmt(a.repairs)} this house needs and you are all-in at ${fmt(maxPrice + a.repairs)} `
+           + `against the ${fmt(a.arv)} it is worth finished. It is the only ceiling on this sheet `
+           + `that has not paid for the repairs, so it is not comparable to the others at face value: `
+           + `to stand beside them it is ${fmt(Math.max(0, Math.min(maxPrice, a.arv - a.repairs)))} or less.`
+           + `${e?' Rent is an estimate: check three real listings before you write anything.':''}`
+         : (a.arv !== null && maxPrice > a.arv)
          ? `The rent here would service a loan on ${fmt(maxPrice)}, which is more than the ${fmt(a.arv)} the house is worth finished — so the rent is not what limits this deal, the value is. Do not read this as permission to pay above ${fmt(a.arv)}: you would be underwater the day you close, whatever the tenant pays.${e?' Rent is an estimate: check three real listings before you write anything.':''}`
          : `Above ${fmt(maxPrice)}, the rent stops covering the debt with room, and “covering with room” is the entire strategy. If the seller wants more, the price is wrong — not the rent.${e?' Rent is an estimate: check three real listings before you write anything.':''}` }); } }
  { const m = need('arv','repairs');
@@ -3520,10 +3995,26 @@ function exitsFor(){
       $8,000 covers whatever the walk-through found. */
    else if (a.repairs !== null && a.repairs > 0.10*a.arv)
      EX.push({ id:'novation', nm:'The novation', na:true, refused:true, e:false, key:null,
-       reason:`Repairs are ${Math.round(a.repairs/a.arv*100)}% of ARV — you cannot run a retail listing on a house that is not retail yet. The novation is a light-work play; this one is a renovation with paperwork.` });
+       reason: a.arv > 0
+         ? `Repairs are ${Math.round(a.repairs/a.arv*100)}% of ARV — you cannot run a retail listing on a house that is not retail yet. The novation is a light-work play; this one is a renovation with paperwork.`
+         : `A finished value of ${fmt(0)} leaves nothing to list into. Put the ARV in and this prices itself.` });
    else { const e = est('arv','asking');
      const prep = Math.max(8000, a.repairs || 0);
      const check = a.arv*(1-V.sell/100-0.005) - a.asking - prep - 25*95;
+     /* ── A NEGATIVE CHEQUE IS A REFUSAL, NOT A RESULT ─────────────────────
+        With the ask far above what a retail listing returns, this computed a
+        cheque of minus three hundred and ninety thousand dollars and stayed
+        "priced" — and because a non-positive key falls out of the money
+        branch, the payday box then presented it as winning on STRUCTURE,
+        in copy written for the buy-and-hold. A novation has no structure to
+        win on; you never own anything. The exit refuses the way every other
+        exit refuses: by saying which two numbers cannot be reconciled. */
+     if (check < 0){
+       EX.push({ id:'novation', nm:'The novation', na:true, refused:true, e, key:null,
+         reason: `Their ${fmt(a.asking)} is more than a retail listing returns: the comps say ${fmt(a.arv)}, `
+           + `and after the cost of selling, the prep and the carry, the promise you would be signing pays you `
+           + `${fmt(check)}. A novation guarantees the owner their number — this number cannot be guaranteed.` });
+     } else
      EX.push({ id:'novation', nm:'The novation', keylab:'check, listed at the comps', key:check, e, check,
        band:[a.arv*0.995, a.arv*1.03], band0:[a.arv*0.995, a.arv*1.03], bandlab:'list between',
        led:[ R('', 'What it lists for at retail', a.arv, 'not an investor price — a normal buyer with a mortgage'),
@@ -3575,8 +4066,26 @@ const leadWith = W => W.price >= 0.55 ? 'price'
    sheet: the exit that lets you pay the most is the exit that wins the property
    in a contest, and everything else is priced as a fraction of it. Different
    question, honestly different basis line, same seller adjustment on top. */
+/* ── A ZERO ASK IS NOT A PRICE ─────────────────────────────────────────────
+   `val('asking')` returns 0 for a TYPED zero, and 0 is a real figure this
+   sheet takes seriously everywhere else. But an asking price is the one place
+   where zero cannot mean what a zero usually means: nobody sells a house for
+   nothing, so a 0 in that box is a placeholder, a stray keystroke, or somebody
+   who has not been told a number yet — and the sheet already has an explicit
+   state for the last of those.
+
+   Left alone it did real damage. `(ceil - 0)/0` is Infinity, so EVERY exit
+   with a positive ceiling clamped to fit 96 and tied; the ranking stopped
+   carrying any information and the order fell to the dollar tiebreak. And
+   `(0 - ceil)/0` is −Infinity, which is ≤ the reach gap, so the sheet
+   cheerfully flagged "Recommended". Meanwhile offerModel has always tested
+   `asking > 0` and treated the same zero as ABSENT, so the offer header said
+   "no asking price" on the same screen as a fit ranking built on one.
+
+   One reading, both panels: a zero ask is no ask. */
+const askOf = () => { const a = val('asking'); return (a !== null && a > 0) ? a : null; };
 function fitFor(x, ctx){
- const ask = val('asking');
+ const ask = askOf();
  let base = null, basis = '';
  if (x.na || x.key === null) return { fit:null, basis:'' };
  if (x.id === 'novation') { base = Math.max(4, Math.min(96, x.check/250)); basis = `check ${fmt(x.check)} against a $24k benchmark`; }
@@ -3643,7 +4152,12 @@ function rankedExits(){
  return { EX, live,
    order: [...live, ...EX.filter(x=>x.na||x.key===null)],
    top: live[0] || null,
-   priceable: live.filter(x => x.ceil !== undefined && x.band) };
+   /* A ceiling at or below zero is not a price, it is the absence of one, and
+      every rail that reads `priceable` prints its figure as money you may pay.
+      Each exit refuses this case at source; this is the rail that catches the
+      next exit somebody adds and forgets to guard. Defence in depth, because
+      the failure mode here is a number in a customer's mouth. */
+   priceable: live.filter(x => x.ceil !== undefined && x.band && x.ceil > 0) };
 }
 
 /* ── PRICING A SHEET THAT IS NOT THE OPEN ONE ──────────────────────────────
@@ -3653,15 +4167,26 @@ function rankedExits(){
    other sheet into S, price it with the same code every other surface uses,
    and put the original back. One engine, always. */
 function priceProp(i){
- const back = P.active;
- loadInto(i);
+ /* ── PUT BACK WHAT WAS THERE, NOT WHAT THE PROP SAYS ─────────────────────
+    This borrowed S and then rebuilt it from P.props[back]. That is fine when
+    the screen is showing a saved property and WRONG whenever it is not — most
+    sharply during a demo, whose figures live in S and in no property at all.
+    So on a one-property account, opening the buy box (which prices the sheet)
+    emptied S.raw and the demo silently became a blank sheet mid-render.
+
+    swapInto, not loadInto, because the engine borrowing S is not a person
+    leaving a sheet: through loadInto this also wiped every hand-edited letter
+    draft and revoked the queued walk-through photos, so merely opening Compare
+    — which prices every property on the bench — destroyed that work. */
+ const held = holdS();
+ swapInto(i);
  const ex = rankExits(), a = vals();
  const est = [...FIELDS,...LOANFIELDS].filter(f => a[f.id] !== null && S.est[f.id]).length;
  const filled = [...FIELDS,...LOANFIELDS].filter(f => a[f.id] !== null).length;
  const out = { i, name: P.props[i].name || P.props[i].addr || ('Property ' + (i+1)),
                addr: P.props[i].addr || '',      // the buy box reads a ZIP off it
                ex, a, est, filled, comps:(S.comps||[]).length, sit:S.sit };
- loadInto(back);
+ putS(held);
  return out;
 }
 /** The best exit on a sheet: highest fit among the ones that priced. Same
@@ -3778,9 +4303,16 @@ function flipPoints(iA, iB){
    for (let s = 0; s <= steps; s++){
      const v = sp.min + span * (s/steps);
      P.adv[k] = v; S.adv = P.adv;
-     const a = scoreOf(priceProp(iA)).v, b = scoreOf(priceProp(iB)).v;
+     const sa = scoreOf(priceProp(iA)), sb = scoreOf(priceProp(iB));
+     const a = sa.v, b = sb.v;
      if (a === null || b === null) { prev = null; continue; }
-     const win = a >= b ? 'A' : 'B';
+     /* the same kind-first comparison the rankbar and the verdict use. On raw
+        value alone a large CEILING beats a modest ROOM, so a sweep across two
+        sheets of different kinds reported the winner never changing — "that is
+        as robust as this gets" — when the two were never being compared on the
+        same quantity in the first place. */
+     const kr = x => x.kind === 'room' ? 0 : x.kind === 'ceil' ? 1 : 2;
+     const win = (kr(sa) !== kr(sb)) ? (kr(sa) < kr(sb) ? 'A' : 'B') : (a >= b ? 'A' : 'B');
      if (prev && prev.win !== win && cross === null) cross = { at:v, from:prev.win, to:win };
      prev = { win, v };
    }
@@ -3809,7 +4341,8 @@ function flipPoints(iA, iB){
    able to find out what made it. */
 function brandOf(){
   const a = signedIn();
-  if (!a || !atLeast(3)) return null;
+  /* branding goes onto a document that leaves the building */
+  if (!a || !mayUse(3)) return null;
   const co = typeof a.co === 'string' ? a.co.trim().slice(0,60) : '';
   const logo = (typeof a.logo === 'string' && /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(a.logo)
                 && a.logo.length < 260000) ? a.logo : null;
@@ -3836,7 +4369,6 @@ function signedIn(){ try { const a = JSON.parse(localStorage.getItem('ni-account
    changed is that it starts with a deliberate click, which is also the only
    version where "you have 6 days left" means anything to the person reading
    it. */
-let DEMO = null;                 // set by loadDemo(); read by premium()
 let ADVWANT = false;             // somebody pressed the locked Advanced tab
 const TRIAL_DAYS = 14;
 /* ── WHAT THE FREE TIER ACTUALLY IS ────────────────────────────────────────
@@ -3921,6 +4453,18 @@ window.startTrial = startTrial;
 
    A demo and a live trial both sit at the top, deliberately: a walk-through
    that shows the free tier shows the version that sells nothing. */
+/* ── ONE GRAMMAR, TWO ROOMS, PROVED BY BEHAVIOUR ──────────────────────────
+   These four lines are duplicated, deliberately, in shared/tier.mjs — which
+   is what the Land Desk runs on. They are NOT injected here: nine harnesses
+   load this file straight off disk over file://, and a page that cannot run
+   until it is built is a page nobody can open to poke at.
+
+   So the guarantee is behavioural rather than textual, which is the stronger
+   of the two anyway: _tcross.mjs stands the two rooms side by side and asserts
+   that tierOf() and entitled() return the SAME answer for the same account in
+   both, across every rung — stranger, blank plan, free, solo, underwriter,
+   office, live trial, lapsed trial. A textual copy can match and still behave
+   differently; this cannot. */
 const TIERS = { 'solo':1, 'underwriter':2, 'the office':3, 'office':3 };
 /* ── the pre-launch plan preview ───────────────────────────────────────────
    The account panel lets you look at every tier before launch, because
@@ -3983,6 +4527,23 @@ window.__tier = tierOf;
    The server re-derives all of this from the access token, because a browser
    saying "I am an Underwriter" is a claim, not evidence. This function only
    decides whether to show somebody a file picker they are allowed to use. */
+/* ── WHICH GATE, AND WHY IT MATTERS ────────────────────────────────────────
+   tierOf() is deliberately generous — a demo runs at tier 3 so a stranger can
+   SEE the paid desk working, and a pre-launch preview can paint any tier for a
+   screenshot. That is the right answer for deciding what to DRAW and the wrong
+   answer for deciding what somebody may DO.
+
+   The five paid features that compute entirely in the browser were all gated
+   on tierOf(): the bulk list underwriter, the buy box, the full letter drafts,
+   the lender packet and document branding. Since tierOf() returns 3 inside a
+   demo, `desk.html#demo=flip` handed every one of them to any visitor, signed
+   out, no account. The AI features were never exposed — the server checks
+   entitlementOf(req, 2) on all five routes — so this was never an API-budget
+   hole. It was the locally-computed paid surface, given away by a URL.
+
+   The rule, from here: entry points ask entitled(n). Painting asks tierOf().
+   A demo may show you the Office desk; it may not run it for you. */
+const mayUse = n => entitled(n);
 function entitled(n){
   if (DEMO) return false;
   const a = signedIn();
@@ -4075,6 +4636,27 @@ function renderKeep(){
 
 function renderAdvanced(){
  const posOf = (sp,v) => (v - sp.min)/(sp.max - sp.min)*100;
+ /* ── WHAT THESE SEVEN NUMBERS ACTUALLY GOVERN ─────────────────────────────
+    Nowhere on this panel said. Somebody who moves the rate to 8.25% has no
+    way to know whether they have changed one sheet or all of them, and the
+    answer — all of them, and every sheet they open next — is a big enough
+    consequence that it should not have to be discovered. It is stated, with
+    the count, and with where the set lives. */
+ const advScopeHTML = () => {
+   const moved = A_SPEC.filter(sp => Math.abs(S.adv[sp.id] - DEFAULTS[sp.id]) > sp.step/2);
+   const n = (P.props || []).length, acct = signedIn();
+   return `<div class="ascope">
+     <div class="asl">${moved.length
+       ? `<b>${moved.length} of ${A_SPEC.length} moved off the shipped default.</b>`
+       : `<b>All seven are the shipped defaults.</b>`}
+      One set, for every property on this desk${n > 1 ? ` — all ${n} of them` : ''}, and for
+      every one you open next.</div>
+     <div class="asr">${acct
+       ? 'Saved to your account, so the same set is here on your phone.'
+       : 'Kept in this browser. Make an account and the set follows you to your phone.'}</div>
+     ${moved.length ? `<button type="button" class="rst" id="adv-allrst">Back to all seven defaults</button>` : ''}
+   </div>`;
+ };
  const assumeHTML = sp => {
   const v = S.adv[sp.id], def = DEFAULTS[sp.id], pc = posOf(sp,v);
   const moved = Math.abs(v - def) > (sp.step/2);
@@ -4109,7 +4691,7 @@ function renderAdvanced(){
    <div class="agrp">
     <div class="agh"><h4>${g.n}</h4><span>${g.s}</span></div>
     <div class="agb">${A_SPEC.filter(sp=>sp.grp===g.id).map(assumeHTML).join('')}</div>
-   </div>`).join('');
+   </div>`).join('') + advScopeHTML();
 
  /* the sensitivity grid: the flip's profit if the two numbers most likely to be
     wrong are wrong, by the amounts they are usually wrong by */
@@ -4120,9 +4702,21 @@ function renderAdvanced(){
   return;
  }
  const ARVS = [-0.10,-0.05,0,0.05,0.10], REPS = [-0.20,0,0.20,0.40];
+ /* ── WHAT YOU PAID IS FIXED. THAT IS THE WHOLE POINT OF THE GRID. ────────
+    With no asking price this re-derived the purchase inside every cell, from
+    that cell's OWN stressed figures — so a repair overrun was absorbed by
+    paying less for a house you have already bought. All four repair rows came
+    out identical: "repairs +40%" on a $30,000 budget showed the same profit as
+    the base cell, a $12,000 overrun rendered as costing nothing, in green.
+    And the ARV column was understated the other way for the same reason.
+
+    A grid titled "If you are wrong" was quietly assuming you knew you were
+    wrong before you bought. The purchase is settled once, at zero stress, and
+    then it is a constant — which is what it is in life. */
  const buyAt = a.asking !== null ? a.asking : null;
+ const paid = buyAt !== null ? buyAt : (a.arv*0.7 - a.repairs);
  const profitAt = (arv, rep) => arv - rep - (V.sell/100)*arv
-   - Math.max(2000*V.hold, 0.006*V.hold*arv) - (buyAt === null ? arv*0.7 - rep : buyAt);
+   - Math.max(2000*V.hold, 0.006*V.hold*arv) - paid;
  const rows = REPS.map(dr => {
   const cells = ARVS.map(da => {
    const p = profitAt(a.arv*(1+da), a.repairs*(1+dr));
@@ -4133,7 +4727,7 @@ function renderAdvanced(){
   return `<tr><td>repairs ${dr>0?'+':''}${Math.round(dr*100)}%</td>${cells}</tr>`;
  }).join('');
  $('sens').innerHTML = `<div class="sh"><span class="t">If you are wrong</span>
-   <span class="n">Flip profit${buyAt===null?' at a 70%-rule purchase':` at ${fmt(buyAt)}`}, with ARV across and repairs down.</span></div>
+   <span class="n">Flip profit at ${fmt(paid)}${buyAt===null?' (the 70% rule on your figures — the price you would have paid)':''}, with ARV across and repairs down.</span></div>
   <table><thead><tr><th></th>${ARVS.map(d=>`<th>ARV ${d>0?'+':''}${Math.round(d*100)}%</th>`).join('')}</tr></thead>
   <tbody>${rows}</tbody></table>`;
 }
@@ -4258,15 +4852,36 @@ function exitPickHTML(m){
  const plain = m.winIsTop && m.topReaches;
  /* one priceable exit and nothing to explain: there is no choice to offer */
  if ((!m.live || m.live.length < 2) && plain && !m.lost && !m.picked) return '';
- const cur = m.best.ceil;
+ /* ══ A NUMBER THAT MOVES WHEN YOU PRESS SOMETHING ELSE IS NOT A NUMBER ═══
+    Each chip carried a ± figure measured against WHICHEVER exit was selected.
+    Press a different one and every figure on the row changed — so the row
+    read as four random numbers that reshuffle on touch, which is exactly
+    what it was. It was also coloured: green for a higher ceiling, red for a
+    lower one. This product spends red on ONE thing (a refusal) and green on
+    ONE thing (money that pays), and a red −$34,863 beside "wholesale" says
+    "this exit loses you thirty-four thousand dollars." It does not. It says
+    the wholesale can pay less than the flip, which is true of the wholesale
+    on every house ever built and is not a loss.
+
+    So: the comparison is anchored to the RECOMMENDATION and never moves when
+    you press a chip; it is grey, because a difference between two ceilings
+    is neither money nor a refusal; and it says what it is in words. The
+    ceiling itself — the only number that matters — is the loud one. */
+ const anchor = (m.top && typeof m.top.ceil === 'number') ? m.top.ceil
+              : (m.win && typeof m.win.ceil === 'number' ? m.win.ceil : null);
  const row = m.live.length < 2 ? '' : `<div class="oxp-r">${m.live.map(x => {
-    const d = x.ceil - cur, on = x.id === m.best.id;
-    return `<button type="button" class="oxp-b${on?' on':''}${m.top&&x.id===m.top.id?' rec':''}"
-      data-oexit="${x.id}" title="${esc(x.nm)} — pay no more than ${fmt(x.ceil)}">
+    const on = x.id === m.best.id, isRec = !!(m.top && x.id === m.top.id);
+    const d = anchor === null ? null : x.ceil - anchor;
+    return `<button type="button" class="oxp-b${on?' on':''}${isRec?' rec':''}"
+      data-oexit="${x.id}" title="${esc(x.nm)} — the most this exit can pay for the house is ${fmt(x.ceil)}${
+        d && !isRec ? `, which is ${fmt(Math.abs(d))} ${d < 0 ? 'less' : 'more'} than the recommendation` : ''}">
       <span class="n">${esc(x.nm.replace(/^The /,''))}</span>
       <span class="c">${fmt(x.ceil)}</span>
-      ${on ? '' : `<span class="d ${d>=0?'up':'dn'}">${d>=0?'+':'−'}${fmt(Math.abs(d))}</span>`}
-    </button>`; }).join('')}</div>`;
+      ${(isRec || !d) ? '' : `<span class="d">${fmt(Math.abs(d))} ${d < 0 ? 'lower' : 'higher'}</span>`}
+    </button>`; }).join('')}</div>
+  <p class="oxp-k2">Each figure is <b>the most that exit can pay for this house</b> — not a profit, and
+   not a loss. “Lower” means a smaller ceiling than the recommendation, which is ordinary: a wholesale
+   pays less than a flip on every house there is.</p>`;
  return `<div class="oxp">
   <span class="oxp-k">This offer is built for</span>
   ${row}
@@ -4646,9 +5261,11 @@ function renderCore(){
  }).join('');
  const condTotal = condTotalOf(arv);
  const condAny = LINES.some(l => (S.sys[l.id]||0) > 0);
- $('cond-total').textContent = condTotal === null ? '—' : fmt(condTotal);
+ /* the same figure the sheet is priced on, displayed the same way */
+ $('cond-total').textContent = condTotal === null ? '—' : fmt(Math.round(condTotal));
  $('cond-cap').textContent = arv === null ? 'needs an ARV to price'
-   : condAny ? `${(condTotal/arv*100).toFixed(1)}% of ARV` : 'nothing flagged yet';
+   : (condAny && arv > 0) ? `${(condTotal/arv*100).toFixed(1)}% of ARV`
+   : condAny ? 'no finished value yet' : 'nothing flagged yet';
  $('cond-sub').textContent = !premium()
    ? 'Pick the one that matches the walk-through. It prices against your ARV.'
    : advNow
@@ -4762,7 +5379,7 @@ function renderCore(){
  $('sittag').className = 'stchip ' + (S.sit==='unknown' ? 'st-needed' : 'st-entered');
  $('sittag').textContent = S.sit==='unknown' ? 'UNREAD' : 'READ';
  if (document.activeElement !== $('addr')) $('addr').value = S.addr;
- renderPresets(); renderComps(); renderKeep(); renderRail(); renderShell();
+ renderPresets(); renderIntake(); renderComps(); renderKeep(); renderRail(); renderShell();
  /* the brief owns its own repaint, like the photo panel: it holds a result the
     user is reading and a request that may be in flight, and rebuilding it on
     every keystroke in the address field would throw both away mid-sentence */
@@ -4869,7 +5486,20 @@ function renderCore(){
      BRRRR's key figure is money you FAILED to get back out, so neither of them
      is allowed to wear it — a page where everything good is green is a page
      where nothing is. */
-  const pays = PAYS.has(x.id) && typeof x.key === 'number' && x.key > 0;
+  /* ── MONEY THAT ONLY EXISTS AT A PRICE NOBODY IS OFFERING ────────────────
+     The flip's key figure is its profit AT THE TOP OF ITS OWN BAND. On the
+     walk-away demo that is $24,040, printed in the green this product spends
+     only on money that pays — eleven inches under a headline reading "No exit
+     reaches their price. It is a different house." Both sentences are true and
+     one of them is in forty-point green, so that is the one a beginner
+     believes.
+
+     The figure stays, because it is the honest answer to "what would this
+     exit make if you got it at your number". It stops being green, and the
+     row says what has to happen first. Green is money you can actually go and
+     get; this is money on the far side of a $162,080 gap. */
+  const reaches = reachesPrice(x, ask);
+  const pays = PAYS.has(x.id) && typeof x.key === 'number' && x.key > 0 && reaches;
   const fitLine = x.fit!==null ? `fit ${x.fit}` : (priced ? 'fit —' : '');
   const fitWork = x.fit!==null ? `<br>fit ${x.fit} — ${x.basis}${x.mod?` · ${SITS.find(s=>s[0]===S.sit)[1].toLowerCase()} ${x.mod>0?'+':''}${x.mod}`:''}` : '';
   return `<div class="exit${best?' best':''}${priced?'':' na'}${x.refused||(x.na&&!x.missFields&&!x.needsLoan)?' refused':''}" id="x-${x.id}">
@@ -4885,7 +5515,13 @@ function renderCore(){
     </div>
     <div class="figs">
      <div class="keyfig ${priced?(typeof x.key==='number'&&x.key<0?'neg':(pays?'pay':'')):'na'}">${kf}</div>
-     ${priced?`<div class="keylab">${x.keylab}</div><div class="fit">${fitLine}</div>`:''}
+     ${priced?`<div class="keylab">${x.keylab}</div>${
+        /* the label says WHAT the figure is; this says what has to be true for
+           it to exist. Losing the label to make room for the condition traded
+           one confusion for another — a reader needs both. */
+        !reaches && typeof x.ceil === 'number'
+          ? `<div class="keyif">only at ${fmt(x.ceil)} · ${fmt(ask - x.ceil)} under their price</div>` : ''
+        }<div class="fit">${fitLine}</div>`:''}
     </div>
     ${(x.na && !x.missFields && !x.needsLoan) ? '<span></span>'
       : '<span class="chev" aria-hidden="true">\u203a</span>'}
@@ -4893,7 +5529,11 @@ function renderCore(){
    ${open?`<div class="exit-b">
     <div class="xb-head">
      <div><div class="xb-k">${priced?esc(x.keylab):'why this one is not on the table'}</div>
-      <div class="xb-v ${pays?'pay':''}">${priced?kf:'not priced'}</div></div>
+      <div class="xb-v ${pays?'pay':''}">${priced?kf:'not priced'}</div>
+      ${priced && !reaches && typeof x.ceil === 'number'
+        ? `<div class="xb-if">That figure is what this exit makes <b>at its own ceiling</b>,
+            ${fmt(x.ceil)} — which is ${fmt(ask - x.ceil)} under the ${fmt(ask)} being asked.
+            Nobody is offering it that price today.</div>` : ''}</div>
      ${x.fit!==null?`<div class="xb-fit"><div class="xb-k">Fit for this seller</div>
        <div class="xb-ring" style="--f:${x.fit}"><span>${x.fit}</span></div></div>`:''}
     </div>
@@ -4975,13 +5615,16 @@ function renderShell(){
  const numOf = (p,id) => { const r = String(p.raw[id]||'').replace(/[^0-9.]/g,'');
    return r === '' ? null : parseFloat(r); };
  const rows = P.props.map((p,i) => {
-   const ask = numOf(p,'asking'), arv = numOf(p,'arv'), rep = numOf(p,'repairs');
-   const sp = (ask!==null && arv!==null && rep!==null) ? arv-rep-ask : null;
+   /* the same figure the guest rail shows and the same one the offer page is
+      built on: the most anybody could pay for this house. `topCeil` exists for
+      exactly this and already refuses a ceiling above the finished value. */
+   const tc = (() => { try { const t = topCeil(priceProp(i));
+     return t && typeof t.ceil === 'number' ? Math.round(t.ceil) : null; } catch(e){ return null; } })();
    const nm = p.name || p.addr || 'Property ' + (i+1);
    const filled = [...FIELDS,...LOANFIELDS].filter(f=>String(p.raw[f.id]||'').replace(/[^0-9.]/g,'')!=='').length;
    return `<a class="rn-p${i===P.active?' on':''}" href="desk.html#open=${i}">
      <div class="t">${sampleChip(p.sample)}${esc(nm)}</div>
-     <div class="s">${sp!==null?`<b class="${sp<0?'dn':''}">${money(sp)}</b> spread`:(filled?`${filled} figure${filled>1?'s':''}`:'empty')}</div></a>`;
+     <div class="s">${tc!==null?`pay up to <b>${money(tc)}</b>`:(filled?`${filled} figure${filled>1?'s':''}`:'empty')}</div></a>`;
  }).join('');
 
  const html = `
@@ -5052,8 +5695,10 @@ function renderGuestShell(el){
     stranger is most likely to be trying it for the first time. */
  try { if (localStorage.getItem('ni-rail') === 'tight') document.body.classList.add('railtight'); } catch(e){}
  const nm = (S.name || S.addr || '').trim() || 'This sheet';
- const ask = val('asking'), arv = val('arv'), rep = val('repairs');
- const sp = (ask!==null && arv!==null && rep!==null) ? arv-rep-ask : null;
+ /* the ceiling, not a gross spread — see the note beside where it is drawn */
+ const ceil = (() => { try { const R = rankedExits();
+   const c = (R.priceable[0] || {}).ceil;
+   return typeof c === 'number' ? Math.round(c) : null; } catch(e){ return null; } })();
  const filled = [...FIELDS,...LOANFIELDS].filter(f=>val(f.id)!==null).length;
  const html = `
   <div class="rn-top">
@@ -5070,7 +5715,21 @@ function renderGuestShell(el){
   <div class="rn-h">This browser</div>
   <div class="rn-list"><a class="rn-p on guestp" href="#">
     <div class="t">${esc(nm)}</div>
-    <div class="s">${sp!==null?`<b class="${sp<0?'dn':''}">${fmt(sp)}</b> spread`:(filled?`${filled} figure${filled>1?'s':''}`:'nothing yet')}
+    ${/* ── THE RAIL MUST NOT ARGUE WITH THE OFFER ─────────────────────────
+          This showed SPREAD — value minus repairs minus asking price, gross,
+          before selling costs, carry, or any target profit. On the tired
+          ranch that is $72,500, in green, four inches from an offer page
+          saying the ceiling is $178,563 with $9,360 of room. Two numbers,
+          both true, describing different things, and nothing telling a
+          beginner which one to believe. Worse, the spread does not move when
+          you touch a lever, so the moment somebody adjusts anything the rail
+          is quietly stale.
+
+          The rail now carries the ceiling — the same quantity the offer's
+          chips, the band and the room meter are all built on — so the two
+          screens cannot disagree. It is not green: a ceiling is a limit, not
+          money you made. */''}
+    <div class="s">${ceil!==null?`pay up to <b>${fmt(ceil)}</b>`:(filled?`${filled} figure${filled>1?'s':''}`:'nothing yet')}
       <em>· not saved</em></div></a></div>
   <a class="rn-guest" href="office.html?want=save">
    <div class="k">A free account adds</div>
@@ -5136,9 +5795,15 @@ function armRemove(btn){
   if (P.props.length < 2) return;
   if (btn.dataset.armed){
     clearTimeout(remT);
+    /* the row on the server has to go too, or mergeSheets finds a remote pid
+       with no local twin on the next visit, decides it came from another
+       device, and puts the property back — a delete that undoes itself */
+    const gonePid = P.props[P.active] && P.props[P.active].id;
     P.props.splice(P.active, 1);
     loadInto(Math.max(0, P.active - 1));
     save(); delete $('props').dataset.struct; render();
+    if (gonePid && typeof window.__deleteSheets === 'function')
+      try { window.__deleteSheets([gonePid]); } catch(e){}
     return;
   }
   btn.dataset.armed = '1';
@@ -5272,11 +5937,33 @@ function importSheets(file, say){
   };
   rdr.readAsText(file);
 }
-function wipeAll(){
+/* ── "DELETE EVERYTHING" HAS TO DELETE EVERYTHING ──────────────────────────
+   This removed fifteen keys and left the Supabase SESSION behind. So on a
+   shared machine — a library, an office, a partner's laptop — the next person
+   to open the desk had authBoot() refresh that surviving session, recreate the
+   account record from the server, and pull every sheet back down. They were
+   signed in AS THE PREVIOUS USER, looking at their portfolio, with the button
+   that promised to delete it still sitting there having done nothing.
+
+   The RentCast key went the same way: left behind, and spendable by whoever
+   sat down next.
+
+   Signing out is awaited before the redirect, because a redirect that races
+   the sign-out is the same bug with better odds. */
+async function wipeAll(){
   for (const k of ['ni-account-v1','ni-desk-v3','ni-desk-v2','ni-desk-case','ni-cmp-v1',
                    'ni-exits-v1','ni-portfolio-v2','ni-offer-course','ni-course-hidden',
-                   'ni-trial-hushed','ni-drill-best','ni-rail','ni-tray','ni-bulk-v1','ni-preview-plan'])
+                   'ni-trial-hushed','ni-drill-best','ni-rail','ni-tray','ni-bulk-v1','ni-preview-plan',
+                   /* the session, or the account signs itself back in */
+                   'ni-session-v1',
+                   /* somebody else's API key is not yours to inherit */
+                   'ni-rentcast-key','ni-rentcast-log',
+                   /* the access code, and the arcade's money */
+                   'ni-access-v1','ni.bank.v1','ni.street.v1'])
     try { localStorage.removeItem(k); } catch(e){}
+  /* the sign-out is the part that reaches the server; without it the local
+     clear is cosmetic and the next visit undoes it */
+  try { if (typeof window.__authSignOut === 'function') await window.__authSignOut(); } catch(e){}
   location.href = 'office.html';
 }
 function wireAcct(){
@@ -5404,15 +6091,102 @@ function wireAcct(){
    this replaced. */
 const REACH_GAP = 0.15;
 function reachesPrice(x, ask){
-  if (!x || ask === null || ask === undefined) return true;
+  /* the same reading as fitFor and offerModel: a zero ask is no ask, and with
+     no ask every exit trivially reaches it */
+  if (!x || ask === null || ask === undefined || !(ask > 0)) return true;
   if (typeof x.ceil !== 'number') return true;   // ranks on spread or on a cheque
   return (ask - x.ceil) / ask <= REACH_GAP;
 }
 const PAYS = new Set(['wholesale','flip','wholetail','subto','novation']);
+
+/* ── THE QUESTION AN UNKNOWN ASKS ──────────────────────────────────────────
+   A missing repair figure used to be a dead end: every ceiling refused, the
+   payday box went blank, and the sheet sat there needing. But the unknown
+   poses a question with a computable answer: HOW MUCH WORK COULD THIS HOUSE
+   NEED and still work at their number? The engine is monotone in repairs —
+   every ceiling falls as the work rises — so the line where the deal stops
+   reaching is found by bisection against the same exitsFor() and
+   reachesPrice() every other panel stands on. No model, no estimate, no new
+   arithmetic: the sheet already knew this number and nobody had asked it.
+
+   The probe borrows S.raw.repairs and puts it back — the same borrow-and-
+   restore discipline as holdS() — and rounds its answer DOWN, because a line
+   you promise past is a line you did not draw. */
+function repairsRoom(){
+  const arv = val('arv'), ask = val('asking');
+  if (arv === null || !(ask > 0)) return null;
+  const keep = S.raw.repairs;
+  const probe = r => {
+    S.raw.repairs = String(Math.round(r));
+    const payers = exitsFor().filter(x => !x.refused && typeof x.ceil === 'number');
+    if (!payers.length) return { reach:false, top:null };
+    const top = payers.reduce((a, b) => (b.ceil > a.ceil ? b : a));
+    return { reach: reachesPrice(top, ask), top };
+  };
+  try {
+    const at0 = probe(0);
+    if (!at0.reach) return { never:true };
+    let lo = 0, hi = Math.max(20000, arv);
+    if (probe(hi).reach) return { max:null, open:true, exit: at0.top };
+    for (let i = 0; i < 42; i++){ const mid = (lo + hi) / 2; if (probe(mid).reach) lo = mid; else hi = mid; }
+    const max = Math.floor(lo / 500) * 500;
+    return { max, exit: probe(max).top };
+  } finally { S.raw.repairs = keep; }
+}
+
+/* the three presets, in dollars, at THIS house's ARV — so the line the solve
+   draws can be said in the product's own three words rather than in bands
+   invented for the sentence. Borrows S.sys wholesale and puts it back. */
+function presetDollars(){
+  const arv = val('arv'); if (arv === null) return null;
+  const keep = S.sys;
+  try {
+    const out = {};
+    for (const p of PRESETS){ S.sys = Object.assign({}, p.sys); out[p.id] = Math.round(condTotalOf(arv)); }
+    return out;
+  } finally { S.sys = keep; }
+}
+/* where a repair line sits against the three presets, as one plain clause */
+function conditionWords(max, pd){
+  if (!pd) return '';
+  if (max >= pd.heavy)  return 'That covers even a heavy turn — systems and structure, about ' + fmt(pd.heavy) + ' here — so the condition is unlikely to be what kills this.';
+  if (max >= pd.medium) return 'That covers a medium turn — kitchen, baths, some systems, about ' + fmt(pd.medium) + ' here — but not a heavy one (' + fmt(pd.heavy) + '). If the walk-through finds structure, walk.';
+  if (max >= pd.light)  return 'That covers a light turn — paint, carpet, clean, about ' + fmt(pd.light) + ' here — but not a medium one (' + fmt(pd.medium) + '). A kitchen and baths would sink it.';
+  return 'That is under even a light turn (' + fmt(pd.light) + ' here) — this only works if the house is close to sound, and houses priced like this rarely are.';
+}
+
 function renderPayday(order){
  const box = $('payday'); if (!box) return;
  const priced = order.filter(x => x.key !== null && x.key !== undefined && !x.refused);
- if (!priced.length){ box.innerHTML = ''; return; }
+ if (!priced.length){
+   /* nothing prices — usually because repairs are the missing figure. The
+      box used to go blank here: dead space, exactly where the answer to
+      "what would it have to be" belongs. Only the repairs-shaped emptiness
+      gets the panel; a sheet missing its ARV has nothing to invert. */
+   if (val('repairs') === null && val('arv') !== null && val('asking') !== null){
+     const room = repairsRoom();
+     if (room && room.never){
+       box.innerHTML = `<div class="payday no">
+         <div class="pl">Their price fails before the condition matters</div>
+         <div class="ps">Even sound to the studs — <b>$0</b> of work — nothing here reaches the
+          <b>${fmt(val('asking'))}</b> they are asking. The gap is the price, not the condition,
+          so a walk-through cannot save it. If their number moves, price the condition then.</div></div>`;
+       return;
+     }
+     if (room && room.max !== null && !room.open){
+       const pd = presetDollars();
+       const bare = v => String(v || '').replace(/^The\s+/i, '').toLowerCase();
+       box.innerHTML = `<div class="payday flat">
+         <div class="pl">What it would have to be</div>
+         <div class="ps">The repairs are the missing figure, but the question they leave has an
+          answer already: at their <b>${fmt(val('asking'))}</b>, this works on the
+          <b>${esc(bare(room.exit.nm))}</b> if the work comes in under <b>${fmt(room.max)}</b>.
+          ${conditionWords(room.max, pd)}
+          Price the condition below — or walk the house — and the sheet answers properly.</div></div>`;
+       return;
+     }
+   }
+   box.innerHTML = ''; return; }
  const best = priced[0];
  /* ── AND IF NOTHING REACHES THEIR PRICE, SAY THAT FIRST ───────────────────
     This box is the loudest thing on the screen: a forty-six-pixel green
@@ -5428,23 +6202,79 @@ function renderPayday(order){
     says so, with the gap, and with the number that would change the answer. */
  const askNow = val('asking');
  if (!reachesPrice(best, askNow)){
-   const gap = askNow - best.ceil;
+   /* ── THE CLOSEST EXIT IS NOT THE BEST-FITTING ONE ───────────────────────
+      `best` is ranked by FIT, and this panel was narrating it as though it
+      were ranked by CEILING. Those are the same exit most of the time and
+      come apart the moment the seller's situation moves a fit: SIT_MOD gives
+      the wholesale +12 on an urgent seller, which is enough to lift it above
+      exits that can pay forty thousand more.
+
+      What that printed, on a real sheet — asking 260,000, ARV 240,000,
+      repairs 20,000, urgent seller: "the closest is the wholesale, it can pay
+      $140,000, every other exit here pays less than that or refuses outright."
+      The flip pays to $169,600. The buy-and-hold pays to $180,944. Neither
+      refused. So a seller countering at $165,000 was told the deal was dead
+      when two exits cleared it — and the exit table on the same screen showed
+      the higher band, contradicting the paragraph above it.
+
+      The fit ranking answers "which exit suits this house and this seller".
+      This paragraph asks a different question — "how far away are we" — and
+      that question is answered by the exit that can pay the MOST. Both are
+      named now, and when they differ the panel says so rather than flattening
+      one into the other. */
+   /* every exit's name already starts with "The", so interpolating it after
+      an article gives "on the the buy and hold" */
+   const bare = v => String(v || '').replace(/^The\s+/i, '').toLowerCase();
+   const payers = priced.filter(x => typeof x.ceil === 'number');
+   const top = payers.length
+     ? payers.reduce((a, b) => (b.ceil > a.ceil ? b : a))
+     : best;
+   const gap = askNow - top.ceil;
+   const differ = top.id !== best.id;
    box.innerHTML = `<div class="payday no">
      <div class="pl">No exit reaches their price</div>
-     <div class="ps">The closest is <b>${esc(best.nm.toLowerCase())}</b>, and at the very top of its
-      band it can pay <b>${fmt(best.ceil)}</b> — <b>${fmt(gap)}</b> under the ${fmt(askNow)} they are
-      asking. Every other exit here pays less than that or refuses outright.
+     <div class="ps">The most anybody here can pay is <b>${fmt(top.ceil)}</b>, on the
+      <b>${esc(bare(top.nm))}</b> at the very top of its band — <b>${fmt(gap)}</b>
+      under the ${fmt(askNow)} they are asking.${differ
+        ? ` The ${esc(bare(best.nm))} fits this house and this seller better, and it
+           pays ${fmt(top.ceil - best.ceil)} less, so it is not the one to measure the gap with.`
+        : ' Every other exit here pays less than that or refuses outright.'}
       A gap that size is not a negotiation, it is a different house — five or ten
       per cent is a conversation, and this is ${Math.round(gap / askNow * 100)}.
-      If they ever came to ${fmt(best.ceil)} this works; nothing above it does.
-      ${best.e ? ' Some of this runs on estimates, so the gap is a range — but it does not close.' : ''}</div>
+      If they ever came to ${fmt(top.ceil)} something here works; nothing above it does.${(() => {
+        /* how much of the gap is the CONDITION — answerable with the same
+           bisection that prices a missing repair figure. If a cheaper
+           walk-through would bring the ask inside reach, the number to argue
+           about is the work; if even $0 of repairs does not reach, no repair
+           conversation can save it and the panel must not imply one could. */
+        const rep = val('repairs');
+        if (rep === null || !(rep > 0)) return '';
+        const room = repairsRoom();
+        if (room && room.never)
+          return ' Even at $0 of repairs it does not reach — the gap is the price, not the condition.';
+        if (room && room.max !== null && !room.open && room.max < rep)
+          return ` Part of that gap is the condition: at repairs under ${fmt(room.max)} their number
+           comes back inside reach, and the sheet carries ${fmt(rep)} — worth knowing which figure
+           to argue about.`;
+        return '';
+      })()}
+      ${top.e || best.e ? ' Some of this runs on estimates, so the gap is a range — but it does not close.' : ''}</div>
     </div>`;
    return;
  }
  const money = PAYS.has(best.id) && typeof best.key === 'number' && best.key > 0;
  if (!money){
-   /* the hold and the BRRRR win on structure, not on a cheque — say what the
-      win actually is instead of inventing a number to colour green */
+   /* a PAYS exit below zero is a loss, and "wins on structure" is copy that
+      belongs to the hold and the BRRRR — plays that are structural BY DESIGN.
+      A subject-to whose spread is negative must be named as what it is. */
+   if (PAYS.has(best.id) && typeof best.key === 'number' && best.key <= 0){
+     box.innerHTML = `<div class="payday no">
+       <div class="pl">The best fit here loses money at their number</div>
+       <div class="ps">The ${esc(best.nm.toLowerCase().replace(/^the\s+/,''))} fits this seller,
+        but its ${esc(best.keylab)} comes to <b>${esc(best.keyfmt || fmt(best.key))}</b> —
+        you would be paying to own the problem. The fit is not the deal.</div></div>`;
+     return;
+   }
    box.innerHTML = `<div class="payday flat">
      <div class="pl">The best fit here is <b>${esc(best.nm.toLowerCase())}</b></div>
      <div class="ps">It wins on structure rather than on a cheque —
@@ -5457,13 +6287,34 @@ function renderPayday(order){
     anybody checks that both sides are the same kind of number. */
  const next = priced.slice(1).find(x =>
    PAYS.has(x.id) && typeof x.key === 'number' && x.key > 0);
+ /* ── AND THE EXITS THAT BUY THE HOUSE, WHEN THEY ARE STILL WAITING ────────
+    A sheet with an ARV and an ask but no repair figure prices the novation —
+    it never buys the house, so $8,000 of prep stands in — while the flip, the
+    wholetail and the hold all sit refused behind the missing number. The
+    verdict above is real; what was missing is the OTHER answer the sheet
+    already knows: how much work the house could need before the buying exits
+    stop working at their price. One clause, no second exit named, so every
+    panel still tells one story. */
+ const buyingLine = (() => {
+   if (val('repairs') !== null) return '';
+   if (priced.some(x => typeof x.ceil === 'number')) return '';
+   const room = repairsRoom();
+   if (room && room.never)
+     return ` The exits that <b>buy</b> the house never reach their number at any condition —
+      this play works precisely because you never buy it.`;
+   if (room && room.max !== null && !room.open)
+     return ` The exits that <b>buy</b> the house are waiting on the walk-through: at their
+      ${fmt(val('asking'))} they work if the work comes in under <b>${fmt(room.max)}</b>.
+      ${esc(conditionWords(room.max, presetDollars()).replace(/<[^>]*>/g,''))}`;
+   return '';
+ })();
  box.innerHTML = `<div class="payday">
    <div class="pl">This one pays you</div>
    <div class="pv">${esc(best.keyfmt || fmt(best.key))}</div>
    <div class="ps">as <b>${esc(best.nm.toLowerCase())}</b> — ${esc(best.keylab)}. ${
      best.e ? `It is running on estimates, so read it as the top of a range rather than a promise.`
             : `That is the top of the workable band, not the middle — pay less and it grows.`}
-    ${next ? `The next exit that pays cash is ${esc(next.nm.toLowerCase())}, at ${esc(next.keyfmt || fmt(next.key))}.` : ''}</div>
+    ${next ? `The next exit that pays cash is ${esc(next.nm.toLowerCase())}, at ${esc(next.keyfmt || fmt(next.key))}.` : ''}${buyingLine}</div>
   </div>`;
 }
 
@@ -5474,6 +6325,11 @@ function wire(order){
    // its provenance and its widening all drop away without a switch to flip
    const id = el.dataset.f;
    S.raw[id]=el.value; S.est[id]=false; S.prov[id]=null; S.unc[id]=null;
+   /* a read figure is an estimate WITH A RECEIPT, so the receipt comes off in
+      the same keystroke the estimate does — otherwise the chip goes on saying
+      READ over a number the person typed themselves, which is the sheet
+      lying about provenance in the one place provenance is the product */
+   if (S.src) delete S.src[id];
    /* typing a repair number by hand takes ownership of it away from the
       condition panel — a contractor's bid outranks a walk-through and must
       not be silently overwritten the next time a slider moves */
@@ -5494,6 +6350,7 @@ function wire(order){
     // format the state while the freshly rendered input still shows raw digits
     if (el.value !== s || S.raw[id] !== s){ S.raw[id] = s; el.value = s; save(); } };
  });
+ wireAudit();
  document.querySelectorAll('[data-est]').forEach(el=> el.onclick = () => {
   const [id,i]=el.dataset.est.split(':'); const q=chipsFor(FIELDS.find(f=>f.id===id))[+i];
   S.raw[id]=fmt(q.f(vals())).replace('$',''); S.est[id]=true; S.prov[id]=q.prov;
@@ -5545,7 +6402,12 @@ function wire(order){
   const tot = condTotalOf(arvNow);
   if (arvNow !== null){
    $('cond-total').textContent = fmt(tot);
-   $('cond-cap').textContent = tot > 0 ? `${(tot/arvNow*100).toFixed(1)}% of ARV` : 'nothing flagged yet';
+   /* every one of these divides by the ARV, and an ARV of zero is a real
+      zero rather than a missing figure — `need()` only catches null. Left
+      unguarded they print "Infinity% of ARV", which is the sheet losing its
+      composure in front of somebody. */
+   $('cond-cap').textContent = (tot > 0 && arvNow > 0) ? `${(tot/arvNow*100).toFixed(1)}% of ARV`
+     : tot > 0 ? 'no finished value yet' : 'nothing flagged yet';
    const cgb = $('cond-go');
    cgb.disabled = tot <= 0;
    cgb.textContent = tot > 0 ? `Use ${fmt(tot)} as the repair estimate` : 'Use as the repair estimate';
@@ -5562,7 +6424,7 @@ function wire(order){
  document.querySelectorAll('[data-sysr]').forEach(el => {
   el.oninput = () => {
    const g = SYSTEMS.find(x=>x.id===el.dataset.sysr), pc = +el.value;
-   g.lines.forEach(l => S.sys[l.id] = pc);
+   g.lines.forEach(l => { S.sys[l.id] = pc; S.sysOwn[l.id] = true; });
    const arvNow = val('arv');
    paintRow(el.closest('.sys'), pc, arvNow === null ? null : arvNow*sysMax(g)*(pc/100));
    document.querySelectorAll('[data-liner]').forEach(li => {
@@ -5577,7 +6439,7 @@ function wire(order){
  document.querySelectorAll('[data-liner]').forEach(el => {
   el.oninput = () => {
    const l = LINE_OF[el.dataset.liner], pc = +el.value;
-   S.sys[l.id] = pc;
+   S.sys[l.id] = pc; S.sysOwn[l.id] = true;
    const arvNow = val('arv');
    paintRow(el.closest('.line'), pc, arvNow === null ? null : arvNow*maxOf(l)*(pc/100));
    // the heading follows its lines, money-weighted
@@ -5596,7 +6458,7 @@ function wire(order){
      syncRepairs(); scheduleRender(); };
    el.onblur = () => { save(); render(); };
  });
- $('cond-reset').onclick = () => { LINES.forEach(l => S.sys[l.id] = 0); syncRepairs(); save(); render(); };
+ $('cond-reset').onclick = () => { LINES.forEach(l => S.sys[l.id] = 0); S.sysOwn = {}; syncRepairs(); save(); render(); };
  /* hand the panel back the pen */
  $('cond-go').onclick = () => { S.repairsOwn = false; syncRepairs(); save(); render(); };
  // ── simple / advanced ──
@@ -5641,6 +6503,10 @@ function wire(order){
  });
  document.querySelectorAll('[data-advrst]').forEach(el => el.onclick = () => {
    S.adv[el.dataset.advrst] = DEFAULTS[el.dataset.advrst]; save(); render(); });
+ { const ar = $('adv-allrst');
+   /* into the SAME object — S.adv and P.adv are one reference and the
+      arithmetic above is already holding it */
+   if (ar) ar.onclick = () => { for (const k in DEFAULTS) S.adv[k] = DEFAULTS[k]; save(); render(); }; }
  const ar = $('adv-reset');
  if (ar) ar.onclick = () => { S.adv = Object.assign({}, DEFAULTS); save(); render(); };
  document.querySelectorAll('[data-row]').forEach(el=> el.onkeydown = ev => {
@@ -5698,8 +6564,10 @@ function demoFill(){
  S.sit='estate'; S.userToggled=false; S.openId=null;
  // the same rule as a lesson's figures: a sample is labelled a sample, and the
  // way back to an empty sheet is one button rather than four cleared fields
- CASE = { from:'demo' }; S.sample = 'demo';
- try { localStorage.setItem('ni-desk-case','demo'); } catch(e){}
+ CASE = { from:'demo' }; S.sample = 'demo'; S.caseLabel = 'demo';
+ /* per-sheet, like every other fact about a sheet — the global this used to
+    write was read by every OTHER property on the account too */
+ try { localStorage.removeItem('ni-desk-case'); } catch(e){}
  save(); strip(); render();
 }
 let addrT = null;
@@ -5802,7 +6670,23 @@ function buildPrint(order, conf){
 const PK_H = t => `<div style="font-family:var(--serif);font-size:16px;font-weight:700;margin-top:24px;
   page-break-after:avoid;break-after:avoid">${t}</div>`;
 function packetHTML(){
- if (!premium()) return `
+ /* ── WHO SEES THE PACKET ───────────────────────────────────────────────────
+    The lender packet is the artefact a paid plan buys, so it is gated — but
+    on entitled(), which is false inside a demo, it disappeared from the one
+    screen whose entire job is to show a stranger what $39 buys. That is the
+    right rule applied to the wrong noun.
+
+    entitled() exists to stop a demo from DOING paid work: spending our API
+    budget, reading someone's photographs, touching a real sheet. Drawing a
+    document about 1104 Elm Street — a house that does not exist, whose comps
+    we invented — spends nothing and reaches nothing. Nobody can hand a lender
+    a packet for a fictional property, and a rendered document is a far more
+    honest description of the product than a bullet list claiming one exists.
+
+    So: a demo may SEE the packet, with a sample rule across its face. It
+    still may not run anything. */
+ const sample = !!DEMO;
+ if (!mayUse(1) && !sample) return `
   <div style="border:1px solid #c9cfda;background:#f6f8fb;margin-top:22px;padding:13px 15px;break-inside:avoid">
    <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#4a5162">Not included</div>
    <div style="font-size:12.5px;line-height:1.55;color:#4a5162;margin-top:4px;max-width:74ch">
@@ -5823,10 +6707,44 @@ function packetHTML(){
  const td = (t,r,b) => `<td style="padding:6px ${r?'0':'8px'} 6px 0;text-align:${r?'right':'left'};
    border-bottom:1px solid #d9dde6;font-weight:${b?650:400}">${t}</td>`;
 
- let out = '';
+ let out = sample ? `
+  <div style="border:1.5px solid #14120f;background:#f6f8fb;margin-top:22px;padding:11px 14px;break-inside:avoid">
+   <div style="font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase">Sample packet</div>
+   <div style="font-size:12.5px;line-height:1.55;color:#4a5162;margin-top:3px;max-width:74ch">This is
+    the evidence section a paid plan adds, filled in with a walk-through property that does not
+    exist. On your own sheet it carries your comps, your condition panel and your name.</div></div>` : '';
+
+ /* ── SECTION 1 ALWAYS RUNS ─────────────────────────────────────────────────
+    It used to be wrapped in `if (rows.length)`, which meant a packet built on
+    a typed ARV — no comps scored — reached a lender carrying no statement of
+    where its central number came from, and no statement that no automated
+    valuation model produced it. The honesty claim vanished at exactly the
+    moment it was load-bearing. A document that is silent about its own
+    provenance is worse than one that admits it has none, so the section is
+    unconditional and the thin case says the thin thing. */
+ const arvProv = () => {
+   if (arv === null) return `No ARV is stated on this sheet. Every exit that needs one refused to
+     price, and the refusals are named above.`;
+   const src = (S.src || {}).arv, why = esc((S.prov || {}).arv || '');
+   if (src === 'photo') return `The ARV was read from a photograph and is carried as an
+     <b>estimate</b>${why ? ` — ${why}` : ''}. No sales were scored against it.`;
+   if (S.est.arv) return `The ARV of <b>${fmt(arv)}</b> is an <b>estimate the software produced</b>,
+     not a figure the preparer supplied${why ? ` — ${why}` : ''}. Every band that touches it is
+     widened for that. <b style="color:#14120f">No sales were scored to support it.</b>`;
+   return `The ARV of <b>${fmt(arv)}</b> was <b>entered by the preparer</b>${
+     why ? ` — ${why}` : ''}. No sales-comparison approach was run inside this document to support
+     it, so it stands on whatever the preparer relied on outside it.`;
+ };
 
  // ── 1 · where the ARV came from ──
- if (rows.length){
+ if (!rows.length){
+  out += PK_H('WHERE THE ARV CAME FROM') + `
+   <div style="font-size:12.5px;line-height:1.55;color:#4a5162;margin-top:3px;max-width:78ch">${arvProv()}
+    <b style="color:#14120f">No automated valuation model was used.</b></div>
+   <div style="font-size:12.5px;margin-top:9px;color:#4a5162">The supported range is
+    <b style="color:#14120f">not stated</b>: a range is produced by scored sales, and none were
+    entered. Two comparable sales is the minimum this software will draw one from.</div>`;
+ } else {
   out += PK_H('WHERE THE ARV CAME FROM') + `
    <div style="font-size:12px;color:#4a5162;margin-top:3px;max-width:78ch">The sales-comparison
     approach, run on ${rows.length} sale${rows.length>1?'s':''} the preparer selected. Each is
@@ -5845,14 +6763,36 @@ function packetHTML(){
          return (v===undefined||Math.abs(v)<250)?'':`${k}&nbsp;${v>0?'+':'−'}${fmt(Math.abs(v)).replace('$','$')}`;
        }).filter(Boolean).join(' &nbsp;·&nbsp; ') || 'no adjustment reached $250'}
        ${r.condLab?` &nbsp;·&nbsp; condition: ${esc(r.condLab)}`:''}</td></tr></tbody>`).join('')}</table>`;
-  if (R.n >= 2) out += `<div style="font-size:12.5px;margin-top:9px">
+  out += R.n >= 2 ? `<div style="font-size:12.5px;margin-top:9px">
     <b>The supported range: ${fmt(R.lo)} — ${fmt(R.hi)}</b>
     <span style="color:#4a5162">· weighted by comparability, clamped to the sales that produced it
-    (${fmt(R.min)} — ${fmt(R.max)})${arv!==null?`. The preparer set ARV at <b>${fmt(arv)}</b>`:''}.</span></div>`;
+    (${fmt(R.min)} — ${fmt(R.max)})${arv!==null?`. The preparer set ARV at <b>${fmt(arv)}</b>`:''}.</span></div>`
+   /* one sale is a data point, not a distribution. Saying so is the whole
+      product; drawing a band across it would be the opposite of it. */
+   : `<div style="font-size:12.5px;margin-top:9px;color:#4a5162">The supported range is
+    <b style="color:#14120f">not stated</b>: one usable sale cannot produce one. The single
+    adjusted comparable is above${arv!==null?`, and the preparer set ARV at <b style="color:#14120f">${fmt(arv)}</b>`:''}.</div>`;
  }
 
  // ── 2 · what the repair number is made of ──
- if (cond.length && arv !== null){
+ /* the same argument as section 1: a packet that simply omits the breakdown
+    when the panel is untouched leaves a lender unable to tell a walk-through
+    from a contractor's bid from a number somebody made up. */
+ if (!cond.length || arv === null){
+  const rep = val('repairs');
+  out += PK_H('WHAT THE REPAIR FIGURE IS MADE OF') + `
+   <div style="font-size:12.5px;line-height:1.55;color:#4a5162;margin-top:3px;max-width:78ch">${
+    rep === null
+     ? `No repair figure is stated on this sheet. Every exit that needs one refused to price.`
+     : arv === null
+      ? `The repair figure of <b style="color:#14120f">${fmt(rep)}</b> is on the sheet, but no
+         repaired value is, so it cannot be expressed as a share of one and the seventeen-system
+         breakdown cannot be scaled.`
+      : `The repair figure of <b style="color:#14120f">${fmt(rep)}</b> was
+         <b style="color:#14120f">${S.repairsOwn ? 'entered whole by the preparer' : 'entered directly'}</b>.
+         The seventeen-system condition panel was not used, so there is no line-by-line breakdown
+         behind it${esc((S.prov||{}).repairs) ? ` — ${esc(S.prov.repairs)}` : ''}.`}</div>`;
+ } else {
   out += PK_H('WHAT THE REPAIR FIGURE IS MADE OF') + `
    <div style="font-size:12px;color:#4a5162;margin-top:3px;max-width:78ch">Seventeen systems, each
     priced as a share of the repaired value and scaled to the size of the house. This is a
@@ -5861,9 +6801,9 @@ function packetHTML(){
     <thead><tr>${th('System')}${th('Condition',1)}${th('Cost',1)}${th('Of ARV',1)}</tr></thead>
     <tfoot style="display:table-row-group"></tfoot>
     <tbody>${cond.map(x=>`<tr>${td(x.l.lab)}
-      ${td(Math.round(x.pc)+'%',1)}${td(fmt(x.$),1,1)}${td((x.$/arv*100).toFixed(1)+'%',1)}</tr>`).join('')}
+      ${td(Math.round(x.pc)+'%',1)}${td(fmt(x.$),1,1)}${td(arv > 0 ? (x.$/arv*100).toFixed(1)+'%' : '\u2014',1)}</tr>`).join('')}
      <tr>${td('<b>Total from the panel</b>')}${td('',1)}${td('<b>'+fmt(condTot)+'</b>',1,1)}
-      ${td('<b>'+(condTot/arv*100).toFixed(1)+'%</b>',1,1)}</tr></tbody></table>`;
+      ${td('<b>'+(arv > 0 ? (condTot/arv*100).toFixed(1)+'%' : '\u2014')+'</b>',1,1)}</tr></tbody></table>`;
  }
  return out;
 }
@@ -5890,7 +6830,12 @@ const DEMOS = {
    sys:{ roof:70, found:10, siding:55, windows:60, hvac:80, plumb:45, elec:50, water:60,
          kitchen:90, bath1:80, bath2:70, floors:85, paint:95, doors:60, drive:35, yard:55, misc:55 },
    comps:[
-    ['1104 Elm — same block','296000','1465','3','2','2','0.2',0],
+    /* this said "1104 Elm — same block", which is the SUBJECT's own address.
+       A sheet that comps a house against itself is the single most damaging
+       thing a walk-through demo can show an underwriter, and it was the very
+       first row. Same block, different house, and the 1,465 sq ft against the
+       subject's 1,420 now makes sense instead of contradicting it. */
+    ['1118 Elm — same block','296000','1465','3','2','2','0.2',0],
     ['88 Ostend St','271000','1290','3','1.5','5','0.4',-1],
     ['2210 Ashby (renovated)','318000','1510','3','2','3','0.6',1],
     ['640 Sells Ave','282000','1380','3','2','9','1.1',0]] },
@@ -6041,7 +6986,12 @@ function rcSpend(){
     keep.push(new Date().toISOString());
     localStorage.setItem(RC_LOG, JSON.stringify(keep)); } catch(e){}
 }
-let RC = { busy:false, msg:null, err:null };
+let RC = { busy:false, msg:null, err:null,
+  /* `month` is the allowance the SERVER reports back — never counted here, so
+     the figure on screen is the one the meter actually holds. `byok` lets a
+     paid account fall back to its own key when the pull is unavailable, so a
+     refusal is never a dead end. */
+  month:null, byok:false };
 
 /** Ask RentCast for candidate comps around an address. Returns rows in the
  *  workbench's own shape, or throws with something a person can act on. */
@@ -6199,7 +7149,11 @@ function renderStreet(){
           title="${esc(ct.title || ct.url)}">${esc(sourceHost(ct.url))}</a>`).join('')}</span>` : ''
       }</p>`).join('')}</div>
     <div class="sb-foot">${c.vintage ? esc(c.vintage) + ' &middot; ' : ''}FEMA National Flood Hazard Layer${
-      d.dropped ? ` &middot; ${d.dropped} paragraph${d.dropped===1?'':'s'} withheld for carrying a figure not in the data` : ''}
+      d.dropped ? ` &middot; ${d.dropped} paragraph${d.dropped===1?'':'s'} withheld for carrying a figure not in the data` : ''}${
+      /* a chip means the sentence is standing on a page you can open; the
+         absence of one meant nothing at all until this line existed */
+      d.searches ? ` &middot; ${d.sourced || 0} of ${(d.sourced||0)+(d.unsourced||0)} paragraph${
+        ((d.sourced||0)+(d.unsourced||0))===1?'':'s'} carry a source you can open` : ''}
       <button type="button" class="sb-again" id="sb-again">Read it again</button></div>
     ${STREET.err ? `<div class="sb-err">${esc(STREET.err)}</div>` : ''}</div>`;
 }
@@ -6343,9 +7297,20 @@ function renderBid(){
   if (b.statedGap !== null && Math.abs(b.statedGap) >= 100)
     bits.push('Its stated total is <b>' + fmt(Math.abs(b.statedGap)) + '</b> ' +
               (b.statedGap > 0 ? 'more' : 'less') + ' than its own line items add up to — worth asking about.');
+  /* A dropped FIGURE is not a dropped LINE, and the sentence has to say so.
+     The bid quoted the work; we could not find the number in the text you
+     pasted, so the line is carried at your own estimate instead of theirs. */
   if (b.counts.dropped)
     bits.push(b.counts.dropped + ' figure' + (b.counts.dropped === 1 ? ' was' : 's were') +
-              ' dropped for not appearing in the text you pasted.');
+              ' dropped for not appearing in the text you pasted — the line' +
+              (b.counts.dropped === 1 ? ' is' : 's are') + ' still counted, at your figure.');
+  /* the same courtesy for the prose. An exclusion or a note carrying a figure
+     that is not in the bid is withheld rather than printed, and a reader is
+     told a sentence went missing instead of quietly getting a shorter list. */
+  const pd = (b.proseDropped || []).length;
+  if (pd)
+    bits.push(pd + (pd === 1 ? ' sentence was' : ' sentences were') +
+              ' withheld for putting a figure on the page that the bid does not print.');
 
   const verdict = '<div class="bv' + (over ? ' over' : '') + '">' +
     '<div class="l">' + (over ? 'Over your estimate, once it is complete' : 'Under your estimate, complete') + '</div>' +
@@ -6361,6 +7326,11 @@ function renderBid(){
     '<div class="bmiss"><div class="h">Named, not priced</div><ul>' +
     b.provisional.map(m => '<li><span>' + esc(m.lab) +
       (m.said ? ' <span class="said">&ldquo;' + esc(m.said) + '&rdquo;</span>' : '') +
+      /* two different silences. "TBD" is the contractor's; "we could not find
+         that figure in the text" is ours, and saying so is the difference
+         between a finding and an accusation. */
+      (m.why === 'unverified'
+        ? ' <span class="said">&mdash; priced in the bid, but that figure is not in the text you pasted</span>' : '') +
       '</span><b>' + fmt(m.est) + '</b></li>').join('') +
     '</ul><div class="sum"><span>Yours to carry until they price it</span><span>' +
     fmt(b.provisionalTotal) + '</span></div></div>';
@@ -6453,6 +7423,17 @@ function wireBid(){
     const b = BIDC.data; if (!b) return;
     S.raw.repairs = b.withMissing.toLocaleString('en-US');
     S.est.repairs = false; S.unc.repairs = null;
+    /* ── AND IT KEEPS THE PEN ──────────────────────────────────────────────
+       The typed-repairs handler and the demo installer both set this; this one
+       did not. So the number a real contractor quoted, adopted on purpose by
+       pressing a button that says so, was overwritten by the condition panel's
+       own estimate on the next slider nudge — silently, flipped back to
+       ESTIMATE, its provenance destroyed, every ceiling downstream repricing
+       tens of thousands too generous.
+
+       syncRepairs' own provenance line promises "type a bid over it and the
+       bid wins." This is literally that bid. It wins. */
+    S.repairsOwn = true;
     S.prov.repairs = 'the contractor bid you pasted (' + fmt(b.bidTotal) + '), plus ' +
       fmt(b.missingTotal + b.provisionalTotal) + ' for the work it does not price, at your own figures';
     save(); render();
@@ -6752,12 +7733,346 @@ async function runRead(){
   renderCondAi();
 }
 
+/* ══ THE INTAKE ════════════════════════════════════════════════════════════
+   Drop the listing screenshot and the sheet fills itself. The server reads
+   the paperwork, checks every figure against its own transcript and hands
+   back only what it could quote; this half decides where those figures land
+   and who owns them.
+
+   ── THE ONE RULE THAT DECIDES EVERYTHING ELSE ─────────────────────────────
+   A FIGURE THE PERSON GAVE US OUTRANKS ONE WE WERE HANDED. It is the same
+   rule as the adopted contractor bid, the typed repairs and the dragged
+   sliders, and it is not negotiable here either: a read never overwrites a
+   number somebody typed. Untouched rows fill; owned rows are left alone and
+   the receipt says how many were.
+
+   And a read figure NEVER lands as ENTERED. It is an estimate with a receipt
+   — the bands widen, the chip says READ, and typing over it in one keystroke
+   makes it yours and clears both marks. ═════════════════════════════════ */
+let INTAKE = { busy:false, step:0, err:null, files:[], drawer:false, hit:null, audit:null, refusedOpen:false, receipt:null };
+
+async function intakeSend(fileList){
+  const files = [...(fileList || [])].filter(f => /^image\//.test(f.type)).slice(0, 8);
+  if (!files.length) return;
+  if (!entitled(2)){
+    INTAKE.err = 'Reading the paperwork comes with Underwriter.'; INTAKE.locked = true;
+    return renderIntake();
+  }
+  INTAKE.busy = true; INTAKE.step = 1; INTAKE.err = null; INTAKE.receipt = null;
+  INTAKE.files = files.map(f => f.name);
+  renderIntake();
+  try {
+    const images = [];
+    for (const f of files){ const im = await shrink(f); images.push({ media_type: im.media_type, data: im.data }); }
+    INTAKE.step = 2; renderIntake();
+    const r = await fetch((window.__NI_API || '') + '/api/intake', {
+      method:'POST',
+      headers:{ 'content-type':'application/json', 'x-ni-access': (PHOTO && PHOTO.code) || '',
+                ...(typeof window.__authHeader === 'function' ? await window.__authHeader() : {}) },
+      body: JSON.stringify({ images }),
+    });
+    let j = null; try { j = await r.json(); } catch(e){}
+    if (r.status === 403){ INTAKE.busy = false; INTAKE.locked = true;
+      INTAKE.err = (j && j.error) || 'Reading the paperwork comes with Underwriter.';
+      return renderIntake(); }
+    if (!r.ok || !j || !j.ok){ INTAKE.busy = false;
+      INTAKE.err = (j && j.error) || 'The read did not come back. Nothing on your sheet changed.';
+      return renderIntake(); }
+    INTAKE.busy = false;
+    applyIntake(j);
+  } catch(e){
+    INTAKE.busy = false;
+    INTAKE.err = 'Those images could not be prepared in this browser.';
+    renderIntake();
+  }
+}
+
+/* where each readable figure lives on this sheet. sqft, beds and baths are the
+   comp workbench's subject block — the same three the condition panel already
+   scales its bath and bedroom lines from — so filling them here feeds two
+   panels from one drop. */
+const INTAKE_TO = {
+  asking: { kind:'field' },
+  sqft:   { kind:'subj', k:'sqft' },
+  beds:   { kind:'subj', k:'beds' },
+  baths:  { kind:'subj', k:'baths' },
+};
+const INTAKE_LAB = { asking:'Asking price', sqft:'Living area', beds:'Beds', baths:'Baths',
+                     year:'Year built', lot:'Lot size', taxes:'Property tax', hoa:'HOA' };
+
+/* The comp workbench's three subject figures are read-fillable, so they carry
+   the same mark and the same audit door as a row on the sheet. Without this
+   they were the one place a photograph could put a number on screen wearing
+   nothing to say where it came from — which is the promise, not a detail. */
+function sjRead(k){
+  if (!S.src || S.src[k] !== 'photo' || !String((S.subj || {})[k] || '').trim()) return '';
+  const f = (S.intake && S.intake.saw && S.intake.saw[k]) || null;
+  return `<button type="button" class="sjr" data-audit="${k}"
+    aria-label="Read from your photo — open the line it came from"
+    title="${esc(f ? 'read from your photograph · “' + f.saw + '”' : 'read from your photograph')}"
+   ><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="3.2"/></svg>READ</button>`;
+}
+
+function applyIntake(j){
+  const placed = [], held = [];
+  for (const [id, f] of Object.entries(j.fields || {})){
+    const to = INTAKE_TO[id]; if (!to || !f || typeof f.value !== 'number') continue;
+    if (to.kind === 'field'){
+      /* the rule: a figure the person gave us outranks one we were handed */
+      if (val(id) !== null && S.src[id] !== 'photo'){ held.push(id); continue; }
+      S.raw[id]  = Math.round(f.value).toLocaleString('en-US');
+      S.est[id]  = true;                       // an estimate, so the bands widen
+      S.src[id]  = 'photo';                    // ...with a receipt
+      S.unc[id]  = 0.08;
+      S.prov[id] = 'read from your photograph · “' + f.saw + '”';
+      placed.push(id);
+    } else {
+      const cur = String((S.subj || {})[to.k] || '').trim();
+      if (cur){ held.push(id); continue; }
+      S.subj[to.k] = String(Math.round(f.value * 100) / 100);
+      S.src[id] = 'photo';
+      placed.push(id);
+    }
+  }
+  S.intake = {
+    transcript: String(j.transcript || ''),
+    context: j.context || {},
+    saw: Object.fromEntries(Object.entries(j.fields || {}).map(([k, f]) => [k, { value:f.value, saw:f.saw }])),
+    notes: Array.isArray(j.notes) ? j.notes : [],
+    dropped: Array.isArray(j.dropped) ? j.dropped : [],
+    at: Date.now(),
+  };
+  INTAKE.receipt = { placed, held, month: j.month || null,
+                     context: Object.keys(j.context || {}).length,
+                     dropped: (j.dropped || []).length,
+                     unquoted: (j.counts && j.counts.unquoted) || 0 };
+  save();
+  /* ── THE CHOREOGRAPHY ───────────────────────────────────────────────────
+     Sheet order, never response order — the form is filling itself in, not
+     reporting back. 320ms start to start; the re-price happens ONCE, 300ms
+     after the last figure, because a ceiling that twitches six times is a
+     ceiling nobody reads. Reduced motion drops the stagger and keeps the
+     wash: which rows changed is information, not decoration. */
+  const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const order = ['asking','sqft','beds','baths'].filter(id => placed.includes(id));
+  render();
+  const mark = id => { const el = $('fb-' + id) || $('sj-' + (INTAKE_TO[id] || {}).k);
+    if (!el) return; const box = el.closest ? (el.closest('.field') || el) : el;
+    box.classList.add('landing'); setTimeout(() => box.classList.remove('landing'), still ? 2300 : 1600); };
+  order.forEach((id, i) => setTimeout(() => mark(id), still ? 0 : i * 320));
+  setTimeout(() => { renderIntake(); announceIntake(placed, held, j); },
+             (still ? 0 : (order.length - 1) * 320) + 300);
+}
+
+/* one sentence at completion, not six as they land — a screen reader being
+   read a running commentary of a form filling itself is unusable */
+function announceIntake(placed, held, j){
+  const el = $('intake-live'); if (!el) return;
+  const names = placed.map(id => INTAKE_LAB[id] || id);
+  const bits = [];
+  if (names.length) bits.push(names.length + ' figure' + (names.length===1?'':'s')
+    + ' read from your photographs and placed as estimates: ' + names.join(', ') + '.');
+  else bits.push('No figures were placed.');
+  const ctx = Object.keys(j.context || {}).length;
+  if (ctx) bits.push(ctx + ' more were quoted but have no box on this sheet.');
+  if (held.length) bits.push(held.length + ' row' + (held.length===1?' was':'s were')
+    + ' left alone because you had already filled ' + (held.length===1?'it':'them') + '.');
+  if ((j.dropped || []).length) bits.push((j.dropped||[]).length
+    + ' figure' + ((j.dropped||[]).length===1?' was':'s were') + ' refused for not being printed in the transcript.');
+  el.textContent = bits.join(' ');
+}
+
+/* ── the audit door ────────────────────────────────────────────────────────
+   The chip is not decoration: it is how you get from a figure to the line it
+   was read from, in one press, without hover. It lives in its own function
+   because two different renders draw chips — the sheet's rows through
+   render(), and the comp workbench's subject block through renderComps(),
+   which repaints on its own. Wired in one place, it cannot go missing from
+   one of them. */
+function wireAudit(){
+ document.querySelectorAll('[data-audit]').forEach(el => { el.onclick = ev => {
+   ev.stopPropagation();
+   const id = el.dataset.audit;
+   document.querySelectorAll('.audit').forEach(x => x.remove());
+   if (INTAKE.audit === id){ INTAKE.audit = null; return; }
+   INTAKE.audit = id;
+   const f = (S.intake && S.intake.saw && S.intake.saw[id]) || null;
+   const box = el.closest('.field') || el.parentElement.closest('span') || el.parentElement;
+   if (!box) return;
+   const pop = document.createElement('div');
+   pop.className = 'audit'; pop.setAttribute('role','dialog');
+   pop.setAttribute('aria-label','Where this figure came from');
+   pop.innerHTML = `<div class="cap">READ FROM YOUR PHOTOGRAPH</div>`
+     + (f ? `<div class="q">“${esc(f.saw)}”</div>` : '')
+     + `<div class="b">Placed as an estimate, not as yours — typing over it makes it yours.
+        It was checked against the transcript before it landed.</div>`
+     + (S.intake && S.intake.transcript ? `<button type="button" data-tr="${esc(id)}">Open the transcript</button>` : '');
+   box.appendChild(pop);
+   const t = pop.querySelector('[data-tr]');
+   if (t) t.onclick = ev2 => { ev2.stopPropagation();
+     INTAKE.drawer = true; INTAKE.hit = f ? f.saw : null; INTAKE.audit = null;
+     pop.remove(); renderIntake(); };
+ }; });
+}
+
+/* a popover that only closes by pressing its own button is a popover people
+   leave open and then complain the page is broken */
+document.addEventListener('click', e => {
+  if (e.target.closest && (e.target.closest('.audit') || e.target.closest('[data-audit]'))) return;
+  if (INTAKE.audit){ INTAKE.audit = null; document.querySelectorAll('.audit').forEach(x => x.remove()); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (INTAKE.audit){ INTAKE.audit = null; document.querySelectorAll('.audit').forEach(x => x.remove()); }
+  if (INTAKE.drawer || INTAKE.refusedOpen){ INTAKE.drawer = false; INTAKE.refusedOpen = false; renderIntake(); }
+});
+
+/* ── the intake, rendered ──────────────────────────────────────────────────
+   Seven states in one function, because they are one thing in seven moods and
+   splitting them is how two of them drift apart. */
+function renderIntake(){
+  const box = $('intake'); if (!box) return;
+  if (!entitled(2) || INTAKE.locked){
+    /* the way out of a locked card is a TAP TARGET, not a word. A 58×19 link
+       is under every thumb minimum there is, and this card is the one thing on
+       the property step somebody on a phone is being asked to press. */
+    box.innerHTML = `<div class="iquiet" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="flex:1;min-width:190px"><div class="h" style="font-size:13.5px;font-weight:600">Reading the paperwork comes with Underwriter.</div>
+       <div class="sub" style="font-size:12.5px;color:var(--soft);margin-top:5px;line-height:1.5">Every plan prices what you type; Underwriter reads the listing for you.</div></div>
+      <a class="btn" href="plans.html" style="font-size:13px;white-space:nowrap;padding:11px 16px">See plans</a></div>`;
+    return;
+  }
+  const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  let html = '';
+  if (INTAKE.busy){
+    const n = INTAKE.files.length;
+    html = `<div class="icard">
+      <div class="h">${INTAKE.step === 1 ? `Sending ${n} image${n===1?'':'s'}…` : 'Transcribing every line…'}</div>
+      <div class="sub">${INTAKE.step === 1 ? 'Nothing lands until it can be quoted.'
+        : 'It reads the page before it reports a figure — anything it cannot quote is refused. Usually 10–25 seconds.'}</div>
+      <div class="ibar"><i></i></div></div>`;
+  } else if (INTAKE.err){
+    html = `<div class="icard"><div class="sub" style="color:var(--mid)">${esc(INTAKE.err)}</div>
+      <div class="irow"><button type="button" id="ik-pick">Try again</button></div></div>`;
+  } else if (INTAKE.receipt){
+    const r = INTAKE.receipt;
+    if (!r.placed.length && r.unquoted){
+      html = `<div class="ibad"><div class="h">None of this read was placed.</div>
+        <div class="b">The figures it returned cite lines that are not in its own transcript — the one failure
+         that says do not trust the rest. Nothing on your sheet changed.</div>
+        <div class="irow"><button type="button" id="ik-tr">See what it read</button>
+         <span style="font-size:12px;color:var(--soft);font-weight:400">A screenshot reads far better than a photo of a screen.</span></div></div>`;
+    } else {
+      const bits = [];
+      /* `r.held` is an ARRAY, and an empty array is truthy — so a clean read
+         announced "0 rows you had already filled were left alone", which is a
+         sentence about nothing, in the one place the feature is explaining
+         itself. Count the rows, not the box they came in. */
+      if (r.held.length) bits.push(`${r.held.length} row${r.held.length===1?'':'s'} you had already filled ${r.held.length===1?'was':'were'} left alone`);
+      if (r.context) bits.push(`${r.context} more ${r.context===1?'is':'are'} quoted below — the sheet has no box for ${r.context===1?'it':'them'}`);
+      html = `<div class="icard">
+        <div class="h">Read ${r.placed.length} figure${r.placed.length===1?'':'s'} from your photograph${INTAKE.files.length===1?'':'s'}.
+         <span style="font-weight:500;color:var(--soft)">${esc(bits.join(' · '))}</span></div>
+        <div class="irow"><button type="button" id="ik-tr">Transcript</button>
+         ${r.dropped ? `<button type="button" id="ik-ref" style="color:var(--est)">${r.dropped} refused</button>` : ''}
+         <button type="button" id="ik-pick">Add more photos</button>
+         ${r.month ? `<span class="m">${r.month.used} of ${r.month.cap} reads this month</span>` : ''}</div>
+        ${INTAKE.refusedOpen ? refusedHTML() : ''}</div>`;
+    }
+  } else {
+    html = `<button type="button" class="idrop" id="ik-drop">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--soft)" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="M3 17l5-4 4 3 4-4 5 5"/></svg>
+      <span style="flex:1;min-width:0"><span class="t">${coarse ? 'Add photos of the listing' : 'Drop the listing here'}</span>
+       <span class="s">Screenshot, tax card, MLS sheet — the sheet fills what it can and asks for the rest.</span></span>
+      <span class="br">${coarse ? 'Choose photos' : 'or browse'}</span></button>`;
+  }
+  /* what it quoted and could not place, plus the notes — the design's own
+     "quoted, not priced" block, which is exactly the right home for figures
+     this sheet has no box for */
+  const it = S.intake;
+  if (it && !INTAKE.busy){
+    const ctx = Object.entries(it.context || {});
+    if (ctx.length || (it.notes || []).length){
+      html += `<div class="iquiet" style="margin-top:10px">
+        <div class="cap">FROM THE LISTING · QUOTED, NOT PRICED</div>
+        ${ctx.map(([k, f]) => `<div class="q"><b style="color:var(--ink)">${esc(INTAKE_LAB[k] || k)}</b> — ${esc(String(f.saw))}</div>`).join('')}
+        ${(it.notes || []).map(t => `<div class="q">“${esc(t)}”</div>`).join('')}</div>`;
+    }
+  }
+  html += `<input type="file" id="ik-file" accept="image/*" multiple style="display:none">`;
+  box.innerHTML = html;
+  if (INTAKE.drawer) box.insertAdjacentHTML('beforeend', drawerHTML());
+  wireIntake();
+}
+function refusedHTML(){
+  const d = (S.intake && S.intake.dropped) || [];
+  return `<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:9px">
+    <div style="font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--est)">NOT PLACED</div>
+    ${d.map(x => { const lab = INTAKE_LAB[x.id] || x.id;
+      const body = x.why === 'invented'
+        ? `It resolved “${esc(x.saw)}” into ${esc(String(x.value))} — a number that is not printed in what it read. The reader may not infer, average or convert, so the row stayed needed.`
+        : x.why === 'insane'
+        ? `“${esc(x.saw)}” is printed, but ${esc(String(x.value))} cannot be ${esc(lab.toLowerCase())}.`
+        : `It cited “${esc(x.saw)}” — a line that is not in its own transcript.`;
+      return `<div style="margin-top:8px"><div style="font-size:13px;font-weight:600">${esc(lab)} — not placed</div>
+        <div style="font-size:12.5px;color:var(--mid);line-height:1.5;margin-top:2px">${body}</div></div>`; }).join('')}
+    <div style="font-size:11.5px;color:var(--soft);margin-top:10px;border-top:1px solid var(--line);padding-top:8px">
+     A refusal is the rail working — only figures printed in the transcript land.</div></div>`;
+}
+function drawerHTML(){
+  const it = S.intake || {}; const lines = String(it.transcript || '').split('\n');
+  const norm = t => String(t).replace(/\s+/g, ' ').toLowerCase();
+  const used = Object.values(it.saw || {}).map(f => norm(f.saw));
+  const hit = INTAKE.hit ? norm(INTAKE.hit) : null;
+  return `<aside class="idraw" role="dialog" aria-label="What it read">
+    <div class="dh"><div><div style="font-family:var(--serif);font-weight:700;font-size:15px">What it read</div>
+      <div style="font-size:11.5px;color:var(--soft);margin-top:2px">the model’s own transcript · placed lines highlighted</div></div>
+     <button type="button" id="ik-close" aria-label="Close transcript"
+       style="border:1px solid var(--line);background:var(--card);border-radius:var(--r-pill);width:28px;height:28px;cursor:pointer;color:var(--mid);font-size:15px;line-height:1">×</button></div>
+    <div class="db" id="ik-db">${lines.map(l => {
+      const n = norm(l);
+      const cls = hit && n.includes(hit) ? 'hit' : used.some(u => u && n.includes(u)) ? 'used' : '';
+      return `<div class="${cls}">${esc(l)}</div>`; }).join('')}</div>
+    <div class="df">Every placed figure is checked against this text — a figure that is not in it is refused,
+     whatever the model says.</div></aside>`;
+}
+function wireIntake(){
+  const box = $('intake'); if (!box) return;
+  const file = $('ik-file');
+  const pick = () => { if (file) file.click(); };
+  if (file) file.onchange = e => { const f = e.target.files; e.target.value = ''; intakeSend(f); };
+  const drop = $('ik-drop');
+  if (drop){
+    drop.onclick = pick;
+    drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+    drop.ondragleave = () => drop.classList.remove('over');
+    drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over');
+      intakeSend(e.dataTransfer && e.dataTransfer.files); };
+  }
+  const b = id => $(id);
+  if (b('ik-pick')) b('ik-pick').onclick = () => { INTAKE.err = null; INTAKE.locked = false; pick(); };
+  if (b('ik-tr'))   b('ik-tr').onclick   = () => { INTAKE.drawer = true; INTAKE.hit = null; renderIntake(); };
+  if (b('ik-ref'))  b('ik-ref').onclick  = () => { INTAKE.refusedOpen = !INTAKE.refusedOpen; renderIntake(); };
+  if (b('ik-close'))b('ik-close').onclick= () => { INTAKE.drawer = false; INTAKE.hit = null; renderIntake(); };
+  const el = $('ik-db');
+  if (el){ const h = el.querySelector('.hit') || el.querySelector('.used');
+    if (h) el.scrollTop = Math.max(0, h.offsetTop - 70); }
+}
+
 /* ── applying it, without a photo-read exemption ───────────────────────── */
 function applyRead(j){
-  const seen = [], refused = [];
+  const seen = [], refused = [], kept = [];
   for (const l of LINES){
     const r = (j.lines || {})[l.id];
     if (r && r.seen === true && typeof r.pc === 'number'){
+      /* ── A HAND ON A SLIDER OUTRANKS A PHOTOGRAPH ────────────────────────
+         The condition panel promises, on screen, that "anything you drag
+         yourself outranks it for good." It did not: a read overwrote every
+         line it could see, so a kitchen dragged to 0 because you had walked
+         the renovated house came back at 85 from the estate agent's
+         pre-renovation photographs. You stood in the room. The model looked at
+         a picture of it. */
+      if (S.sysOwn && S.sysOwn[l.id]){ kept.push(l.id); continue; }
       S.sys[l.id] = Math.max(0, Math.min(100, Math.round(r.pc)));
       seen.push(l.id);
     } else refused.push(l.id);         // LEFT ALONE. Not zeroed.
@@ -6768,14 +8083,36 @@ function applyRead(j){
      wider still. */
   const share = seen.length / LINES.length;
   const lowConf = seen.filter(id => (j.lines[id].conf || 'low') === 'low').length;
+  /* ── IT TAKES OVER, AND IT SAYS WHAT IT TOOK ───────────────────────────
+     Two defensible positions, and the product had picked neither out loud.
+
+     Pressing "read the condition" IS a request to have the panel filled in, so
+     the read taking over is what the button asks for — that is the existing
+     decision and t-photo has enforced it deliberately since it was written.
+     But a repairs figure somebody TYPED is a known number, est:false, and
+     replacing it with a photo-derived estimate carrying up to 0.42 uncertainty
+     moved every ceiling downstream by whatever the difference was, silently,
+     with nothing on screen to say it had happened.
+
+     So it still takes over — and it records what it displaced, so the panel
+     can name the figure it replaced and offer it back in one press. That is
+     the same consent grammar as the estimate chips: do the useful thing, then
+     say what you did. What it must never be is invisible. */
+  const hadOwn = !!S.repairsOwn && !!String(S.raw.repairs || '').trim();
+  const wasRepairs = hadOwn ? { v: S.raw.repairs, prov: S.prov.repairs || 'you typed it' } : null;
   S.repairsOwn = false;
   syncRepairs();
   if (S.raw.repairs){
     S.est.repairs = true;
     S.unc.repairs = Math.min(0.42, 0.18 + (1 - share) * 0.18 + (lowConf / Math.max(1, seen.length)) * 0.08);
     S.prov.repairs = `read from ${PHOTO.files.length} photograph${PHOTO.files.length===1?'':'s'} · `
-      + `${seen.length} of ${LINES.length} lines were visible; the rest were left as they were`;
+      + `${seen.length} of ${LINES.length} lines were visible; the rest were left as they were`
+      + (wasRepairs ? ` · this replaced the ${wasRepairs.v} you had in` : '');
   }
+  /* what the read displaced, so the panel can offer it back rather than
+     leaving somebody to remember a number the software overwrote */
+  S.tookOver = wasRepairs;
+  if (kept.length) S.keptLines = kept.slice();
   /* the receipt travels with the sheet, because a number on a lender packet
      that nobody can trace back is the thing this product exists to refuse */
   S.read = {
@@ -7048,6 +8385,18 @@ const compFmt = v => v === null || v === undefined ? '—' : fmt(v);
 function rcPanel(){
  const key = rcKey(), used = rcCount(), left = Math.max(0, RC_FREE_MONTH - used);
  const room = premium() ? 12 : compRoom().room;
+ /* ── PAID PULLS ON OUR KEY. FREE BRINGS ITS OWN. ─────────────────────────
+    plans.html sells "the comps arrive pulled and scored" under Underwriter and
+    they did not arrive: the customer had to go and get a RentCast account,
+    generate a key, paste it into their own browser, and live inside somebody
+    else's fifty-a-month. RentCast's own documentation says a key "should never
+    be exposed in any client-side, front-end or publicly-accessible code" — so
+    the paid experience was asking a paying customer to do the thing the vendor
+    warns against, to get a thing the pricing page said they had already bought.
+
+    Entitlement, not tier: a demo paints at tier 3 and a preview flag paints
+    anything, and neither may spend money at a vendor who bills us per request. */
+ if (entitled(2) && !RC.byok) return rcPanelPaid();
  if (RC.busy) return `<div class="rc busy"><span class="sp"></span>
    <div><b>Asking RentCast for sales near ${esc(S.addr || 'this address')}…</b>
     <p>Their value estimate is discarded on arrival. You are getting the sales, to score yourself.</p></div></div>`;
@@ -7080,6 +8429,77 @@ function rcPanel(){
   </div>`;
 }
 
+/* ── ONE LANDING PATH, TWO SOURCES ────────────────────────────────────────
+   Rows arriving from our key and rows arriving from the reader's own key are
+   the same rows and must land the same way — the tier's room, the unscored
+   promise, and the warning that RentCast reports LISTING records rather than
+   closings. Two copies of this drifted the moment one of them was touched. */
+function rcTake(got){
+  const room = premium() ? 24 - S.comps.length : compRoom().room;
+  const take = (got || []).slice(0, Math.max(0, room));
+  S.comps = S.comps.concat(take);
+  S.compOpen = true;
+  RC.msg = `${take.length} sale${take.length===1?'':'s'} added, unscored.`
+    + (got.length > take.length ? ` ${got.length - take.length} more came back than this tier takes.` : '')
+    + ' RentCast reports listing records, so check each price against what it actually closed at'
+    + ' — in a moving market the two differ, and the difference is exactly the part worth knowing.';
+  return take.length;
+}
+
+/* the paid pull: no key, no vendor account, no fifty-a-month — an allowance
+   that lives on the account, said out loud before the press, the same way
+   every other metered feature on this desk says it */
+function rcPanelPaid(){
+  const m = RC.month;
+  const left = m && typeof m.left === 'number' ? m.left : null;
+  if (RC.busy) return `<div class="rc busy"><span class="sp"></span>
+    <div><b>Pulling sales near ${esc(S.addr || 'this address')}…</b>
+     <p>Their value estimate is discarded on arrival. You are getting the sales, to score yourself.</p></div></div>`;
+  const noAddr = !S.addr.trim();
+  const out = left !== null && left <= 0;
+  return `<div class="rc on">
+    <div class="rch"><span class="tag live">included</span><b>Comps, pulled</b>
+     ${m ? `<span class="use">${m.used} of ${m.cap} this month${left !== null && left <= 5 ? ` · <b>${left} left</b>` : ''}</span>` : ''}</div>
+    <p>One pull returns up to ten recent sales near this address, on our key — nothing for you to
+     set up. They arrive <b>unscored</b>: the comparability score, the adjustments and the ARV stay
+     yours, which is the whole point of the workbench. <b>Their value estimate is not used.</b></p>
+    <div class="rcf">
+     <button class="btn p sm" type="button" id="rc-pull"${(noAddr || out) ? ' disabled' : ''}>${
+       noAddr ? 'Enter an address first' : out ? 'No pulls left this month' : 'Pull comps'}</button>
+     ${RC.byok ? '' : '<button class="btn sm" type="button" id="rc-byok">Use my own RentCast key instead</button>'}</div>
+    ${RC.err ? `<div class="rcerr">${esc(RC.err)}</div>` : ''}
+    ${RC.msg ? `<div class="rcok">${esc(RC.msg)}</div>` : ''}
+   </div>`;
+}
+/* the pull itself. The reply's shape is the workbench's own row shape, so
+   nothing here reinterprets it — the server already threw the estimate away. */
+async function rcPull(){
+  const addr = S.addr.trim(); if (!addr) return;
+  RC.busy = true; RC.err = null; RC.msg = null; renderComps();
+  try {
+    const r = await fetch((window.__NI_API || '') + '/api/comps', {
+      method:'POST',
+      headers:{ 'content-type':'application/json', 'x-ni-access': (PHOTO && PHOTO.code) || '',
+                ...(typeof window.__authHeader === 'function' ? await window.__authHeader() : {}) },
+      body: JSON.stringify({ address: addr }),
+    });
+    let j = null; try { j = await r.json(); } catch(e){}
+    RC.busy = false;
+    if (!r.ok || !j || !j.ok){
+      RC.err = (j && j.error) || 'The pull did not come back. Nothing on your sheet changed.';
+      /* a plan that cannot pull can still bring a key — say so rather than
+         leaving somebody at a dead end */
+      if (j && j.byok) RC.byok = true;
+      return renderComps();
+    }
+    RC.month = j.month || null;
+    rcTake(j.rows || []);
+    save(); render();
+  } catch(e){
+    RC.busy = false; RC.err = 'The pull could not be made from this browser.'; renderComps();
+  }
+}
+
 function renderComps(){
  const box = $('cw'); if (!box) return;
  const rows = compRows();
@@ -7089,6 +8509,9 @@ function renderComps(){
  const arvNow = val('arv');
 
  const adjLine = r => {
+   /* a zero in the sold-for box is a different mistake from an empty one, and
+      saying which is the difference between a fixable row and a puzzle */
+   if (r.noPrice) return '<span>Sold for $0 — a house that sold for nothing did not sell. Put the real price in, or untick it.</span>';
    if (!r.ok) return '<span>Needs a sold price</span>';
    const bit = (k, lab) => { const v = r.adj[k]; if (!v || Math.abs(v) < 250) return '';
      return `<span>${lab} <b class="${v>0?'pos':'neg'}">${v>0?'+':'−'}${fmt(Math.abs(v)).replace('$','$')}</b></span>`; };
@@ -7174,9 +8597,9 @@ function renderComps(){
   </div>
   ${!S.compOpen ? '' : `
   <div class="subj">
-   <span><label for="sj-sqft">Subject sq ft</label><input id="sj-sqft" inputmode="decimal" value="${esc(S.subj.sqft||'')}" placeholder="1,380"></span>
-   <span><label for="sj-beds">Beds</label><input id="sj-beds" inputmode="decimal" value="${esc(S.subj.beds||'')}" placeholder="3"></span>
-   <span><label for="sj-baths">Baths</label><input id="sj-baths" inputmode="decimal" value="${esc(S.subj.baths||'')}" placeholder="2"></span>
+   <span><label for="sj-sqft">Subject sq ft${sjRead('sqft')}</label><input id="sj-sqft" inputmode="decimal" value="${esc(S.subj.sqft||'')}" placeholder="1,380"></span>
+   <span><label for="sj-beds">Beds${sjRead('beds')}</label><input id="sj-beds" inputmode="decimal" value="${esc(S.subj.beds||'')}" placeholder="3"></span>
+   <span><label for="sj-baths">Baths${sjRead('baths')}</label><input id="sj-baths" inputmode="decimal" value="${esc(S.subj.baths||'')}" placeholder="2"></span>
   </div>
   <div class="comps">${rows.map(compCard).join('')}</div>
   ${(() => {
@@ -7199,6 +8622,20 @@ function renderComps(){
       return `<div class="capnote"><b>That is ${ACCT_COMPS_WEEK} scored comps this week</b> — two houses
         done properly. It resets on Monday, and nothing you have already scored goes anywhere.
         <a href="plans.html">Solo lifts it</a>, along with every condition line on its own slider.</div>`;
+    /* ── THE FOURTH RUNG, WHICH USED TO WEAR THE FIRST ONE'S CLOTHES ─────
+       'account-unknown' is somebody who IS signed in and whose weekly balance
+       could not be read — the server function is not deployed yet, or the
+       network is out. The degrade is deliberate and documented: a missing
+       migration must never lock somebody out of something that worked
+       yesterday. But it fell through to the guest wall, so a member was told
+       to go and make an account they already had — the exact failure the
+       comment above says this block exists to prevent, surviving in the one
+       branch nobody reads. Say the true thing instead. */
+    if (R.rung === 'account-unknown')
+      return `<div class="capnote"><b>Three comps in this browser, for now.</b> You are signed in,
+        but this week's allowance could not be read just then — so the sheet is holding to the
+        offline limit rather than guessing in your favour. Reload and it will ask again; nothing
+        you have scored goes anywhere either way.</div>`;
     return `<div class="capnote"><b>Three comps in this browser.</b> Three draws a real range — this
       one is doing it above. <a href="office.html?want=comps">A free account scores
       ${ACCT_COMPS_WEEK} a week</a>, on every device, with no card. More comps narrow the range,
@@ -7238,19 +8675,15 @@ function renderComps(){
    const fg = $('rc-forget');
    if (fg) fg.onclick = () => { try { localStorage.removeItem(RC_KEY); } catch(e){}
      RC.err = null; RC.msg = null; render(); };
+   const pull = $('rc-pull');
+   if (pull) pull.onclick = () => rcPull();
+   const byok = $('rc-byok');
+   if (byok) byok.onclick = () => { RC.byok = true; RC.err = null; RC.msg = null; render(); };
    const go = $('rc-go');
    if (go) go.onclick = async () => {
      RC.busy = true; RC.err = null; RC.msg = null; render();
      try {
-       const got = await rcFetch(S.addr.trim());
-       const room = premium() ? 24 - S.comps.length : compRoom().room;
-       const take = got.slice(0, room);
-       S.comps = S.comps.concat(take);
-       S.compOpen = true;
-       /* the subject's own shape often comes back on the nearest sale; it is
-          only ever a suggestion, and only fills fields the person left blank */
-       RC.msg = `${take.length} sale${take.length===1?'':'s'} added, unscored.` +
-         (got.length > take.length ? ` ${got.length - take.length} more came back than this tier takes.` : '');
+       rcTake(await rcFetch(S.addr.trim()));
        save();
      } catch(e){ RC.err = e.message || String(e); }
      RC.busy = false; render();
@@ -7266,11 +8699,27 @@ function renderComps(){
    else { el.onchange = commit; el.onblur = commit; }
  });
  ['sqft','beds','baths'].forEach(k => { const el = $('sj-'+k); if (!el) return;
-   const commit = () => { S.subj[k] = el.value.slice(0,10); save(); renderComps(); };
+   /* the same keystroke that makes a figure yours drops the receipt on it —
+      this is the ownership rule, and it was already honoured on the sheet's
+      own rows. These three are read-fillable too, so it has to hold here. */
+   const commit = () => { const v = el.value.slice(0,10);
+     if (S.src && S.src[k] === 'photo' && v !== String(S.subj[k] || '')) delete S.src[k];
+     S.subj[k] = v; save(); renderComps(); };
    el.onchange = commit; el.onblur = commit; });
+ wireAudit();                       // the subject block draws chips of its own
  box.querySelectorAll('[data-ca]').forEach(el => { const commit = () => {
-     const v = parseFloat(String(el.value).replace(/[^0-9.]/g,''));
-     S.compAdj[el.dataset.ca] = Number.isFinite(v) ? v : COMP_DEFAULTS[el.dataset.ca];
+     /* the market moves in BOTH directions and 2026 has metros where it is
+        moving down. The old parse stripped the minus sign, so typing −4
+        committed +4 — every stale comp adjusted UP in a falling market, the
+        wrong direction, silently, in the feature that builds the most
+        important number on the sheet. Only the market rate may be negative;
+        a negative price per bedroom is not a market view, it is a typo. */
+     const raw = String(el.value);
+     const v = el.dataset.ca === 'market'
+       ? parseFloat(raw.replace(/[^0-9.\-\u2212]/g,'').replace(/\u2212/g,'-'))
+       : parseFloat(raw.replace(/[^0-9.]/g,''));
+     const okv = Number.isFinite(v) && (el.dataset.ca === 'market' ? v > -50 && v < 50 : v >= 0);
+     S.compAdj[el.dataset.ca] = okv ? v : COMP_DEFAULTS[el.dataset.ca];
      save(); renderComps(); };
    el.onchange = commit; el.onblur = commit; });
  const take = $('arv-take');
@@ -7291,6 +8740,9 @@ function renderComps(){
    run yet, `COMPQ` is null and this falls back to the signed-out limit — the
    safe direction, and identical to how this screen behaved yesterday. */
 function compRoom(){
+  /* one allowance across the product — the sold-lot bench on the Land Desk
+     draws on this same meter, because the pricing page makes ONE promise with
+     ONE number and two meters would need a second sentence nobody reads */
   if (premium()) return { room: Math.max(0, 24 - S.comps.length), rung:'paid' };
   const q = signedIn() && typeof window.__compAllowance === 'function'
     ? window.__compAllowance() : null;
@@ -7609,6 +9061,15 @@ function cardHTML(r, i, rank){
   const b = bestExit(r), room = roomOf(r);
   const conf = cmpConf(r), sp = cmpSpread(r);
   const at = CMP.picks.indexOf(i);
+  /* `room` is topCeil's ceiling less the asking price, and topCeil is not
+     always the exit named on the line above it. When the best fit is a
+     subject-to or a novation — neither of which buys the house outright —
+     the card said "The subject-to · $69,140 too dear" and the $69,140 was
+     the flip's shortfall. A reader would walk away from a live deal.
+     Same rule as the bench: the figure stays, and it says whose it is. */
+  const tc = topCeil(r);
+  const roomOwner = (room !== null && b && tc && b.id !== tc.id)
+    ? String(tc.nm).replace(/^The /,'') : null;
   return `<button class="dk${at>=0?' placed':''}${rank!==null&&rank<3?' top':''}" type="button"
      draggable="true" data-card="${i}"
      aria-label="${esc(r.name)} — drag up onto the bench, or press to place it">
@@ -7617,8 +9078,10 @@ function cardHTML(r, i, rank){
     <span class="dk-x">${b ? esc(b.nm) : 'not priced yet'}</span>
     <span class="dk-f"><b class="${sp===null?'':(sp>=0?'up':'dn')}">${sp===null?'—':fmt(sp)}</b>
       <em>spread</em></span>
-    <span class="dk-m"><span class="dk-room ${room===null?'':(room>=0?'ok':'no')}">${
-      room===null?'no asking price':(room>=0?fmt(room)+' of room':fmt(-room)+' too dear')}</span>
+    <span class="dk-m"><span class="dk-room ${room===null?'':(room>=0?'ok':'no')}"${
+      roomOwner?` title="On the ${esc(roomOwner)} — the ${esc(String(b.nm).replace(/^The /,''))} does not buy the house outright"`:''}>${
+      room===null?'no asking price':(room>=0?fmt(room)+' of room':fmt(-room)+' too dear')}${
+      roomOwner?`<i> on the ${esc(roomOwner)}</i>`:''}</span>
       <span class="dk-c" style="color:${GOODCOL(conf==='high'?90:conf==='medium'?55:25)}">${conf}</span></span>
     ${boxChip(boxCheck(r))}
   </button>`;
@@ -7628,12 +9091,27 @@ function slotHTML(r, i, pos, isWin){
     <span class="sl-e">Lift a property up here</span>
     <span class="sl-e" style="font-size:11.5px">&mdash; or press a card below</span></div>`;
   const b = bestExit(r), c = topCeil(r);
+  /* ── WHOSE CEILING IS THAT? ──────────────────────────────────────────────
+     These two lines sat one above the other with nothing between them: the
+     name of the BEST-FITTING exit, then the highest ceiling ANY exit allows,
+     labelled "pay no more than". They are usually the same exit and the card
+     read fine. They are never the same exit when the best fit is a subject-to
+     or a novation — neither of which has a purchase ceiling at all, because
+     one is priced on a monthly spread and the other on a cheque at closing.
+     On the subject-to demo the bench said "The subject-to · $198,860 · pay no
+     more than", and the $198,860 belongs to the fix and flip.
+
+     The ceiling is still the right figure to show — it is the most anybody
+     could pay for the house — so it stays, and it now says whose it is. */
+  const sameExit = !!(b && c && b.id === c.id);
   return `<div class="slot${isWin?' win':''}" data-slot="${pos}" draggable="true">
     <span class="sl-rank">${isWin ? 'Ahead' : '#' + (pos+1)}</span>
     <button class="sl-x" type="button" data-clear="${pos}" title="Take it off the bench">×</button>
     <span class="sl-n">${esc(r.name)}</span>
     <span class="sl-b">${b ? esc(b.nm) : 'not priced'}</span>
-    <span class="sl-p">${c ? fmt(c.ceil) : '—'}<em>pay no more than</em></span>
+    <span class="sl-p">${c ? fmt(c.ceil) : '—'}<em>${
+      !c ? 'no purchase price' : sameExit ? 'pay no more than'
+         : 'pay no more than &mdash; on the ' + esc(String(c.nm).replace(/^The /,''))}</em></span>
     ${boxChip(boxCheck(r))}</div>`;
 }
 function lockedSlotHTML(){
@@ -7721,26 +9199,63 @@ function renderCompare(){
  } else {
    const scores = on.map(scoreOf);
    const anyNull = scores.some(x => x.v === null);
-   let win = -1, wv = -Infinity;
-   scores.forEach((x,k) => { if (x.v !== null && x.v > wv){ wv = x.v; win = k; } });
-   /* the runner-up: who the winner has to beat, and the pair the flip analysis
-      runs on — a crossover against the property in fourth place is arithmetic
-      nobody asked for */
-   let sec = -1, sv = -Infinity;
-   scores.forEach((x,k) => { if (k !== win && x.v !== null && x.v > sv){ sv = x.v; sec = k; } });
+   /* ── THE SAME COMPARATOR THE RANKBAR USES, OR NOT AT ALL ────────────────
+      rankAll sorts KIND FIRST: a sheet scored in `room` — what you can pay
+      less what they want — outranks one scored in `ceil`, because a ceiling
+      with no asking price against it is not an answer to the same question.
+      This block re-derived the winner with a plain max(v) that ignored kind
+      entirely, so a large CEILING beat a modest ROOM and the verdict box
+      contradicted the rankbar rendered inches above it.
+
+      Worse than disagreeing: it then printed the difference. "B, by $118,000
+      of room over A" is a ceiling minus a room — two incommensurable
+      quantities subtracted and labelled with the name of one of them — and
+      the body added "No asking price on these", which was false of A.
+
+      On Solo the rankbar is a locked placeholder, so the user saw only the
+      wrong verdict with nothing on screen to contradict it.
+
+      One comparator now, lifted out so rankAll and this cannot drift. */
+   const KIND_RANK = { room:0, ceil:1, none:2 };
+   const byScore = (p, q) => {
+     const kp = KIND_RANK[p.s.kind] ?? 2, kq = KIND_RANK[q.s.kind] ?? 2;
+     if (kp !== kq) return kp - kq;
+     return (q.s.v === null ? -Infinity : q.s.v) - (p.s.v === null ? -Infinity : p.s.v);
+   };
+   const ordered = scores.map((s2, k) => ({ k, s: s2 }))
+     .filter(x => x.s.v !== null)
+     .sort(byScore);
+   const win = ordered.length ? ordered[0].k : -1;
+   const sec = ordered.length > 1 ? ordered[1].k : -1;
+   const wv = win >= 0 ? scores[win].v : -Infinity;
+   const sv = sec >= 0 ? scores[sec].v : -Infinity;
+   /* the delta is only a delta when both sides measure the same thing */
+   const comparable = win >= 0 && sec >= 0 && scores[win].kind === scores[sec].kind;
 
    const cell = v => v === null || v === undefined ? '<span class="dash">&mdash;</span>' : v;
    const row = (lab, vals, winK, note) => `<div class="cmp-r"${note?` title="${esc(note)}"`:''}>
      <span class="l">${lab}</span>${vals.map((v,k)=>
        `<span class="v${winK===k?' win':''}">${cell(v)}</span>`).join('')}</div>`;
    /* which column wins a row: the best value, or nobody if it ties or a figure
-      is missing — a "winner" chosen out of two blanks is a lie */
-   const best = (vals, hi) => {
+      is missing — a "winner" chosen out of two blanks is a lie.
+
+      `money` marks the rows where the SIGN carries meaning. Room and spread can
+      both be negative on every sheet on the bench, and this used to crown the
+      least negative of them: −$32,000 beat −$45,000, took the .win class, and
+      rendered in money-green with a tick beside it. A loss in the colour of a
+      gain, with a tick, is the worst thing this grid could say. Nobody wins a
+      race to lose less — on a money row the winner must actually be positive. */
+   const best = (vals, hi, money) => {
      const ok = vals.map((v,k)=>[v,k]).filter(([v])=>typeof v === 'number' && Number.isFinite(v));
      if (ok.length < 2) return -1;
      ok.sort((p,q) => hi ? q[0]-p[0] : p[0]-q[0]);
+     if (money && !(ok[0][0] > 0)) return -1;
      return ok[0][0] === ok[1][0] ? -1 : ok[0][1];
    };
+   /* and a negative money figure is never neutral type either: it is a number
+      you would have to talk somebody down by, so it wears the refusal colour */
+   const moneyCell = v => v === null || v === undefined ? null
+     : (v < 0 ? `<span class="neg">${fmt(v)}</span>` : fmt(v));
    const bs = on.map(bestExit), cs = on.map(topCeil);
    const rooms = on.map(roomOf), spreads = on.map(cmpSpread);
    const ceils = cs.map(c => c ? c.ceil : null);
@@ -7764,9 +9279,9 @@ function renderCompare(){
            'The highest ceiling any exit on the sheet allows.')}
      ${row('&hellip;on that ceiling', cs.map(c=>c?c.nm:null), -1)}
      ${row('They ask', on.map(r=>r.a.asking!==null?fmt(r.a.asking):null), -1)}
-     ${row('Room &mdash; ceiling less asking', rooms.map(v=>v!==null?fmt(v):null), best(rooms, true),
-           'What you can pay, less what they want.')}
-     ${row('Spread on paper', spreads.map(v=>v!==null?fmt(v):null), best(spreads, true))}
+     ${row('Room &mdash; ceiling less asking', rooms.map(moneyCell), best(rooms, true, true),
+           'What you can pay, less what they want. A negative number is what you would have to talk them down.')}
+     ${row('Spread on paper', spreads.map(moneyCell), best(spreads, true, true))}
      ${row('Repairs', on.map(r=>r.a.repairs!==null?fmt(r.a.repairs):null),
            best(on.map(r=>r.a.repairs), false))}
      ${row('Fit of the best exit', fits, best(fits, true))}
@@ -7783,13 +9298,35 @@ function renderCompare(){
     ${win < 0 ? `<div class="cmp-verdict none"><span class="k">No verdict yet</span>
        <h3>Nothing here has been priced far enough to compare.</h3>
        <p>Each sheet needs an asking price and enough to price at least one exit.</p></div>`
+     /* The bench had two verdicts — "no verdict yet" and "this one wins" — and
+        no way to say the third true thing: every sheet on it is a walk-away.
+        With rooms of −$32,000 and −$45,000 it crowned the first and said "by
+        $13,000 of room over" the second, which reads as a recommendation to
+        buy the less bad one. The offer page grew this third state months ago;
+        the bench never did. Ranking losses is fine — presenting the top of that
+        ranking as the pick is not. */
+     : (scores[win].kind === 'room' && !(wv > 0)) ? `<div class="cmp-verdict none">
+       <span class="k">The verdict</span>
+       <h3>None of these reach. ${nmOf(win)} is the closest, and it is still ${fmt(Math.abs(wv))} short.</h3>
+       <p>Room is what you can pay less what they want, and on every sheet here it is negative
+          &mdash; there is no price on this bench that works as they are asked. This is a ranking
+          of how far away they are, not a recommendation to buy the nearest.
+          ${anyNull ? 'One of them is not priced far enough to rank, and is not in it.' : ''}</p></div>`
      : `<div class="cmp-verdict ${win===0?'a':'b'}"><span class="k">The verdict</span>
-       <h3>${nmOf(win)}${sec>=0?`, by ${fmt(Math.abs(wv - sv))} of room over ${nmOf(sec)}`:''}.</h3>
-       <p>${scores[win].kind === 'room'
+       <h3>${nmOf(win)}${comparable
+          ? `, by ${fmt(Math.abs(wv - sv))} of ${scores[win].kind === 'room' ? 'room' : 'ceiling'} over ${nmOf(sec)}`
+          : sec >= 0 ? `, ahead of ${nmOf(sec)}` : ''}.</h3>
+       <p>${(!comparable && sec >= 0) ? `${nmOf(win)} has an asking price to measure against and
+             ${nmOf(sec)} does not, so there is no single figure that separates them — they are
+             not answering the same question yet. ` : ''}${scores[win].kind === 'room'
           ? `Room is what you can pay less what they want, and it is the only figure here that
              answers the question you actually have. ${sec>=0 ? `${nmOf(sec)} may look better on
              spread or on comps — it is still what you walk away from first.` : ''}`
-          : `No asking price on these, so this ranks on what each exit can pay.`}
+          /* "these" was a plural claim about the whole bench, and it was false
+             the moment any sheet on it HAD an asking price — which is exactly
+             the mixed-kind case. It speaks for the winner only. */
+          : `${nmOf(win)} has no asking price, so it ranks on what its exits can pay rather than
+             on room. Put their number in and it moves to the figure that answers the question.`}
           ${anyNull ? ' One of them is not priced far enough to rank, and is not in the verdict.' : ''}</p></div>`}
     <div class="cmp-dials"><span class="k">Move them all at once</span>
      <p class="lede">One set of assumptions drives every sheet on the bench. Drag one and watch the
@@ -7806,15 +9343,35 @@ function renderCompare(){
       Assembled from the SAME values the table above just painted, so the
       prose and the table cannot disagree — the fastest way to lose somebody's
       trust in a document is for it to contradict the screen it came from. */
+   /* `room` is the CEILING exit's room, and `bestExit` is the best-FITTING
+      exit. They are usually one exit and the pairing was invisible. They are
+      never one exit when the best fit is a subject-to or a novation, and the
+      model was handed `bestExit: "The subject-to", room: -69,140` as though
+      the second described the first — so a written comparison a customer
+      forwards to a partner called a live subject-to a walk-away, in prose,
+      with a number attached. The facts now name the exit the ceiling belongs
+      to, and say plainly when the best exit does not buy the house outright. */
    CMPFACTS = {
-     sheets: on.map((r, k) => ({
-       name: r.name, bestExit: bs[k] ? bs[k].nm : '',
+     sheets: on.map((r, k) => {
+       const bx = bs[k], cx = cs[k];
+       const owned = !!(bx && cx && bx.id === cx.id);
+       return {
+       name: r.name, bestExit: bx ? bx.nm : '',
        ceiling: cmpNum(ceils[k]), asking: cmpNum(r.a.asking), room: cmpNum(rooms[k]),
+       ceilingExit: cx ? cx.nm : '',
+       roomBelongsToBestExit: owned,
+       ...(bx && !owned ? { note:
+         `The ceiling and the room above belong to ${cx ? cx.nm : 'another exit'}, not to ${bx.nm}. ` +
+         `${bx.nm} does not buy this house outright — it is priced on ${
+           bx.id === 'subto' ? 'the monthly spread over the payment already on it'
+                             : 'the cheque at the closing'}. ` +
+         `Do NOT describe the room figure as this sheet's best exit falling short: on ${bx.nm} it is not a shortfall at all.`
+       } : {}),
        spread: cmpNum(spreads[k]), repairs: cmpNum(r.a.repairs), arv: cmpNum(r.a.arv),
        fit: cmpNum(fits[k]),
        confidence: cmpConfKey(r), comps: r.comps,
-       estimated: cmpEstimated(r), refused: !!(bs[k] && bs[k].refused),
-     })),
+       estimated: cmpEstimated(r), refused: !!(bx && bx.refused),
+     }; }),
      flip: CMPFLIP,
    };
 
@@ -8015,7 +9572,9 @@ const BOX_SPEC = [
 ];
 function renderBuyBox(){
  const el = $('buybox'); if (!el || el.hidden) return;
- const paid = atLeast(3), B = P.box;
+ /* the buy box writes to P.box and drives verdicts on real sheets — a demo
+    gets to look at it, not to switch it on */
+ const paid = mayUse(3), B = P.box;
  save();
  const cards = P.props.map((_,i) => priceProp(i));
  /* the count runs on the real rules even when the switch is locked — an
@@ -8459,7 +10018,9 @@ function renderLetters(){
   const c = $('lt-close'); if (c) c.onclick = closeLetters;
   return;
  }
- const paid = atLeast(2);
+ /* full drafts are a paid feature; a demo gets the locked teaser like anybody
+    else who has not bought one */
+ const paid = mayUse(2);
  const tab = LT_TABS.find(t => t.id === LT.tab) || LT_TABS[1];
  if (LT.text[tab.id] === undefined || !LT.dirty[tab.id]) LT.text[tab.id] = letterFor(tab.id, d);
  const body = LT.text[tab.id];
@@ -8799,6 +10360,9 @@ function bulkDraft(r){
    anywhere in here, deliberately. */
 function priceBatch(drafts){
   const back = P.active, n0 = P.props.length, out = [];
+  /* what is on screen right now — restored verbatim in the finally, because
+     during a demo that state exists in S and in no property */
+  const held0 = holdS();
   try {
     drafts.forEach(d => P.props.push(d));
     for (let k = 0; k < drafts.length; k++){
@@ -8827,8 +10391,10 @@ function priceBatch(drafts){
     }
   } finally {
     P.props.length = n0;
-    P.active = Math.max(0, Math.min(back, P.props.length - 1));
-    loadInto(P.active);
+    /* same reason as priceProp: restore what was on screen, which during a
+       demo is not any property's data */
+    if (held0) putS(held0);
+    else { P.active = Math.max(0, Math.min(back, P.props.length - 1)); swapInto(P.active); }
   }
   return out;
 }
@@ -8851,7 +10417,10 @@ function bulkSorted(rows){
 
 function renderBulk(){
   const box = $('bulk'); if (!box) return;
-  const paid = atLeast(3);
+  /* entitled(), not atLeast(): a demo may SHOW the list underwriter and may
+     not RUN it — and this one operates on the real portfolio, which is how a
+     demo reached P.props at all. */
+  const paid = mayUse(3);
   const P0 = bulkParse();
   const room = 40 - P.props.length;
   let rows = null;
@@ -9174,10 +10743,23 @@ function renderPresets(){
  box.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
    const p = PRESETS.find(x=>x.id===b.dataset.preset);
    LINES.forEach(l => { S.sys[l.id] = p ? (p.sys[l.id]||0) : 0; });
+   /* picking a preset restates the whole panel, so it takes the pen back from
+      every individual drag — the same rule the repairs figure already follows */
+   S.sysOwn = {};
    /* picking a preset is an unambiguous statement about the repairs, so it
       takes the pen back from a stale typed number */
    S.repairsOwn = false;
-   syncRepairs();
+   const wrote = syncRepairs();
+   /* "Sound / nothing needed" is an affirmative statement, not the absence of
+      one — and on a fresh sheet syncRepairs() has no estimate to overwrite, so
+      it writes nothing and the field stays NEEDED. Pressing a button that says
+      "nothing needed" and getting back "needed" is the sheet contradicting the
+      user. An untouched sheet still starts at NEEDED; only this press makes it
+      a zero. */
+   if (!p && !wrote && val('arv') !== null){
+     S.raw.repairs = '0'; S.est.repairs = true; S.unc.repairs = 0.05;
+     S.prov.repairs = 'you marked every system sound — nothing to do';
+   }
    save(); render();
  });
 }
@@ -9216,9 +10798,30 @@ function readCase(){
   (q.get('est')||'').split(',').filter(Boolean).forEach(f=>{ if (c.raw[f]) c.est[f]=true; });
   return Object.keys(c.raw).length ? c : null;
 }
-let CASE = null, pending = null;
 function applyCase(c){
-  S.addr=''; S.raw={}; S.est={}; S.prov={}; S.unc={};
+  /* ── A WORKED EXAMPLE IS NOT AN EDIT TO YOUR SHEET ───────────────────────
+     This cleared five stores — addr, raw, est, prov, unc — and left everything
+     else standing on the property it landed in. So a lesson's example arrived
+     wearing the previous house's NAME, its four COMPS, its walked CONDITION
+     panel and its bought PHOTO READ, and the sheet quietly underwrote
+     Beecher Street's example against Elm Street's comparables. Worse, it wrote
+     over the open property in place: a reader with one real sheet who clicked
+     a lesson link lost it, from a link that looked like reading material.
+
+     Same rule as "+ New sheet", for the same reason: if there is work on the
+     open sheet, the example gets its OWN property. If there is not, it lands
+     here — and either way it lands on a clean one. */
+  if (propHasWork(P.props[P.active]) && P.props.length < 40){
+    save();
+    P.props.push(newProp());
+    loadInto(P.props.length - 1);
+  }
+  S.addr=''; S.name=''; S.raw={}; S.est={}; S.prov={}; S.unc={};
+  S.comps=[]; S.compAdj={}; S.subj={sqft:'',beds:'',baths:''};
+  S.sys={}; S.read=null; S.repairsOwn=false;
+  S.offerExit=null; S.toName=''; S.fin=null; S.sitPc=0;
+  if (typeof LT === 'object'){ LT.dirty={}; LT.text={}; }
+  if (c.title) S.name = String(c.title).slice(0,80);
   Object.assign(S.raw, c.raw);
   const why = c.from==='arcade'
     ? 'the arcade knew this one for a fact — the world does not, so the band widens'
@@ -9229,7 +10832,10 @@ function applyCase(c){
   S.openId = c.exit || null;
   CASE = c; pending = null;
   S.sample = c.from === 'arcade' ? 'arcade' : 'lesson';
-  try { localStorage.setItem('ni-desk-case', c.from + (c.title?' — '+c.title:'')); } catch(e){}
+  S.caseLabel = c.from + (c.title?' \u2014 '+c.title:'');
+  /* the old global is actively removed rather than left to haunt the next
+     sheet somebody opens on a browser that has one */
+  try { localStorage.removeItem('ni-desk-case'); } catch(e){}
   save(); strip(); render();
   const el = $('fromcourse'); if (el) el.scrollIntoView({block:'nearest'});
 }
@@ -9252,9 +10858,26 @@ const SAMPLE_OF = { demo:['Demo','a showroom property, not one of yours'],
                     lesson:['From a lesson','the course\u2019s worked example'] };
 const sampleChip = k => SAMPLE_OF[k]
   ? `<span class="smp" title="${SAMPLE_OF[k][1]}">${SAMPLE_OF[k][0]}</span>` : '';
+/* Everything a sheet can hold that a person would be sorry to lose. This used
+   to check the money fields, the address and the comps — and nothing else, so
+   a sheet carrying a walked condition panel and a PAID photo condition read
+   counted as blank. "+ New sheet" then wrote over it in place rather than
+   opening a new one, and the read was gone: money spent, artefact destroyed,
+   by a button labelled as harmless. Every store the sheet owns is named here.
+   Adding a store and not adding it here is the bug. */
 const propHasWork = p => !!p && (
   [...FIELDS,...LOANFIELDS].some(f => String(p.raw[f.id]||'').replace(/[^0-9.]/g,'') !== '')
-  || String(p.addr||'').trim() !== '' || (p.comps||[]).length > 0);
+  || String(p.addr||'').trim() !== ''
+  || String(p.name||'').trim() !== ''
+  || (p.comps||[]).length > 0
+  /* a walked condition panel is work, and it is what drives the repair figure */
+  || Object.values(p.sys || {}).some(v => +v > 0)
+  /* the photo read is bought with money and cannot be recreated for free */
+  || !!p.read
+  /* the subject numbers a comparison is adjusted against */
+  || Object.values(p.subj || {}).some(v => String(v||'').trim() !== '')
+  /* a chosen exit, a named counterparty, a financing pick, a drafted letter */
+  || !!p.offerExit || String(p.toName||'').trim() !== '' || !!p.fin);
 
 /* ── "+ NEW SHEET" MEANS A NEW SHEET ──────────────────────────────────────
    It used to blank the OPEN property in place. On an account with one
@@ -9266,12 +10889,27 @@ const propHasWork = p => !!p && (
    in which case there is nothing to preserve and breeding empty sheets would
    just clutter the rail. */
 function newSheet(){
-  DEMO = null;
+  /* `DEMO = null` used to be the first statement here, and save() the fourth.
+     Those three tokens cost somebody their sheet: leaving a demo by pressing
+     "+ New sheet" cleared the flag while S still held the DEMO's name, address
+     and figures, so the very next save() copied the showroom furniture over
+     the real property and synced it to every device.
+
+     The preserving save() exists to flush the CURRENT sheet before we move
+     off it. While a demo is up, S is not the current sheet — the prop already
+     holds the real data untouched, which is the whole reason demos are safe —
+     so there is nothing to flush and the save is not merely unnecessary, it is
+     the bug. loadInto() clears the flag on the way into the new prop. */
+  const inDemo = !!DEMO;
   const cur = P.props[P.active];
   if (propHasWork(cur) && P.props.length < 40){
-    save();
+    if (!inDemo) save();
     P.props.push(newProp());
-    loadInto(P.props.length - 1);
+    loadInto(P.props.length - 1);      // clears DEMO
+  } else if (inDemo){
+    /* nothing worth keeping on the open prop, so the demo lands on it — but
+       it must still stop being a demo before clearCase() writes anything */
+    DEMO = null;
   }
   clearCase();
 }
@@ -9281,7 +10919,7 @@ function clearCase(){
   S.addr=''; S.name=''; S.raw={}; S.est={}; S.prov={}; S.unc={}; S.sit='unknown'; S.sitPc=0;
   S.userToggled=false; S.openId=null; S.noAsk=false; CASE=null; pending=null; dropHash();
   S.comps=[]; S.subj={sqft:'',beds:'',baths:''}; S.compAdj={}; S.compOpen=false;
-  S.repairsOwn=false; DEMO=null; S.sample=null; S.offerExit=null; S.toName=''; S.fin=null; S.read=null;
+  S.repairsOwn=false; DEMO=null; S.sample=null; S.caseLabel=null; S.offerExit=null; S.toName=''; S.fin=null; S.read=null;
   S.sys = {};
   LINES.forEach(l => S.sys[l.id] = 0);
   try { localStorage.removeItem('ni-desk-case'); } catch(e){}
@@ -9296,8 +10934,12 @@ function clearCase(){
    both ask, because a printed sheet outlives the tab it was made in */
 function caseLabel(){
   if (DEMO && DEMOS[DEMO]) return 'demo:'+DEMO;
-  if (CASE) return CASE.from + (CASE.title?' — '+CASE.title:'');
-  try { return localStorage.getItem('ni-desk-case'); } catch(e){ return null; }
+  /* CASE is a global and so was the localStorage fallback under it, which is
+     how a real property — and the lender packet printed from it — ended up
+     wearing "From a lesson · the course's worked example". The label belongs
+     to the sheet it describes, so it is read off the sheet. CASE is kept only
+     as the in-flight value for the sheet being loaded right now. */
+  return S.caseLabel || null;
 }
 function strip(){
   const el = $('fromcourse'); if (!el) return;
@@ -9449,10 +11091,20 @@ const demoKey = ((location.hash||'').match(/^#demo=([a-z]{3,12})$/i)||[])[1];
 /* #open=<n> — the hub's property rows link here. Reopening your own work is
    free and always will be; charging for it would be charging for the door. */
 const openIdx = ((location.hash||'').match(/^#open=(\d{1,2})$/)||[])[1];
+/* The hashchange handler below routes four panels — #compare, #buybox,
+   #letter and #bulk — and this boot router only ever knew the first two. So
+   the panels worked when you clicked to them and vanished when you RELOADED,
+   which is the moment a person is most likely to be sharing a link or coming
+   back to something. Two routers over one set of routes is how they drift;
+   they are the same list now. */
 if ((location.hash||'').toLowerCase() === '#compare'){
   showCompare();
 } else if ((location.hash||'').toLowerCase() === '#buybox'){
   showBuyBox();
+} else if ((location.hash||'').toLowerCase() === '#letter'){
+  showLetters();
+} else if ((location.hash||'').toLowerCase() === '#bulk'){
+  showBulk();
 } else if ((location.hash||'').toLowerCase() === '#new'){
   newSheet();
   showStep('property', {scroll:false});

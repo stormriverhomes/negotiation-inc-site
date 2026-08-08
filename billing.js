@@ -609,6 +609,15 @@ const CAP_DEFAULT = {
   ailetter:   60,   // the other side of the table
   aiintake:   80,   // reading the paperwork — cheap per call, and the one
                     // people will reach for on every property they look at
+  /* ── THE ONE METER THAT IS NOT A MODEL CALL ────────────────────────────
+     Every other feature here bills tokens. This one bills a third party per
+     REQUEST, on a plan with a fixed monthly allowance and an overage rate, so
+     the cap is doing a different job: it is not rationing our compute, it is
+     bounding a bill somebody else sends us. Forty a month is two comp pulls a
+     working day, which is more than anybody underwriting properly needs, and
+     on the worst tier it is eight dollars against a hundred-and-twenty-nine
+     dollar subscription. */
+  aicomps:    40,   // comps pulled and scored, on our key
 };
 export const FEATURES = Object.keys(CAP_DEFAULT);
 /* ── AND A CAP OF ZERO MEANT UNLIMITED ─────────────────────────────────────
@@ -691,9 +700,27 @@ export async function countUse(uid, feature, cap){
   } catch(e){ return null; }
 }
 
+/* ── WHICH MONEY IS THIS ───────────────────────────────────────────────────
+   `pay: on` said the checkout was wired. It did not say whether it was wired
+   to REAL money, and those are different launch states: a site live on test
+   keys takes no card anybody owns, and the failure is invisible from the
+   outside — every button works, every redirect lands, and nothing arrives.
+
+   The mode is read off the key's PREFIX, which is the one part of a Stripe
+   secret that is not secret: sk_test_ / sk_live_ (rk_ for restricted keys).
+   The key itself is never read, logged, or returned — only which of the two
+   worlds it belongs to. */
+const stripeMode = () => {
+  const k = String(process.env.STRIPE_SECRET || '');
+  if (!k) return 'unset';
+  if (/^(sk|rk)_live_/.test(k)) return 'live';
+  if (/^(sk|rk)_test_/.test(k)) return 'test';
+  return 'unknown';
+};
 export const billingState = () => ({
   pay: PAY_ON ? 'on' : 'off',
   hook: HOOK_ON ? 'on' : 'off',
+  mode: stripeMode(),
   plans: Object.entries(PRICE).filter(([, v]) => v).map(([k]) => k),
   trialDays: TRIAL_DAYS,
 });

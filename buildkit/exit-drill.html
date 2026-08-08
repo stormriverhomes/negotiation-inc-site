@@ -1,0 +1,854 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Exit Drill · The Arcade · Negotiation Inc</title>
+<meta name="description" content="Sixty seconds, one house at a time: flip it, hold it, take the payments, run the listing, or walk. The desk's own arithmetic, played as a reflex.">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   EXIT DRILL — cabinet 03.
+
+   The drill asks the desk's question at the desk's speed limit removed: which
+   exit fits THIS house and THIS seller. It runs the desk's arithmetic with
+   every dial at its default, and it quizzes the FIRST CUT — flip, hold,
+   subto, novation, walk — because that is what the ranking actually decides.
+   The wholesale is the flip's read assigned to someone else's money; the
+   BRRRR is the hold's read with a refinance; the wholetail is a flip that
+   stops early. Variants are role choices inside a read, and the verdicts say
+   so. drill-verify.mjs holds this file's answers equal to desk.html's own
+   ranking, so the game cannot drift from the tool it advertises.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --ink:#23201c; --deep:#0d1420; --panel:#141c2b; --edge:#223047; --well:#101825;
+  --txt:#e8e2d4; --dim:#aeb8c8; --faint:#8b98ac; --gold:#a8873a; --blue:#3a78e8;
+  --green:#3fa06a; --red:#d96a5a;
+  --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif; /* no typewriter in the software */
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:var(--deep)}
+body{font-family:var(--sans);color:var(--txt);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.02em;line-height:1.1}
+a{color:#8fb4ff}
+.wrap{max-width:1020px;margin:0 auto;padding:0 26px}
+.ftlegal{border-top:1px solid var(--edge);color:#8794aa;margin-top:34px;padding:18px 0 40px;
+ font-size:12.5px;opacity:.72}
+.ftlegal a{color:inherit;text-decoration:none;margin-right:15px;border-bottom:1px solid transparent}
+.ftlegal a:hover{opacity:1;border-bottom-color:currentColor}
+
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#6f7d94}
+header{border-bottom:1px solid var(--edge);background:rgba(13,20,32,.9)}
+/* `.mast` and `.top` are both `class="wrap …"`. The padding SHORTHAND zeroes
+   the page gutter that `.wrap` supplies, so on every phone this game's
+   headline, its explanation and its whole scoreboard sat flush against both
+   edges of the glass. Vertical rhythm on its own axis, always. */
+.mast{display:flex;justify-content:space-between;align-items:center;gap:14px 18px;
+ padding-top:14px;padding-bottom:14px;flex-wrap:wrap}
+.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:var(--txt)}
+.mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
+.mark .inc{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--gold)}
+.mark:hover .nm{color:#fff}
+/* Every item in this row is optically centred on the same line. The account
+   chip carries a border and more padding than the plain links, so without an
+   explicit align-items the flex row stretched them to different heights and the
+   chip sat a pixel or two low — the kind of drift that reads as carelessness
+   long before anybody can name it. */
+.masknav{display:flex;align-items:center;gap:18px;font-size:14px;flex-wrap:wrap}
+.masknav a{display:inline-flex;align-items:center;padding:6px 2px;line-height:1;color:var(--dim);text-decoration:none}.masknav a:hover{color:#fff}
+
+.top{padding-top:34px;padding-bottom:6px;display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}
+h1{font-size:40px}
+.lede{font-size:15.5px;color:var(--dim);margin-top:8px;max-width:52ch}
+.tally{display:flex;gap:22px;text-align:right}
+.tally .t{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#6f7d94}
+.tally .v{font-family:var(--serif);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+
+.stage{margin:22px 0 60px;background:var(--panel);border:1px solid var(--edge);border-radius:12px;overflow:hidden}
+.clockrail{height:10px;background:var(--well);position:relative;overflow:hidden}
+.clockrail i{position:absolute;inset:0;transform-origin:left;background:var(--gold);transition:none}
+.clockrail.low i{background:var(--red)}
+.deck{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);min-height:430px}
+@media (max-width:840px){ .deck{grid-template-columns:1fr} h1{font-size:32px} }
+
+.house{border-right:1px solid var(--edge);padding:22px;display:flex;flex-direction:column;gap:14px;background:var(--well)}
+@media (max-width:840px){ .house{border-right:0;border-bottom:1px solid var(--edge)} }
+/* on a phone the picture is flavour and the buttons are the game — the art
+   shrinks so the first decision is one thumb-flick away, not two */
+@media (max-width:700px){
+  .top{padding-top:18px}
+  h1{font-size:34px}
+  .house{padding:14px 16px;gap:9px}
+  .house canvas{max-width:200px}
+  .sellerline{min-height:0}
+  .fig .fv{font-size:18px}
+  .play{padding:14px 16px}
+}
+.house canvas{width:100%;max-width:340px;margin:0 auto;image-rendering:pixelated;border:1px solid var(--edge);background:#0f1622}
+.sellerline{font-size:14.5px;color:var(--dim);line-height:1.5;min-height:3.2em}
+.sellerline b{color:var(--txt);font-weight:650}
+.figs{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}
+.fig .fl{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#6f7d94}
+.fig .fv{font-family:var(--serif);font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.fig .fv small{font-size:12px;color:var(--faint);font-weight:400}
+
+.play{padding:22px;display:flex;flex-direction:column;gap:12px}
+.prompt{font-size:13px;color:var(--faint)}
+.prompt b{color:var(--txt)}
+.answers{display:grid;gap:9px}
+/* the answer buttons are the only thing on this page you touch, and they were
+   the only square object on a page whose every other control has a 10px
+   corner — added later than the rest and never given the radius */
+.ans{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:12px;text-align:left;
+ font-family:inherit;font-size:15.5px;font-weight:650;color:var(--txt);cursor:pointer;
+ background:#182234;border:1.5px solid #2b3850;padding:11px 14px;border-radius:10px}
+.ans:hover{border-color:#5a92ff;background:#1b2740}
+.ans:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.ans .key{display:inline-grid;place-items:center;width:24px;height:24px;border:1px solid #39435a;
+ font-size:12px;color:var(--faint)}
+.ans .hint{font-size:12px;font-weight:400;color:var(--faint)}
+/* This floor used to sit BELOW the touch block, at the same specificity and
+   later in the file — so it silently beat the 52px written for phones, and
+   the one rule on this page authored for a thumb never applied. Base first,
+   then the override. */
+.ans{min-height:48px}
+/* a phone has no number row and no hover: the key chips are desk furniture,
+   and a thumb wants more than a mouse does */
+@media (hover:none){
+  .ans{grid-template-columns:1fr auto;min-height:52px}
+  .ans .key{display:none}
+}
+.below{margin-top:26px}
+.below .btnrow{margin-top:14px}
+.ans[disabled]{opacity:.55;cursor:default}
+.ans.shut{opacity:.4;border-style:dashed;border-color:#39435a}
+.ans.shut .hint{color:#e8cf72;opacity:.8}
+.ans.right{border-color:var(--green);background:rgba(63,160,106,.12)}
+.ans.wrong{border-color:var(--red);background:rgba(217,106,90,.12)}
+
+.verdict{border:1px solid var(--edge);background:var(--well);padding:13px 15px;font-size:14px;color:var(--dim);line-height:1.55}
+.verdict .vh{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px}
+.verdict.right .vh{color:var(--green)} .verdict.wrong .vh{color:var(--red)}
+.verdict b{color:var(--txt);font-weight:650}
+.verdict .go{margin-top:8px;font-size:12.5px;color:var(--faint)}
+/* the fee rides in the verdict header, beside the points, because points are
+   a game and the fee is the part that follows you out of the cabinet */
+.feetag{float:right;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:none;
+  color:var(--green);border:1px solid var(--green);padding:1px 6px;margin-left:10px}
+.feetag.dn{color:var(--red);border-color:var(--red)}
+.tally .v.m{font-size:21px} .tally .v.up{color:var(--green)} .tally .v.dn{color:var(--red)}
+.statrow .v.up{color:var(--green)} .statrow .v.dn{color:var(--red)}
+/* the ledger: every exit in its own units, never averaged, never "fit points" */
+.ldg{margin-top:9px;border-top:1px solid var(--edge)}
+.lr{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:8px 0;border-bottom:1px solid var(--edge);align-items:baseline}
+.lr:last-child{border-bottom:none}
+.ln{font-weight:650;color:var(--txt);font-size:13.5px}
+.lv{font-variant-numeric:tabular-nums;font-weight:700;font-size:14px;color:var(--faint);text-align:right;white-space:nowrap}
+.lv.good{color:var(--green)}
+.lv i{font-style:normal;font-weight:400;font-size:11.5px;color:var(--faint);letter-spacing:.02em}
+.lw{grid-column:1/-1;font-size:12.5px;color:var(--dim);line-height:1.45}
+.lt{display:inline-block;margin-left:7px;font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  padding:1px 5px;border:1px solid var(--edge);color:var(--faint);vertical-align:1px}
+.lt.best{color:var(--green);border-color:var(--green)}
+.lt.you{color:var(--txt)}
+.lnone{margin-top:2px;font-size:13px;color:var(--dim)}
+
+.card{padding:34px 26px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+.card h2{font-size:34px}
+.card .big{font-family:var(--serif);font-size:64px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.card .grade{font-size:14px;color:var(--dim);max-width:46ch}
+.card .grade b{color:var(--txt)}
+.statrow{display:flex;gap:26px;justify-content:center;flex-wrap:wrap}
+.statrow .s .t{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#6f7d94}
+.statrow .s .v{font-family:var(--serif);font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.btn{border-radius:10px;display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:14.5px;font-weight:650;
+ padding:10px 16px;border:1.5px solid #39435a;background:transparent;color:#cdd6e4;text-decoration:none;cursor:pointer}
+.btn:hover{border-color:#fff;color:#fff}
+.btn.p{background:#3570d8;border-color:#3570d8;color:#fff}   /* not --blue: white on it was 4.17:1 */
+.btn.p:hover{background:#5a92ff;border-color:#5a92ff}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+/* ── the start screen ─────────────────────────────────────────────────────
+   The cabinet used to open mid-run: a stranger's first sixty seconds were
+   spent working out what the buttons meant, and the score they got was a
+   score for reading a rulebook under a clock. Sixty seconds is short enough
+   that the rules have to be free. */
+.start{padding:30px 28px 32px;display:grid;gap:22px}
+.start .sh{display:grid;gap:9px;max-width:60ch}
+.start h2{font-family:var(--serif);font-size:29px;font-weight:700;letter-spacing:-.02em}
+.start .sub{font-size:15.5px;color:var(--dim);line-height:1.55}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.rule{border:1px solid #2b3850;background:#151f31;padding:13px 15px;display:grid;gap:5px;border-radius:10px}
+.rule .n{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#5b8dee}
+.rule .t{font-size:14.5px;font-weight:650;color:var(--txt)}
+.rule .d{font-size:12.5px;color:var(--faint);line-height:1.45}
+.ladder{display:grid;gap:5px}
+.ladder .lh{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#6f7d94}
+.rk{display:grid;grid-template-columns:74px 128px 1fr;gap:14px;align-items:baseline;
+ padding:8px 12px;border-left:2px solid #2b3850;font-size:13px}
+.rk .sc{font-variant-numeric:tabular-nums;color:var(--faint);font-size:12px}
+.rk .nm{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--dim)}
+.rk .lo{color:var(--faint);line-height:1.45}
+.rk.have{border-left-color:var(--green)} .rk.have .nm{color:var(--txt)}
+.rk.now{border-left-color:var(--gold,#e8cf72);background:rgba(232,207,114,.07)}
+.rk.now .nm{color:var(--gold,#e8cf72)}
+.rk.now .sc{color:var(--gold,#e8cf72)}
+@media(max-width:640px){ .rk{grid-template-columns:64px 1fr;row-gap:2px} .rk .lo{grid-column:1/-1} }
+/* the position line: the one thing on the card that is about YOU */
+.posline{font-size:13.5px;line-height:1.5;color:#e8cf72;background:rgba(232,207,114,.09);
+ border-left:2px solid #e8cf72;padding:9px 12px;margin-top:2px}
+.posline b{color:#f4e4ad;font-weight:700}
+.addr{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--txt);letter-spacing:-.01em}
+.tierpip{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.finefoot{border-top:1px solid var(--edge);padding:16px 22px;font-size:12.5px;color:#6f7d94;line-height:1.5}
+.finefoot b{color:var(--faint)}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="wrap mast">
+  <a class="mark" href="index.html" title="Negotiation Inc"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+  <nav class="masknav">
+   <a href="arcade.html">The floor</a>
+      <a href="desk.html">The desk</a>
+   <a href="office.html">Your desk</a>
+  </nav>
+ </div>
+</header>
+
+<div class="wrap top">
+ <div>
+  <div class="eyebrow">Cabinet 03 · sixty seconds</div>
+  <h1>Exit Drill</h1>
+  <p class="lede">Five doors at first, eight by the end — and a line about <b>your</b> position
+   that closes some of them.</p>
+ </div>
+ <div class="tally">
+  <div><div class="t">Score</div><div class="v" id="score">0</div></div>
+  <div><div class="t">Streak</div><div class="v" id="streak">0</div></div>
+  <div><div class="t">Best</div><div class="v" id="best">—</div></div>
+  <div><div class="t">Bankroll</div><div class="v m" id="bank">—</div></div>
+ </div>
+</div>
+
+<div class="wrap">
+ <div class="stage">
+  <div class="clockrail hidden" id="rail"><i id="clock"></i></div>
+
+
+  <div class="deck hidden" id="deck">
+   <div class="house">
+    <canvas id="px" width="96" height="64" aria-label="A pixel drawing of the property"></canvas>
+    <div class="addr" id="addr"></div>
+    <div class="sellerline" id="seller"></div>
+    <div id="pos"></div>
+    <div class="figs" id="figs"></div>
+   </div>
+   <div class="play">
+    <div class="prompt" id="prompt"><b>Pick the exit that pays.</b></div>
+    <div class="answers" id="answers"></div>
+    <div class="verdict hidden" id="verdict"></div>
+   </div>
+  </div>
+
+  <div class="card hidden" id="card"></div>
+
+  <div class="below" id="below"></div>
+
+  <div class="finefoot">Same arithmetic as the desk, dials at their defaults — a 7.1% rate, 75% LTV,
+   a 1.25 DSCR floor, 8% selling costs. <b>All eight exits are in here now</b>, and three of them —
+   the wholesale, the BRRRR and the wholetail — are only ever the right answer once your own
+   position rules the others out. That is not a game mechanic; it is the reason those three exits
+   exist at all.</div>
+ </div>
+</div>
+
+<script>
+/* ── the desk's arithmetic, dials at defaults ────────────────────────────────
+   Lifted from desk.html with DEFAULTS applied (rate 7.1, ltv 75, dscr 1.25,
+   sell 8, hold 6mo, profit 8%, opex 40%). drill-verify.mjs feeds identical
+   deals to the real desk and to this file and fails the build if the two ever
+   rank differently — that is the enforcement behind "same arithmetic". */
+/* the prompt mentions number keys only where number keys exist */
+const FINEPOINTER = !!(window.matchMedia && matchMedia('(hover:hover) and (pointer:fine)').matches);
+const MPD = (r => { const m=r/12, k=Math.pow(1+m,360); return m*k/(k-1); })(0.071);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const SIT_MOD = {   // identical to the desk's, line for line
+ wholesale:{ urgent:12, motivated:6, nohurry:-8, behind:6 },
+ wholetail:{ urgent:6, estate:6 },
+ flip:{ motivated:4 },
+ novation:{ nohurry:6, estate:8, urgent:-6 },
+ subto:{ behind:14, estate:-4 },
+};
+function rank(d){
+  const out=[];
+  const gapFit=(id,ceil)=>{ const base=clamp(50+220*(ceil-d.ask)/d.ask,4,96);
+    return { id, ceil, fit: Math.round(clamp(base+((SIT_MOD[id]||{})[d.sit]||0),2,98)) }; };
+  out.push(gapFit('wholesale', 0.70*d.arv - d.rep - 8000));
+  { const sell=.08*d.arv, hold=Math.max(12000,.036*d.arv), target=Math.max(15000,.08*d.arv);
+    out.push(gapFit('flip', d.arv-d.rep-sell-hold-target)); }
+  if (d.rep <= 0.08*d.arv){                    // the desk's gate: light work only
+    const asIs = d.arv - d.rep*1.9;
+    out.push(gapFit('wholetail', asIs*0.92 - 15000 - 0.4*d.rep - 3000)); }
+  { const pay=d.rent*.60/1.25, price=pay/MPD/.75; out.push(gapFit('hold', price)); }
+  out.push(gapFit('brrrr', 0.75*d.arv - d.rep - 7000));
+  if (d.piti != null){ const spread=d.rent*.82-d.piti;
+    out.push({ id:'subto', spread, fit: Math.round(clamp(clamp(spread/4,4,96)+((SIT_MOD.subto||{})[d.sit]||0),2,98)) }); }
+  if (d.rep <= 0.10*d.arv){                    // the desk's gate: no retail listing on a non-retail house
+    const check=d.arv*(1-.08-.005)-d.ask-Math.max(8000,d.rep)-25*95;
+    out.push({ id:'novation', check, fit: Math.round(clamp(clamp(check/250,4,96)+((SIT_MOD.novation||{})[d.sit]||0),2,98)) }); }
+  out.sort((a,b)=>b.fit-a.fit);
+  return out;
+}
+const WALK_UNDER = 25;                       // best fit under this = nothing fits = walk
+
+/* ── YOUR POSITION ─────────────────────────────────────────────────────────
+   The drill used to explain, in a footnote, that the wholesale and the BRRRR
+   live "inside" the flip and the hold. That was true of the arithmetic and
+   wrong about the job: the flip's ceiling is always above the wholesale's, so
+   on a pure fit ranking the wholesale can never be the right answer — and yet
+   thousands of people wholesale for a living.
+
+   The missing variable was never a number on the house. It is what YOU can do.
+   No money and no lender, and every exit needing a down payment is closed to
+   you; the wholesale is not second best, it is the only door. Building a
+   portfolio and refusing to sell, and the flip is closed by choice; that is
+   the entire reason the BRRRR exists.
+
+   So the harder rounds deal a position with the house, and the answer is the
+   best fit AMONG THE EXITS YOU CAN ACTUALLY TAKE. Same arithmetic, one honest
+   constraint on top — which is how the real decision is made. */
+const POS = {
+ funded: { allows:null, line:'' },
+ nocash: { allows:['wholesale','subto','novation'],
+   line:'<b>Your position:</b> $6,000 to your name and no lender. Anything with a down payment is closed to you.' },
+ keeper: { allows:['hold','brrrr','subto'],
+   line:'<b>Your position:</b> you are building a rental portfolio. This one is not for sale, whatever it would fetch.' },
+};
+const allowsOf = d => (POS[d.pos] || POS.funded).allows;
+function answerFor(d){
+  const allow = allowsOf(d);
+  const R = rank(d).filter(x => !allow || allow.indexOf(x.id) >= 0);
+  return (!R.length || R[0].fit < WALK_UNDER) ? 'walk' : R[0].id;
+}
+
+/* ── deals ──────────────────────────────────────────────────────────────────
+   Shapes are targeted, then honestly verified: a candidate only ships if the
+   intended answer wins the ranking above by at least 12 fit points (or, for
+   walk, if every fit is under 25 with room to spare). No deal has two right
+   answers, because a drill that argues with its own answer key trains doubt. */
+let seed = (typeof window!=='undefined' && window.__seed) || (Date.now()>>>0);
+const rnd = () => { seed=Math.imul(seed^seed>>>16,0x45d9f3b); seed=Math.imul(seed^seed>>>16,0x45d9f3b);
+  seed^=seed>>>16; return (seed>>>0)/4294967296; };
+const r500=v=>Math.round(v/500)*500, r25=v=>Math.round(v/25)*25;
+const SHAPES = ['flip','hold','subto','novation','walk'];
+const SHAPES_2 = SHAPES.concat(['wholetail']);
+const SHAPES_3 = SHAPES_2.concat(['wholesale','brrrr']);
+/* Sixty seconds is twelve to sixteen houses, and a drill that recycles four
+   seller lines inside one run stops being a read and becomes a lookup table.
+   Streets, numbers and a much deeper bench of sellers — every line still says
+   exactly one thing about motivation, because that is the variable. */
+const STREETS = ['Sylvan','Peach Tree','Marigold','Cottonwood','Bellview','Harlan','Ridgeway',
+ 'Pine Hollow','Ashby','Kestrel','Dunmore','Willowbank','Cardinal','Foxglove','Tanner',
+ 'Old Mill','Brightwater','Quarry','Halloway','Sable Creek','Winslow','Underhill'];
+const SUFFIX = ['Rd','St','Ave','Ct','Ln','Way','Terr','Dr'];
+const DIRS = ['','',' SW',' NE',' N',' E'];
+const addressOf = () => (100 + Math.floor(rnd()*8900)) + ' ' +
+  STREETS[Math.floor(rnd()*STREETS.length)] + ' ' + SUFFIX[Math.floor(rnd()*SUFFIX.length)] +
+  DIRS[Math.floor(rnd()*DIRS.length)];
+/* ── the seller, decoupled from the answer ──────────────────────────────────
+   This used to be one bucket of lines PER ANSWER. Every "behind on payments"
+   line lived in the subject-to bucket and nowhere else, so the drill quietly
+   became a lookup table: read the adjective, press the matching button, never
+   look at a number. That is not reading a deal, it is matching a word.
+
+   Now the seller line is built from two independent halves:
+     · WHY they are selling — keyed to the situation, which the arithmetic
+       already prices through SIT_MOD, and which is now drawn freely;
+     · WHAT the house is — keyed to the repair figure the generator actually
+       dealt, so the prose can never describe a wreck the numbers call pristine.
+
+   The 12-point margin in deal() still guarantees exactly one right answer.
+   What changed is that "behind on payments" can now sit on a flip, a walk or
+   a wholesale, and the player has to look at the money to know which. */
+const SIT_LINES = {
+ urgent: ['<b>Needs it gone yesterday.</b> A job starts across the state on the first.',
+          '<b>Divorce, and neither of them wants it.</b> Two signatures and one deadline.',
+          '<b>Moving into care next month.</b> The family wants it closed this quarter.',
+          '<b>Relocating in six weeks.</b> Priced to be gone, not to be admired.'],
+ motivated:['<b>Motivated.</b> They have already made an offer on the next place.',
+          '<b>Code letter on the door.</b> They want it to be somebody else’s problem by month end.',
+          '<b>Tired landlord.</b> The last tenant left and they have decided they are done.',
+          '<b>Out-of-state owner who has never seen it.</b> The property manager quit; so have they.'],
+ nohurry:['<b>No hurry, and priced like it.</b> They read a headline about the market once.',
+          '<b>Zillow says.</b> They have said “Zillow says” four times and it is not a negotiation yet.',
+          '<b>Selling three of eleven.</b> They know their numbers to the dollar and will wait.',
+          '<b>Already listed once and withdrew it.</b> The agent wanted a price cut; they wanted a plan.',
+          '<b>Will wait for the right buyer.</b> They can, and they will.'],
+ behind: ['<b>Behind on payments.</b> Three months of arrears on a loan at a rate nobody is getting back.',
+          '<b>Two payments down and the letters have started.</b> A 2020 loan they would not qualify for today.',
+          '<b>Lost the job in March.</b> The payment is the problem, not the plan.',
+          '<b>Behind on taxes and the auction date is set.</b> Whoever moves first gets it.',
+          '<b>Moved for work and could not sell.</b> Paying the shortfall every month, and done with it.'],
+ estate: ['<b>An estate.</b> The executor is two states away and wants a date and a clean wire.',
+          '<b>Probate, three siblings, one number.</b> They will not haggle and will not do the work.',
+          '<b>Trustee sale, clean title.</b> Nobody involved wants to manage a renovation.',
+          '<b>An estate that has already been emptied.</b> Every decision now is a money decision.'],
+ unknown:['<b>Unread.</b> Nobody has said why, and nobody has said no.',
+          '<b>Empty two years.</b> The mail was forwarded and never chased.',
+          '<b>Inherited, and already rented.</b> The tenant has been there nine years.',
+          '<b>Priced off the neighbour’s sale.</b> They have not said what they will take.'],
+};
+/* What the house IS — chosen by the repair figure the generator dealt, so the
+   description and the arithmetic can never disagree. */
+const COND_LINES = [
+ [0.030,['Shows well; the kitchen is simply forty years old.','Immaculate for its age and dated in every direction.',
+         'Carpets, paint and a lockbox is close to the whole job.','Clean house, dated everything, no structural anything.']],
+ [0.080,['Dated but sound — a weekend of paint and a long list of small things.',
+         'Cosmetically tired, mechanically fine.','A tidy house with an ugly bathroom.',
+         'Nothing broken, and nothing new either.']],
+ [0.140,['Deferred maintenance with a paying tenant; the rent roll says more than the photos.',
+         'The roof explains the price.','Solid bones, dead systems.',
+         'A landlord special — everything works, nothing is nice.']],
+ [9.999,['The furnace is out and the roof is patched.',
+         'Insurance paid out and they never fixed it; the ceiling is still open.',
+         'Fire in the back bedroom last winter — boarded, insured, and beyond them.',
+         'Half-finished: studs, a permit, and a lot of regret.']],
+];
+const SITS = Object.keys(SIT_LINES);
+function sellerFor(d){
+  const why = SIT_LINES[d.sit][Math.floor(rnd()*SIT_LINES[d.sit].length)];
+  const band = COND_LINES.find(x => d.rep / d.arv <= x[0]) || COND_LINES[COND_LINES.length-1];
+  return why + ' ' + band[1][Math.floor(rnd()*band[1].length)];
+}
+function candidate(shape){
+  const arv = r500(150000 + rnd()*330000);
+  const d = { arv, sit:'unknown', piti:null };
+  /* Each recipe leans on the arithmetic's own gates so one answer wins alone:
+     heavy repairs close the novation and wholetail; a thin rent closes the
+     hold; a near-retail ask closes everything except the loan already on the
+     house. The verifier holds every shipped deal to a 12-point fit margin. */
+  if (shape==='flip'){ d.rep=r500(arv*(0.13+rnd()*0.06)); d.ask=r500(arv*(0.42+rnd()*0.1)); d.rent=r25(arv*(0.0042+rnd()*0.001)); }
+  if (shape==='hold'){ d.rep=r500(arv*(0.11+rnd()*0.03)); d.ask=r500(arv*(0.60+rnd()*0.06)); d.rent=r25(arv*(0.0080+rnd()*0.0014)); }
+  if (shape==='subto'){ d.rep=r500(arv*(0.02+rnd()*0.06)); d.ask=r500(arv*(0.88+rnd()*0.1)); d.rent=r25(arv*(0.0062+rnd()*0.0016));
+    d.piti=r25(d.rent*(0.38+rnd()*0.18)); d.balance=r500(d.ask*(0.82+rnd()*0.1)); }
+  if (shape==='novation'){ d.rep=r500(arv*(0.01+rnd()*0.025)); d.ask=r500(arv*(0.68+rnd()*0.1)); d.rent=r25(arv*(0.0048+rnd()*0.0012)); }
+  if (shape==='walk'){ d.rep=r500(arv*(0.14+rnd()*0.1)); d.ask=r500(arv*(1.02+rnd()*0.16)); d.rent=r25(arv*(0.0038+rnd()*0.0012)); }
+  /* The three exits that only exist because of your position. Each recipe puts
+     the house squarely in the window where that exit is the honest read:
+       wholetail — nearly nothing to do, priced close enough to retail that the
+                   novation's cheque disappears and tidy-and-relist is all that
+                   is left;
+       wholesale — repairs past the retail gates, and no capital, so the only
+                   door is somebody else's money;
+       brrrr     — rentable stock with real work in it, kept rather than sold. */
+  if (shape==='wholetail'){ d.rep=r500(arv*(0.012+rnd()*0.022)); d.ask=r500(arv*(0.845+rnd()*0.035));
+    d.rent=r25(arv*(0.0036+rnd()*0.0008)); d.pos='funded'; }
+  if (shape==='wholesale'){ d.rep=r500(arv*(0.13+rnd()*0.07)); d.ask=r500(arv*(0.40+rnd()*0.10));
+    d.rent=r25(arv*(0.0040+rnd()*0.0012)); d.pos='nocash'; }
+  if (shape==='brrrr'){ d.rep=r500(arv*(0.10+rnd()*0.08)); d.ask=r500(arv*(0.44+rnd()*0.10));
+    d.rent=r25(arv*(0.0040+rnd()*0.0010)); d.pos='keeper'; }
+  /* The situation is drawn FREELY, not from the answer's own bucket. Most
+     draws will be rejected by the margin check below — which is the point:
+     what survives is a house where the numbers, not the adjective, decide. */
+  d.sit = SITS[Math.floor(rnd()*SITS.length)];
+  d.sellerHtml = sellerFor(d);
+  d.shape = shape;
+  d.pos = d.pos || 'funded';
+  d.addr = addressOf();
+  return d;
+}
+function deal(shape){
+  for (let t=0;t<900;t++){
+    const d = candidate(shape);
+    const allow = allowsOf(d);
+    const R = rank(d).filter(x => !allow || allow.indexOf(x.id) >= 0);
+    const top=R[0], second=R[1];
+    if (shape==='walk'){ if (top && top.fit <= WALK_UNDER-6) { d.rank=R; return d; } continue; }
+    if (top && top.id===shape && top.fit>=WALK_UNDER+10 && (top.fit-(second?second.fit:0))>=12){ d.rank=R; return d; }
+  }
+  if (window.__strict) throw new Error('generator exhausted 900 tries for '+shape);
+  return deal(SHAPES[Math.floor(rnd()*4)]);   // a stubborn shape yields to a workable one
+}
+
+/* ── the pixel house ────────────────────────────────────────────────────────
+   Drawn, not fetched: the arcade draws its own world everywhere else, and the
+   drill's houses vary with the deal — boarded windows past 15% repairs, a
+   patched roof past 9%, weeds past 5%. The tells are the data, drawn. */
+function drawHouse(cv,d){
+  const g=cv.getContext('2d'); const W=cv.width,H=cv.height;
+  const rat=d.rep/d.arv;
+  const hue=[['#1b2b45','#223760'],['#25203c','#332a52'],['#1c3130','#264441']][Math.floor(rnd()*3)];
+  g.fillStyle=hue[0]; g.fillRect(0,0,W,H);                    // sky
+  g.fillStyle=hue[1]; for(let i=0;i<28;i++) g.fillRect(Math.floor(rnd()*W),Math.floor(rnd()*(H-22)),1,1); // stars
+  g.fillStyle='#2a2620'; g.fillRect(0,H-14,W,14);             // ground
+  const bx=18,by=H-38,bw=60,bh=24;
+  g.fillStyle=rat>.15?'#5c5346':'#7a6f5c'; g.fillRect(bx,by,bw,bh);          // walls, tired when heavy
+  g.fillStyle=rat>.09?'#4a4038':'#6b4a3a';                                    // roof, patched when worn
+  for(let i=0;i<=6;i++) g.fillRect(bx-4+i,by-8+ (6-i),bw+8-2*i,1+(i<6?1:0));
+  if (rat>.09){ g.fillStyle='#3a6ea5'; g.fillRect(bx+38,by-7,12,4); }         // the tarp
+  g.fillStyle='#2e2a24'; g.fillRect(bx+26,by+8,10,16);                        // door
+  g.fillStyle=rat>.15?'#3a352d':'#d8c66a';                                    // windows: lit or boarded
+  g.fillRect(bx+8,by+7,10,8); g.fillRect(bx+44,by+7,10,8);
+  if (rat>.15){ g.fillStyle='#8a7a58';
+    g.fillRect(bx+7,by+9,12,2); g.fillRect(bx+43,by+11,12,2); }               // boards
+  g.fillStyle='#4a4038'; g.fillRect(bx+50,by-14,5,8);                         // chimney
+  if (rat>.05){ g.fillStyle='#4a5a34';                                        // weeds
+    for(let i=0;i<9;i++){ const x=4+Math.floor(rnd()*(W-8)); g.fillRect(x,H-16,1,3); } }
+  g.fillStyle='#8b98ac'; g.fillRect(6,H-24,2,10); g.fillStyle='#c9c0ad'; g.fillRect(4,H-27,10,5); // the sign
+}
+
+/* ── the game loop ──────────────────────────────────────────────────────────
+   The clock only runs while a question is open. Reading a verdict is free,
+   because punishing the player for learning would be a strange curriculum. */
+const $=id=>document.getElementById(id);
+const fmt=v=>(v<0?'−$':'$')+Math.abs(Math.round(v)).toLocaleString('en-US');
+
+/*__ARCADE_BANK__*/
+
+const LS={ get(k){try{return localStorage.getItem(k)}catch(e){return null}},
+           set(k,v){try{localStorage.setItem(k,v)}catch(e){}} };
+const ANSWERS=[['wholesale','The wholesale','sell the contract, never own it'],
+               ['flip','The fix and flip','buy it, fix it, sell it'],
+               ['wholetail','The wholetail','clean it, photograph it, list it'],
+               ['hold','The buy and hold','the rent carries a loan'],
+               ['brrrr','The BRRRR','fix it, rent it, refinance, keep it'],
+               ['subto','The subject-to','take over their payments'],
+               ['novation','The novation','deliver their number, sell at retail'],
+               ['walk','Walk away','no exit pays at this ask']];
+const NAME=Object.fromEntries(ANSWERS.map(a=>[a[0],a[1]]));
+const HINT=Object.fromEntries(ANSWERS.map(a=>[a[0],a[2]]));
+const G={ t:60, score:0, streak:0, reads:0, right:0, cur:null, open:false, over:false, last:null,
+          askedAt:0, house:0, teaching:false, started:false };
+const best0=+(LS.get('ni-drill-best')||0); if (best0) $('best').textContent=best0;
+
+/* ── the ladder ────────────────────────────────────────────────────────────
+   Four flat grades became six ranks with something to say, because the reason
+   anybody plays a sixty-second game twice is to move one line up a list they
+   can see. The top two are the ones that make you want the eighth answer. */
+const RANKS = [
+ { at:0,    n:'Door-knocker', lore:'A clipboard and a list. Everything past that is learned on somebody’s porch.' },
+ { at:450,  n:'Bird dog',     lore:'You can spot the house worth another investor’s phone call. That is a skill, and it pays.' },
+ { at:900,  n:'Apprentice',   lore:'You are pricing the house. Start pricing the person selling it — the seller line is half the answer.' },
+ { at:1500, n:'Underwriter',  lore:'The reads are right and the speed is arriving. This is the rank the desk was built for.' },
+ { at:2300, n:'Closer',       lore:'You are reading the seller before the arithmetic finishes. Eight doors, and you know which one is yours.' },
+ { at:3200, n:'The Desk',     lore:'Somebody else’s offer arrived second, and they still do not know why.' },
+];
+const rankFor = sc => RANKS.filter(r => sc >= r.at).pop() || RANKS[0];
+
+/* Difficulty arrives inside the run, not across sessions: house one is five
+   doors, and by house eight it is all eight plus a position that closes some
+   of them. A first-timer is never shown nine buttons; somebody on their
+   fortieth run never sees five. */
+const TIERS = [
+ { from:1, shapes:SHAPES,   answers:['flip','hold','subto','novation','walk'], hints:true,
+   pip:'Five doors' },
+ { from:4, shapes:SHAPES_2, answers:['flip','wholetail','hold','subto','novation','walk'], hints:true,
+   pip:'Six doors — the wholetail is open' },
+ { from:7, shapes:SHAPES_3, answers:['wholesale','flip','wholetail','hold','brrrr','subto','novation','walk'],
+   hints:false, pip:'All eight — and your position decides which are open' },
+];
+const tierFor = n => TIERS.filter(t => n >= t.from).pop() || TIERS[0];
+
+/* ── the ledger ────────────────────────────────────────────────────────────
+   This used to print "fit 78" — a unit that exists nowhere in real estate,
+   invented for this game. rank() has always computed the real numbers: a
+   purchase ceiling for the exits you buy into, a monthly spread for the
+   subject-to, a cheque for the novation. Those are what a player should be
+   shown, in their own units, never averaged into one another.
+
+   The unit trap: a purchase CEILING is not a payout. The first cut of this
+   ledger put "$285,132" (a price you may pay) in the same green column as
+   "$54,428" (a cheque you keep) and invited a comparison that means nothing —
+   the wholetail looked five times better than the answer the desk had just
+   crowned. That is the same defect as a worksheet whose panels argue.
+
+   So the headline figure on every row is MONEY THE DEAL HAS IN IT, one unit:
+     · exits you buy into  → the room between their ask and your ceiling
+     · the novation        → the cheque at the closing
+     · the subject-to      → a monthly spread, which is honestly NOT a lump,
+                             so it is labelled and never ranked against one
+   The ceiling itself moves to the explanation line, where it belongs.
+   Green stays reserved for money that actually pays. */
+function payLine(x, d){
+  if (x.id === 'subto'){
+    const ok = x.spread > 0;
+    return { id:x.id, ok, lump:null, n:fmt(x.spread), unit:'a month',
+      what: ok ? 'the rent covers their payment and leaves '+fmt(x.spread)+' a month. A monthly spread is not a cheque — it is why this one is judged on its own terms.'
+               : 'the rent does not cover the payment already on the house — it bleeds '+fmt(-x.spread)+' a month.' };
+  }
+  if (x.id === 'novation'){
+    const ok = x.check > 0;
+    return { id:x.id, ok, lump:x.check, n:fmt(x.check), unit:'at the closing',
+      what: ok ? 'you never buy it — you hand them their number, sell it at retail, and keep '+fmt(x.check)+'.'
+               : 'after their number and the selling costs there is nothing left to keep.' };
+  }
+  const room = x.ceil - d.ask, ok = room >= 0;
+  return { id:x.id, ok, lump:room, n:fmt(room), unit: ok ? 'of room' : 'short',
+    what: 'you can pay up to '+fmt(x.ceil)+'; they ask '+fmt(d.ask)+
+      (ok ? '.' : ', so you would have to talk them down '+fmt(-room)+' before it works.') };
+}
+const WALKROW = { id:'walk', ok:false, lump:null, n:'—', unit:'',
+  what:'nothing here pays at what they are asking.' };
+/* four rows carry the lesson: what the desk said, what YOU said, and the two
+   nearest misses — never the whole table, which nobody reads at speed */
+function working(d, chose, correct){
+  const R = rank(d), allow = allowsOf(d);
+  const seen = new Set(), rows = [];
+  const push = id => {
+    if (seen.has(id)) return;
+    if (id === 'walk'){ seen.add(id); rows.push(WALKROW); return; }
+    const x = R.find(y=>y.id===id); if (!x) return;
+    seen.add(id); rows.push(payLine(x, d));
+  };
+  push(correct); push(chose);
+  for (const x of R){ if (rows.length >= 4) break; push(x.id); }
+
+  /* If the desk's answer is not the biggest lump on the page, say why out
+     loud. It is the seller's situation — that is the whole reason the drill
+     shows you a seller at all — and an unexplained crown reads as a bug. */
+  const lumps = rows.filter(r => r.lump != null);
+  const deskRow = rows.find(r => r.id === correct);
+  const biggest = lumps.length ? lumps.reduce((a,b)=> b.lump > a.lump ? b : a) : null;
+  const needsWhy = deskRow && biggest && deskRow.id !== biggest.id && correct !== 'walk';
+
+  /* The drill asks which exit FITS BEST, and best can still be short. The desk
+     itself has this third state — closest fit, not a recommendation — and if
+     the drill crowns an exit while the ledger underneath it says "$1,700 short
+     of their ask", the two are arguing in front of the player. Say it once, at
+     the top, in plain words. */
+  const shortfall = (deskRow && !deskRow.ok && correct !== 'walk')
+    ? '<div class="lnone">Closest fit — and still short. Nothing here reaches their ask as it stands, '+
+      'so this is a number to negotiate toward, not a cheque to write.</div>' : '';
+
+  return shortfall + '<div class="ldg">' + rows.map(r => {
+    const shut = allow && allow.indexOf(r.id) < 0 && r.id !== 'walk';
+    const pays = r.ok && !shut;
+    const tag = r.id===correct ? '<span class="lt best">the desk</span>'
+              : r.id===chose   ? '<span class="lt you">you said</span>'
+              : shut           ? '<span class="lt off">closed to you</span>' : '';
+    const why = (needsWhy && r.id===correct)
+      ? ' <b>The seller decides this one</b> — read the line at the top of the house again.' : '';
+    return '<div class="lr'+(pays?' pays':'')+'">' +
+      '<span class="ln">'+NAME[r.id]+tag+'</span>' +
+      '<span class="lv'+(pays?' good':'')+'">'+r.n+(r.unit?'<i> '+r.unit+'</i>':'')+'</span>' +
+      '<span class="lw">'+r.what+why+(shut ? ' It is closed to you here.' : '')+'</span></div>';
+  }).join('') + '</div>';
+}
+function next(){
+  G.house++;
+  const T = tierFor(G.house);
+  G.cur = deal(T.shapes[Math.floor(rnd()*T.shapes.length)]);
+  drawHouse($('px'),G.cur);
+  const d=G.cur;
+  $('addr').textContent = d.addr || '';
+  $('seller').innerHTML = d.sellerHtml;
+  $('pos').innerHTML = (POS[d.pos]||POS.funded).line
+    ? `<div class="posline">${(POS[d.pos]||POS.funded).line}</div>` : '';
+  const figs=[['They ask',fmt(d.ask)],['Comps say (ARV)',fmt(d.arv)],['Repairs walk-through',fmt(d.rep)],['Rent, realistic',fmt(d.rent)+'<small>/mo</small>']];
+  if (d.piti!=null){ figs.push(['Their payment (PITI)',fmt(d.piti)+'<small>/mo</small>']); figs.push(['Loan balance',fmt(d.balance)]); }
+  $('figs').innerHTML = figs.map(f=>`<div class="fig"><div class="fl">${f[0]}</div><div class="fv">${f[1]}</div></div>`).join('');
+  const allow = allowsOf(d);
+  $('answers').innerHTML = T.answers.map((id,i)=>{
+    const shut = allow && allow.indexOf(id) < 0 && id !== 'walk';
+    return `<button class="ans${shut?' shut':''}" data-a="${id}"${shut?' disabled':''}>
+      <span class="key">${i+1}</span><span>${NAME[id]}</span>
+      <span class="hint">${shut ? 'closed to you here' : (T.hints ? HINT[id] : '')}</span></button>`;
+  }).join('');
+  document.querySelectorAll('.ans:not([disabled])').forEach(b=>b.onclick=()=>answer(b.dataset.a));
+  $('prompt').innerHTML = `<b>Which exit fits?</b> ${FINEPOINTER ? `Keys 1–${T.answers.length} answer. ` : ''}Wrong costs five seconds.
+    <span class="tierpip"> · ${T.pip}</span>`;
+  $('verdict').className='verdict hidden';
+  G.open=true; G.askedAt=G.t;
+}
+function answer(a){
+  if(!G.open||G.over) return; G.open=false;
+  /* the sixty seconds begin HERE, on the first answer — not on page load,
+     and not behind a start button that no longer exists */
+  if(!G.running){ G.running=true; $('score').textContent=G.score; $('streak').textContent=G.streak;
+    lastTick=performance.now(); requestAnimationFrame(tick); }
+  const correct = answerFor(G.cur); G.reads++;
+  const took = G.askedAt-G.t;
+
+  /* ── THE MONEY MOVES ON EVERY ANSWER ────────────────────────────────────
+     Not at the end of the run. If the drill settled up only when the clock
+     expired, a player having a bad minute could close the tab and keep their
+     bankroll — and a game you can quit out of losing is a game with no stake
+     in it, which is exactly what this cabinet was before today.
+
+     The fee is a FINDER'S FEE, and the copy says so: you did not buy the
+     house, you said what it was for, and saying what it is for is worth
+     paying somebody. It scales with the size of the deal you read, floored so
+     a thin one still pays and capped so one fat one is not the session. */
+  const cx = rank(G.cur).find(x => x.id === correct);
+  const size = !cx ? 0
+    : cx.id === 'subto'    ? Math.max(0, (cx.spread || 0) * 12)
+    : cx.id === 'novation' ? Math.max(0, cx.check || 0)
+    : Math.max(0, (cx.ceil || 0) - G.cur.ask);
+  const fee  = drillFee(size);
+  const paid = (a === correct) ? fee : -DRILL_MISS;
+  const mv   = BANK.move({ game:'drill', delta: paid,
+    note: (a === correct ? 'read ' + (NAME[correct]||'the walk') : 'called it wrong') + ' on ' + (G.cur.addr || 'a house') });
+  G.take += mv.applied;
+  /* a run that is not being saved must not print a bankroll as though it
+     were. The end card used to say "This run paid +$3,250" directly above
+     "Your bankroll is $150,000" and let the reader work it out. */
+  if (mv.stored === false) G.notStored = mv.why || 'nostore';
+  G.capped = G.capped || mv.capped;
+  paintBank();
+  document.querySelectorAll('.ans').forEach(b=>{ b.disabled=true;
+    if(b.dataset.a===correct) b.classList.add('right');
+    else if(b.dataset.a===a) b.classList.add('wrong'); });
+  const v=$('verdict');
+  if (a===correct){
+    G.right++; G.streak++;
+    const bonus = Math.max(0, Math.round(40*(1 - Math.min(took,12)/12)));
+    const chain = (G.streak>0 && G.streak%3===0) ? 50 : 0;
+    G.score += 100+bonus+chain;
+    v.className='verdict right';
+    v.innerHTML=`<div class="vh">Right — ${NAME[correct]||'the walk'} · +${100+bonus}${chain?' +50 streak':''}
+      <span class="feetag">${mv.applied > 0 ? 'finder’s fee ' + fmt(mv.applied)
+        : mv.capped ? 'day’s fees are capped' : 'no fee'}</span></div>
+      ${correct==='walk' ? '<div class="lnone">Nothing on this house pays at what they are asking. Walking away IS the read.</div>' : ''}
+      ${working(G.cur, a, correct)}<div class="go">Space or click for the next house.</div>`;
+  } else {
+    G.streak=0; G.t=Math.max(0,G.t-5);
+    v.className='verdict wrong';
+    v.innerHTML=`<div class="vh">The desk says ${NAME[correct]||'walk away'} · −5 seconds
+      <span class="feetag dn">${mv.applied < 0 ? fmt(-mv.applied) + ' out of your bankroll'
+        : 'nothing left to take'}</span></div>
+      ${correct==='walk' ? '<div class="lnone">Nothing on this house pays at what they are asking.</div>' : ''}
+      ${working(G.cur, a, correct)}
+      <div class="go">Space or click for the next house.</div>`;
+  }
+  G.last=G.cur;
+  $('score').textContent=G.score; $('streak').textContent=G.streak;
+  if (G.t<=0) end();
+}
+function paintBank(){
+  const el = $('bank'); if (!el) return;
+  const b = BANK.standing();
+  el.textContent = fmt(b.cash);
+  el.className = 'v m' + (G.take > 0 ? ' up' : G.take < 0 ? ' dn' : '');
+  const t = $('banktake');
+  if (t) t.textContent = G.take === 0 ? '' : (G.take > 0 ? '+' : '−') + fmt(Math.abs(G.take)).replace('$','$');
+}
+function advance(){ if(G.over||G.teaching||!G.started) return; if(!G.open && G.t>0) next(); }
+document.addEventListener('keydown',e=>{
+  if (G.over || !G.started) return;
+  if (G.open && e.key>='1' && e.key<='8'){ const b=document.querySelectorAll('.ans')[+e.key-1];
+    if(b && !b.disabled) answer(b.dataset.a); }
+  else if (!G.open && (e.key===' '||e.key==='Enter')){ e.preventDefault(); advance(); }
+});
+$('deck').addEventListener('click',e=>{ if(!G.open && !e.target.closest('.ans')) advance(); });
+
+let lastTick=performance.now();
+function tick(now){
+  if (G.over || !G.started) return;
+  const dt=(now-lastTick)/1000; lastTick=now;
+  if (G.open && !G.teaching) G.t=Math.max(0,G.t-dt);
+  $('clock').style.transform=`scaleX(${G.t/60})`;
+  $('rail').classList.toggle('low',G.t<12);
+  if (G.t<=0 && G.open){ G.open=false; end(); }
+  requestAnimationFrame(tick);
+}
+/* ── the door ──────────────────────────────────────────────────────────────
+   Rules for free, the ladder visible, and a way to see one house without a
+   clock running. Everything here is one screen, because the drill is sixty
+   seconds and a two-minute briefing would be a joke at its own expense. */
+function ladderHTML(best){
+  const have = rankFor(best);
+  return `<div class="ladder"><div class="lh">The ladder</div>
+   ${RANKS.map(r=>`<div class="rk${best>=r.at?' have':''}${r===have?' now':''}">
+     <span class="sc">${r.at ? r.at.toLocaleString('en-US')+'+' : '—'}</span>
+     <span class="nm">${r.n}</span><span class="lo">${r.lore}</span></div>`).join('')}</div>`;
+}
+/* ══ PLAY FIRST, EXPLAIN NEVER ═════════════════════════════════════════════
+   This cabinet used to open on a start screen: rules, a six-rank ladder with
+   lore, three buttons — 1,705 pixels of prose on a phone before the first
+   pressable thing. That is a briefing, and a briefing is a joke at a
+   sixty-second game's expense (its own comment said so, and then briefed).
+
+   Now the door IS the first house: it is on screen, the answers are live,
+   and the clock is FULL AND FROZEN until the first answer — so a stranger
+   is never dropped into a countdown, and never reads a rulebook either. The
+   rules and the ladder still exist, in full, BELOW the game, where somebody
+   who has already played one house can read them with a reason to care. */
+function renderBelow(){
+  const best = Math.max(best0, +(LS.get('ni-drill-best')||0));
+  $('below').innerHTML = `
+   <div class="rules">
+    <div class="rule"><div class="n">Scoring</div><div class="t">100 a house, plus speed</div>
+     <div class="d">Up to 40 more for answering inside twelve seconds, and 50 every third right in a row.</div></div>
+    <div class="rule"><div class="n">Wrong</div><div class="t">Five seconds off the clock</div>
+     <div class="d">No score penalty. Time is the only currency here, which is also true on a Tuesday.</div></div>
+    <div class="rule"><div class="n">It gets harder</div><div class="t">Five doors, then six, then eight</div>
+     <div class="d">By the eighth house every exit is open — and a line about <b>your</b> position closes some of them.</div></div>
+   </div>
+   ${ladderHTML(best)}
+   <div class="btnrow" style="justify-content:flex-start">
+    <a class="btn" href="exits.html">Learn the eight exits</a>
+   </div>`;
+}
+function beginRun(){
+  Object.assign(G,{t:60,score:0,streak:0,reads:0,right:0,over:false,open:false,last:null,
+                   house:0,teaching:false,started:true,running:false,take:0,capped:false});
+  BANK.run('drill');
+  paintBank();
+  /* zeros before anybody has played are not a scoreboard, they are a shrug */
+  $('score').textContent='\u2014'; $('streak').textContent='\u2014';
+  $('card').classList.add('hidden');
+  $('deck').classList.remove('hidden'); $('rail').classList.remove('hidden');
+  $('clock').style.transform='scaleX(1)';
+  next();
+  $('prompt').innerHTML = `<b>Pick the exit that pays.</b> The clock starts with your first answer.`;
+}
+function end(){
+  G.over=true;
+  const best=Math.max(best0,+(LS.get('ni-drill-best')||0),G.score);
+  LS.set('ni-drill-best',String(best)); $('best').textContent=best;
+  const acc=G.reads?Math.round(100*G.right/G.reads):0;
+  const rk = rankFor(G.score);
+  const nextRk = RANKS[RANKS.indexOf(rk)+1];
+  const grade = [rk.n, rk.lore];
+  const d=G.last, handoff = d ? 'desk.html#'+[`asking=${d.ask}`,`arv=${d.arv}`,`repairs=${d.rep}`,`rent=${d.rent}`,
+    ...(d.piti!=null?[`piti=${d.piti}`,`balance=${d.balance}`]:[]),
+    `est=${['arv','repairs','rent',...(d.piti!=null?['piti']:[])].join(',')}`,
+    `sit=${d.sit}`,'from=arcade',`title=${encodeURIComponent('Exit Drill — the last house')}`].join('&') : 'desk.html';
+  $('deck').classList.add('hidden');
+  const c=$('card'); c.classList.remove('hidden');
+  c.innerHTML=`<div class="eyebrow">Time</div><h2>${grade[0]}</h2>
+   <div class="big">${G.score}</div>
+   <div class="statrow"><div class="s"><div class="t">Houses read</div><div class="v">${G.reads}</div></div>
+    <div class="s"><div class="t">Called right</div><div class="v">${acc}%</div></div>
+    <div class="s"><div class="t">Best</div><div class="v">${best}</div></div>
+    <div class="s"><div class="t">This run paid</div>
+      <div class="v ${G.take>0?'up':G.take<0?'dn':''}">${(G.take>0?'+':G.take<0?'−':'')+fmt(Math.abs(G.take)).replace(/^−/,'')}</div></div></div>
+   ${G.notStored ? '<div class="grade" style="color:#e8cf72">' + troubleLine(G.notStored) + '</div>' : ''}
+   <div class="grade">Your bankroll is <b>${fmt(BANK.read().cash)}</b>. ${
+     G.capped ? 'You have taken the day’s full fees out of the drill — it still plays, it stops paying until tomorrow.'
+     : G.take < 0 ? 'A bad minute costs less here than a bad offer does on a real house. That is what the drill is for.'
+     : 'Reading them right is worth a fee. Buying them right is worth a great deal more — that is the street.'}</div>
+   <div class="grade">${grade[1]}</div>
+   ${nextRk ? `<div class="grade" style="color:#e8cf72">
+     <b>${(nextRk.at-G.score).toLocaleString('en-US')}</b> more and you are a ${nextRk.n}.</div>` : ''}
+   <div class="btnrow"><button class="btn p" id="again">Run it again</button>
+    ${d?`<a class="btn" href="${handoff}">Take the last house to the desk →</a>`:''}
+    <button class="btn" id="ladder">The ladder</button>
+    <a class="btn" href="arcade.html">Back to the floor</a></div>`;
+  renderBelow();          // the ladder below now marks the new best
+  $('again').onclick=()=>beginRun();
+  const lb=$('ladder'); if (lb) lb.onclick=()=>{ renderBelow();
+    document.getElementById('below').scrollIntoView({behavior:'smooth',block:'start'}); };
+}
+renderBelow();
+{ const b0 = Math.max(best0, +(LS.get('ni-drill-best')||0));
+  $('best').textContent = b0 > 0 ? b0.toLocaleString('en-US') : '\u2014'; }
+beginRun();
+</script>
+
+<footer class="ftlegal"><div class="wrap" style="font-size:12.5px">
+ <a href="arcade.html">The arcade</a><a href="desk.html">The desk</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Billing</a>
+</div></footer>
+
+</body></html>

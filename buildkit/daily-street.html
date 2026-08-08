@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Daily Street — Negotiation Inc</title>
+<style>
+  :root{
+    --paper:#e9e2d0; --stock:#f6f1e3; --stock-2:#f0e8d4; --stock-3:#eae1cb;
+    --carbon:#22201c; --carbon-soft:#4a463d; --carbon-faint:#736e60;   /* was 3.3:1 on the stock — unreadable at 10px */
+    --rule:#c9bfa6; --rule-soft:#ded5bd;
+    --red:#b3372c; --green:#2f6b46; --amber:#9a6b1f;
+    --red-bg:rgba(179,55,44,.1); --green-bg:rgba(47,107,70,.12); --amber-bg:rgba(154,107,31,.1);
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Courier New',monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:repeating-linear-gradient(0deg,rgba(0,0,0,.012) 0 1px,transparent 1px 3px),
+      radial-gradient(120% 80% at 50% 0%,#efe8d7 0%,var(--paper) 60%,#ded5bf 100%);
+    color:var(--carbon);font-family:var(--serif);font-size:16px;line-height:1.5;min-height:100vh;padding:0 0 50px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:560px;margin:0 auto;padding:0 14px}
+  .board{background:var(--stock);border:1px solid var(--rule);box-shadow:2px 3px 0 rgba(0,0,0,.06);margin-top:16px}
+  button{font-family:var(--mono);cursor:pointer}
+  /* the only way out of this screen, and it was seventeen pixels tall */
+  .back{display:block;text-align:center;margin-top:6px;padding:14px 8px;font-family:var(--mono);font-size:11px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--carbon-faint);text-decoration:none}
+  .back:hover{color:var(--carbon)}
+
+  .bar{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--rule);
+    background:var(--stock-2);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--carbon-soft)}
+  .bar .m{font-size:14px;letter-spacing:0;font-variant-numeric:tabular-nums;color:var(--carbon)}
+  .bar .t.warn{color:var(--red)}
+
+  .coach{display:flex;gap:9px;align-items:center;padding:11px 14px;background:var(--carbon);color:var(--stock);font-size:15px;line-height:1.3}
+  .coach .dot{flex:none;width:7px;height:7px;border-radius:50%;background:var(--stock);animation:pulse 1.7s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+  .coach b{color:#fff}
+  @media (prefers-reduced-motion:reduce){.coach .dot{animation:none;opacity:1}}
+
+  .hero{padding:40px 20px 24px;text-align:center}
+  .hero .mark{font-family:var(--mono);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--carbon-faint)}
+  .hero h1{font-size:33px;line-height:1.15;margin:14px 0 0;font-weight:400}
+  .hero h1 b{font-weight:700}
+  .hero .sub{font-size:17px;color:var(--carbon-soft);margin-top:12px}
+  .hero .meta{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--carbon-faint);margin-top:18px}
+  .pane{padding:22px 18px}
+  .pane h1{font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;margin:0 0 4px;font-weight:400;color:var(--carbon-faint)}
+  .pane h2{font-size:26px;margin:2px 0 12px;line-height:1.2}
+  .lede{font-size:16px;color:var(--carbon-soft);margin-bottom:14px}
+
+  .btn{display:block;width:100%;font-size:13px;letter-spacing:.15em;text-transform:uppercase;border:1px solid var(--carbon);
+    background:var(--carbon);color:var(--stock);padding:15px;margin-top:14px}
+  .btn:hover{background:#000}
+  .btn.ghost{background:transparent;color:var(--carbon)}
+  .btn.ghost:hover{background:var(--carbon);color:var(--stock)}
+  .btn.go{background:var(--green);border-color:var(--green);color:#fff;font-size:15px}
+  .btn.go:hover{background:#25563a}
+  .btn:disabled{opacity:.35;cursor:default}
+
+  .cond{border:2px solid var(--carbon);background:var(--stock-2);padding:14px;margin-top:14px}
+  .cond .cn{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:4px}
+  .cond .cb{font-size:16px;color:var(--carbon-soft)}
+  .dossier{border:1px solid var(--rule);background:var(--stock-2);margin-top:14px}
+  .dossier .dh{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:9px 12px;border-bottom:1px solid var(--rule);color:var(--carbon-faint)}
+  .who{padding:9px 12px;border-bottom:1px solid var(--rule-soft)}
+  .who:last-child{border-bottom:none}
+  .who .n{font-weight:600;font-size:15px}
+  .who .t{font-size:14px;color:var(--carbon-soft)}
+
+  .pager{display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 14px;border-bottom:1px solid var(--rule-soft)}
+  .pager .p{width:34px;height:5px;background:var(--rule);border:none;padding:0}
+  .pager .p.on{background:var(--carbon)}
+  .pager .p.bought{background:var(--green)}
+  .pager .p.seen{background:var(--carbon-faint)}
+  .nav{background:none;border:none;color:var(--carbon-soft);font-size:19px;padding:0 6px;line-height:1}
+  .nav:disabled{opacity:.25}
+
+  .house{padding:16px 16px 18px}
+  .hname{font-size:25px;font-weight:600;line-height:1.15}
+  .hmeta{font-size:15px;color:var(--carbon-soft);margin-top:3px}
+  .chips{margin-top:9px;display:flex;gap:6px;flex-wrap:wrap}
+  /* same reason as .mt below: "No other offers" and "Needs a lot" are one
+     label each, and a border that breaks across two lines reads as two */
+  .chip{display:inline-block;white-space:nowrap;font-size:13px;padding:3px 9px;border:1px solid var(--rule);color:var(--carbon-soft);background:var(--stock-2)}
+  .chip.good{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+  .chip.warn{border-color:var(--amber);color:var(--amber);background:var(--amber-bg)}
+  .chip.bad{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+
+  /* ── comps: a match table you read at a glance ── */
+  .comps{margin-top:15px;border-top:1px solid var(--rule);padding-top:13px}
+  .clab{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--carbon-faint);margin-bottom:10px}
+  .ctab{width:100%;border-collapse:collapse}
+  .ctab th{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--carbon-faint);
+    font-weight:400;text-align:right;padding:0 0 5px}
+  .ctab th:first-child{text-align:left}
+  .ctab td{padding:8px 0;border-top:1px solid var(--rule-soft);font-size:15px;text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+  .ctab td:first-child{text-align:left;font-family:var(--serif);font-size:15px}
+  .ctab tr.you td{border-top:2px solid var(--carbon);font-weight:700;background:var(--stock-3)}
+  .ctab tr.you td:first-child{font-weight:700}
+  /* "3 bed" and "much smaller" are single labels wearing a border. Without
+     nowrap they break mid-chip on a phone and the border draws TWICE — "3" in
+     one box and "bed" in a second box on the next line, which reads as two
+     facts instead of one and looks broken. inline-block so the padding is
+     honoured on the wrapped line too. */
+  .mt{display:inline-block;white-space:nowrap;padding:2px 7px;border:1px solid var(--rule);font-size:13px;font-family:var(--mono)}
+  .mt.same{border-color:var(--green);color:var(--green);background:var(--green-bg)}
+  .mt.near{border-color:var(--amber);color:var(--amber);background:var(--amber-bg)}
+  .mt.off{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+  .cnote{font-size:14px;color:var(--carbon-soft);margin-top:10px}
+  .cnote b{color:var(--carbon)}
+
+  /* ── free detail ── */
+  .more{margin-top:12px;border:1px solid var(--rule);background:var(--stock-2)}
+  .more summary{padding:10px 12px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--carbon-soft)}
+  .more .mb{padding:0 12px 12px;font-size:15px;color:var(--carbon-soft)}
+  .more .mb p{margin:8px 0}
+
+  .facts{margin-top:14px;display:grid;gap:8px}
+  .fact{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid var(--rule);background:var(--stock-2);
+    padding:11px 12px;font-size:15px;text-align:left;width:100%;font-family:var(--serif);color:var(--carbon)}
+  .fact:hover:not(:disabled){border-color:var(--carbon);background:var(--stock-3)}
+  .fact .c{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--carbon-faint);white-space:nowrap}
+  .fact.known{background:var(--stock);cursor:default}
+  .fact.known .v{font-family:var(--mono);font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .fact.known.bad .v{color:var(--red)}
+  .quote{font-style:italic;color:var(--carbon-soft);font-size:14px;margin-top:3px}
+  .joblist{margin-top:6px;font-size:14px;color:var(--carbon-soft)}
+  .joblist span{display:inline-block;border:1px solid var(--rule);padding:1px 7px;margin:2px 4px 2px 0;font-family:var(--mono);font-size:12px}
+
+  /* ── deal bar ── */
+  .deal{margin-top:16px;border-top:1px solid var(--rule);padding-top:14px}
+  .dealbar{display:flex;height:44px;border:1px solid var(--carbon);background:var(--stock-3);overflow:hidden}
+  .dealbar i{height:100%;transition:width .08s linear}
+  .dealbar .pay{background:var(--carbon)} .dealbar .keep{background:var(--green)}
+  .dealbar .fix{background:repeating-linear-gradient(45deg,var(--rule) 0 5px,var(--stock-3) 5px 10px)}
+  .dealbar .over{background:var(--red)}
+  .dealkey{display:flex;gap:14px;flex-wrap:wrap;margin-top:9px;font-size:14px}
+  .dealkey span{display:flex;align-items:center;gap:6px;color:var(--carbon-soft)}
+  .sw{width:13px;height:13px;border:1px solid var(--carbon);flex:none}
+  .sw.pay{background:var(--carbon)} .sw.keep{background:var(--green)} .sw.over{background:var(--red)}
+  .sw.fix{background:repeating-linear-gradient(45deg,var(--rule) 0 4px,var(--stock-3) 4px 8px)}
+  .keepbig{text-align:center;margin-top:14px}
+  .keepbig .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--carbon-faint)}
+  .keepbig .v{font-family:var(--mono);font-size:36px;font-variant-numeric:tabular-nums;line-height:1.05;color:var(--green)}
+  .keepbig .v.bad{color:var(--red)}
+  .keepbig .n{font-size:14px;color:var(--carbon-soft);margin-top:4px}
+  input[type=range]{width:100%;accent-color:var(--carbon);margin:16px 0 0}
+  .offerrow{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--carbon-faint);margin-top:2px}
+  .offerrow b{color:var(--carbon);font-size:17px}
+  .rival{margin-top:12px;font-size:14px;color:var(--carbon-soft);border-left:3px solid var(--rule);padding-left:10px}
+  .rival.warn{border-color:var(--amber)} .rival.bad{border-color:var(--red)}
+  .stamp{border:2px solid var(--green);color:var(--green);padding:14px;font-family:var(--mono);font-size:13px;letter-spacing:.1em;
+    text-transform:uppercase;transform:rotate(-.5deg);text-align:center;background:var(--green-bg);margin:16px 0 0}
+
+  /* ── renovation ── */
+  .job{display:grid;grid-template-columns:26px 1fr auto;gap:11px;align-items:start;border:1px solid var(--rule);background:var(--stock-2);
+    padding:12px;text-align:left;width:100%;font-family:var(--serif);font-size:16px;color:var(--carbon);margin-bottom:9px}
+  .job:hover{border-color:var(--carbon)}
+  .job.on{border-color:var(--green);border-width:2px;background:var(--green-bg)}
+  .job .box{width:22px;height:22px;border:2px solid var(--carbon);display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:15px;line-height:1;background:var(--stock)}
+  .job.on .box{background:var(--green);border-color:var(--green);color:#fff}
+  .job .lb{font-weight:600}
+  .job .nt{font-size:14px;color:var(--carbon-soft);font-style:italic;margin-top:3px}
+  .job .money{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:14px}
+  .job .money .c{display:block;color:var(--carbon)}
+  .job .money .a{display:block;font-size:13px;margin-top:2px}
+  .job .money .a.up{color:var(--green)} .job .money .a.dn{color:var(--red)}
+  .job .money .a.q{color:var(--carbon-faint)}
+  .kind{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--rule);
+    padding:1px 5px;margin-left:6px;vertical-align:middle;font-weight:400}
+  .kind.k-essential{border-color:var(--green);color:var(--green)}
+  .kind.k-cosmetic{border-color:var(--amber);color:var(--amber)}
+  .kind.k-vanity{border-color:var(--red);color:var(--red)}
+  .estbtn{display:block;width:100%;margin-top:13px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+    border:1px dashed var(--carbon);background:transparent;color:var(--carbon);padding:12px}
+  .estbtn:hover:not(:disabled){background:var(--stock-3)}
+  .estbtn:disabled{opacity:.4;cursor:default}
+  .estnote{margin-top:13px;font-size:14px;color:var(--carbon-soft);border-left:3px solid var(--green);padding-left:10px}
+  .renotot{border-top:2px solid var(--carbon);background:var(--stock-2);padding:14px;margin-top:4px}
+  .renorow{display:flex;justify-content:space-between;font-size:16px;padding:3px 0}
+  .renorow .n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .renorow.big{font-size:19px;font-weight:700;border-top:1px solid var(--carbon);margin-top:7px;padding-top:9px}
+  .renorow.big .n.up{color:var(--green)} .renorow.big .n.dn{color:var(--red)}
+
+  .rhead{padding:12px 15px;border-bottom:2px solid var(--carbon);background:var(--stock-2);font-family:var(--mono);
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase}
+  .rrow{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 15px;border-bottom:1px solid var(--rule-soft);align-items:baseline;
+    opacity:0;transform:translateY(-3px);transition:opacity .25s,transform .25s}
+  .rrow.in{opacity:1;transform:none}
+  .rrow .a{font-size:17px;font-weight:600}
+  .rrow .who2{font-size:14px;color:var(--carbon-soft);margin-top:2px}
+  .rrow .amt{font-family:var(--mono);font-size:15px;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+  .rrow.mine{background:var(--green-bg)} .rrow.lost{background:var(--red-bg)}
+  .oops{color:var(--red);font-size:13px;font-style:italic;margin-top:3px}
+
+  .sheet{margin:15px;border:1px solid var(--carbon);background:#fffdf6;box-shadow:2px 3px 0 rgba(0,0,0,.07)}
+  .sheet .sh{border-bottom:2px solid var(--carbon);padding:12px 15px;background:var(--stock-2)}
+  .sheet .sh .t{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--carbon-faint)}
+  .sheet .sh .a{font-size:19px;font-weight:600;margin-top:1px}
+  .sl{display:grid;grid-template-columns:1fr auto;gap:12px;padding:10px 15px;font-size:16px;align-items:baseline}
+  .sl .n{font-family:var(--mono);font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .sl.rule{border-top:1px solid var(--carbon);padding-top:10px}
+  .sl.sub{color:var(--carbon-soft);font-size:15px} .sl.sub .n{font-size:15px}
+  .sl.tot{border-top:2px solid var(--carbon);background:var(--stock-2);padding:14px 15px}
+  .sl.tot .l{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .sl.tot .n{font-size:28px;font-weight:700}
+  .sl.tot.win .n{color:var(--green)} .sl.tot.lose .n{color:var(--red)}
+  .nodeal{padding:18px 15px;text-align:center}
+  .nodeal .big{font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+  .nodeal .sm{margin-top:8px;font-size:15px;color:var(--carbon-soft)}
+  .streak{margin:0 15px;padding:11px 14px;background:var(--green);color:#fff;text-align:center;font-family:var(--mono);
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+  .said{padding:14px 15px;font-size:16px;font-style:italic;color:var(--carbon-soft);border-top:1px solid var(--rule)}
+
+  /* THE READ — the counterfactual, in dollars.
+     The board has always known which house was the play and what it was worth;
+     it just never said. A round that ends in "wrong" teaches nothing. A round
+     that ends in "the play was the brick one on the corner and it had $19,000
+     in it — you found $6,200" teaches the whole trade.
+     The gold is deliberate: this money did not pay, it is what was ON THE TABLE.
+     Green here would be a lie. */
+  .read{margin:15px;border:1px solid var(--carbon);background:var(--stock-2)}
+  .read .rh{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+    padding:10px 14px;border-bottom:1px solid var(--rule);color:var(--carbon-faint)}
+  .read .rb{padding:13px 14px}
+  .read .hl{font-size:17px;line-height:1.45}
+  .read .hl b{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:700}
+  .read .left{margin-top:11px;padding-top:11px;border-top:1px solid var(--rule-soft);
+    display:grid;grid-template-columns:1fr auto;gap:12px;align-items:baseline}
+  .read .left .l{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--carbon-faint)}
+  .read .left .n{font-family:var(--mono);font-size:26px;font-variant-numeric:tabular-nums;font-weight:700;color:var(--amber)}
+  .read.perfect .left .n{color:var(--green)}
+  .read .note{margin-top:9px;font-size:14px;color:var(--carbon-soft)}
+
+  .grid7{font-family:var(--mono);font-size:25px;line-height:1.4;letter-spacing:.08em;text-align:center;padding:16px;white-space:pre-line}
+  .runtot{text-align:center;padding:4px 15px 16px}
+  .runtot .big{font-family:var(--mono);font-size:45px;font-variant-numeric:tabular-nums;line-height:1}
+  .runtot .big.up{color:var(--green)} .runtot .big.dn{color:var(--red)}
+  .runtot .cap{font-size:15px;color:var(--carbon-soft);margin-top:6px}
+  .runtot .cap.rl{margin-top:9px;padding-top:9px;border-top:1px solid var(--rule-soft);font-size:14px}
+  /* THE STAKE. Stated before you play rather than after you lose it — the
+     whole point of money that can go down is that you knew it could. */
+  .stake{margin:0 18px 14px;padding:12px 14px;border:1px solid var(--carbon);background:var(--stock-2);
+    display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:baseline}
+  .stake .l{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--carbon-faint)}
+  .stake .n{font-family:var(--mono);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;grid-row:span 2}
+  .stake .s{grid-column:1;font-size:13.5px;color:var(--carbon-soft);line-height:1.45}
+  .stake.thin{border-color:var(--amber)} .stake.thin .n{color:var(--amber)}
+  .stake.broke{border-color:var(--red)}  .stake.broke .n{color:var(--red)}
+  /* and what it did, at the end */
+  .bankline{margin:14px 15px 0;padding:12px 14px;border:1px solid var(--carbon);background:var(--stock-2);
+    display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:baseline}
+  .bankline .l{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--carbon-faint)}
+  .bankline .n{font-family:var(--mono);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;grid-row:span 2}
+  .bankline .s{grid-column:1;font-size:13.5px;color:var(--carbon-soft);line-height:1.45}
+  /* the bankroll did not reach the disk. GOLD, not red: nothing was refused
+     and nothing is wrong with the deal — the browser will not keep it. */
+  .bankline.warn{grid-template-columns:1fr;border-color:var(--gold,#a8873a)}
+  .bankline.warn .s{color:var(--gold,#a8873a)}
+  .bankline.up .n{color:var(--green)} .bankline.dn .n{color:var(--red)}
+  /* ── the sentence under the bankroll needs the whole width on a phone ────
+     Both of these boxes put the big number in a column of its own that spans
+     two rows, which leaves the explaining sentence in a 55%-wide gutter with
+     dead space beside it — three cramped lines against an empty half-box.
+     On a phone the number gets its row and the sentence gets the width. */
+  @media (max-width:560px){
+    .stake .n, .bankline .n{grid-row:auto}
+    .stake .s, .bankline .s{grid-column:1 / -1}
+  }
+  .rec{margin:0 18px 16px;padding:10px 13px;border:1px solid var(--rule);background:var(--stock-2);
+    font-size:14px;color:var(--carbon-soft);text-align:center}
+  .rec b{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--carbon)}
+  .rec .done{margin-top:6px;padding-top:6px;border-top:1px solid var(--rule-soft);font-size:13px;color:var(--carbon-faint)}
+  .ledger{margin:0 15px}
+  .lrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule-soft);font-size:14px;align-items:baseline}
+  .lrow .g{font-family:var(--mono);font-size:15px;letter-spacing:.05em}
+  .lrow .m{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+  .lrow .m.up{color:var(--green)} .lrow .m.dn{color:var(--red)}
+  .legend{margin:13px 15px 0;display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;font-size:14px;color:var(--carbon-soft)}
+  .legend b{font-style:normal;font-size:16px;margin-right:6px}
+  .share{margin:13px 15px 0;background:var(--stock-3);border:1px solid var(--rule);padding:14px;font-family:var(--mono);font-size:14px;white-space:pre-line;line-height:1.6}
+  .copybtn{margin:12px 15px 0;font-size:11px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--carbon);
+    background:transparent;color:var(--carbon);padding:12px 15px;width:calc(100% - 30px)}
+  .copybtn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .filter{padding:15px;font-size:15px;color:var(--carbon-soft);border-top:1px solid var(--rule);margin-top:14px}
+  .filter a{color:var(--carbon);text-decoration:none;border-bottom:1px solid var(--carbon);font-family:var(--mono);font-size:12px}
+  .foot{text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--carbon-faint);margin-top:16px;line-height:1.9}
+  .help{margin:0 15px 15px;border:1px solid var(--rule);background:var(--stock-2);font-size:15px}
+  .help summary{padding:11px 12px;font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--carbon-soft)}
+  .help .hb{padding:0 12px 12px;color:var(--carbon-soft)}
+  .help p{margin:9px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="board" id="board"></div>
+  <div class="foot">A game. Fictional houses, fictional money.</div>
+</div>
+
+<script>var SRBoard = (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+  // src/index.ts
+  var index_exports = {};
+  __export(index_exports, {
+    ASK_SIGNALS: () => ASK_SIGNALS,
+    BASE_FINANCE_RATE: () => BASE_FINANCE_RATE,
+    DRAWABLE: () => DRAWABLE,
+    KNOWABLE_PER_HOUSE: () => KNOWABLE_PER_HOUSE,
+    LOOK_BUDGET: () => LOOK_BUDGET,
+    MODIFIERS: () => MODIFIERS,
+    MOTIVATION_FACTOR: () => MOTIVATION_FACTOR,
+    ROUNDS: () => ROUNDS,
+    ROUND_CLOCK: () => ROUND_CLOCK,
+    ROUND_ONE: () => ROUND_ONE,
+    START_CAPITAL: () => START_CAPITAL,
+    TENDENCIES: () => TENDENCIES,
+    UNTIMED_ROUNDS: () => UNTIMED_ROUNDS,
+    bestFixSet: () => bestFixSet,
+    bestRenovationValue: () => bestRenovationValue,
+    bidsFor: () => bidsFor,
+    boardForClient: () => boardForClient,
+    boardForRound: () => boardForRound,
+    buildBoard: () => buildBoard,
+    buildCast: () => buildCast,
+    buildRun: () => buildRun,
+    difficultyFor: () => difficultyFor,
+    financeCost: () => financeCost,
+    finishSale: () => finishSale,
+    jobsFor: () => jobsFor,
+    marketSwing: () => marketSwing,
+    priceToWin: () => priceToWin,
+    renovationCost: () => renovationCost,
+    runShareString: () => runShareString,
+    salePrice: () => salePrice,
+    scoreRound: () => scoreRound,
+    shareString: () => shareString,
+    totalCost: () => totalCost,
+    visibleAppeal: () => visibleAppeal
+  });
+
+  // ../scenario/src/rng.ts
+  function hashSeed(str) {
+    let h = 1779033703 ^ str.length;
+    for (let i = 0; i < str.length; i++) {
+      h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+      h = h << 13 | h >>> 19;
+    }
+    h = Math.imul(h ^ h >>> 16, 2246822507);
+    h = Math.imul(h ^ h >>> 13, 3266489909);
+    return (h ^= h >>> 16) >>> 0;
+  }
+  function rng(seed) {
+    let a = hashSeed(seed);
+    return function() {
+      a |= 0;
+      a = a + 1831565813 | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  var int = (r, lo, hi) => lo + Math.floor(r() * (hi - lo + 1));
+  var pick = (r, xs) => xs[Math.floor(r() * xs.length)];
+  var float = (r, lo, hi) => lo + r() * (hi - lo);
+  var roundTo = (n, step) => Math.round(n / step) * step;
+  function dailySeed(isoDate) {
+    return `daily-${isoDate}`;
+  }
+
+  // ../scenario/src/data.ts
+  var STREETS = [
+    "Bellhaven",
+    "Halloway",
+    "Ashcombe",
+    "Kestrel",
+    "Sumter",
+    "Marlow",
+    "Pellard",
+    "Thornbury",
+    "Vance",
+    "Ridley",
+    "Caldon",
+    "Fenwick",
+    "Harrow",
+    "Ilford",
+    "Jarrow",
+    "Kelso",
+    "Larkin",
+    "Merrow",
+    "Norbury",
+    "Ottley",
+    "Pinegrove",
+    "Quarrend",
+    "Rushmere",
+    "Selby",
+    "Tarrant",
+    "Upton",
+    "Verrall",
+    "Westerby",
+    "Yarrow",
+    "Ambleside",
+    "Brackwell",
+    "Cowdray",
+    "Duxbury",
+    "Ellerby"
+  ];
+  var SUFFIXES = ["Rd", "St", "Ln", "Ct", "Ave", "Way", "Dr", "Row", "Place"];
+  var METROS = [
+    { city: "Marston", state: "OH" },
+    { city: "Rell Harbor", state: "MI" },
+    { city: "Kingsmere", state: "IN" },
+    { city: "Alder Fork", state: "TN" },
+    { city: "Bramwell", state: "MO" },
+    { city: "Cadence", state: "GA" },
+    { city: "Dunmore", state: "PA" },
+    { city: "Eastvale Junction", state: "TX" }
+  ];
+  var STORIES = {
+    probate_resolution: [
+      "My mother passed in February. The house has been empty since. I live out of state and I just want it handled.",
+      "It came to us through the estate. Neither of us lives nearby and neither of us wants it."
+    ],
+    tired_landlord: [
+      "Owned it as a rental for eighteen years. I am done with tenants.",
+      "Four units, four sets of problems. I would like to be finished with all four."
+    ],
+    speed: [
+      "I start a new job in another state on the first. I need this closed before then.",
+      "We already bought the next one. This has to go."
+    ],
+    highest_price: [
+      "I am not in a hurry. I want what it is worth.",
+      "Two other people have looked at it. I am going to take the best number."
+    ],
+    monthly_income: [
+      "I do not need a lump sum. What I need is something every month.",
+      "The lump sum is a tax problem for me. Payments are not."
+    ],
+    avoiding_repairs: [
+      "I know what it needs. I am not doing any of it.",
+      "The last contractor quoted me and I have not slept since."
+    ],
+    certainty: [
+      "The last two buyers fell through on financing. I want one that closes.",
+      "I have had it under contract twice. I would like it to be the last time."
+    ],
+    convenience: [
+      "Whatever is simplest. I do not want to manage a process.",
+      "I would like to sign once and be done."
+    ],
+    unknown: [
+      "I am just seeing what it might be worth.",
+      "A neighbour said you buy houses. That is all I know."
+    ]
+  };
+
+  // ../scenario/src/generate.ts
+  function percentile(sorted, p) {
+    if (sorted.length === 0) return NaN;
+    if (sorted.length === 1) return sorted[0];
+    const idx = (sorted.length - 1) * p;
+    const lo = Math.floor(idx);
+    const hi = Math.ceil(idx);
+    const frac = idx - lo;
+    return sorted[lo] * (1 - frac) + sorted[hi] * frac;
+  }
+  function ppsfOf(comps) {
+    return comps.filter((c) => c.included).map((c) => c.sale_price / c.sqft).sort((a, b) => a - b);
+  }
+  var RATES = {
+    kitchen: { good: 0, fair: 4, poor: 12, bad: 20 },
+    bathrooms: { good: 0, fair: 3, poor: 8, bad: 14 },
+    roof: { good: 0, fair: 1.5, poor: 4.5, bad: 7 },
+    plumbing: { good: 0, fair: 1.5, poor: 5, bad: 10 },
+    flooring: { good: 0, fair: 2, poor: 5, bad: 8 },
+    interior_paint: { good: 0, fair: 1.5, poor: 4, bad: 7 },
+    hvac: { good: 0, fair: 1.2, poor: 3.5, bad: 6 },
+    windows: { good: 0, fair: 1, poor: 3, bad: 5 },
+    exterior: { good: 0, fair: 1, poor: 3, bad: 6 },
+    electrical: { good: 0, fair: 1.5, poor: 4, bad: 8 },
+    landscaping: { good: 0, fair: 0.5, poor: 1.5, bad: 3 },
+    foundation: { good: 0, fair: 0.5, poor: 4, bad: 12 }
+  };
+  var SYSTEM_IDS = Object.keys(RATES);
+  var COND_SCORE = { good: 0, fair: 1, poor: 2, bad: 3 };
+  function scoreToCondition(avg) {
+    if (avg < 0.5) return "good";
+    if (avg < 1.5) return "fair";
+    if (avg < 2.5) return "poor";
+    return "bad";
+  }
+  function ageMultiplier(yearBuilt, valuationYear) {
+    const age = valuationYear - yearBuilt;
+    if (age > 50) return 1.25;
+    if (age > 30) return 1.12;
+    if (age > 15) return 1.05;
+    return 1;
+  }
+  function repairEstimate(systems, sqft, yearBuilt, valuationYear) {
+    const answered = SYSTEM_IDS.filter((id) => systems[id] && systems[id] !== "none");
+    if (answered.length === 0) return 0;
+    const avg = answered.reduce((s, id) => s + COND_SCORE[systems[id]], 0) / answered.length;
+    const imputed = scoreToCondition(avg);
+    const mult = ageMultiplier(yearBuilt, valuationYear);
+    let total = 0;
+    for (const id of SYSTEM_IDS) {
+      const cond = systems[id] && systems[id] !== "none" ? systems[id] : imputed;
+      total += Math.round(RATES[id][cond] * sqft * mult);
+    }
+    return total;
+  }
+  var SHAPE = {
+    easy: { n: 3, sqftVar: 0.04, ppsfVar: 0.03, outlier: false },
+    medium: { n: 5, sqftVar: 0.28, ppsfVar: 0.06, outlier: false },
+    hard: { n: 5, sqftVar: 0.3, ppsfVar: 0.08, outlier: true }
+  };
+  var round1k = (n) => Math.round(n / 1e3) * 1e3;
+  function generate(seed, difficulty, valuationYear) {
+    const r = rng(seed);
+    const metro = pick(r, METROS);
+    const shape = SHAPE[difficulty];
+    const sqft = int(r, 980, 2400);
+    const beds = sqft < 1200 ? int(r, 2, 3) : sqft < 1800 ? 3 : int(r, 3, 4);
+    const baths = beds <= 2 ? 1 : int(r, 1, 2);
+    const yearBuilt = int(r, 1946, 2004);
+    const street = pick(r, STREETS);
+    const address = `${int(r, 12, 9899)} ${street} ${pick(r, SUFFIXES)}`;
+    const basePpsf = float(r, 88, 190);
+    const comps = [];
+    for (let i = 0; i < shape.n; i++) {
+      const cSqft = Math.round(sqft * (1 + float(r, -shape.sqftVar, shape.sqftVar)));
+      const renovated = r() < 0.3;
+      let cPpsf = basePpsf * (1 + float(r, -shape.ppsfVar, shape.ppsfVar)) * (renovated ? 1.06 : 1);
+      if (shape.outlier && i === shape.n - 1) cPpsf = basePpsf * (r() < 0.5 ? 1.42 : 0.62);
+      comps.push({
+        address: `${int(r, 12, 9899)} ${pick(r, STREETS)} ${pick(r, SUFFIXES)}`,
+        beds: Math.max(1, beds + int(r, -1, 1)),
+        baths: Math.max(1, baths + int(r, 0, 1)),
+        sqft: cSqft,
+        sale_price: Math.round(cPpsf * cSqft),
+        months_ago: int(r, 1, 11),
+        renovated,
+        distance_mi: Math.round(float(r, 0.1, 0.9) * 10) / 10,
+        included: true
+      });
+    }
+    const ppsf = ppsfOf(comps);
+    const arv = percentile(ppsf, 0.5) * sqft;
+    const arvBand = [percentile(ppsf, 0.25) * sqft, percentile(ppsf, 0.75) * sqft];
+    const systems = {};
+    const answeredCount = int(r, 5, 10);
+    const pool = [...SYSTEM_IDS];
+    const rough = r() < 0.45;
+    for (let i = 0; i < answeredCount && pool.length; i++) {
+      const id = pool.splice(Math.floor(r() * pool.length), 1)[0];
+      const roll = r();
+      systems[id] = rough ? roll < 0.25 ? "good" : roll < 0.55 ? "fair" : roll < 0.85 ? "poor" : "bad" : roll < 0.5 ? "good" : roll < 0.85 ? "fair" : "poor";
+    }
+    const repairs = repairEstimate(systems, sqft, yearBuilt, valuationYear);
+    const mao = {
+      conservative: round1k(arv * 0.65 - repairs - repairs * 0.35 - 25e3),
+      smart: round1k(arv * 0.72 - repairs - repairs * 0.2 - 2e4),
+      stretch: round1k(arv * 0.78 - repairs - repairs * 0.1 - 1e4)
+    };
+    const priority = pick(r, [
+      "probate_resolution",
+      "tired_landlord",
+      "speed",
+      "highest_price",
+      "monthly_income",
+      "avoiding_repairs",
+      "certainty",
+      "convenience",
+      "unknown"
+    ]);
+    const asking = roundTo(arv * float(r, 0.62, 1.28), 500);
+    const freeClear = priority === "probate_resolution" ? r() < 0.75 : r() < 0.35;
+    const loanBalance = freeClear ? 0 : roundTo(arv * float(r, 0.28, 0.72), 500);
+    const seller = {
+      seller_priority: priority,
+      motivation_level: r() < 0.4 ? "high" : r() < 0.75 ? "medium" : "low",
+      timeline: priority === "speed" ? "urgent" : r() < 0.3 ? "urgent" : r() < 0.8 ? "flexible" : "none",
+      is_listed: r() < 0.22 ? "yes" : "no",
+      comparing_investors: r() < 0.3 ? "yes" : "no",
+      seller_asking_price: asking
+    };
+    const financing = {
+      debt_status: freeClear ? "free_clear" : "has_mortgage",
+      loan_balance: loanBalance,
+      // A below-market legacy rate is the whole reason sub-to exists; make it common.
+      rate: freeClear ? null : Math.round(float(r, 0.028, 0.079) * 1e3) / 1e3
+    };
+    const hasLoan = !freeClear;
+    const equity = Math.max(0, arv - loanBalance);
+    const candidates = [
+      { model_id: "cash.v1", status: mao.smart > 0 ? "green" : "red", max_to_seller: mao.smart > 0 ? mao.smart : null },
+      { model_id: "subto.v1", status: hasLoan ? "green" : "red", max_to_seller: hasLoan ? round1k(loanBalance + Math.min(equity * 0.55, mao.stretch)) : null },
+      { model_id: "subto_hybrid.v1", status: hasLoan ? "green" : "red", max_to_seller: hasLoan ? round1k(loanBalance + Math.min(equity * 0.4, mao.smart)) : null },
+      { model_id: "seller_finance.v1", status: freeClear ? "green" : "yellow", max_to_seller: round1k(arv * (freeClear ? 0.82 : 0.7)) },
+      { model_id: "wrap.v1", status: hasLoan ? "yellow" : "red", max_to_seller: hasLoan ? round1k(arv * 0.76) : null },
+      { model_id: "novation.v1", status: seller.is_listed === "yes" ? "green" : "yellow", max_to_seller: round1k(arv * 0.86 - repairs) }
+    ];
+    const FAVOURED = {
+      highest_price: "seller_finance.v1",
+      speed: "cash.v1",
+      certainty: "cash.v1",
+      convenience: "cash.v1",
+      monthly_income: "seller_finance.v1",
+      avoiding_repairs: "cash.v1",
+      probate_resolution: "cash.v1",
+      tired_landlord: "subto.v1"
+    };
+    const CARRY = /* @__PURE__ */ new Set(["seller_finance.v1", "subto.v1", "subto_hybrid.v1", "wrap.v1"]);
+    if (r() < 0.9) {
+      const fav = FAVOURED[priority];
+      const target = candidates.find((c) => c.model_id === fav && c.status !== "red") ?? candidates.find((c) => c.model_id === "cash.v1");
+      if (target) {
+        const others = candidates.filter((c) => c !== target && c.status !== "red" && c.max_to_seller != null);
+        if (CARRY.has(target.model_id)) {
+          const maxOther = Math.max(0, ...others.map((c) => c.max_to_seller));
+          target.max_to_seller = round1k(Math.max(target.max_to_seller ?? 0, maxOther * 1.28));
+        } else {
+          for (const c of others) if (c.status === "green") c.status = "orange";
+        }
+      }
+    }
+    const exits = {
+      flip_max: round1k(arv * 0.75 - repairs),
+      rental_max: round1k(arv * 0.68 - repairs),
+      brrrr_max: round1k(arv * 0.72 - repairs)
+    };
+    return {
+      seed,
+      difficulty,
+      valuation_year: valuationYear,
+      subject: { address: `${address}, ${metro.city}, ${metro.state}`, beds, baths, sqft, year_built: yearBuilt, asking_price: asking },
+      seller_story: pick(r, STORIES[priority] ?? STORIES.unknown),
+      seller,
+      financing,
+      systems,
+      comps,
+      truth: { arv, arv_band: arvBand, repairs, mao, candidates, exits }
+    };
+  }
+
+  // src/rivals.ts
+  var TENDENCIES = {
+    clean_chaser: { appetite: 0.42, reach: [0.3, 0.72], blunder: 0.16, tell: "pays up for a clean house and ignores the ugly ones" },
+    cheap_hunter: { appetite: 0.5, reach: [0.18, 0.58], blunder: 0.1, tell: "goes wherever the price per square foot is lowest" },
+    sniper: { appetite: 0.26, reach: [0.62, 0.88], blunder: 0.04, tell: "bids rarely, and bids like it did the arithmetic" },
+    lowballer: { appetite: 0.55, reach: [-0.24, 0.1], blunder: 0, tell: "offers on everything and gets refused constantly" },
+    volume: { appetite: 0.66, reach: [0.22, 0.52], blunder: 0.14, tell: "makes an offer on almost everything, never the top one" }
+  };
+  var NAMES = [
+    "Halbrook Capital",
+    "D. Osei",
+    "Kettleman & Sons",
+    "Ridge Line Homes",
+    "M. Vantriese",
+    "Two Rivers Holdings",
+    "A. Okonkwo",
+    "Fairmount Property Co",
+    "S. Demb\xE9l\xE9",
+    "Cardinal Point",
+    "R. Achterberg",
+    "Ninth Street Partners",
+    "Bellweather Homes",
+    "J. Marchetti",
+    "Quarry Road Group",
+    "T. Iwuchukwu"
+  ];
+  function buildCast(seed, size = 5) {
+    const r = rng(`${seed}-cast`);
+    const kinds = ["sniper"];
+    const rest = ["clean_chaser", "cheap_hunter", "lowballer", "volume"];
+    for (let i = rest.length - 1; i > 0; i--) {
+      const j = Math.floor(r() * (i + 1));
+      [rest[i], rest[j]] = [rest[j], rest[i]];
+    }
+    kinds.push(...rest.slice(0, Math.max(0, size - 1)));
+    const used = /* @__PURE__ */ new Set();
+    return kinds.map((tendency) => {
+      let n = Math.floor(r() * NAMES.length);
+      while (used.has(n)) n = (n + 1) % NAMES.length;
+      used.add(n);
+      return { name: NAMES[n], tendency, tell: TENDENCIES[tendency].tell };
+    });
+  }
+  function visibleAppeal(ppsf, conditions, i) {
+    const lo = Math.min(...ppsf);
+    const hi = Math.max(...ppsf);
+    const cheapness = hi === lo ? 0.5 : (hi - ppsf[i]) / (hi - lo);
+    const cond = conditions[i] === "Clean" ? 0.2 : conditions[i] === "Dated" ? 0 : -0.2;
+    return Math.max(0, Math.min(1, cheapness * 0.8 + 0.1 + cond));
+  }
+  function pull(t, appeal, cheapness, clean) {
+    switch (t) {
+      case "clean_chaser":
+        return clean ? 0.42 : -0.24;
+      case "cheap_hunter":
+        return (cheapness - 0.5) * 0.85;
+      case "sniper":
+        return (appeal - 0.5) * 0.3;
+      case "lowballer":
+        return 0.06;
+      case "volume":
+        return 0.1;
+    }
+  }
+  function bidsFor(seed, i, cast, appeal, cheapness, clean, reservation, walkAway, difficulty = 1) {
+    const r = rng(`${seed}-rivals-${i}`);
+    const headroom = Math.max(0, walkAway - reservation);
+    const out = [];
+    for (const rival of cast) {
+      const spec = TENDENCIES[rival.tendency];
+      const chance = Math.max(0.04, Math.min(0.95, spec.appetite + pull(rival.tendency, appeal, cheapness, clean)));
+      if (r() >= chance) continue;
+      const [lo, hi] = spec.reach;
+      const t = r() ** 0.8;
+      let frac = (lo + t * (hi - lo)) * difficulty;
+      const blundered = r() < spec.blunder;
+      if (blundered) frac = float(r, 1.04, 1.34);
+      const amount = roundTo(reservation + headroom * frac, 500);
+      out.push({
+        buyer: rival.name,
+        tendency: rival.tendency,
+        amount,
+        qualifies: amount >= reservation,
+        blunder: blundered
+      });
+    }
+    if (out.length > 0 && !out.some((b) => b.qualifies) && r() < 0.72) {
+      const rival = cast[Math.floor(r() * cast.length)];
+      const spec = TENDENCIES[rival.tendency];
+      const frac = Math.max(0.08, spec.reach[0] + (spec.reach[1] - spec.reach[0]) * 0.35) * difficulty;
+      const amount = roundTo(reservation + headroom * frac, 500);
+      out.push({ buyer: rival.name, tendency: rival.tendency, amount, qualifies: amount >= reservation, blunder: false });
+    }
+    if (out.length === 0) {
+      const rival = cast[Math.floor(r() * cast.length)];
+      const [lo, hi] = TENDENCIES[rival.tendency].reach;
+      const frac = Math.max(0.05, lo + (hi - lo) * 0.15) * difficulty;
+      const amount = roundTo(reservation + headroom * frac, 500);
+      out.push({ buyer: rival.name, tendency: rival.tendency, amount, qualifies: amount >= reservation, blunder: false });
+    }
+    out.sort((a, b) => b.amount - a.amount);
+    return out;
+  }
+  function priceToWin(reservation, bids) {
+    let top = reservation;
+    for (const b of bids) if (b.qualifies && b.amount > top) top = b.amount;
+    return top;
+  }
+
+  // src/modifiers.ts
+  var MODIFIERS = {
+    open_market: {
+      id: "open_market",
+      name: "Open market",
+      blurb: "Nothing unusual. Five houses and the people who want them.",
+      difficulty: 1,
+      comps: 2
+    },
+    quiet_market: {
+      id: "quiet_market",
+      name: "Quiet market",
+      blurb: "Rates moved last week. Half the buyers stayed home \u2014 but the sellers have not heard yet.",
+      difficulty: 0.82,
+      comps: 2,
+      appetite: -0.2
+    },
+    auction_week: {
+      id: "auction_week",
+      name: "Auction week",
+      blurb: "Everybody in the county is out today. Expect company on anything that shows well.",
+      difficulty: 1.16,
+      comps: 2,
+      appetite: 0.22
+    },
+    estate_week: {
+      id: "estate_week",
+      name: "Probate calendar",
+      blurb: "The court cleared a backlog. Every seller on this street needs it gone.",
+      difficulty: 1.05,
+      comps: 2,
+      forceMotivation: "high"
+    },
+    thin_data: {
+      id: "thin_data",
+      name: "Thin data",
+      blurb: "The county recorder is three months behind. One comp per house, and you had better trust it.",
+      difficulty: 1,
+      comps: 1
+    },
+    firm_sellers: {
+      id: "firm_sellers",
+      name: "Firm sellers",
+      blurb: "Word got around that prices are up. Nobody on this street is in a hurry.",
+      difficulty: 0.95,
+      comps: 2,
+      forceMotivation: "low"
+    },
+    cash_crunch: {
+      id: "cash_crunch",
+      name: "Cash crunch",
+      blurb: "Your lender repriced. Anything you borrow above your cash costs double.",
+      difficulty: 1,
+      comps: 2,
+      financeRate: 0.06
+    },
+    flood_of_paper: {
+      id: "flood_of_paper",
+      name: "Flood of paper",
+      blurb: "Five wholesalers blasted this street this morning. Offers are already stacked up.",
+      difficulty: 1.1,
+      comps: 2,
+      appetite: 0.3
+    }
+  };
+  var ROUND_ONE = "open_market";
+  var DRAWABLE = [
+    "quiet_market",
+    "auction_week",
+    "estate_week",
+    "thin_data",
+    "firm_sellers",
+    "cash_crunch",
+    "flood_of_paper"
+  ];
+
+  // src/repairs.ts
+  var ESSENTIAL = [
+    { id: "roof", label: "Roof", weight: 1, mult: [1.25, 1.75], note: "Three layers of shingle. Someone decided the fix for a bad roof was another roof." },
+    { id: "hvac", label: "Furnace & air", weight: 0.8, mult: [1.2, 1.65], note: "It runs. It also screams. Those are two different facts." },
+    { id: "elec", label: "Electrical", weight: 0.7, mult: [1.3, 1.8], note: "There is a penny in the fuse box. An actual penny." },
+    { id: "plumb", label: "Plumbing", weight: 0.7, mult: [1.2, 1.6], note: "A previous owner repaired a supply line with a bicycle inner tube and hope." },
+    { id: "found", label: "Foundation", weight: 0.5, mult: [1.35, 1.9], note: "The crack is old and stable. That is the good news and it is also the bad news." },
+    { id: "sewer", label: "Sewer line", weight: 0.5, mult: [1.3, 1.85], note: "The camera got eleven feet in and then declined to continue." },
+    { id: "termite", label: "Termite damage", weight: 0.4, mult: [1.25, 1.7], note: "The inspector tapped a joist and then looked sad for a while." },
+    { id: "water", label: "Water heater", weight: 0.6, mult: [1.15, 1.55], note: "Manufactured during a different presidency. Sweating about it." }
+  ];
+  var COSMETIC = [
+    {
+      id: "kitchen",
+      label: "Kitchen refresh",
+      weight: 1,
+      mult: [0.75, 1.45],
+      noteGood: "The layout is good and the light is good. It needs doors and a worktop, not a gut.",
+      noteBad: "You would be taking it back to the studs. The room fights you the whole way."
+    },
+    {
+      id: "bath",
+      label: "Bathrooms",
+      weight: 0.9,
+      mult: [0.75, 1.45],
+      noteGood: "Pink tile, but the rooms are square and everything is where it should be.",
+      noteBad: "Two bathrooms, both awkward, and both need the floor lifted first."
+    },
+    {
+      id: "floors",
+      label: "Flooring",
+      weight: 0.9,
+      mult: [0.8, 1.4],
+      noteGood: "There is oak under that carpet. Somebody carpeted over oak.",
+      noteBad: "Slab underneath and it is not level. Whatever goes down has to be built up first."
+    },
+    {
+      id: "paint",
+      label: "Paint throughout",
+      weight: 1,
+      mult: [0.85, 1.5],
+      noteGood: "Walls are sound. Two coats and it photographs like a different house.",
+      noteBad: "Every wall is textured. Somebody really committed to texture."
+    },
+    {
+      id: "windows",
+      label: "Windows",
+      weight: 0.7,
+      mult: [0.8, 1.35],
+      noteGood: "Single pane, standard sizes, square openings. An easy swap.",
+      noteBad: "Nine odd sizes and two of them arched. Every one is a special order."
+    },
+    {
+      id: "kerb",
+      label: "Kerb appeal",
+      weight: 0.9,
+      mult: [0.85, 1.45],
+      noteGood: "A skip, a weekend and some mulch. The house behind it is fine.",
+      noteBad: "You can tidy the front all you like. The house still looks like what it is."
+    },
+    {
+      id: "stage",
+      label: "Staging",
+      weight: 0.7,
+      mult: [0.8, 1.35],
+      noteGood: "Empty and echoey. Nobody walking through can picture a sofa in it.",
+      noteBad: "It shows fine as it is. You would be renting furniture to prove a point."
+    },
+    {
+      id: "garage",
+      label: "Garage conversion",
+      weight: 0.5,
+      mult: [0.7, 1.3],
+      noteGood: "Everything else on this street has four bedrooms. This has three and a garage.",
+      noteBad: "Nobody round here wants one less garage. They all have two cars."
+    }
+  ];
+  var VANITY = [
+    { id: "pool", label: "Pool resurfacing", weight: 0.7, mult: [0.3, 0.6], note: "The pool is a hole in the ground you pour money into. That is not a metaphor." },
+    { id: "koi", label: "Koi pond", weight: 0.5, mult: [0.15, 0.45], note: "Comes with six koi. The seller was firm that they convey." },
+    { id: "theater", label: "Home theatre", weight: 0.6, mult: [0.3, 0.6], note: "Seven speakers. Six work. The seventh is behind drywall and stays there." },
+    { id: "cellar", label: "Wine cellar", weight: 0.5, mult: [0.25, 0.55], note: "A closet with a thermostat and ambitions well beyond its station." },
+    { id: "sauna", label: "Sauna", weight: 0.4, mult: [0.2, 0.5], note: "In the garage. Vented into the garage." },
+    { id: "bar", label: "Built-in tiki bar", weight: 0.5, mult: [0.2, 0.5], note: "Structurally sound. Spiritually, a lot going on." },
+    { id: "mural", label: "The mural", weight: 0.4, mult: [0.1, 0.4], note: "A full-wall portrait of the late family cat, Winston. He is watching." },
+    { id: "gazebo", label: "The gazebo", weight: 0.4, mult: [0.15, 0.45], note: "Hand-built, not quite square, and the wisteria may be load-bearing." },
+    { id: "aquar", label: "Wall aquarium", weight: 0.3, mult: [0.1, 0.4], note: "Two hundred gallons, in a wall, above a dining table. Someone signed off on this." }
+  ];
+  function weightedPick(r, pool, used) {
+    const avail = pool.filter((x) => !used.has(x.id));
+    if (!avail.length) return null;
+    const total = avail.reduce((s, x) => s + x.weight, 0);
+    let t = r() * total;
+    for (const x of avail) {
+      t -= x.weight;
+      if (t <= 0) return x;
+    }
+    return avail[avail.length - 1];
+  }
+  function jobsFor(seed, i, quote, condition) {
+    const r = rng(`${seed}-jobs-${i}`);
+    const repairTotal = Math.max(6e3, quote);
+    const nEss = condition === "Rough" ? 3 : condition === "Dated" ? 2 : 1;
+    const nCos = condition === "Clean" ? 3 : r() < 0.5 ? 2 : 3;
+    const nVan = r() < 0.35 ? 2 : 1;
+    const used = /* @__PURE__ */ new Set();
+    const take = (pool, n) => {
+      const out = [];
+      for (let k = 0; k < n; k++) {
+        const x = weightedPick(r, pool, used);
+        if (x) {
+          used.add(x.id);
+          out.push(x);
+        }
+      }
+      return out;
+    };
+    const ess = take(ESSENTIAL, nEss);
+    const cos = take(COSMETIC, nCos);
+    const van = take(VANITY, nVan);
+    while (ess.length + cos.length + van.length > 6 && cos.length > 1) cos.pop();
+    while (ess.length + cos.length + van.length > 6 && van.length > 1) van.pop();
+    const essShare = ess.length ? float(r, 0.42, 0.58) : 0;
+    const vanShare = float(r, 0.12, 0.22);
+    const cosShare = Math.max(0.1, 1 - essShare - vanShare);
+    const jobs = [];
+    const spread = (budget, items, kind) => {
+      if (!items.length || budget <= 0) return;
+      const weights = items.map(() => float(r, 0.6, 1.4));
+      const wsum = weights.reduce((a, b) => a + b, 0);
+      items.forEach((it, k) => {
+        const cost = Math.max(1e3, roundTo(budget * weights[k] / wsum, 500));
+        const raw = roundTo(cost * float(r, it.mult[0], it.mult[1]), 250);
+        const adds = kind === "essential" ? Math.max(cost + 250, raw) : kind === "vanity" ? Math.min(cost - 250, Math.max(250, raw)) : Math.max(250, raw);
+        const note = kind === "cosmetic" ? adds > cost ? it.noteGood : it.noteBad : it.note;
+        jobs.push({ id: it.id, label: it.label, kind, cost, adds, note });
+      });
+    };
+    spread(repairTotal * essShare, ess, "essential");
+    spread(repairTotal * cosShare, cos, "cosmetic");
+    spread(repairTotal * vanShare, van, "vanity");
+    return jobs;
+  }
+  function totalCost(jobs) {
+    return jobs.reduce((s, j) => s + j.cost, 0);
+  }
+  function salePrice(arv, jobs, fixed, swing = 0) {
+    let price = arv;
+    for (const j of jobs) if (!fixed.has(j.id)) price -= j.adds;
+    return Math.round(price * (1 + swing));
+  }
+  function renovationCost(jobs, fixed) {
+    let c = 0;
+    for (const j of jobs) if (fixed.has(j.id)) c += j.cost;
+    return c;
+  }
+  function bestFixSet(jobs) {
+    const out = /* @__PURE__ */ new Set();
+    for (const j of jobs) if (j.adds > j.cost) out.add(j.id);
+    return out;
+  }
+  function bestRenovationValue(arv, jobs) {
+    const best = bestFixSet(jobs);
+    return salePrice(arv, jobs, best) - renovationCost(jobs, best);
+  }
+  function marketSwing(seed, i) {
+    return float(rng(`${seed}-swing-${i}`), -0.03, 0.03);
+  }
+
+  // src/board.ts
+  var NEIGHBOURHOODS = [
+    "Fielder Park",
+    "Rowan Heights",
+    "Marsh End",
+    "Kestrel Ridge",
+    "Old Quarry",
+    "Linden Cross",
+    "Harbourgate",
+    "Ashfield",
+    "Pinewold",
+    "Cobble Hill",
+    "Deepwater",
+    "Elmgrove",
+    "Fenwick Bend",
+    "Garrison Flats"
+  ];
+  var ASK_SIGNALS = {
+    high: [
+      "Job starts out of state on the first. Wants it gone.",
+      "Already closed on the next one. Carrying both.",
+      "Estate sale. Nobody local wants it.",
+      "Owner relocated in March; empty since."
+    ],
+    medium: [
+      "Listed once, expired, never relisted.",
+      "Tired landlord. Three tenants, three problems.",
+      "Two names on the deed; only one is answering.",
+      "Would move on the right number, not a hurry."
+    ],
+    low: [
+      "Priced to what the neighbour got in 2021.",
+      "Turned down an offer last spring. Still talks about it.",
+      "No rush. Says he will wait for his price.",
+      "Lived there thirty years. It is worth what it is worth."
+    ]
+  };
+  var MOTIVATION_FACTOR = { high: 0.66, medium: 0.74, low: 0.82 };
+  function dayNumber(iso) {
+    const [y, m, d] = iso.split("-").map(Number);
+    const toDays = (yy, mm, dd) => {
+      const a = Math.floor((14 - mm) / 12);
+      const yr = yy + 4800 - a;
+      const mo = mm + 12 * a - 3;
+      return dd + Math.floor((153 * mo + 2) / 5) + 365 * yr + Math.floor(yr / 4) - Math.floor(yr / 100) + Math.floor(yr / 400) - 32045;
+    };
+    return toDays(y, m, d) - toDays(2026, 7, 28) + 213;
+  }
+  function conditionOf(scenario) {
+    const vals = Object.values(scenario.systems);
+    const score = vals.reduce((s, c) => s + (c === "bad" ? 3 : c === "poor" ? 2 : c === "fair" ? 1 : 0), 0) / Math.max(1, vals.length);
+    return score >= 1.5 ? "Rough" : score >= 0.6 ? "Dated" : "Clean";
+  }
+  function buildBoard(isoDate, valuationYear, opts = {}) {
+    const o = typeof opts === "number" ? { difficulty: opts } : opts;
+    const mod = MODIFIERS[o.modifier ?? "open_market"];
+    const difficulty = (o.difficulty ?? 1) * mod.difficulty;
+    const seed = dailySeed(isoDate) + (o.salt ?? "");
+    const cast = o.cast ?? buildCast(seed);
+    const r = rng(`${seed}-board`);
+    const name = NEIGHBOURHOODS[Math.floor(r() * NEIGHBOURHOODS.length)];
+    const cards = [];
+    const looks = [];
+    const base = [];
+    for (let i = 0; i < 5; i++) {
+      const s = generate(`${seed}-p${i}`, i === 4 ? "hard" : "medium", valuationYear);
+      const value_mid = s.truth.arv;
+      const value_band = s.truth.arv_band;
+      const repairs = s.truth.repairs;
+      const mot = mod.forceMotivation ?? s.seller.motivation_level;
+      const reservation = Math.round(value_mid * MOTIVATION_FACTOR[mot] / 500) * 500;
+      cards.push({
+        address: s.subject.address.split(",")[0],
+        // street only on the board
+        beds: s.subject.beds,
+        baths: s.subject.baths,
+        sqft: s.subject.sqft,
+        asking: s.subject.asking_price,
+        ppsf: Math.round(s.subject.asking_price / s.subject.sqft),
+        condition: conditionOf(s),
+        interest: 0
+        // filled below, once the whole board is visible
+      });
+      const pool = s.comps.length > 2 ? s.comps.slice(1) : s.comps;
+      const a0 = int(r, 0, pool.length - 1);
+      const a1 = pool.length > 1 ? (a0 + 1 + int(r, 0, pool.length - 2)) % pool.length : a0;
+      const picks = mod.comps === 1 ? [pool[a0]] : [pool[a0], pool[a1]];
+      const chosen = picks.map((c) => ({
+        address: c.address,
+        beds: c.beds,
+        sqft: c.sqft,
+        sale_price: c.sale_price,
+        months_ago: c.months_ago
+      }));
+      looks.push({
+        comps: chosen,
+        walkthrough: [0, 0],
+        // filled once the jobs exist — see below
+        ask: ASK_SIGNALS[mot][int(r, 0, ASK_SIGNALS[mot].length - 1)]
+      });
+      base.push({ value_mid, value_band, repairs, reservation, mot });
+    }
+    const ANCHOR_ROOM = 0.14;
+    const roomIfMotivated = (b) => (b.value_mid * (1 - MOTIVATION_FACTOR.high) - b.repairs) / b.value_mid;
+    let anchor = 0;
+    const roomFrac = (b) => (b.value_mid - b.repairs - b.reservation) / b.value_mid;
+    for (let i = 1; i < 5; i++) if (roomIfMotivated(base[i]) > roomIfMotivated(base[anchor])) anchor = i;
+    if (roomFrac(base[anchor]) < ANCHOR_ROOM) {
+      const b = base[anchor];
+      b.mot = "high";
+      b.reservation = Math.round(b.value_mid * MOTIVATION_FACTOR.high / 500) * 500;
+      const maxRepairs = b.value_mid - b.reservation - b.value_mid * ANCHOR_ROOM;
+      if (b.repairs > maxRepairs) b.repairs = Math.max(1e3, Math.round(maxRepairs / 100) * 100);
+      looks[anchor].ask = ASK_SIGNALS.high[int(r, 0, ASK_SIGNALS.high.length - 1)];
+      looks[anchor].walkthrough = [Math.round(b.repairs * 0.85), Math.round(b.repairs * 1.15)];
+    }
+    const ppsf = cards.map((c) => c.ppsf);
+    const conds = cards.map((c) => c.condition);
+    const truth = base.map((b, i) => {
+      const jobs = jobsFor(seed, i, b.repairs, conds[i]);
+      const repairs = totalCost(jobs);
+      const walk_away = bestRenovationValue(b.value_mid, jobs);
+      const appeal = visibleAppeal(ppsf, conds, i);
+      const lo = Math.min(...ppsf), hi = Math.max(...ppsf);
+      const cheapness = hi === lo ? 0.5 : (hi - ppsf[i]) / (hi - lo);
+      const bids = bidsFor(
+        seed,
+        i,
+        cast,
+        appeal,
+        cheapness,
+        conds[i] === "Clean",
+        b.reservation,
+        walk_away,
+        difficulty
+      );
+      const ptw = priceToWin(b.reservation, bids);
+      cards[i].interest = bids.length;
+      looks[i].walkthrough = [Math.round(repairs * 0.9), Math.round(repairs * 1.1)];
+      return {
+        value_mid: b.value_mid,
+        value_band: b.value_band,
+        repairs,
+        jobs,
+        reservation: b.reservation,
+        walk_away,
+        bids,
+        price_to_win: ptw,
+        // Both measured against a WELL-RUN renovation, not a fix-everything one.
+        // Scoring against fix-all would quietly punish the player for making the
+        // right call on the vanity jobs.
+        spread: walk_away - b.reservation,
+        achievable: walk_away - ptw
+      };
+    });
+    if (!truth.some((t) => t.achievable > 0)) {
+      let room = 0;
+      for (let i = 1; i < 5; i++) if (truth[i].walk_away - truth[i].reservation > truth[room].walk_away - truth[room].reservation) room = i;
+      const t = truth[room];
+      t.bids = t.bids.filter((b) => !b.blunder);
+      if (t.bids.length === 0) {
+        t.bids = [{ buyer: cast[0].name, tendency: cast[0].tendency, amount: t.reservation, qualifies: true, blunder: false }];
+      }
+      cards[room].interest = t.bids.length;
+      t.price_to_win = priceToWin(t.reservation, t.bids);
+      t.achievable = t.walk_away - t.price_to_win;
+    }
+    let best_index = 0;
+    for (let i = 1; i < 5; i++) if (truth[i].achievable > truth[best_index].achievable) best_index = i;
+    return { seed, modifier: mod, cast, number: dayNumber(isoDate), name, cards, looks, truth, best_index };
+  }
+  function boardForClient(b) {
+    const { truth, best_index, ...rest } = b;
+    return rest;
+  }
+
+  // src/score.ts
+  function scoreRound(board, a) {
+    const best_spread = board.truth[board.best_index].achievable;
+    const resolutions = board.truth.map((t, i) => {
+      const mine = a.bid_index === i && a.bid_amount != null ? a.bid_amount : null;
+      const topRival = t.bids.filter((b) => b.qualifies).sort((x, y) => y.amount - x.amount)[0] ?? null;
+      const offers = t.bids.length + (mine != null ? 1 : 0);
+      if (mine != null && mine >= t.reservation && (!topRival || mine >= topRival.amount)) {
+        return { index: i, sold_at: mine, winner: "you", offers };
+      }
+      if (topRival) return { index: i, sold_at: topRival.amount, winner: topRival.buyer, offers };
+      return { index: i, sold_at: null, winner: null, offers };
+    });
+    let outcome = "no_bid";
+    let your_spread = 0;
+    let needed = null;
+    let floor = null;
+    let finance_cost = 0;
+    let overpaid = false;
+    if (a.bid_index != null && a.bid_amount != null) {
+      const t = board.truth[a.bid_index];
+      const res = resolutions[a.bid_index];
+      floor = t.reservation;
+      if (res.winner === "you") {
+        outcome = "won";
+        const gross = t.walk_away - a.bid_amount;
+        overpaid = gross < 0;
+        if (a.capital != null) {
+          const borrowed = Math.max(0, a.bid_amount - a.capital);
+          finance_cost = Math.round(borrowed * (a.financeRate ?? 0.03));
+        }
+        your_spread = gross - finance_cost;
+      } else if (a.bid_amount < t.reservation) {
+        outcome = "refused";
+        needed = t.price_to_win;
+      } else {
+        outcome = "outbid";
+        needed = t.price_to_win;
+      }
+    }
+    const pct = best_spread > 0 ? Math.max(0, Math.min(100, Math.round(your_spread / best_spread * 100))) : 0;
+    const opened = new Set(a.opened);
+    const grid = board.cards.map((_, i) => {
+      if (a.bid_index === i) return outcome === "won" ? "\u{1F7E9}" : "\u{1F7E5}";
+      return opened.has(i) ? "\u{1F7E8}" : "\u2B1C";
+    });
+    return {
+      pct,
+      outcome,
+      needed,
+      floor,
+      finance_cost,
+      overpaid,
+      best_index: board.best_index,
+      best_spread,
+      your_spread,
+      achievable: board.truth.map((t) => t.achievable),
+      resolutions,
+      grid,
+      looks: a.looks
+    };
+  }
+  function finishSale(board, index, paid, fixed, capital, financeRate = 0.03) {
+    const t = board.truth[index];
+    const swing = marketSwing(board.seed, index);
+    const sold_for = salePrice(t.value_mid, t.jobs, fixed, swing);
+    const spent = renovationCost(t.jobs, fixed);
+    const borrowed = Math.max(0, paid + spent - capital);
+    const finance_cost = Math.round(borrowed * financeRate);
+    const all = new Set(t.jobs.map((j) => j.id));
+    const best = bestFixSet(t.jobs);
+    const at = (set) => salePrice(t.value_mid, t.jobs, set, swing) - paid - renovationCost(t.jobs, set) - Math.round(Math.max(0, paid + renovationCost(t.jobs, set) - capital) * financeRate);
+    return {
+      jobs: t.jobs,
+      fixed: [...fixed],
+      arv: t.value_mid,
+      sold_for,
+      swing,
+      spent,
+      paid,
+      finance_cost,
+      profit: sold_for - paid - spent - finance_cost,
+      profit_if_fix_all: at(all),
+      profit_if_perfect: at(best)
+    };
+  }
+
+  // src/share.ts
+  function shareString(board, result) {
+    const looks = `${result.looks} look${result.looks === 1 ? "" : "s"}`;
+    return `Negotiation Inc ${board.number} \u2014 ${board.name}
+${result.grid.join("")}  ${result.pct}% \xB7 ${looks}`;
+  }
+  function runShareString(runNumber, lines, finalCapital) {
+    const grid = lines.map((l) => l.grid.join("")).join("\n");
+    const bought = lines.filter((l) => l.grid.includes("\u{1F7E9}")).length;
+    const money = `$${Math.round(finalCapital).toLocaleString("en-US")}`;
+    const rounds = `${lines.length} round${lines.length === 1 ? "" : "s"}`;
+    return `Negotiation Inc \u2014 Run ${runNumber}
+${grid}
+${money} \xB7 ${rounds} \xB7 ${bought} bought`;
+  }
+
+  // src/run.ts
+  var ROUNDS = 3;
+  var START_CAPITAL = 15e4;
+  var BASE_FINANCE_RATE = 0.03;
+  var LOOK_BUDGET = [6, 5, 4];
+  var KNOWABLE_PER_HOUSE = 2;
+  var ROUND_CLOCK = [0, 70, 60];
+  var UNTIMED_ROUNDS = 1;
+  function difficultyFor(round) {
+    return 0.85 + round / (ROUNDS - 1) * 0.45;
+  }
+  function buildRun(isoDate) {
+    const seed = dailySeed(isoDate);
+    const r = rng(`${seed}-run`);
+    const cast = buildCast(seed);
+    const pool = [...DRAWABLE];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(r() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    const rounds = [];
+    for (let i = 0; i < ROUNDS; i++) {
+      const id = i === 0 ? ROUND_ONE : pool[(i - 1) % pool.length];
+      const modifier = MODIFIERS[id];
+      rounds.push({
+        index: i,
+        looks: LOOK_BUDGET[i] ?? 4,
+        clock: ROUND_CLOCK[i] ?? 55,
+        timed: i >= UNTIMED_ROUNDS,
+        difficulty: difficultyFor(i),
+        modifier,
+        financeRate: modifier.financeRate ?? BASE_FINANCE_RATE
+      });
+    }
+    return { seed, number: boardNumber(isoDate), cast, rounds, startCapital: START_CAPITAL };
+  }
+  function boardForRound(isoDate, valuationYear, plan, round) {
+    const p = plan.rounds[round];
+    return buildBoard(isoDate, valuationYear, {
+      difficulty: p.difficulty,
+      modifier: p.modifier.id,
+      cast: plan.cast,
+      salt: `-r${round}`
+    });
+  }
+  function financeCost(bid, capital, rate) {
+    const borrowed = Math.max(0, bid - capital);
+    return Math.round(borrowed * rate);
+  }
+  function boardNumber(iso) {
+    const [y, m, d] = iso.split("-").map(Number);
+    const toDays = (yy, mm, dd) => {
+      const a = Math.floor((14 - mm) / 12);
+      const yr = yy + 4800 - a;
+      const mo = mm + 12 * a - 3;
+      return dd + Math.floor((153 * mo + 2) / 5) + 365 * yr + Math.floor(yr / 4) - Math.floor(yr / 100) + Math.floor(yr / 400) - 32045;
+    };
+    return toDays(y, m, d) - toDays(2026, 7, 28) + 213;
+  }
+  return __toCommonJS(index_exports);
+})();
+</script>
+<script>
+const B = SRBoard;
+const M  = n => '$' + Math.round(Math.abs(n)).toLocaleString('en-US');
+const MP = n => (n > 0 ? '+' : n < 0 ? '−' : '') + M(n);
+const clockStr = s => Math.floor(Math.max(0,s)/60) + ':' + String(Math.max(0,Math.ceil(s))%60).padStart(2,'0');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+const TIER_OF = (() => { const m={}; for (const k of Object.keys(B.ASK_SIGNALS)) for (const s of B.ASK_SIGNALS[k]) m[s]=k; return m; })();
+const TIER_WORD = { high:'Wants out badly', medium:'Would move for the right number', low:'In no hurry at all' };
+
+let run, board, state, timer;
+
+/*__ARCADE_BANK__*/
+
+/* ── THE MONEY IS REAL NOW ─────────────────────────────────────────────────
+   The street used to hand you $150,000 at the top of every run and take it
+   back at the bottom, which meant three good streets and three catastrophic
+   ones ended in exactly the same place: nowhere. Now the run is played WITH
+   the bankroll. What you make is yours and what you lose is gone.
+
+   The daily rule from the record carries over unchanged and matters more here:
+   only the FIRST finish of a day moves the money. You may replay today as
+   often as you like — to see the street again, to try the other house — and
+   the bankroll watches the first run only. Without that, a bad day is farmed
+   away in four minutes and the number stops meaning anything. */
+let BANKED = false;          // has this run already moved the money?
+
+/* ── the record ────────────────────────────────────────────────────────────
+   This game had no localStorage in it anywhere. You could finish three
+   streets, close the tab, and the run had never happened — which is a strange
+   thing to do to a game whose whole premise is "come back tomorrow."
+
+   What persists is the RECORD, not the run in progress. A half-played timed
+   round restored from disk is a worse experience than starting it again, and
+   restoring one would also hand a player a way to stop the clock. So: you may
+   replay today as often as you like, and the record keeps the FIRST finish of
+   the day. That is the daily-puzzle convention and people already know it. */
+const REC_KEY = 'ni.street.v1';
+const FRESH_REC = () => ({ v:1, days:{}, streak:0, best:null, bestDay:null, played:0, last:null });
+function loadRec(){
+  try {
+    const r = JSON.parse(localStorage.getItem(REC_KEY) || 'null');
+    if (!r || r.v !== 1 || typeof r.days !== 'object' || !r.days) return FRESH_REC();
+    return Object.assign(FRESH_REC(), r);
+  } catch(e){ return FRESH_REC(); }
+}
+function saveRec(r){ try { localStorage.setItem(REC_KEY, JSON.stringify(r)); } catch(e){} }
+function prevISO(iso){
+  const [y,m,d] = iso.split('-').map(Number);
+  const t = new Date(Date.UTC(y, m-1, d) - 86400000);
+  return t.getUTCFullYear()+'-'+String(t.getUTCMonth()+1).padStart(2,'0')+'-'+String(t.getUTCDate()).padStart(2,'0');
+}
+/* Returns the record as it stood BEFORE today, so the summary can say
+   "your best" without today's run silently becoming the thing it beat. */
+function recordFinish(iso, capital, bought){
+  const r = loadRec();
+  if (r.days[iso]) return r;                       // first finish of the day is the one that counts
+  r.days[iso] = { capital: Math.round(capital), bought };
+  r.played = Object.keys(r.days).length;
+  r.streak = r.last === prevISO(iso) ? (r.streak || 0) + 1 : 1;
+  r.last = iso;
+  if (r.best == null || capital > r.best){ r.best = Math.round(capital); r.bestDay = iso; }
+  saveRec(r);
+  return r;
+}
+
+/* ── lifecycle ─────────────────────────────────────────────────────────── */
+
+function newRun(){
+  clearInterval(timer);
+  const iso = todayISO();
+  /* the opening capital IS what you have. A thin bankroll is not a lockout:
+     the street already lets you bid above your cash and charges points on the
+     borrowed part, so being poor makes every deal dearer rather than
+     impossible — which is both kinder and truer than a velvet rope. */
+  const bank = BANK.read();
+  BANKED = false;
+  run = { iso, plan: B.buildRun(iso), round: 0, capital: bank.cash,
+          opening: bank.cash, lines: [], ledger: [], streak: 0, screen: 'hero' };
+  board = null; state = null;
+  render();
+}
+function beginRound(){
+  const p = run.plan.rounds[run.round];
+  board = B.boardForRound(run.iso, new Date().getFullYear(), run.plan, run.round);
+  state = { clock:p.clock, timed:p.timed, looksLeft:p.looks, phase:'play', at:0, mode:'browse',
+            seen:{}, looks:0, price:0, bid:null, revealed:0, settled:false, result:null, fixed:new Set(), sale:null };
+  for (let i=0;i<5;i++) state.seen[i] = { walk:false, ask:false };
+  run.screen = 'play';
+  clearInterval(timer);
+  if (p.timed) timer = setInterval(tick, 1000);
+  render();
+}
+function tick(){
+  if (!state || state.phase !== 'play' || !state.timed) return;
+  state.clock -= 1;
+  if (state.clock <= 0){ state.clock = 0; closeRound(); return; }
+  const el = document.getElementById('clk');
+  if (el){ el.textContent = clockStr(state.clock); el.className = 't' + (state.clock<=12?' warn':''); }
+}
+
+/* ── what the player knows ─────────────────────────────────────────────── */
+
+function read(i){
+  const c = board.cards[i], L = board.looks[i], s = state.seen[i];
+  const each = L.comps.map(x => x.sale_price / x.sqft);
+  const ppsf = each.reduce((a,b)=>a+b,0) / each.length;
+  const o = { each, ppsf, value: ppsf * c.sqft, repairs:null, tier:null, factor:null, reservation:null };
+  // A range, not a point. Two sales disagree; pretending otherwise is the false
+  // precision that makes this feel like homework.
+  const lo = Math.min(...each) * c.sqft, hi = Math.max(...each) * c.sqft;
+  o.lo = lo; o.hi = hi;
+  if (s.walk) o.repairs = (L.walkthrough[0] + L.walkthrough[1]) / 2;
+  if (s.ask){ o.tier = TIER_OF[L.ask] || 'medium'; o.factor = B.MOTIVATION_FACTOR[o.tier]; o.reservation = o.value * o.factor; }
+  o.walkAway = o.value - (o.repairs != null ? o.repairs : 0);
+  o.sure = o.repairs != null;
+  return o;
+}
+function sliderRange(i){
+  const c = board.cards[i], r = read(i);
+  const hi = Math.max(c.asking * 1.35, r.walkAway * 1.2);
+  const lo = Math.min(c.asking * 0.5, hi * 0.4);
+  return [Math.round(lo/500)*500, Math.round(hi/500)*500];
+}
+
+/* ── coach ─────────────────────────────────────────────────────────────── */
+
+function coach(){
+  if (state.phase === 'renovate'){
+    if (state.estimated) return 'Tick everything <b>green</b>. Leave the rest.';
+    return 'Structural work always pays. Extras never do. <b>Read the note</b> on the cosmetic ones.';
+  }
+  if (state.phase !== 'play') return null;
+  if (state.bid) return 'Offer sealed. <b>Close the street</b> to see how everyone did.';
+  if (state.mode === 'offer') return 'Drag the handle. <b>Green is your profit</b> — make it as big as you dare.';
+  const s = state.seen[state.at];
+  if (state.looksLeft <= 0) return 'No looks left. Pick a house and <b>make your offer</b>.';
+  if (!s.walk) return 'The sales tell you what it is worth. Now check <b>what it needs</b>.';
+  if (!s.ask)  return 'Find out <b>why they are selling</b> — that is what they will take.';
+  return 'You know this one. <b>Make an offer</b>, or arrow across to another house.';
+}
+
+/* ── actions ───────────────────────────────────────────────────────────── */
+
+function go(d){ if (state.phase==='play' && state.mode!=='offer'){ state.at=(state.at+d+5)%5; render(); } }
+function jump(i){ if (state.phase==='play' && state.mode!=='offer'){ state.at=i; render(); } }
+function doLook(kind){
+  const i = state.at;
+  if (state.phase!=='play' || state.seen[i][kind] || state.looksLeft<=0) return;
+  state.seen[i][kind]=true; state.looks++; state.looksLeft--; render();
+}
+function toOffer(){
+  if (state.phase!=='play' || state.bid) return;
+  const i=state.at, r=read(i), range=sliderRange(i);
+  const anchor = r.reservation != null ? r.reservation : board.cards[i].asking*0.82;
+  state.price = Math.max(range[0], Math.min(range[1], Math.round(anchor/500)*500));
+  state.mode='offer'; render();
+}
+function backToBrowse(){ state.mode='browse'; render(); }
+function setPrice(v){ state.price=+v; paintDeal(); }
+function sealOffer(){
+  if (state.phase!=='play' || state.bid) return;
+  state.bid={ idx:state.at, amount:state.price }; state.mode='browse'; render();
+}
+
+function dealParts(i){
+  const r = read(i), p = run.plan.rounds[run.round];
+  const borrowed = Math.max(0, state.price - run.capital);
+  const points = Math.round(borrowed * p.financeRate);
+  return { total:r.value, fix:(r.repairs!=null?r.repairs:0), pay:state.price, keep:r.walkAway-state.price-points, sure:r.sure };
+}
+function paintDeal(){
+  const d = dealParts(state.at), pctOf = v => Math.max(0,(v/d.total)*100);
+  const bar = document.getElementById('dealbar');
+  if (bar){
+    const pay = Math.min(100, pctOf(d.pay));
+    bar.innerHTML = d.keep >= 0
+      ? '<i class="pay" style="width:'+pay+'%"></i><i class="keep" style="width:'+Math.min(100-pay,pctOf(d.keep))+'%"></i>' +
+        '<i class="fix" style="width:'+Math.max(0,100-pay-pctOf(d.keep))+'%"></i>'
+      : '<i class="pay" style="width:'+Math.max(0,100-Math.min(40,pctOf(-d.keep)))+'%"></i><i class="over" style="width:'+Math.min(40,pctOf(-d.keep))+'%"></i>';
+  }
+  const kv=document.getElementById('keepv');
+  if (kv){ kv.textContent = d.keep>=0 ? M(d.keep) : '−'+M(-d.keep); kv.className='v'+(d.keep>=0?'':' bad'); }
+  const kn=document.getElementById('keepn');
+  if (kn) kn.textContent = d.keep>=0 ? (d.sure ? 'if you win it, before the work you choose' : 'but you have not checked what it needs')
+                                     : 'you would lose money on this';
+  const ov=document.getElementById('offerv'); if (ov) ov.innerHTML='<b>'+M(state.price)+'</b>';
+}
+
+/* ── close / resolve / renovate ────────────────────────────────────────── */
+
+function closeRound(){
+  if (!state || state.phase!=='play') return;
+  clearInterval(timer);
+  state.phase='resolve';
+  const opened=[];
+  for (let i=0;i<5;i++){ const s=state.seen[i]; if (s.walk||s.ask) opened.push(i); }
+  const p = run.plan.rounds[run.round];
+  state.result = B.scoreRound(board, { opened, bid_index: state.bid?state.bid.idx:null,
+    bid_amount: state.bid?state.bid.amount:null, looks: state.looks, capital: run.capital, financeRate: p.financeRate });
+  state.revealed=0; render(); revealStep();
+}
+function revealStep(){
+  if (state.revealed >= 5){
+    // `settled` makes the reveal rows render already-visible. Without it the
+    // next render() rebuilds the DOM, drops every .in class, and the whole
+    // resolution silently fades to nothing — which is exactly what it did.
+    state.settled = true;
+    if (state.result.outcome === 'won'){
+      state.phase = 'renovate';
+      state.fixed = new Set(); state.estimated = false;
+    } else {
+      state.phase = 'settle';
+      run.streak = 0;
+    }
+    render(); return;
+  }
+  const rows = document.querySelectorAll('.rrow');
+  if (rows[state.revealed]) rows[state.revealed].classList.add('in');
+  state.revealed++;
+  setTimeout(revealStep, 340);
+}
+function buyEstimate(){
+  if (state.phase!=='renovate' || state.estimated || state.looksLeft<=0) return;
+  state.looksLeft--; state.estimated = true; render();
+}
+function toggleJob(id){
+  if (state.phase!=='renovate') return;
+  if (state.fixed.has(id)) state.fixed.delete(id); else state.fixed.add(id);
+  render();
+}
+function finishReno(){
+  if (state.phase!=='renovate') return;
+  const p = run.plan.rounds[run.round];
+  state.sale = B.finishSale(board, state.bid.idx, state.bid.amount, state.fixed, run.capital, p.financeRate);
+  state.phase = 'settle';
+  run.streak = state.sale.profit > 0 ? run.streak + 1 : 0;
+  render();
+}
+function roundProfit(){ return state.sale ? state.sale.profit : 0; }
+function nextRound(){
+  const R = state.result, profit = roundProfit();
+  run.capital += profit;
+  run.lines.push({ grid: R.grid, profit });
+  run.ledger.push({ grid: R.grid.join(''), profit, outcome: R.outcome,
+                    where: state.bid ? board.cards[state.bid.idx].address : null });
+  run.round++;
+  if (run.round >= B.ROUNDS){
+    /* read the record BEFORE filing today's, so "you beat your best" can
+       compare against something today has not already overwritten */
+    const before = loadRec();
+    run.before = { best: before.best, streak: before.streak, played: before.played,
+                   already: !!before.days[run.iso] };
+    const firstToday = !before.days[run.iso];
+    run.rec = recordFinish(run.iso, run.capital, run.ledger.filter(l=>l.outcome==='won').length);
+    /* the money moves ONCE, on the first finish of the day, for the amount the
+       three streets actually made or lost */
+    if (firstToday && !BANKED){
+      BANKED = true;
+      const delta = Math.round(run.capital - run.opening);
+      const bought = run.ledger.filter(l=>l.outcome==='won').length;
+      const r = BANK.move({ game:'street', delta,
+        note: delta === 0 ? 'three streets, nothing bought'
+            : (delta > 0 ? 'made' : 'lost') + ' it on ' + (bought === 1 ? 'one flip' : bought + ' flips') });
+      BANK.run('street');
+      run.banked = { delta, applied: r.applied, floored: r.floored, after: r.bank.cash,
+                      stored: r.stored !== false, why: r.why };
+    } else {
+      run.banked = null;
+    }
+    run.screen='summary'; clearInterval(timer); render(); return;
+  }
+  run.screen='card'; render();
+}
+
+/* ── render ────────────────────────────────────────────────────────────── */
+
+function render(){
+  const el = document.getElementById('board');
+  if (run.screen==='hero'){ el.innerHTML=heroHTML(); return; }
+  if (run.screen==='card'){ el.innerHTML=cardHTML(); return; }
+  if (run.screen==='summary'){ el.innerHTML=summaryHTML(); return; }
+  if (state.phase==='play'){ el.innerHTML=playHTML(); if (state.mode==='offer') paintDeal(); return; }
+  if (state.phase==='renovate'){ el.innerHTML=renovateHTML(); return; }
+  el.innerHTML = resolveHTML();
+}
+
+function heroHTML(){
+  const r = loadRec();
+  /* A returning player should be met by their own history, not by the same
+     blank door they saw yesterday. A first-timer sees nothing extra. */
+  let bar = '';
+  if (r.played > 0){
+    const bits = [];
+    if (r.streak > 1) bits.push('<b>'+r.streak+'</b> days running');
+    bits.push('<b>'+r.played+'</b> street'+(r.played===1?'':'s')+' walked');
+    if (r.best != null) bits.push('best finish <b>'+M(r.best)+'</b>');
+    bar = '<div class="rec">'+bits.join(' · ')+
+      (r.days[todayISO()] ? '<div class="done">Today is already on the board at '+M(r.days[todayISO()].capital)+
+        ' — you can play it again, the record keeps the first run.</div>' : '')+'</div>';
+  }
+  const bk = BANK.standing();
+  /* the stake, stated before you play rather than after you lose it */
+  const stake = '<div class="stake'+(bk.thin?' thin':'')+(bk.broke?' broke':'')+'">' +
+    '<span class="l">You are playing with</span><span class="n">'+M(bk.cash)+'</span>' +
+    /* ── A REPLAY DOES NOT TAKE THE STAKE, SO IT MUST NOT PROMISE ONE ──────
+       nextRound only moves money when firstToday. This block branched on
+       broke and thin but not on whether today was already banked — four lines
+       after the record line checked exactly that — so a second run promised
+       "what you lose is gone", showed the cash falling across three streets,
+       and only admitted once it was over that none of it had been real. The
+       reverse is worse: win $60,000 and find out at the end it did not count.
+       The bankroll clause is decided first, because it decides the premise;
+       the broke and thin notes still apply, because the points penalty for
+       bidding on borrowed money is real on a replay too. */
+    '<span class="s">'+(r.days[todayISO()]
+      ? 'Today is already banked, so the bankroll does not move either way — this run is for the practice. '
+        + (bk.broke ? 'Bidding above nothing still costs you points.'
+          : bk.thin ? 'Bidding above what you have still costs you points.'
+          : 'The score still counts, and the record keeps your first run.')
+      : bk.broke
+      ? 'Nothing. Every house on the street is borrowed money now, and the points come off the top. The drill pays a fee for a right read — that is the way back.'
+      : bk.thin
+      ? 'Thin. You can still bid above it, but the borrowed part costs you points, so the margins get tight.'
+      : 'Three streets. What you make is yours and what you lose is gone.')+'</span></div>';
+  return '<div class="hero"><div class="mark">The Daily Street</div>' +
+    '<h1>Buy a house for<br>less than it is <b>worth</b>.</h1>' +
+    '<div class="sub">Fix what is worth fixing. Keep the difference.</div>' +
+    '<div class="meta">3 streets · 3 minutes · new houses every day</div></div>' + stake + bar +
+    '<div style="padding:0 18px 20px"><button class="btn go" onclick="beginRound()">'+
+    (r.days[todayISO()] ? 'Play again' : 'Play')+'</button>' +
+    '<a class="back" href="arcade.html">← the arcade</a></div>' + helpHTML();
+}
+
+function statusBar(){
+  const p = run.plan.rounds[run.round];
+  const timed = state ? state.timed : p.timed;
+  return '<div class="bar">' +
+    '<span>Street <span class="m">'+(run.round+1)+'/'+B.ROUNDS+'</span></span>' +
+    '<span>Cash <span class="m">'+M(run.capital)+'</span></span>' +
+    '<span>Looks <span class="m">'+(state?state.looksLeft:p.looks)+'</span></span>' +
+    (timed ? '<span class="t" id="clk">'+clockStr(state?state.clock:p.clock)+'</span>' : '<span>no clock</span>') + '</div>';
+}
+
+function cardHTML(){
+  const p = run.plan.rounds[run.round];
+  const last = run.ledger[run.ledger.length-1];
+  let recap='';
+  if (last){
+    const what = last.outcome==='won'
+      ? 'You flipped '+esc(last.where)+' for '+(last.profit>=0?'<b>'+MP(last.profit)+'</b>.':'a <b>'+M(-last.profit)+'</b> loss.')
+      : last.outcome==='no_bid' ? 'You did not make an offer.'
+      : last.outcome==='refused' ? 'The seller would not take your number.' : 'You were outbid.';
+    recap = '<div class="lede">'+what+'</div>';
+  }
+  const firstTime = run.round===1;
+  const dossier = firstTime ? '<div class="dossier"><div class="dh">Who else is bidding — the same faces all run</div>' +
+    run.plan.cast.map(r=>'<div class="who"><div class="n">'+esc(r.name)+'</div><div class="t">'+esc(r.tell)+'</div></div>').join('')+'</div>' : '';
+  const clockNote = firstTime ? '<div class="lede" style="margin-top:14px">From here there is a clock — '+clockStr(p.clock)+' a street.</div>' : '';
+  return '<div class="pane"><h1>Street '+(run.round+1)+' of '+B.ROUNDS+'</h1>' +
+    '<h2>'+esc(p.modifier.name)+'</h2>'+recap +
+    '<div class="cond"><div class="cn">What is different here</div><div class="cb">'+esc(p.modifier.blurb)+'</div></div>' +
+    clockNote + dossier +
+    '<button class="btn go" onclick="beginRound()">'+(p.timed?'Start the clock':'Walk the street')+'</button></div>' + helpHTML();
+}
+
+function helpHTML(){
+  return '<details class="help"><summary>How it works</summary><div class="hb">' +
+    '<p>Every house shows you <b>what similar homes just sold for</b>. Closer match, better guide. Those sales are public, so they cost nothing.</p>' +
+    '<p>What you dig for is <b>what it needs</b> and <b>why they are selling</b>. Each costs a look, and looks are short.</p>' +
+    '<p>Make <b>one sealed offer</b>. Other buyers already made theirs. Too little and they take it; too much and there is nothing left.</p>' +
+    '<p style="margin-bottom:0">Then you <b>fix it up and sell it</b>. Some jobs pay back more than they cost. Some really do not.</p></div></details>';
+}
+
+function condChip(c){
+  const cls = c==='Clean'?'good':c==='Rough'?'bad':'';
+  return '<span class="chip '+cls+'">'+(c==='Clean'?'Good shape':c==='Rough'?'Needs a lot':'Dated')+'</span>';
+}
+function heatChip(n){
+  const cls = n<=1?'good':n===2?'warn':'bad';
+  return '<span class="chip '+cls+'">'+(n===0?'No other offers':n===1?'1 other buyer':n+' other buyers')+'</span>';
+}
+
+/**
+ * Comps as a match table.
+ *
+ * The subject's own worth is deliberately NOT printed here. Handing over the
+ * answer turns the most valuable habit in the game — looking at what sold and
+ * forming a view — into reading a number off a card. What IS given is how well
+ * each sale matches on size and bedrooms, colour-coded, so the read is available
+ * at a glance without being done for you.
+ */
+function matchTag(comp, c){
+  const d = Math.abs(comp.sqft - c.sqft) / c.sqft;
+  if (d <= 0.06) return ['same','same size'];
+  if (d <= 0.15) return ['near', comp.sqft > c.sqft ? 'a bit bigger' : 'a bit smaller'];
+  return ['off', comp.sqft > c.sqft ? 'much bigger' : 'much smaller'];
+}
+function compsHTML(i){
+  const c = board.cards[i], L = board.looks[i];
+  let rows = '';
+  for (const x of L.comps){
+    const [cls,word] = matchTag(x, c);
+    const bedCls = x.beds === c.beds ? 'same' : Math.abs(x.beds - c.beds) === 1 ? 'near' : 'off';
+    rows += '<tr><td>'+esc(x.address)+'<div><span class="mt '+cls+'">'+word+'</span> ' +
+            '<span class="mt '+bedCls+'">'+x.beds+' bed</span></div></td>' +
+            '<td>'+x.sqft.toLocaleString()+'</td><td>'+M(x.sale_price)+'</td></tr>';
+  }
+  rows += '<tr class="you"><td>This house<div style="font-weight:400"><span class="mt">'+c.beds+' bed</span></div></td>' +
+          '<td>'+c.sqft.toLocaleString()+'</td><td>asking '+M(c.asking)+'</td></tr>';
+  const anySame = L.comps.some(x => matchTag(x,c)[0]==='same');
+  return '<div class="comps"><div class="clab">What just sold nearby</div>' +
+    '<table class="ctab"><tr><th>Address</th><th>Sqft</th><th>Sold for</th></tr>'+rows+'</table>' +
+    '<div class="cnote">' + (anySame
+      ? 'One of these is about the same size as this house. <b>That is your best guide.</b>'
+      : 'Neither is quite the same size — scale it up or down in your head and allow yourself some room.') +
+    '</div></div>';
+}
+
+/** Free colour on the property. Contains real tells, costs nothing to read. */
+function detailHTML(i){
+  const c = board.cards[i], L = board.looks[i];
+  const size = c.sqft > 2200 ? 'It is a big one for the street.' : c.sqft < 1400 ? 'It is on the small side for the street.' : 'It is about average size for the street.';
+  const cond = c.condition==='Clean' ? 'From the kerb it shows well — paint is recent and the roofline looks straight.'
+    : c.condition==='Rough' ? 'From the kerb it shows badly. Gutter is hanging off one corner and the porch has a lean to it.'
+    : 'From the kerb it shows its age. Nothing alarming, nothing recent either.';
+  const ppsf = 'Asking works out to ' + M(c.ppsf) + ' a square foot.';
+  const crowd = c.interest >= 3 ? 'There have been cars outside all week. Everyone can see this one.'
+    : c.interest === 0 ? 'Nobody has been by. It has been sitting.'
+    : 'A couple of people have walked it.';
+  return '<details class="more"><summary>Take a closer look — free</summary><div class="mb">' +
+    '<p>'+size+' '+cond+'</p><p>'+ppsf+' '+crowd+'</p></div></details>';
+}
+
+function factsHTML(i){
+  const L = board.looks[i], s = state.seen[i], r = read(i), t = board.truth ? board.truth[i] : null;
+  const out = state.looksLeft <= 0;
+  let h = '<div class="facts">';
+  if (s.walk){
+    const tags = t ? t.jobs.map(j=>'<span>'+esc(j.label)+'</span>').join('') : '';
+    h += '<div class="fact known bad"><span>It needs work<div class="joblist">'+tags+'</div></span><span class="v">−'+M(r.repairs)+'</span></div>';
+  } else {
+    h += '<button class="fact" onclick="doLook(\'walk\')" '+(out?'disabled':'')+'><span>What does it need?</span><span class="c">'+(out?'no looks':'1 look')+'</span></button>';
+  }
+  h += s.ask
+    ? '<div class="fact known"><span>'+TIER_WORD[r.tier]+'<div class="quote">“'+esc(L.ask)+'”</div></span><span class="v">~'+M(r.reservation)+'</span></div>'
+    : '<button class="fact" onclick="doLook(\'ask\')" '+(out?'disabled':'')+'><span>Why are they selling?</span><span class="c">'+(out?'no looks':'1 look')+'</span></button>';
+  return h + '</div>';
+}
+
+function pagerHTML(){
+  let h = '<div class="pager"><button class="nav" onclick="go(-1)" '+(state.mode==='offer'?'disabled':'')+'>◀</button>';
+  for (let i=0;i<5;i++){
+    const s=state.seen[i];
+    const cls = (state.bid&&state.bid.idx===i)?'bought':(i===state.at?'on':(s.walk||s.ask?'seen':''));
+    h += '<button class="p '+cls+'" onclick="jump('+i+')" aria-label="house '+(i+1)+'"></button>';
+  }
+  return h + '<button class="nav" onclick="go(1)" '+(state.mode==='offer'?'disabled':'')+'>▶</button></div>';
+}
+
+function browseHTML(){
+  const i=state.at, c=board.cards[i], sealed = state.bid && state.bid.idx===i;
+  return '<div class="house">' +
+    '<div class="hname">'+esc(c.address)+'</div>' +
+    '<div class="hmeta">'+c.beds+' bed · '+c.sqft.toLocaleString()+' sqft · asking '+M(c.asking)+'</div>' +
+    '<div class="chips">'+condChip(c.condition)+heatChip(c.interest)+'</div>' +
+    compsHTML(i) + detailHTML(i) + factsHTML(i) +
+    (sealed ? '<div class="stamp">Your offer — '+M(state.bid.amount)+' · sealed</div>'
+     : state.bid ? '' : '<button class="btn go" onclick="toOffer()">Make an offer on this one</button>') +
+  '</div>';
+}
+
+function offerHTML(){
+  const i=state.at, c=board.cards[i], range=sliderRange(i), n=c.interest;
+  const hint = n===0 ? ['','Nobody else has offered here. Only the seller is in your way.']
+    : n===1 ? ['warn','One other buyer is already in, so the seller’s lowest number will not be enough.']
+    : ['bad', n+' other buyers are already in. This one goes to whoever leaves the least on the table.'];
+  return '<div class="house"><div class="hname">'+esc(c.address)+'</div>' +
+    '<div class="hmeta">Your one offer. Sealed until the street closes.</div>' +
+    '<div class="deal"><div class="dealbar" id="dealbar"></div>' +
+      '<div class="dealkey"><span><i class="sw pay"></i>you pay</span><span><i class="sw keep"></i>you keep</span><span><i class="sw fix"></i>repairs</span></div>' +
+      '<div class="keepbig"><div class="k">You keep</div><div class="v" id="keepv"></div><div class="n" id="keepn"></div></div>' +
+      '<input type="range" min="'+range[0]+'" max="'+range[1]+'" step="500" value="'+state.price+'" oninput="setPrice(this.value)">' +
+      '<div class="offerrow"><span>your offer <span id="offerv"></span></span><span>asking '+M(c.asking)+'</span></div>' +
+      '<div class="rival '+hint[0]+'">'+hint[1]+'</div>' +
+      '<button class="btn go" onclick="sealOffer()">Seal this offer</button>' +
+      '<button class="btn ghost" onclick="backToBrowse()">Back</button></div></div>';
+}
+
+function playHTML(){
+  let h = statusBar() + '<div class="coach"><span class="dot"></span><span>'+coach()+'</span></div>' + pagerHTML();
+  if (state.mode==='offer') return h + offerHTML();
+  h += browseHTML();
+  return h + '<div style="padding:13px 15px;border-top:1px solid var(--rule);background:var(--stock-2)">' +
+    '<button class="btn'+(state.bid?' go':' ghost')+'" style="margin:0" onclick="closeRound()">' +
+    (state.bid ? 'Close the street →' : 'Skip this street') + '</button></div>';
+}
+
+/* ── the renovation ────────────────────────────────────────────────────── */
+
+function renovateHTML(){
+  const i = state.bid.idx, t = board.truth[i], c = board.cards[i];
+  let spent = 0;
+  for (const j of t.jobs) if (state.fixed.has(j.id)) spent += j.cost;
+  const skipped = t.jobs.filter(j => !state.fixed.has(j.id)).reduce((s,j)=>s+j.adds,0);
+  const sellFor = t.value_mid - skipped;
+  const p = run.plan.rounds[run.round];
+  const borrowed = Math.max(0, state.bid.amount + spent - run.capital);
+  const points = Math.round(borrowed * p.financeRate);
+  const profit = sellFor - state.bid.amount - spent - points;
+
+  const KIND = { essential:'Structural', cosmetic:'Cosmetic', vanity:'Extra' };
+  let jobs = '';
+  for (const j of t.jobs){
+    const on = state.fixed.has(j.id);
+    // The payback is a JUDGEMENT, not a quote. Hidden until bought or sold.
+    const money = state.estimated
+      ? '<span class="c">' + M(j.cost) + '</span><span class="a ' + (j.adds > j.cost ? 'up' : 'dn') + '">adds ' + M(j.adds) + '</span>'
+      : '<span class="c">' + M(j.cost) + '</span><span class="a q">adds ?</span>';
+    jobs += '<button class="job'+(on?' on':'')+'" onclick="toggleJob(\''+j.id+'\')">' +
+      '<span class="box">'+(on?'✓':'')+'</span>' +
+      '<span><span class="lb">'+esc(j.label)+' <span class="kind k-'+j.kind+'">'+KIND[j.kind]+'</span></span>' +
+      '<span class="nt">'+esc(j.note)+'</span></span>' +
+      '<span class="money">'+money+'</span></button>';
+  }
+
+  const est = state.estimated
+    ? '<div class="estnote">An agent walked it with you and priced the work. Green pays back more than it costs.</div>'
+    : '<button class="estbtn" onclick="buyEstimate()" '+(state.looksLeft<=0?'disabled':'')+'>' +
+      (state.looksLeft>0
+        ? 'Ask an agent what each job is worth — 1 look ('+state.looksLeft+' left)'
+        : 'No looks left — go on what you can see') + '</button>';
+
+  return statusBar() + '<div class="coach"><span class="dot"></span><span>'+coach()+'</span></div>' +
+    '<div class="house"><div class="hname">You bought '+esc(c.address)+'</div>' +
+    '<div class="hmeta">Fix what is worth fixing. Every job costs money and adds to what it sells for — but not always more than it costs.</div>' +
+    est + '<div style="margin-top:14px">'+jobs+'</div></div>' +
+    '<div class="renotot">' +
+      '<div class="renorow"><span>You paid</span><span class="n">−'+M(state.bid.amount)+'</span></div>' +
+      '<div class="renorow"><span>The work you picked</span><span class="n">−'+M(spent)+'</span></div>' +
+      (points>0 ? '<div class="renorow"><span>Lender’s points</span><span class="n">−'+M(points)+'</span></div>' : '') +
+      (state.estimated
+        ? '<div class="renorow"><span>It should sell for</span><span class="n">'+M(sellFor)+'</span></div>' +
+          '<div class="renorow big"><span>You would clear</span><span class="n '+(profit>=0?'up':'dn')+'">'+MP(profit)+'</span></div>'
+        : '<div class="renorow big"><span>Sells for</span><span class="n" style="color:var(--carbon-faint)">you will find out</span></div>') +
+    '</div>' +
+    '<div style="padding:14px 15px"><button class="btn go" style="margin:0" onclick="finishReno()">Do the work and sell it</button></div>';
+}
+
+const ACHE = {
+  won:'You did the arithmetic and you held your nerve.',
+  outbid:'You read it right. You just would not pay for it.',
+  refused:'That was not an offer. That was a wish with a number on it.',
+  no_bid:'Three streets. You cannot buy a house on none of them.',
+};
+const STREAK = ['','','Two in a row.','Three for three. A perfect run.'];
+
+function resolveHTML(){
+  const R = state.result;
+  let h = statusBar() + '<div class="rhead">Offers opened — '+esc(board.name)+'</div>';
+  R.resolutions.forEach(function(res,i){
+    const c=board.cards[i], mine=state.bid&&state.bid.idx===i, won=res.winner==='you';
+    const t = board.truth ? board.truth[i] : null;
+    let who='', oops='';
+    if (!res.sold_at) who='Nobody met the seller’s number. Still for sale.';
+    else if (won) who='<b>You bought it.</b>';
+    else {
+      who = esc(res.winner)+' bought it.';
+      if (t && res.sold_at > t.walk_away)
+        oops = '<div class="oops">They paid '+M(res.sold_at-t.walk_away)+' more than it is worth. That one hurts in the morning.</div>';
+    }
+    // `settled` keeps these visible for good once the reveal has finished.
+    h += '<div class="rrow'+(state.settled?' in':'')+(won?' mine':mine?' lost':'')+'">' +
+      '<div><div class="a">'+esc(c.address)+'</div><div class="who2">' +
+      (res.offers===1?'1 offer':res.offers+' offers')+' · '+who+'</div>'+oops+'</div>' +
+      '<div class="amt">'+(res.sold_at?M(res.sold_at):'—')+'</div></div>';
+  });
+  if (state.phase!=='settle') return h;
+  const streak = run.streak>=2 ? '<div class="streak">'+STREAK[Math.min(run.streak,3)]+'</div>' : '';
+  return h + settlementHTML() + theReadHTML() + streak + '<div class="said">'+ACHE[R.outcome]+'</div>' +
+    '<div style="padding:14px 15px;border-top:1px solid var(--rule)">' +
+    '<button class="btn go" style="margin:0" onclick="nextRound()">' +
+    (run.round+1>=B.ROUNDS ? 'See how the run went →' : 'Next street →')+'</button></div>';
+}
+
+/* ── the read: what the street was actually worth ──────────────────────────
+   scoreRound() has always returned best_index, best_spread and achievable[].
+   Nothing rendered them, so every round ended in a verb ("outbid", "refused")
+   instead of a number. This is the teaching moment: the same units on both
+   sides — room at the buy, walk-away minus what it took to win — so the two
+   figures are honestly comparable. Renovation profit is a different quantity
+   and lives in the settlement above; it is never mixed in here. */
+function theReadHTML(){
+  const R = state.result;
+  const bi = R.best_index, best = R.best_spread;
+  if (bi == null || !(best > 0)) return '';
+  const where = esc(board.cards[bi].address);
+  const tookIt = state.bid && state.bid.idx === bi && R.outcome === 'won';
+  const mine = R.outcome === 'won' ? R.your_spread : 0;
+  const left = Math.max(0, best - mine);
+
+  let hl, note;
+  if (tookIt){
+    hl = 'The play on this street was <b>'+where+'</b>. You took it.';
+    note = mine >= best
+      ? 'You bought it at or under the price it would have taken. That is the whole job.'
+      : 'You had the right house. You paid '+M(best - mine)+' more than it would have taken to win it.';
+  } else if (R.outcome === 'won'){
+    hl = 'You bought <b>'+esc(board.cards[state.bid.idx].address)+'</b>. The play was <b>'+where+'</b>.';
+    note = 'Not a wasted round — you own a house. But the money was on the other one.';
+  } else if (R.outcome === 'no_bid'){
+    hl = 'The play was <b>'+where+'</b>, and you never made an offer on it.';
+    note = R.looks ? 'You looked at '+R.looks+' thing'+(R.looks===1?'':'s')+' and walked. Sometimes right. Not today.'
+                   : 'You cannot buy what you did not look at.';
+  } else {
+    hl = 'The play was <b>'+where+'</b>.';
+    note = state.bid && state.bid.idx === bi
+      ? 'You were on the right house. You were '+M(R.needed - state.bid.amount)+' short of owning it.'
+      : 'You were bidding on a different house.';
+  }
+  return '<div class="read'+(tookIt && mine >= best ? ' perfect' : '')+'">' +
+    '<div class="rh">The read</div><div class="rb">' +
+    '<div class="hl">'+hl+'</div>' +
+    '<div class="left"><span class="l">'+(left > 0 ? 'Left on the table' : 'Room you captured')+'</span>' +
+      '<span class="n">'+M(left > 0 ? left : best)+'</span></div>' +
+    '<div class="note">There was '+M(best)+' of room in '+where+' at the price it would have taken to win it'+
+      (R.outcome === 'won' ? ', and '+M(mine)+' in the one you bought.' : '.') + ' ' + note + '</div>' +
+    '</div></div>';
+}
+
+function settlementHTML(){
+  const R = state.result;
+  if (R.outcome!=='won'){
+    const why = R.outcome==='no_bid' ? 'You did not make an offer on this street.'
+      : R.outcome==='refused' ? 'You offered '+M(state.bid.amount)+'. The seller would not go below '+M(R.floor)+', and it took '+M(R.needed)+' to actually get it.'
+      : 'You offered '+M(state.bid.amount)+'. Someone else offered '+M(R.needed)+'.';
+    return '<div class="sheet"><div class="sh"><div class="t">Settlement</div><div class="a">Nothing bought</div></div>' +
+      '<div class="nodeal"><div class="big">You go home empty on this street</div><div class="sm">'+why+'</div></div>' +
+      '<div class="sl tot"><span class="l">Your cash</span><span class="n">'+M(run.capital)+'</span></div></div>';
+  }
+  const s = state.sale, i = state.bid.idx;
+  const skipped = s.jobs.filter(j => !s.fixed.includes(j.id));
+  const win = s.profit >= 0;
+  const swingWord = s.swing > 0.005 ? 'The market was kind this month.' : s.swing < -0.005 ? 'The market softened this month.' : '';
+  return '<div class="sheet">' +
+    '<div class="sh"><div class="t">Settlement</div><div class="a">'+esc(board.cards[i].address)+'</div></div>' +
+    '<div class="sl"><span>It sold for</span><span class="n">'+M(s.sold_for)+'</span></div>' +
+    (skipped.length ? '<div class="sl sub"><span>You left '+skipped.map(j=>esc(j.label.toLowerCase())).join(', ')+' undone</span><span class="n">−'+M(skipped.reduce((a,j)=>a+j.adds,0))+'</span></div>' : '') +
+    (swingWord ? '<div class="sl sub"><span>'+swingWord+'</span><span class="n">'+(s.swing>0?'+':'−')+Math.abs(s.swing*100).toFixed(1)+'%</span></div>' : '') +
+    '<div class="sl rule"><span>You paid for it</span><span class="n">−'+M(s.paid)+'</span></div>' +
+    '<div class="sl"><span>The work you did</span><span class="n">−'+M(s.spent)+'</span></div>' +
+    (s.finance_cost>0 ? '<div class="sl sub"><span>Lender’s points</span><span class="n">−'+M(s.finance_cost)+'</span></div>' : '') +
+    '<div class="sl tot '+(win?'win':'lose')+'"><span class="l">'+(win?'You made':'You lost')+'</span><span class="n">'+MP(s.profit)+'</span></div>' +
+    '<div class="sl sub"><span>Fixing everything would have paid '+MP(s.profit_if_fix_all)+
+      (s.profit >= s.profit_if_perfect ? '. You picked perfectly.' : '. The best possible was '+MP(s.profit_if_perfect)+'.') +
+      '</span><span class="n"></span></div>' +
+  '</div>';
+}
+
+function summaryHTML(){
+  const start=run.opening ?? B.START_CAPITAL, end=run.capital, delta=end-start;
+  const grid = run.lines.map(l=>l.grid.join('')).join('\n');
+  const bought = run.ledger.filter(l=>l.outcome==='won').length;
+  const share = B.runShareString(run.plan.number, run.lines, end);
+  const ledger = run.ledger.map(l=>'<div class="lrow"><span class="g">'+l.grid+'</span>' +
+    '<span>'+(l.outcome==='won'?esc(l.where):l.outcome==='outbid'?'outbid':l.outcome==='refused'?'refused':'no offer')+'</span>' +
+    '<span class="m '+(l.profit>0?'up':l.profit<0?'dn':'')+'">'+(l.profit?MP(l.profit):'—')+'</span></div>').join('');
+  /* The record line. run.before is the record as it stood before today was
+     filed, so "you beat it" is measured against something real. */
+  const bf = run.before || {}, rc = run.rec || loadRec();
+  let recline = '';
+  if (bf.already){
+    recline = 'Today was already on the board at '+M(rc.days[run.iso].capital)+'. The record keeps the first run.';
+  } else if (bf.best != null && end > bf.best){
+    recline = 'Your best finish was '+M(bf.best)+'. This one beats it.';
+  } else if (bf.best != null){
+    recline = 'Your best finish is still '+M(bf.best)+'.';
+  } else {
+    recline = 'That is your first street on the board. Come back tomorrow — new houses, same questions.';
+  }
+  if (rc.streak > 1) recline += ' <b>'+rc.streak+' days running.</b>';
+
+  /* what the money did, said plainly. A run that did not move the bankroll has
+     to say so out loud — a player who thinks they just lost $40,000 and did
+     not is a player who stops believing the number. */
+  let bankline = '';
+  if (run.banked){
+    const bk = run.banked;
+    bankline = '<div class="bankline'+(bk.applied>0?' up':bk.applied<0?' dn':'')+'">' +
+      '<span class="l">Your bankroll</span>' +
+      '<span class="n">'+M(bk.after)+'</span>' +
+      '<span class="s">'+(bk.applied === 0 ? 'Unchanged — you finished level.'
+        : (bk.applied>0?'Up ':'Down ')+'<b>'+M(Math.abs(bk.applied))+'</b> on this run'
+          + (bk.stored === false ? ', and it did not save.' : ', and it is banked.')) +
+        (bk.floored ? ' You could not lose more than you had.' : '')+'</span></div>' +
+      /* and if it did not actually reach the disk, the sentence above is a
+         claim we cannot make. Saying "it is banked" over a failed write is
+         the one thing this panel must never do. */
+      (bk.stored === false ? '<div class="bankline warn"><span class="s">' +
+        troubleLine(bk.why || 'nostore') + '</span></div>' : '');
+  } else {
+    bankline = '<div class="bankline"><span class="l">Your bankroll</span>' +
+      '<span class="n">'+M(BANK.read().cash)+'</span>' +
+      '<span class="s">Today is already banked, so this run was for the practice. ' +
+        'The first finish of the day is the one that counts.</span></div>';
+  }
+
+  return '<div class="rhead">Run '+run.plan.number+' — three streets</div>' +
+    '<div class="runtot"><div class="grid7">'+grid+'</div>' +
+      '<div class="big '+(delta>0?'up':delta<0?'dn':'')+'">'+M(end)+'</div>' +
+      '<div class="cap">Started with '+M(start)+', finished with '+M(end)+' — '+(delta>=0?'up':'down')+
+      ' <b>'+M(delta)+'</b> across '+bought+' flip'+(bought===1?'':'s')+'.</div>' +
+      '<div class="cap rl">'+recline+'</div></div>' + bankline +
+    '<div class="ledger">'+ledger+'</div>' +
+    '<div class="legend"><span><b>🟩</b> you bought it</span><span><b>🟥</b> you offered and lost</span>' +
+      '<span><b>🟨</b> you looked</span><span><b>⬜</b> you never looked</span></div>' +
+    '<div class="share">'+esc(share)+'</div>' +
+    '<button class="copybtn" id="cp" onclick="copyShare()">Copy result</button>' +
+    '<div class="filter">This is a game. The real version asks the same questions — what is it worth, what does it need, what will they take, who else is bidding — except the houses are real. <a href="#" onclick="return false">Run a real address →</a></div>' +
+    '<button class="btn ghost" style="margin:14px 15px;width:calc(100% - 30px)" onclick="newRun()">Play again</button>';
+}
+
+function copyShare(){
+  const txt = B.runShareString(run.plan.number, run.lines, run.capital);
+  const done = () => { const b=document.getElementById('cp'); if(b){ b.textContent='Copied'; b.className='copybtn done'; } };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, done);
+  else { const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select();
+         try{ document.execCommand('copy'); }catch(e){} document.body.removeChild(ta); done(); }
+}
+
+newRun();
+</script>
+</body>
+</html>

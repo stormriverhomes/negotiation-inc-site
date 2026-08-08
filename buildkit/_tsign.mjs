@@ -44,6 +44,18 @@ const BASE = `http://127.0.0.1:${port}`;
 
 /* one property well under water, one comfortably above it, so both directions
    of the law are exercised on the same screen */
+/* ── THE FIXTURE HAS TO PRODUCE A LOSS, OR THIS HARNESS PROVES NOTHING ─────
+   The negative figure this used to catch came from the rail's SPREAD, which
+   the rail no longer prints — it prints the ceiling now, and a ceiling is
+   never negative. Losing the loss did not make the guard pass, which is
+   exactly right: it reported that the run was empty.
+
+   The loss it watches now is the one the desk still legitimately prints —
+   an exit whose key figure is below zero. `p-under` is priced so the flip's
+   profit at the top of its own band is negative: they want $249,500 for a
+   house worth $190,000 finished with $42,500 of work in it. That is a real
+   sheet somebody could type, and the number it produces must never be
+   green. */
 const PROPS = [
   { id:'p-under', name:'The one to leave', addr:'44 Underwater Way, Atlanta GA 30310',
     updated: 1, raw:{ asking:'249,500', arv:'190,000', repairs:'42,500', rent:'1,450' },
@@ -76,7 +88,22 @@ const SCAN = () => {
     /* a zero has no sign and no opinion; skip it */
     const digits = t.replace(/[^\d]/g, '');
     if (!digits || Number(digits) === 0) continue;
-    out.push({ text: t, negative: /^[\s]*[−-]/.test(t),
+    /* ── A POSITIVE NUMBER IS NOT ALWAYS A GAIN ──────────────────────────
+       This guard assumes sign tells you the mood: unsigned money is good
+       news and must not be red. Most of the desk works that way. It does not
+       work for a quantity of BADNESS measured positively — "over the ceiling
+       by $144,400", "$28,850 under their price", "$9,100 too dear". Those are
+       correctly red and correctly unsigned, and flagging them would push
+       somebody to paint an overage green to satisfy a test.
+
+       So the sentence around the figure gets a vote. Only the sentence — the
+       figure's own sign still rules everywhere else, and a real gain in red
+       still fails. */
+    const near = ((el.closest('div,li,p,td,span') || el).textContent || '').toLowerCase();
+    const gap = /\b(over|above|under|short|shortfall|too dear|costs?|owe[sd]?)\b/.test(near);
+    /* kept in the scan, not dropped from it: a gap figure still proves the
+       loss path rendered, it is just exempt from "a gain must not be red" */
+    out.push({ text: t, gap, negative: /^[\s]*[−-]/.test(t),
       rgb: [ +m[0], +m[1], +m[2] ],
       el: el.tagName.toLowerCase() + (typeof el.className === 'string' && el.className
         ? '.' + el.className.trim().split(/\s+/).slice(0,2).join('.') : ''),
@@ -97,7 +124,7 @@ async function look(page, label){
     if (f.negative && near(f.rgb, GOOD))
       bad.push(`${label}: "${f.text}" — a LOSS painted in the affirmative colour `
              + `rgb(${f.rgb.join(',')}) on ${f.el}`);
-    if (!f.negative && near(f.rgb, BAD))
+    if (!f.negative && !f.gap && near(f.rgb, BAD))
       bad.push(`${label}: "${f.text}" — a GAIN painted in the alarm colour `
              + `rgb(${f.rgb.join(',')}) on ${f.el}`);
   }
@@ -129,8 +156,38 @@ async function look(page, label){
   }, PROPS);
   await p.waitForTimeout(1200);
   const n1 = await look(p, 'desk · results, rail open');
-  if (!n1.some(f => f.negative))
-    bad.push('desk: the fixture produced no negative money at all — this run proved nothing');
+  /* ── THE NON-VACUITY CHECK, HONESTLY RESTATED ────────────────────────────
+     This used to demand that the run find a MINUS-SIGNED figure, on the
+     theory that a desk with no losses on it proves nothing about how losses
+     are painted. That theory has expired, and for a good reason: the desk
+     now says badness in words with an unsigned number — "over the ceiling by
+     $144,400", "$28,850 under their price", "$9,100 too dear" — because a
+     minus sign is the easiest thing on a screen to miss and the word "over"
+     is not. Chasing a minus sign would mean contorting the fixture to force
+     a shape the product deliberately moved away from, or worse, adding minus
+     signs back to satisfy a test.
+
+     What still proves the run was real: it found money, and it found money
+     painted in the alarm colour — so the loss path rendered and was
+     inspected. The rule those figures are held to (no loss in green, no gain
+     in red) is unchanged and runs above. */
+  /* the losing sheet is opened deliberately rather than hoped for: the alarm
+     colour lives in ITS payday box and ITS band, and whichever sheet the rail
+     happens to have open first is not a thing to build a guard on */
+  await p.evaluate(() => { try {
+    const i = P.props.findIndex(x => /Underwater/.test(x.addr || ''));
+    if (i >= 0) loadInto(i);
+    S.userToggled = true; S.openId = 'flip';
+    render(); if (typeof showResults === 'function') showResults();
+  } catch(e){} });
+  await p.waitForTimeout(900);
+  const n2 = await look(p, 'desk · the losing sheet, open');
+  const all = n1.concat(n2);
+  const alarm = all.filter(f => near(f.rgb, BAD)).length;
+  if (all.length < 6)
+    bad.push(`desk: only ${all.length} money figures across both sheets — this run proved nothing`);
+  else if (!alarm && !all.some(f => f.negative))
+    bad.push('desk: nothing on either sheet was painted as a loss — this run proved nothing');
 
   /* and the rail specifically, which is where he found it */
   const rail = await p.evaluate(() => {

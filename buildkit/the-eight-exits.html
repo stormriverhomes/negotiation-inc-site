@@ -1,0 +1,1165 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Eight Exits · A walk-through · Negotiation Inc</title>
+<meta name="description" content="Every way out of a property deal, with the arithmetic shown. Fifteen minutes. No email, nothing to buy.">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE EIGHT EXITS — the reference work.
+
+   This page was, until now, dressed in the arcade's paper: tan stock, tape,
+   a sheet floating on a wooden desk. That was a strategic error. The arcade's
+   paper is the GAME's costume, and the seam between the two worlds only means
+   something if the software's side never wears it.
+
+   The walk-through is not a game surface. It is the first thing a buyer, a lender or
+   a fund analyst reads, and it has to carry the authority of a reference work —
+   a curriculum, a research note, a treatise. Authority in print comes from
+   STRUCTURE AND RESTRAINT, never from craft props. So:
+
+     · white ground, app tokens, blue is the software's
+     · serif display for gravitas, sans for body and data, mono for provenance
+     · numbered sections, numbered figures, captions, a visible grid
+     · rules instead of shadows; no tape, no stamps, no floating sheet
+
+   Paper stays in the arcade. That is the whole rule now.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --page:#fbfcfd; --card:#ffffff; --ink:#101725; --mid:#4a5162; --soft:#677187;
+  --line:#e3e7ee; --line-ink:#c3cad6; --wash:#f7f8fa;
+  --blue:#1f5fd0; --blue-deep:#173f8a; --blue-soft:#e9effb;
+  --green:#177a4d; --green-soft:#eaf6f0; --green-line:#bfe0cd;
+  --amber:#a6610d; --amber-soft:#fbf4e6; --amber-line:#ecd9b0;
+  --red:#b3372c; --red-soft:#faeeec; --red-line:#f0d2ce;
+  --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;   /* no typewriter in the software */
+}
+*{box-sizing:border-box;margin:0}
+html{background:var(--page)}
+body{font-family:var(--sans);background:var(--page);color:var(--ink);
+ max-width:940px;margin:0 auto;min-height:100vh;padding:0 28px 70px;
+ font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.mono{font-family:var(--mono)}
+.num{font-variant-numeric:tabular-nums}
+a{color:var(--blue)}
+
+/* ── masthead: a publication, not a landing page ── */
+header{padding:26px 0 0}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+ padding-bottom:12px;border-bottom:3px solid var(--ink)}
+.mark{display:inline-flex;align-items:baseline;gap:8px}
+.mark .nm{font-family:var(--serif);font-size:18px;font-weight:700;letter-spacing:.11em}
+.mark .inc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em}
+.marksub{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-top:4px}
+/* Every item in this row is optically centred on the same line. The account
+   chip carries a border and more padding than the plain links, so without an
+   explicit align-items the flex row stretched them to different heights and the
+   chip sat a pixel or two low — the kind of drift that reads as carelessness
+   long before anybody can name it. */
+.top nav{display:flex;align-items:center;gap:16px;font-size:13px;flex-wrap:wrap}
+.top nav a{display:inline-flex;align-items:center;text-decoration:none;color:var(--mid);
+ padding:6px 2px;border-bottom:2px solid transparent;line-height:1}
+.top nav a:hover{color:var(--ink)}
+.top nav a.on{color:var(--ink);font-weight:650;border-bottom-color:var(--blue)}
+.top nav a.acct{border:1.5px solid var(--line-ink);border-radius:9px;padding:6px 12px;
+ color:var(--ink);font-weight:650;border-bottom-width:1.5px}
+.top nav a.acct:hover{border-color:var(--blue);color:var(--blue)}
+.title{display:grid;grid-template-columns:1fr;gap:0;padding:26px 0 20px;border-bottom:1px solid var(--line)}
+h1{font-family:var(--serif);font-size:42px;font-weight:700;line-height:1.06;letter-spacing:-.02em}
+.standfirst{font-size:16.5px;line-height:1.6;color:var(--mid);margin-top:12px;max-width:62ch}
+.standfirst strong{color:var(--ink);font-weight:650}
+.colophon{display:flex;gap:22px;flex-wrap:wrap;margin-top:16px;font-family:var(--mono);
+ font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft)}
+.colophon b{color:var(--ink);font-weight:700}
+
+/* ── contents rail ── */
+.contents{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;padding:13px 0;border-bottom:1px solid var(--line)}
+.contents .lab{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft)}
+nav#rail{display:flex;flex-wrap:wrap;gap:4px 5px;flex:1}
+nav#rail button{font-family:var(--sans);font-size:12px;font-weight:600;
+ border:1px solid var(--line-ink);background:#fff;color:var(--mid);padding:5px 10px;cursor:pointer}
+nav#rail button .n{font-family:var(--mono);font-size:10px;color:var(--soft);font-weight:700;margin-right:6px}
+nav#rail button.on{border-color:var(--ink);background:var(--ink);color:#fff}
+nav#rail button.on .n{color:#fff;opacity:.75}
+nav#rail button.done .n{color:var(--green)}
+nav#rail button:hover:not(.on){border-color:var(--ink);color:var(--ink)}
+
+/* ── the lesson ── */
+main{margin-top:0}
+/* progress is offered, not imposed — one line, above the card, only when there
+   is something to pick up and the reader is not already there */
+.resume{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+ margin:0 0 -1px;padding:10px 16px;border:1px solid var(--line);border-bottom:0;
+ background:var(--wash,#f6f8fb);font-size:13.5px;color:var(--mid)}
+.resume b{color:var(--ink);font-weight:650}
+.resume button{font-family:inherit;font-size:13px;font-weight:650;color:var(--blue,#1f5fd0);
+ background:none;border:0;padding:0;cursor:pointer;white-space:nowrap}
+.resume button:hover{text-decoration:underline}
+.card{background:var(--card);border:1px solid var(--line);border-top:0;padding:26px 30px 22px}
+.exit-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--soft);text-transform:uppercase}
+h2{font-family:var(--serif);font-size:33px;font-weight:700;letter-spacing:-.02em;margin-top:4px;line-height:1.12}
+.panebar{display:flex;gap:0;margin:18px 0 0;border-bottom:1px solid var(--line-ink);flex-wrap:wrap}
+.panebar span{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--soft);
+ padding:7px 13px 8px;border-bottom:2px solid transparent;cursor:pointer;margin-bottom:-1px}
+.panebar span .s{font-family:var(--mono);font-size:9.5px;color:var(--line-ink);margin-right:7px}
+.panebar span.on{color:var(--ink);border-bottom-color:var(--blue)}
+.panebar span.on .s{color:var(--blue)}
+.panebar span:hover:not(.on){color:var(--ink)}
+.pane{padding-top:20px;min-height:250px}
+.pane > p{font-size:16px;line-height:1.68;color:var(--mid);margin-bottom:13px;max-width:66ch}
+.pane > p strong{color:var(--ink);font-weight:650}
+.pane > p em{color:var(--ink);font-style:italic}
+
+/* the figure: the software's own sheet, quoted as an exhibit — no tape */
+.fig{max-width:520px;margin:6px 0 0;border:1px solid var(--line-ink)}
+.fig-h{background:var(--blue);color:#fff;display:flex;justify-content:space-between;gap:12px;
+ padding:7px 12px;font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase}
+.fig-b{padding:13px 15px;font-size:14px;line-height:1.85;color:var(--mid);font-variant-numeric:tabular-nums;background:#fff}
+.fig-b b{color:var(--blue);font-weight:650}
+.figcap{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--soft);
+ margin-top:9px;padding-top:7px;border-top:1px solid var(--line);max-width:520px}
+.figcap b{color:var(--ink);letter-spacing:.14em}
+
+/* the case note */
+.case{border:1px solid var(--red-line);border-left:3px solid var(--red);background:var(--red-soft);
+ padding:15px 18px;max-width:70ch}
+.case .lab{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--red);margin-bottom:8px}
+.case p{font-size:15.5px;line-height:1.65;color:var(--mid);margin-bottom:9px}
+.case p:last-of-type{margin-bottom:0}
+.case p strong{color:var(--ink)} .case p em{color:var(--ink)}
+.case .cost{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--red);margin-top:11px;padding-top:9px;border-top:1px solid var(--red-line)}
+
+/* ── the worked exercise ── */
+.deal{display:flex;flex-wrap:wrap;gap:7px 22px;padding:11px 14px;background:var(--wash);
+ border:1px solid var(--line);margin-bottom:18px}
+.deal span{font-size:12.5px;color:var(--mid)}
+.deal b{font-size:12.5px;color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums}
+.sliderlab{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:5px}
+.sliderlab .l{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.sliderlab .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+/* The band is the product's signature shape, so the lesson has to draw it the
+   way the desk draws it — rounded, inset, the same blue core. A reader who
+   learns a shape here and meets a different one on the sheet has to learn it
+   twice, and the second time they wonder whether it means the same thing. */
+.track{position:relative;height:32px;margin-bottom:2px}
+.track::before{content:'';position:absolute;left:0;right:0;top:12px;height:8px;border-radius:999px;
+ background:linear-gradient(180deg,#e4e8f0,#eef1f6);box-shadow:inset 0 1px 2px rgba(16,23,37,.09)}
+.band{position:absolute;top:11px;height:10px;border-radius:999px;pointer-events:none;z-index:1;
+ background:linear-gradient(180deg,rgba(31,95,208,.24),rgba(31,95,208,.14));
+ box-shadow:inset 0 0 0 1.5px var(--blue)}
+.band::after{content:'NEGOTIATION INC';position:absolute;top:-12px;left:1px;
+ font-family:var(--mono);font-size:7.5px;letter-spacing:.14em;color:var(--blue);white-space:nowrap}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:32px;background:transparent;
+ position:relative;z-index:2;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;background:transparent}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-7px;
+ background:var(--ink);border:3px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(16,23,37,.45)}
+input[type=range]::-moz-range-track{height:8px;background:transparent}
+input[type=range]::-moz-range-thumb{width:17px;height:17px;background:var(--ink);border:3px solid #fff;
+ border-radius:50%;box-shadow:0 1px 4px rgba(16,23,37,.45)}
+.scale{display:flex;justify-content:space-between;font-family:var(--mono);
+ font-size:9.5px;color:var(--soft);margin-bottom:16px}
+.readout{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;padding:12px 15px;
+ border:1px solid var(--green-line);border-left:4px solid var(--green);background:var(--green-soft)}
+.readout.warn{border-color:var(--amber-line);border-left-color:var(--amber);background:var(--amber-soft)}
+.readout.bad{border-color:var(--red-line);border-left-color:var(--red);background:var(--red-soft)}
+.readout .lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+.readout .fig2{font-size:31px;font-weight:700;line-height:1;color:var(--green);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.readout.warn .fig2{color:var(--amber)}
+.readout.bad .fig2{color:var(--red)}
+.subread{display:flex;gap:22px;flex-wrap:wrap;margin-top:10px}
+.subread span{font-size:12.5px;color:var(--mid)}
+.subread b{font-size:12.5px;color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums}
+.verdict{margin-top:16px;padding-top:11px;border-top:1px solid var(--line-ink);max-width:64ch}
+.verdict::before{content:'The verdict';display:block;font-family:var(--mono);
+ font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);margin-bottom:6px}
+.verdict{font-size:16px;line-height:1.6;color:var(--ink);min-height:4.4em}
+
+/* the handoff strip — the walk-through's one door into the software, at the exact
+   moment the reader has just worked the number themselves */
+.handoff{margin-top:18px;border:1px solid var(--line-ink);border-left:3px solid var(--blue);
+ background:var(--blue-soft);padding:13px 16px;display:flex;justify-content:space-between;
+ align-items:center;gap:16px;flex-wrap:wrap}
+.handoff .hk{display:block;font-family:var(--mono);font-size:9px;font-weight:700;
+ letter-spacing:.18em;text-transform:uppercase;color:var(--blue-deep)}
+.handoff p{margin:4px 0 0;font-size:14px;line-height:1.5;max-width:52ch}
+.handoff .btn{white-space:nowrap}
+.handoff.none{background:#f7f8fa;border-left-color:var(--soft);display:block}
+.handoff.none .hk{color:var(--soft)}
+.carry{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);
+ font-size:13.5px;color:var(--soft)}
+.carry a{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;
+ text-decoration:none;color:var(--blue-deep);border:1px solid var(--line-ink);padding:3px 9px;margin:6px 4px 0 0}
+.carry a:hover{background:var(--blue-deep);color:#fff;border-color:var(--blue-deep)}
+
+.cardnav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:22px;
+ padding-top:14px;border-top:1px solid var(--line)}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;
+ border:1px solid var(--line-ink);background:#fff;color:var(--ink);padding:9px 17px;cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--ink)}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.primary:hover{background:var(--blue);border-color:var(--blue)}
+.btn:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:6px}
+.dots i{width:7px;height:7px;background:#dde2ea}
+.dots i.on{background:var(--blue)}
+
+/* the ninth screen */
+.ninth h2{font-size:35px}
+.ninth p{font-size:16.5px;line-height:1.68;color:var(--mid);max-width:64ch;margin-bottom:13px}
+.ninth p strong{color:var(--ink);font-weight:650}
+.ninth .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.ninth .row a{text-decoration:none}
+.receipt{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;
+ text-transform:uppercase;color:var(--green);background:var(--green-soft);
+ border:1px solid var(--green-line);padding:5px 10px}
+
+.ftlegal a{color:inherit;text-decoration:none;margin-left:13px;border-bottom:1px solid transparent}
+.ftlegal a:hover{border-bottom-color:currentColor}
+footer{margin-top:30px;padding-top:13px;border-top:3px solid var(--ink);
+ font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--soft);
+ display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;text-transform:uppercase}
+
+/* ── the course furniture ──────────────────────────────────────────────────
+   "Lesson 3 of 8" and a bar that fills. Obvious, and the thing the page was
+   missing: a reader could not tell whether they were at the beginning. */
+.lessonbar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.lessonbar .ln{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.16em;
+ text-transform:uppercase;color:var(--blue);white-space:nowrap}
+.lessonbar .lp{flex:1;height:5px;border-radius:999px;background:#e7ebf2;overflow:hidden;min-width:60px}
+.lessonbar .lp i{display:block;height:100%;border-radius:999px;background:var(--green);transition:width .3s}
+.lessonbar .lc{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+ color:var(--soft);white-space:nowrap}
+.panebar span.pass{color:var(--mid)}
+.panebar span.pass .s{color:var(--green)}
+.panebar span .s{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;
+ border-radius:50%;background:#eef1f6;font-size:9.5px;font-weight:700;margin-right:7px}
+.panebar span.on .s{background:var(--blue);color:#fff}
+
+/* ── the plain opening ── */
+.lead{font-family:var(--serif);font-size:23px;line-height:1.42;color:var(--ink);
+ max-width:30ch;margin-bottom:20px;letter-spacing:-.01em}
+.lead em{font-style:italic}
+.steps{list-style:none;counter-reset:s;display:grid;gap:9px;margin:0 0 22px;padding:0;max-width:60ch}
+.steps li{counter-increment:s;display:grid;grid-template-columns:26px 1fr;gap:11px;align-items:start}
+.steps li::before{content:counter(s);display:flex;align-items:center;justify-content:center;
+ width:26px;height:26px;border-radius:50%;background:var(--blue-soft);color:var(--blue-deep);
+ font-family:var(--mono);font-size:12px;font-weight:700}
+.steps li span{font-size:16px;line-height:1.5;color:var(--mid);padding-top:3px}
+.twocard{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:70ch}
+.tc{padding:13px 15px;border:1px solid var(--line);border-left:3px solid var(--line-ink);background:var(--wash);border-radius:14px}
+.tc.why{border-left-color:var(--green);background:var(--green-soft);border-color:var(--green-line)}
+.tc.catch{border-left-color:var(--amber);background:var(--amber-soft);border-color:var(--amber-line)}
+.tc .k{display:block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.16em;
+ text-transform:uppercase;color:var(--soft);margin-bottom:5px}
+.tc.why .k{color:var(--green)} .tc.catch .k{color:var(--amber)}
+.tc p{font-size:14.5px;line-height:1.52;color:var(--mid)}
+.longer{margin-top:20px;padding-top:13px;border-top:1px solid var(--line);max-width:70ch}
+.longer summary{font-size:13.5px;font-weight:650;color:var(--blue);cursor:pointer;list-style:none}
+.longer summary::-webkit-details-marker{display:none}
+.longer summary::before{content:'▸ ';color:var(--soft)}
+.longer[open] summary::before{content:'▾ '}
+.longer p{font-size:15.5px;line-height:1.65;color:var(--mid);margin-top:12px;max-width:66ch}
+.longer p strong{color:var(--ink);font-weight:650} .longer p em{color:var(--ink);font-style:italic}
+
+/* ── the rule, under the case note ── */
+.rule{margin-top:16px;padding:12px 15px;border:1px solid var(--line-ink);border-left:3px solid var(--ink);
+ background:#fff;max-width:70ch}
+.rule .k{display:block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.16em;
+ text-transform:uppercase;color:var(--soft);margin-bottom:5px}
+.rule p{font-size:15.5px;line-height:1.55;color:var(--ink)}
+
+/* ── the live excerpt: the software itself, quoted and working ── */
+.live{margin-top:22px;border:1px solid var(--line-ink);background:#fff}
+.live-h{display:flex;align-items:center;gap:10px;padding:9px 15px;border-bottom:1px solid var(--line);
+ background:var(--wash);font-size:13.5px;font-weight:650;color:var(--ink);flex-wrap:wrap}
+.live-h .k{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+ color:#fff;background:var(--blue);padding:3px 7px;border-radius:4px}
+.li-rows,.cr-rows{padding:15px 15px 4px;display:grid;gap:13px}
+.li label{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+ font-size:13px;color:var(--mid);margin-bottom:1px}
+.li label b{font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+.li input[type=range]{height:24px}
+.li input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:999px;
+ background:linear-gradient(90deg,var(--blue) var(--fill,0%),#e7ebf2 var(--fill,0%));
+ box-shadow:inset 0 1px 2px rgba(16,23,37,.09)}
+.li input[type=range]::-webkit-slider-thumb{width:18px;height:18px;margin-top:-6px}
+.li input[type=range]::-moz-range-track{height:6px;border-radius:999px;
+ background:linear-gradient(90deg,var(--blue) var(--fill,0%),#e7ebf2 var(--fill,0%))}
+/* the condition rows, drawn exactly as the desk draws them */
+.cr{display:grid;grid-template-columns:minmax(96px,150px) 1fr 78px;gap:12px;align-items:center}
+.crl{font-size:13px;color:var(--mid)}
+.crv{font-size:13px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+input.crs{height:24px}
+input.crs::-webkit-slider-runnable-track{height:7px;border-radius:999px;
+ background:linear-gradient(90deg,var(--col,#177a4d) var(--fill,0%),#e7ebf2 var(--fill,0%))}
+input.crs::-webkit-slider-thumb{width:17px;height:17px;margin-top:-5px;background:#fff;
+ border:2.5px solid var(--col,#177a4d);box-shadow:0 1px 3px rgba(16,23,37,.3)}
+input.crs::-moz-range-track{height:7px;border-radius:999px;
+ background:linear-gradient(90deg,var(--col,#177a4d) var(--fill,0%),#e7ebf2 var(--fill,0%))}
+input.crs::-moz-range-thumb{width:13px;height:13px;background:#fff;border:2.5px solid var(--col,#177a4d)}
+.cr-key{display:flex;gap:16px;flex-wrap:wrap;padding:11px 15px 0;font-size:11px;color:var(--soft)}
+.cr-key i,.lo-key i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.live-out{padding:14px 15px 15px;margin-top:11px;border-top:1px solid var(--line);background:var(--wash)}
+.lo-bar{display:flex;height:15px;border-radius:999px;overflow:hidden;background:#e7ebf2;
+ box-shadow:inset 0 1px 2px rgba(16,23,37,.09)}
+.lo-bar .seg{display:block;height:100%;transition:width .18s}
+.lo-key{display:flex;gap:15px;flex-wrap:wrap;margin-top:9px;font-size:11.5px;color:var(--soft)}
+.lo-key b{color:var(--ink);font-weight:650;font-variant-numeric:tabular-nums}
+.lo-fig{display:flex;align-items:baseline;gap:12px;margin-top:12px;flex-wrap:wrap}
+.lo-fig .lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+.lo-fig .v{font-size:27px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--green)}
+.lo-fig .v.warn{color:var(--amber)} .lo-fig .v.bad{color:var(--red)}
+.lo-say{font-size:14.5px;line-height:1.55;color:var(--mid);margin-top:8px;max-width:64ch}
+.lo-say b{color:var(--ink);font-weight:650}
+.live-note{padding:11px 15px;border-top:1px solid var(--line);font-size:12.5px;line-height:1.5;color:var(--soft)}
+
+/* ── the recap ── */
+.learned{margin-top:18px;padding:13px 16px;border:1px solid var(--green-line);
+ border-left:3px solid var(--green);background:var(--green-soft);max-width:70ch}
+.learned .k{display:block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.16em;
+ text-transform:uppercase;color:var(--green);margin-bottom:7px}
+.learned ul{margin:0;padding-left:18px;display:grid;gap:5px}
+.learned li{font-size:14.5px;line-height:1.5;color:var(--ink)}
+
+@media(max-width:700px){ .twocard{grid-template-columns:1fr} }
+@media(max-width:620px){
+ body{padding:0 15px 40px}
+ .lead{font-size:20px}
+ .cr{grid-template-columns:1fr 62px;grid-template-areas:'l v' 's s';row-gap:3px}
+ .crl{grid-area:l} .crv{grid-area:v} input.crs{grid-area:s}
+ .lo-fig .v{font-size:23px}
+ h1{font-size:30px} h2{font-size:25px}
+ .card{padding:18px 16px 16px}
+ .pane{min-height:0}
+ .readout .fig2{font-size:25px}
+ .panebar span{padding:6px 9px 7px;font-size:11px}
+ .panebar span .s{display:none}
+}
+@media(prefers-reduced-motion:no-preference){
+ .pane{animation:in .2s ease-out}
+ @keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+}
+.marklink{text-decoration:none;color:inherit;display:inline-block}
+.marklink:hover .nm{color:var(--blue)}
+</style></head><body>
+
+<header>
+ <div class="top">
+  <div>
+   <a href="index.html" class="marklink" title="Negotiation Inc — home"><div class="mark"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></div></a>
+   <div class="marksub">The eight exits &middot; a walk-through</div>
+  </div>
+  <nav>
+   <a href="the-eight-exits.html" class="on">Walk-through</a>
+   <a href="desk.html">The desk</a>
+   <a href="portfolio.html">Arcade</a>
+   <a href="plans.html">Plans</a>
+   <a href="office.html" class="acct">Sign in</a>
+  </nav>
+ </div>
+ <div class="title">
+  <h1>The eight exits.</h1>
+  <p class="standfirst">There are only eight ways out of a property deal, and every one of them
+   comes down to <strong>a single number</strong>. Learn the eight numbers and you can price a deal.
+   This is that, and nothing else.</p>
+  <div class="colophon">
+   <span><b>Eight lessons</b> &middot; four short pages each</span>
+   <span><b>Fifteen minutes</b> end to end</span>
+   <span><b>Real controls</b> from the software</span>
+   <span><b>No account</b>, no email</span>
+  </div>
+ </div>
+ <div class="contents"><span class="lab">Contents</span><nav id="rail" aria-label="Exits"></nav></div>
+</header>
+
+<div id="resume"></div>
+<main id="main"></main>
+
+<!--SOON-->
+<!-- Somebody who has read a lesson on this page has spent more attention on
+     this product than almost anybody else on the site, and there was nowhere
+     for that to go except back to a free page. -->
+<div style="max-width:44rem;margin:26px auto 0;padding:0 20px"
+  data-waitlist="The paid desk" data-from="course"
+  data-line="The course is <b>free forever</b> and so is the desk that runs these numbers on your own addresses. The paid tiers &mdash; the photo condition read, comps pulled for the address, offer letters written from the winning exit &mdash; are being wired to a payment rail. Leave an address and you get <b>one</b> email the day they open, with the founding price on it."></div>
+<!--/SOON-->
+
+<footer>
+ <span>NEGOTIATION INC &middot; THE COURSE IS FREE FOREVER</span>
+ <span id="permalink">LINK TO ANY EXIT: #WHOLESALE</span>
+ <span class="ftlegal"><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Billing</a></span>
+</footer>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const money = v => {
+  const neg = v < 0, a = Math.abs(v);
+  const s = a >= 1e6 ? (a/1e6).toFixed(2) + 'M' : a >= 1e3 ? Math.round(a/100)/10 >= 100 ? Math.round(a/1000) + 'k' : (a/1000).toFixed(1) + 'k' : Math.round(a).toString();
+  return (neg ? '−$' : '$') + s;
+};
+const moneyFull = v => (v < 0 ? '−$' : '$') + Math.abs(Math.round(v)).toLocaleString('en-US');
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Eight exits. Each teaches ONE deciding number, shows the arithmetic on the
+   software's paper, tells one true story of it going wrong, and then hands over
+   the slider — which is the actual offer-calculator pattern, band and all.
+   The lesson ends with the person already inside the tool. No seam.
+──────────────────────────────────────────────────────────────────────────── */
+const EXITS = [
+{ id:'wholesale', n:'I', title:'The wholesale', tag:'sell the contract, never the house',
+  what:[
+   `You put a house under contract at one price, and sell <strong>the contract itself</strong> to an investor at a higher one, before you ever own anything. The difference is your fee. You are not selling a house — you are selling <em>a good price you found first</em>.`,
+   `It is the exit with the least money down and the least forgiveness. Everything depends on one subtraction working for the person <em>behind</em> you.`],
+  number:{ name:'Your spread', lines:[
+   `<b>Buyer’s ceiling</b> = 70% of ARV − repairs`,
+   `<b>Your fee</b> = buyer’s ceiling − your contract price`,
+   `ARV is the After-Repair Value — what it sells for, fixed.`]},
+  wrong:{ story:[
+   `You contract at $128,000 because the seller was firm and you wanted the deal. Your buyer’s ceiling is $130,000. You spend three weeks marketing a $2,000 spread, nobody bites, the contract expires, and the seller — who told two neighbours — no longer answers your calls.`],
+   cost:`Cost: three weeks, one neighbourhood, $0` },
+  /* the same figures, in the shape the desk takes them — one source, two surfaces */
+  desk:{ asking:118000, arv:240000, repairs:38000, exit:'wholesale' },
+  turn:{
+   deal:[['ARV','$240,000'],['Repairs','$38,000'],['Seller asking','$118,000'],['Buyer’s ceiling','$130,000']],
+   slider:{ label:'Your offer to the seller', min:92000, max:136000, step:500, def:112000, fmt:moneyFull },
+   band:[110000,122000],
+   calc(v){
+     const fee = 130000 - v;
+     const cls = fee >= 8000 && fee <= 20000 ? 'good' : fee >= 5000 ? 'warn' : 'bad';
+     const verdict = fee <= 0 ? `Your buyer’s math died at $130,000. Offer more than that and <em>you</em> are the end buyer now, with none of their money.`
+       : fee < 5000 ? `A contract, two closings, three weeks of your life — for ${moneyFull(fee)}. Not worth the paper.`
+       : fee < 8000 ? `Thin. One surprise in the repair estimate and this is a hobby.`
+       : fee <= 20000 ? `Assignable. The buyer still clears their margin, the seller gets their number, and you never owned a doorknob.`
+       : `If the seller signs at this, sign fast — but sellers who sign this low usually already got a second phone call.`;
+     return { primary:{lab:'Your assignment fee', val:money(fee), cls},
+              sub:[['Buyer pays', moneyFull(v + Math.max(0,fee))],['Their margin intact', fee>0?'yes':'no']],
+              verdict };
+   }}},
+
+{ id:'flip', n:'II', title:'The fix and flip', tag:'the subtraction, taken seriously',
+  what:[
+   `Buy it broken, fix it, sell it fixed. The whole business is one subtraction: what it sells for, minus <strong>everything</strong> — and “everything” is the part that ends careers. Repairs, yes. Also six months of loan interest, taxes, insurance, utilities, two sets of closing costs, and the agent who sells it for you.`,
+   `Every number in the subtraction is an estimate except one: <em>what you paid</em>. Which is why the price you pay is the only mistake you cannot fix later.`],
+  number:{ name:'Profit, after everything', lines:[
+   `<b>Profit</b> = ARV − purchase − repairs − selling costs − holding costs`,
+   `The 70% rule: pay ≤ 70% of ARV − repairs.`,
+   `The rule is not the math. The rule is the margin for being wrong.`]},
+  wrong:{ story:[
+   `The repair bid was $55,000. Behind the shower wall it became $71,000. The six-month hold became eleven because the county lost the permit twice, and holding costs run every day whether you do. The house sold at full ARV — and lost $9,000. <em>Nothing went dramatically wrong. It just all went two turns slower and one notch worse.</em>`],
+   cost:`Cost: eleven months, $9,000, one marriage-grade argument` },
+  desk:{ asking:200000, arv:320000, repairs:55000, exit:'flip' },
+  turn:{
+   deal:[['ARV','$320,000'],['Repairs (bid)','$55,000'],['Selling costs','$26,000'],['Holding, 6 mo','$12,000']],
+   slider:{ label:'What you pay for it', min:150000, max:240000, step:1000, def:200000, fmt:moneyFull },
+   band:[150000,202000],
+   calc(v){
+     const profit = 320000 - 55000 - 26000 - 12000 - v;
+     const rule = 0.70*320000 - 55000;
+     const cls = v <= rule ? 'good' : profit >= 25000 ? 'good' : profit > 0 ? 'warn' : 'bad';
+     const verdict = v <= rule ? `Inside the 70% rule (${moneyFull(rule)}). The rule exists because one of these numbers is about to be wrong, and you do not yet know which.`
+       : profit >= 25000 ? `The math clears ${money(profit)} — you are past the rule, so you are betting the repair bid is honest. Sometimes it is.`
+       : profit > 0 ? `Profitable if nothing happens. Something happens.`
+       : `You are paying retail for a construction project. The seller’s agent will frame your offer.`;
+     return { primary:{lab:'Profit, after everything', val:money(profit), cls},
+              sub:[['70% rule says', moneyFull(rule)],['All-in', moneyFull(v+55000+26000+12000)]],
+              verdict };
+   }}},
+
+{ id:'wholetail', n:'III', title:'The wholetail', tag:'the shortcut between the first two',
+  what:[
+   `Buy it like a wholesaler, sell it like a flipper — but only <strong>barely</strong> fix it. Clean-out, paint, carpet, lightbulbs, list it on the open market. You are not renovating; you are making it <em>photographable</em>.`,
+   `The skill is knowing where to stop. Every dollar of work must move the price by more than a dollar, and that stops being true far sooner than it feels like it should.`],
+  number:{ name:'The marginal dollar', lines:[
+   `<b>Net</b> = new price × 92% − what you paid − the work − holding`,
+   `Spend while each $1 of work returns > $1 of price.`,
+   `Then stop. The stopping is the entire skill.`]},
+  wrong:{ story:[
+   `It needed paint. Then the painted walls made the kitchen look tired, so, cabinets. The cabinets shamed the counters. Four months later a $12,000 spruce-up was a $38,000 renovation of a house bought at a wholesale price that no longer was one.`,
+   `There is a name for this and the name is <em>a flip you never underwrote</em>.`],
+   cost:`Cost: the whole margin, by increments` },
+  desk:{ asking:165000, arv:205000, repairs:12000, exit:'wholetail' },
+  turn:{
+   deal:[['You paid','$165,000'],['Sells as-is for','$205,000'],['Selling costs','8%'],['Base holding','$3,000']],
+   slider:{ label:'The work budget', min:0, max:40000, step:500, def:12000, fmt:moneyFull },
+   band:[6000,16000],
+   calc(v){
+     const lift = 1.9 * v * (1 - v/80000);
+     const price = 205000 + lift;
+     const net = price*0.92 - 165000 - v - (3000 + v*0.25);
+     const marginal = 0.92*1.9*(1 - 2*v/80000) - 1.25;
+     const cls = v <= 16000 && v >= 3000 ? 'good' : v < 3000 ? 'good' : marginal > -0.25 ? 'warn' : 'bad';
+     const verdict = v < 3000 ? `A clean-out, a lockbox, and speed. Honest money — you leave some lift on the table and keep three months of your life.`
+       : v <= 16000 ? `Paint-and-carpet money. Around here every dollar of work comes back with a friend.`
+       : v <= 28000 ? `Past the knee. Each dollar in returns less than a dollar out now — you are polishing your own margin off.`
+       : `You are renovating a flip you already sold. Go back to lesson two and start over with its numbers.`;
+     return { primary:{lab:'Your net', val:money(net), cls},
+              sub:[['It lists at', moneyFull(Math.round(price/500)*500)],['Each $1 of work returns', '$'+Math.max(0,(0.92*1.9*(1-2*v/80000))).toFixed(2)]],
+              verdict };
+   }}},
+
+{ id:'hold', n:'IV', title:'The buy and hold', tag:'the number the lender underlines',
+  what:[
+   `Keep it. Rent it. The tenant pays the mortgage and time does the rest. It is the calmest exit and the most lied-about, because the lie is always the same: <strong>the rent covers it</strong> — said by someone who counted the mortgage and forgot the other forty percent.`,
+   `Taxes, insurance, vacancy, maintenance, management. The industry’s shorthand: about 40% of the rent never reaches the loan.`],
+  number:{ name:'DSCR — debt service coverage', lines:[
+   `<b>NOI</b> = rent − the 40% (tax, insurance, vacancy, repairs, mgmt)`,
+   `<b>DSCR</b> = NOI ÷ monthly loan payment`,
+   `1.00 = the rent exactly covers the debt. Banks want 1.25.`]},
+  wrong:{ story:[
+   `On the spreadsheet it cash-flowed $210 a month. In February the water heater went, in April the tenant left, and re-letting took six weeks and a repaint. The year ended $3,900 negative — <em>on a property performing exactly to statistical averages.</em> The spreadsheet had no row for February.`],
+   cost:`Cost: $3,900/yr, paid monthly, in surprise` },
+  desk:{ asking:210000, rent:1850, exit:'hold' },
+  turn:{
+   deal:[['Price','$210,000'],['Down 25%','$52,500'],['Loan $157,500 @ 7.1%','$1,058/mo'],['Operating costs','40% of rent']],
+   slider:{ label:'The rent it actually gets', min:1400, max:2400, step:25, def:1850, fmt:v=>'$'+v.toLocaleString('en-US')+'/mo' },
+   band:[2205,2400],
+   calc(v){
+     const noi = v*0.60, dscr = noi/1058, cf = noi - 1058;
+     const cls = dscr >= 1.25 ? 'good' : dscr >= 1.0 ? 'warn' : 'bad';
+     const verdict = dscr < 1.0 ? `The tenant pays most of it and you pay the rest. That is not an investment, it is a donation with paperwork. At this price, it isn’t the rent that’s wrong.`
+       : dscr < 1.25 ? `Covered — until the water heater. Banks demand 1.25 because they have read more Februaries than you have.`
+       : `Covered with room. This is the number the lender underlines, and now you know why.`;
+     return { primary:{lab:'DSCR', val:dscr.toFixed(2), cls},
+              sub:[['Cash flow', money(cf)+'/mo'],['NOI', moneyFull(Math.round(noi))+'/mo']],
+              verdict };
+   }}},
+
+{ id:'brrrr', n:'V', title:'The BRRRR', tag:'the flip that refuses to sell',
+  what:[
+   `Buy, Rehab, Rent, Refinance, Repeat. Do the whole flip — and then <strong>keep the house</strong>: a bank refinances it at its new value and hands your capital back, the tenant services the new loan, and the same money goes and buys the next one.`,
+   `The entire machine turns on one appraisal you do not control. Lessons two and four still apply in full; this exit is merely both of them, stapled to a stranger’s opinion.`],
+  number:{ name:'Cash left in the deal', lines:[
+   `<b>Refi proceeds</b> = appraisal × 75%`,
+   `<b>Left in</b> = all-in cost − proceeds`,
+   `At zero left in, the return on your money divides by nothing.`]},
+  wrong:{ story:[
+   `All-in $150,000, worth $205,000 by every comp you pulled. The appraiser — who had a Tuesday — said $183,000. The refi returned $137,250, trapping $12,750 in a house you now keep for a decade. The machine still runs; it just runs slower, and the next deal waits on new savings, not recycled ones.`],
+   cost:`Cost: $12,750 parked for ten years, plus the plan` },
+  // the appraisal has not happened yet — it goes over as an estimate, and the desk widens for it
+  desk:{ asking:105000, repairs:38000, arv:192000, est:'arv', exit:'brrrr' },
+  turn:{
+   deal:[['Bought','$105,000'],['Rehab','$38,000'],['Carry','$7,000'],['All-in','$150,000'],['Refi LTV','75%']],
+   slider:{ label:'What the appraiser says', min:165000, max:220000, step:1000, def:192000, fmt:moneyFull },
+   band:[200000,220000],
+   calc(v){
+     const out = v*0.75, left = 150000 - out;
+     const cls = left <= 0 ? 'good' : left <= 15000 ? 'warn' : 'bad';
+     const verdict = left > 15000 ? `The appraiser did not read your spreadsheet. This much capital parked makes it a rental you overpaid your way into — lesson four, the hard way.`
+       : left > 0 ? `Some money stays behind. Survivable — <em>if</em> the rent clears lesson four on the new, larger payment.`
+       : `Everything out, the house stays, the tenant pays the loan. Infinite return on zero dollars left in — this is why people will not shut up about it.`;
+     return { primary:{lab:'Cash still in the deal', val:money(Math.max(0,left)) + (left<=0?' — none':''), cls},
+              sub:[['Refi returns', moneyFull(out)],['New loan', moneyFull(out)]],
+              verdict };
+   }}},
+
+{ id:'subto', n:'VI', title:'The subject-to', tag:'you bought the payment, not the price',
+  what:[
+   `The seller is behind on a mortgage written when money was cheap. You take over the house <strong>with the loan still in place</strong> — their name on the note, your name on the deed, their 3.2% living on inside your deal. You catch up the arrears, hand them something to walk with, and the price was barely discussed.`,
+   `Because the price is decoration here. <em>The terms are the asset.</em> You did not buy a house; you bought a payment no bank would write you today.`],
+  number:{ name:'The monthly spread', lines:[
+   `<b>Spread</b> = rent − PITI − operating (≈18%)`,
+   `<b>Entry</b> = arrears + walk money + closing`,
+   `Payback = entry ÷ spread, in months. Then it’s yield.`]},
+  wrong:{ story:[
+   `The loan carries a due-on-sale clause — the bank <em>may</em> call the whole note when the deed moves. Mostly they don’t, while payments arrive. Then the insurance was rewritten wrong, a claim was denied, the servicer noticed, and “mostly” stopped being a plan. Nobody who does this well does it without the insurance handled and a lawyer who has seen one before.`],
+   cost:`Cost: potentially the entire structure, on a clause you didn’t price` },
+  desk:{ balance:178000, piti:1205, arrears:9000, rent:1700, sit:'behind', exit:'subto' },
+  turn:{
+   deal:[['Balance $178,000 @ 3.2%','PITI $1,205/mo'],['Arrears','$9,000'],['Walk money','$6,000'],['Entry, all-in','$18,000']],
+   slider:{ label:'The rent it actually gets', min:1300, max:2100, step:25, def:1700, fmt:v=>'$'+v.toLocaleString('en-US')+'/mo' },
+   band:[1865,2100],
+   calc(v){
+     const spread = v*0.82 - 1205;
+     const payback = spread > 0 ? 18000/spread : Infinity;
+     const cls = spread >= 250 ? 'good' : spread >= 120 ? 'warn' : 'bad';
+     const verdict = spread < 0 ? `You assumed somebody’s mortgage in order to lose money monthly. The 3.2% is not a deal at this rent — it is a souvenir.`
+       : spread < 120 ? `A part-time job that can telephone you at 2am.`
+       : spread < 250 ? `It works while everything works. Price February in before you sign.`
+       : `A 3.2% note in a 7% world — the spread is the rate difference wearing a house. Entry money back in ${Math.round(payback)} months, yield forever after.`;
+     return { primary:{lab:'Monthly spread', val:money(spread)+'/mo', cls},
+              sub:[['Entry back in', spread>0 ? Math.round(payback)+' months' : '—'],['The loan’s rate','3.2%, inherited']],
+              verdict };
+   }}},
+
+{ id:'novation', n:'VII', title:'The novation', tag:'the retail exit you never own',
+  what:[
+   `The owner’s house is worth real money — <em>retail</em> money — but they can’t get it: the house needs prep, the process needs managing, and they need a number they can count on. You contract to deliver them that number, then <strong>you</strong> prep it, list it on the open market, and keep everything above their line.`,
+   `You never own it. You never loaned on it. You ran the last hundred yards of somebody else’s sale, and the spread is the fee for knowing how.`],
+  number:{ name:'Your check at closing', lines:[
+   `<b>Check</b> = sale × 92% − owner’s number − prep − holding`,
+   `Overprice it and days-on-market eat the check:`,
+   `every $1,000 over the comps ≈ a week of carrying.`]},
+  wrong:{ story:[
+   `Listed 6% over the comps, because the ceiling fee looked better on paper. Nine showings, no offers, forty days, price cut — and the owner, refreshing Zillow nightly, watched the cut happen and called wanting to know why <em>their</em> number wasn’t moving up while yours moved down. Now it is a listing <em>and</em> a negotiation, and you live in both.`],
+   cost:`Cost: 96 days, the spread, and the reference` },
+  desk:{ asking:195000, arv:236000, repairs:8000, sit:'nohurry', exit:'novation' },
+  turn:{
+   deal:[['Owner’s number','$195,000, net, firm'],['Comps say','$236,000'],['Prep','$8,000'],['Carry','≈$95/day on market']],
+   slider:{ label:'Where you list it', min:215000, max:262000, step:1000, def:240000, fmt:moneyFull },
+   band:[237000,243500],
+   calc(v){
+     const over = Math.max(0,(v-236000)/1000);
+     const dom = 25 + Math.pow(over,1.6)*3;
+     const net = v*0.92 - 195000 - 8000 - dom*95;
+     const cls = net >= 10000 ? 'good' : net >= 4000 ? 'warn' : 'bad';
+     const verdict = v < 234000 ? `It will sell this weekend — to the one buyer in town who didn’t need a discount. You found them by accident and paid for the privilege.`
+       : v <= 244000 ? `Priced to the comps. A five-figure check for professionally finishing a sale you never owned. This is the quiet good one.`
+       : v <= 252000 ? `Every thousand over the comps buys you six more days, and days cost $95 each. The market is not reading your spreadsheet either.`
+       : `The listing goes stale, the owner reads Zillow nightly, and now you are managing a sale <em>and</em> a relationship. The check shrinks either way.`;
+     return { primary:{lab:'Your check at closing', val:money(net), cls},
+              sub:[['Days on market ≈', Math.round(dom)+' days'],['Owner still nets','$195,000, always']],
+              verdict };
+   }}},
+
+{ id:'land', n:'VIII', title:'The land play', tag:'the number nobody publishes',
+  what:[
+   `Six acres on the edge of town. As farmland it is worth less than you’d pay; <strong>split into lots</strong>, with the county’s blessing, it is worth multiples. The entire deal is the blessing — an approval that takes over a year and arrives, or doesn’t.`,
+   `Seven exits taught you to find a number. The eighth teaches the harder thing: <em>what to do when the deciding number is a probability, and nobody will tell you what it is.</em>`],
+  number:{ name:'Expected value of the bet', lines:[
+   `<b>EV</b> = p × (win) + (1−p) × (loss)`,
+   `Win: approved value − costs − price paid`,
+   `Loss: as-is resale − price paid. p is yours to earn.`]},
+  wrong:{ story:[
+   `The seller’s agent said rezoning was “basically a formality.” The formality took nineteen months, two hearings, one traffic study, and then a neighbour with a lawyer. The land sold back to a farmer at a loss — who is, incidentally, the only party in this story who ever knew exactly what the ground was worth.`],
+   cost:`Cost: 19 months of carry and the whole downside, taken at somebody else’s odds` },
+  // no desk handoff: the split is a permission, not a subtraction — the sheet says so rather than faking it
+  desk:null, deskwhy:'The desk does not price this one. A land split turns on a permission the sheet cannot know, and a worksheet that pretends otherwise is worse than no worksheet.',
+  turn:{
+   deal:[['Contract price','$90,000'],['As-is resale','$60,000'],['If approved, net of costs','+$176,000'],['If refused','−$34,000']],
+   slider:{ label:'Your odds the split approves', min:5, max:95, step:1, def:40, fmt:v=>v+'%' },
+   band:[17,55],
+   calc(v){
+     const p = v/100;
+     const ev = p*176000 - (1-p)*34000;
+     const cls = v < 17 ? 'bad' : v <= 55 ? 'good' : 'warn';
+     const verdict = v < 17 ? `Negative expectancy. Below 17% you are buying a lottery ticket at farmland prices, which is the expensive kind.`
+       : v <= 45 ? `Positive expectancy with real variance. Size it so that losing is annoying, never fatal — you will be wrong sometimes, that’s what the p means.`
+       : v <= 70 ? `If you genuinely know it’s this likely, you know a planning officer by first name and what the traffic study says. Do you?`
+       : `Nobody knows this number at ${v}%. The county does not know it at ${v}%. Adjust for the fact that you just moved a slider and felt confident.`;
+     return { primary:{lab:'Expected value', val:money(ev), cls},
+              sub:[['Breakeven odds','17%'],['One number is not published','p']],
+              verdict };
+   }}},
+];
+window.__EXITS = EXITS;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE PLAIN VERSION.
+
+   The prose above is good prose. It is also, on the first page of the first
+   lesson, two dense paragraphs of it — and a course whose first screen is a
+   wall of text loses the exact reader it was written for. Somebody who has
+   never done this has no scaffolding to hang a clause like "the least
+   forgiveness" on.
+
+   So every lesson now opens the way a person would explain it out loud:
+
+     · one sentence saying what it IS
+     · three steps saying how it GOES
+     · one line each on why anyone bothers and what bites them
+
+   Nothing is dumbed down — every figure and every caveat survives, further in.
+   What changes is the order: shape first, nuance second. And each lesson's
+   arithmetic page now carries a LIVE PIECE OF THE ACTUAL SOFTWARE, because
+   "the condition panel writes your repair estimate" is a sentence nobody
+   believes and a slider everybody believes in four seconds.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const PLAIN = {
+wholesale:{
+ one:`You lock up a cheap house with a contract — then sell <em>the contract</em> to somebody else. You never own the house.`,
+ steps:[`Agree a price with the seller and sign a contract.`,
+        `Find an investor who will pay more than that price.`,
+        `Sell them the contract. The difference is yours.`],
+ why:`No loan, no repairs, no house. You get paid for finding the price first.`,
+ catch:`Your buyer has a limit. Sign above it and nobody takes the contract off your hands.`,
+ live:{ kind:'calc', head:`What will an investor actually pay?`,
+   note:`Every investor in the country runs this same subtraction. Run it before you sign, not after.`,
+   inputs:[
+    {id:'arv', lab:'What it sells for, fixed up', min:120000, max:420000, step:5000, def:240000},
+    {id:'rep', lab:'What the repairs cost', min:0, max:120000, step:1000, def:38000}],
+   calc(v){
+     const ceil = 0.70*v.arv - v.rep;
+     return { bars:[
+        {lab:'What they can pay you', val:Math.max(0,ceil), col:'#1f5fd0'},
+        {lab:'Repairs', val:v.rep, col:'#e0a75f'},
+        {lab:'Their cushion (30%)', val:0.30*v.arv, col:'#c8d2e2'}],
+       out:{lab:'A buyer will pay up to', val:ceil, cls: ceil <= 0 ? 'bad' : 'good'},
+       say: ceil <= 0
+         ? `The repairs eat the whole cushion. There is no price here that works for anybody.`
+         : `Every dollar you agree <b>below ${moneyFull(ceil)}</b> is your fee. Every dollar above it is your problem.` };
+   }},
+ learned:[`A buyer's ceiling is 70% of the fixed-up value, minus the repairs.`,
+          `Your fee is whatever room is left between that ceiling and the seller's price.`]},
+
+flip:{
+ one:`You buy it broken, fix it, and sell it fixed. Your profit is what is left after <em>every</em> cost — not just the repairs.`,
+ steps:[`Buy it cheap, because it needs work.`,
+        `Pay for the work — and the loan, the taxes, the insurance, the agent.`,
+        `Sell it fixed. What is left over is yours.`],
+ why:`The biggest profit of any exit, if the subtraction is honest.`,
+ catch:`Every number in that subtraction is a guess except the price you paid. That one is permanent.`,
+ live:{ kind:'cond', head:`This is the desk's condition panel. Drag a system.`,
+   note:`On the desk this is seventeen lines, and the total becomes your repair estimate automatically — you never type it.`,
+   arv:320000,
+   lines:[{id:'roof', lab:'Roof', max:.055, def:70},
+          {id:'kitch',lab:'Kitchen', max:.048, def:80},
+          {id:'bath', lab:'Bathrooms', max:.030, def:55},
+          {id:'mech', lab:'Heating &amp; electrics', max:.042, def:40},
+          {id:'floor',lab:'Floors &amp; paint', max:.026, def:65}]},
+ learned:[`Profit is the sale price minus every cost — repairs, loan, taxes, agent, time.`,
+          `The 70% rule is not the maths. It is the room to be wrong.`]},
+
+wholetail:{
+ one:`You buy it cheap like a wholesaler, tidy it up over a weekend, and sell it on the open market like a normal house.`,
+ steps:[`Buy it at an investor price.`,
+        `Clean it, paint it, replace the carpet. Nothing structural.`,
+        `List it publicly, where ordinary buyers can see it.`],
+ why:`Ordinary buyers pay more than investors do. A fortnight of tidying can be worth thirty thousand.`,
+ catch:`Knowing where to stop. Past a certain point each dollar of work returns less than a dollar.`,
+ live:{ kind:'cond', head:`The same panel — but only the cheap lines.`,
+   note:`Nothing here is structural. That is the whole exit: make it photographable, then put the tools down.`,
+   arv:205000,
+   lines:[{id:'clean',lab:'Clean-out &amp; haul', max:.014, def:100},
+          {id:'paint',lab:'Paint, inside', max:.020, def:90},
+          {id:'floor',lab:'Carpet &amp; floors', max:.022, def:70},
+          {id:'yard', lab:'Yard &amp; front door', max:.010, def:80},
+          {id:'kitch',lab:'Kitchen (careful)', max:.048, def:0}]},
+ learned:[`Photographable beats renovated.`,
+          `Spend only while each $1 of work adds more than $1 to the price. Then stop.`]},
+
+hold:{
+ one:`You keep the house and rent it out. The tenant pays the mortgage; in thirty years you own it outright.`,
+ steps:[`Buy it with a loan — usually 20–25% down.`,
+        `Rent it to a tenant.`,
+        `Their rent pays the loan, the taxes and the repairs. What is left is yours.`],
+ why:`Slow, calm money — and somebody else buys you a house over thirty years.`,
+ catch:`About 40% of the rent never reaches the mortgage. Almost everybody forgets this.`,
+ live:{ kind:'calc', head:`Where the rent actually goes.`,
+   note:`The 40% is not pessimism — it is taxes, insurance, vacancy, repairs and management, averaged over years you have not had yet.`,
+   inputs:[
+    {id:'rent', lab:'Rent, per month', min:900, max:3200, step:25, def:1850, money:1},
+    {id:'pay',  lab:'The loan payment, per month', min:500, max:2400, step:25, def:1058, money:1}],
+   calc(v){
+     const op = v.rent*0.40, noi = v.rent - op, dscr = noi/v.pay, cf = noi - v.pay;
+     return { bars:[
+        {lab:'Taxes, insurance, vacancy, repairs', val:op, col:'#e0a75f'},
+        {lab:'The loan', val:Math.min(v.pay,noi), col:'#c8d2e2'},
+        {lab: cf >= 0 ? 'Yours' : 'Short — you pay this', val:Math.abs(cf), col: cf>=0?'#177a4d':'#b3372c'}],
+       out:{lab:'DSCR', val:dscr, fix:2, cls: dscr>=1.25?'good':dscr>=1?'warn':'bad'},
+       say: dscr < 1
+         ? `Under 1.00 the tenant does not cover the loan and <b>you pay the difference every month</b>.`
+         : dscr < 1.25
+         ? `It covers the loan — until February. Banks want 1.25 because they have read more Februaries than you have.`
+         : `Covered with room to spare. This is the number a lender underlines.` };
+   }},
+ learned:[`Rent minus roughly 40% is what is actually available to pay the loan.`,
+          `DSCR is that figure divided by the payment. 1.00 is break-even; banks want 1.25.`]},
+
+brrrr:{
+ one:`You do the whole flip — and then refuse to sell. A bank hands your money back, and you keep the house <em>and</em> the tenant.`,
+ steps:[`Buy it broken and fix it, exactly like a flip.`,
+        `Rent it out.`,
+        `Refinance at the new value. The bank's cheque returns your cash; the tenant pays the new loan.`],
+ why:`The same money buys house after house, instead of being stuck inside one.`,
+ catch:`The whole machine turns on one appraisal, by one stranger, on one Tuesday.`,
+ live:{ kind:'calc', head:`How much of your money comes back?`,
+   note:`A bank lends about 75% of what the house is now worth. Everything you spent above that stays in the wall.`,
+   inputs:[
+    {id:'all', lab:'Everything you put in', min:80000, max:260000, step:2500, def:150000},
+    {id:'app', lab:'What the appraiser says it is worth', min:110000, max:320000, step:2500, def:192000}],
+   calc(v){
+     const back = v.app*0.75, left = v.all - back;
+     return { bars:[
+        {lab:'The bank hands back', val:Math.min(back, v.all), col:'#177a4d'},
+        {lab: left>0 ? 'Stuck in the house' : 'Cash out, on top', val:Math.abs(left), col: left>0?'#b3372c':'#8fc7a8'}],
+       out:{lab:'Cash still in the deal', val:Math.max(0,left), cls: left<=0?'good':left<=15000?'warn':'bad'},
+       say: left <= 0
+         ? `Everything came back out and you still own the house. This is why nobody will shut up about it.`
+         : left <= 15000
+         ? `A little stays behind. Survivable — as long as the rent clears lesson four on the bigger loan.`
+         : `${moneyFull(left)} is now parked in a wall for a decade. The next deal waits on new savings, not this one.` };
+   }},
+ learned:[`The refinance returns about 75% of whatever the appraiser says.`,
+          `Money left behind is money that cannot go and buy the next house.`]},
+
+subto:{
+ one:`The seller's old, cheap mortgage stays in their name. You take the house — and you take over the payments.`,
+ steps:[`Find a seller who is behind on a loan written when rates were low.`,
+        `Catch up what they owe and give them something to walk away with.`,
+        `The deed becomes yours. The loan stays theirs, and you pay it every month.`],
+ why:`A 3% mortgage in a 7% world is worth more than any discount on the price.`,
+ catch:`The bank may demand the whole loan back the day the deed moves. Usually they don't. Usually is not a plan.`,
+ live:{ kind:'calc', head:`What the inherited rate is worth, monthly.`,
+   note:`Nobody would write you this loan today. That gap — not the price — is what you actually bought.`,
+   inputs:[
+    {id:'rent', lab:'Rent, per month', min:900, max:2800, step:25, def:1700, money:1},
+    {id:'piti', lab:'Their payment, per month', min:600, max:2200, step:25, def:1205, money:1}],
+   calc(v){
+     const op = v.rent*0.18, spread = v.rent - op - v.piti;
+     const back = spread > 0 ? 18000/spread : 0;
+     return { bars:[
+        {lab:'Running costs (18%)', val:op, col:'#e0a75f'},
+        {lab:'Their mortgage', val:Math.min(v.piti, v.rent-op), col:'#c8d2e2'},
+        {lab: spread>=0 ? 'Your spread' : 'Short every month', val:Math.abs(spread), col: spread>=0?'#177a4d':'#b3372c'}],
+       out:{lab:'Monthly spread', val:spread, cls: spread>=250?'good':spread>=120?'warn':'bad'},
+       say: spread <= 0
+         ? `You took on somebody's mortgage in order to lose money every month.`
+         : `At ${moneyFull(Math.round(spread))} a month, an ${moneyFull(18000)} entry comes back in <b>${Math.round(back)} months</b> — and then it is yield, on a rate nobody can buy any more.` };
+   }},
+ learned:[`Here the terms are the asset. The price is nearly decoration.`,
+          `Your entry money comes back out of the monthly spread. After that, it is profit.`]},
+
+novation:{
+ one:`The owner wants one guaranteed number. You promise it, smarten the house up, sell it publicly, and keep everything above their line.`,
+ steps:[`Agree a number the owner will definitely receive.`,
+        `You pay for the prep and you run the listing.`,
+        `It sells to an ordinary buyer. Everything above the owner's number is yours.`],
+ why:`Retail money, without ever owning the house or borrowing a penny.`,
+ catch:`Overprice it and every extra thousand buys you about a week of carrying costs.`,
+ live:{ kind:'calc', head:`What being greedy costs you.`,
+   note:`The owner's number never moves. Yours absorbs every day the house sits there.`,
+   inputs:[
+    {id:'comp', lab:'What the comparable houses say', min:150000, max:400000, step:2500, def:236000},
+    {id:'list', lab:'Where you list it', min:150000, max:430000, step:1000, def:240000}],
+   calc(v){
+     const over = Math.max(0,(v.list-v.comp)/1000);
+     const dom = 25 + Math.pow(over,1.6)*3;
+     const carry = dom*95;
+     return { bars:[
+        {lab:'Selling costs (8%)', val:v.list*0.08, col:'#c8d2e2'},
+        {lab:'Days on market, at $95/day', val:carry, col:'#b3372c'},
+        {lab:'Prep', val:8000, col:'#e0a75f'}],
+       out:{lab:'It sits for about', val:dom, fix:0, unit:' days', cls: dom<=32?'good':dom<=60?'warn':'bad'},
+       say: over === 0
+         ? `Priced to the comps. It goes in about a month and the carrying cost stays small.`
+         : `${moneyFull(Math.round(over*1000))} over the comps buys you <b>${Math.round(dom-25)} extra days</b> — and ${moneyFull(Math.round(carry-2375))} of extra carrying cost.` };
+   }},
+ learned:[`The owner's number never moves. Yours absorbs everything that goes wrong.`,
+          `Days on market are a cost, not a delay.`]},
+
+land:{
+ one:`You buy raw land cheaply, ask the county for permission to split it into building plots, and if they say yes it is worth several times more.`,
+ steps:[`Put the land under contract at farmland money.`,
+        `Ask the county for permission to divide it.`,
+        `Yes, and it is worth multiples. No, and you sell it back as farmland at a loss.`],
+ why:`The biggest multiple of any exit — and it comes from paperwork, not construction.`,
+ catch:`The answer takes a year or more, and nobody will tell you the odds beforehand.`,
+ live:{ kind:'calc', head:`How often do you have to be right?`,
+   note:`Seven exits taught you to find a number. This one asks a harder question: what odds make the bet worth taking at all?`,
+   inputs:[
+    {id:'win',  lab:'What you make if they approve it', min:20000, max:400000, step:5000, def:176000},
+    {id:'lose', lab:'What you lose if they refuse', min:5000, max:150000, step:1000, def:34000}],
+   calc(v){
+     const be = v.lose/(v.win+v.lose)*100;
+     return { bars:[
+        {lab:'Upside', val:v.win, col:'#177a4d'},
+        {lab:'Downside', val:v.lose, col:'#b3372c'}],
+       out:{lab:'You need odds of at least', val:be, fix:0, unit:'%', cls: be<=35?'good':be<=55?'warn':'bad'},
+       say:`Below <b>${be.toFixed(0)}%</b> the bet loses money over a lifetime of taking it, no matter how it goes this once. Above it, size the bet so losing is annoying and never fatal.` };
+   }},
+ learned:[`When the deciding number is a probability, price the bet — not the outcome.`,
+          `Below the break-even odds, no amount of enthusiasm helps.`]},
+};
+
+const PANES = ['The idea','The maths','How it goes wrong','Try it yourself'];
+
+/* ── the handoff ───────────────────────────────────────────────────────────
+   The lesson's own figures, handed to the software that prices them. The
+   course owns the numbers; the desk owns the arithmetic; the URL is the seam.
+   Fields a lesson does not cover are deliberately left NEEDED over there —
+   the sheet refusing to price is part of what the walk-through is teaching. */
+function deskURL(E){
+  if (!E.desk) return null;
+  const q = Object.entries(E.desk).filter(([k,v])=>v!==null&&v!=='')
+    .map(([k,v])=>`${k}=${encodeURIComponent(v)}`);
+  q.push('from='+E.n, 'title='+encodeURIComponent(E.title));
+  return 'desk.html#' + q.join('&');
+}
+function handoffHTML(E){
+  const u = deskURL(E);
+  if (!u) return `<div class="handoff none"><span class="hk">Not a desk exit</span>
+    <p>${E.deskwhy}</p></div>`;
+  return `<div class="handoff"><div><span class="hk">Take it to the desk</span>
+    <p>Send ${E.n}.4's figures to the worksheet and watch all eight exits argue over the same house.</p></div>
+    <a class="btn primary" href="${u}">Price this on the desk &rarr;</a></div>`;
+}
+let ex = 0, pane = 0;
+const seen = new Set();
+/* Fifteen minutes is one sitting for some people and three for most. The
+   course remembers where you were and which sections you finished — the rail's
+   ticks survive a closed tab. A deep link still outranks the memory: a shared
+   #brrrr should land on the BRRRR, not on the reader's own bookmark. */
+try { const m = JSON.parse(localStorage.getItem('ni-exits-v1'));
+  if (m){ (m.seen||[]).forEach(i=>{ if(i>=0&&i<8) seen.add(+i); });
+    if (Number.isInteger(m.ex)) ex = Math.max(0, Math.min(8, m.ex));
+    if (Number.isInteger(m.pane)) pane = Math.max(0, Math.min(3, m.pane)); } } catch(e){}
+const remember = () => { try {
+  localStorage.setItem('ni-exits-v1', JSON.stringify({seen:[...seen], ex, pane})); } catch(e){} };
+
+function railHTML(){
+  return EXITS.map((E,i) => `<button data-ex="${i}" class="${i===ex?'on':''}${seen.has(i)?' done':''}"
+    aria-current="${i===ex}"><span class="n">${E.n}</span>${E.title.replace('The ','')}</button>`).join('')
+  + `<button data-ex="8" class="${ex===8?'on':''}"><span class="n">IX</span>the desk</button>`;
+}
+/* ── the live excerpt ──────────────────────────────────────────────────────
+   Two shapes, both lifted straight off the desk rather than illustrated:
+
+     `cond` — the condition panel. Real sliders, real red-to-green fill, the
+              real arithmetic (each system is worth a fixed share of the ARV),
+              and the same sentence the desk writes when it hands you the
+              total. This is the feature people do not believe until they
+              touch it.
+     `calc` — two inputs and a composition bar, which is how the desk shows
+              every "where does the money actually go" question.
+
+   Neither is a mock-up. If the desk's numbers change, these change with them. */
+const CONDCOL = pc => {
+  const p = Math.max(0, Math.min(100, pc)) / 100;
+  const mix = (a,b,t) => a.map((x,i)=>Math.round(x + (b[i]-x)*t));
+  const rgb = p < 0.5 ? mix([35,138,88],[214,158,48], p/0.5)
+                      : mix([214,158,48],[199,58,56], (p-0.5)/0.5);
+  return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+};
+function liveHTML(L){
+  if (!L) return '';
+  const head = `<div class="live-h"><span class="k">Try it</span>${L.head}</div>`;
+  if (L.kind === 'cond'){
+    const rows = L.lines.map(l => `<div class="cr" data-cr="${l.id}">
+      <span class="crl">${l.lab}</span>
+      <input type="range" class="crs" id="cr-${l.id}" min="0" max="100" step="5" value="${l.def}"
+        data-max="${l.max}" aria-label="${l.lab.replace(/&amp;/g,'and')} condition">
+      <span class="crv num" id="crv-${l.id}"></span></div>`).join('');
+    return `<div class="live">${head}
+      <div class="cr-key"><span><i style="background:${CONDCOL(0)}"></i>as new</span>
+        <span><i style="background:${CONDCOL(50)}"></i>tired</span>
+        <span><i style="background:${CONDCOL(100)}"></i>replace it</span></div>
+      <div class="cr-rows" id="cr-rows">${rows}</div>
+      <div class="live-out"><div class="lo-fig"><span class="lab">Repair estimate</span>
+        <b class="v" id="lo-v"></b></div>
+        <p class="lo-say" id="lo-say"></p></div>
+      <div class="live-note">${L.note}</div></div>`;
+  }
+  const ins = L.inputs.map(i => `<div class="li">
+    <label for="lv-${i.id}">${i.lab}<b class="num" id="lvv-${i.id}"></b></label>
+    <input type="range" id="lv-${i.id}" min="${i.min}" max="${i.max}" step="${i.step}" value="${i.def}"
+      data-money="${i.money?1:0}"></div>`).join('');
+  return `<div class="live">${head}
+    <div class="li-rows">${ins}</div>
+    <div class="live-out">
+      <div class="lo-bar" id="lo-bar"></div>
+      <div class="lo-key" id="lo-key"></div>
+      <div class="lo-fig"><span class="lab" id="lo-lab"></span><b class="v" id="lo-v"></b></div>
+      <p class="lo-say" id="lo-say"></p></div>
+    <div class="live-note">${L.note}</div></div>`;
+}
+function wireLive(L){
+  if (!L) return;
+  const set = (el, cls) => { el.className = 'v ' + (cls||'good'); };
+  if (L.kind === 'cond'){
+    const paint = () => {
+      let tot = 0, worst = null;
+      L.lines.forEach(l => {
+        const s = $('cr-'+l.id), pc = +s.value, dollars = L.arv * l.max * (pc/100);
+        tot += dollars;
+        if (!worst || dollars > worst.d) worst = { d:dollars, lab:l.lab };
+        const col = CONDCOL(pc);
+        s.style.setProperty('--fill', pc + '%');
+        s.style.setProperty('--col', col);
+        $('crv-'+l.id).textContent = dollars >= 500 ? moneyFull(Math.round(dollars/100)*100) : '—';
+        $('crv-'+l.id).style.color = pc === 0 ? 'var(--soft)' : col;
+      });
+      $('lo-v').textContent = moneyFull(Math.round(tot/500)*500);
+      set($('lo-v'), tot/L.arv > 0.22 ? 'bad' : tot/L.arv > 0.12 ? 'warn' : 'good');
+      $('lo-say').innerHTML = tot < 500
+        ? `Nothing to do. Which happens, and is usually a sign the price will not be a bargain either.`
+        : `That is <b>${(tot/L.arv*100).toFixed(1)}%</b> of a ${moneyFull(L.arv)} house, and the
+           biggest single line is <b>${worst.lab.toLowerCase().replace(/&amp;/g,'and')}</b>.
+           On the desk this number walks itself into the repair box — and a real contractor's
+           bid, typed over it, always wins.`;
+    };
+    L.lines.forEach(l => { $('cr-'+l.id).oninput = paint; });
+    paint(); return;
+  }
+  const paint = () => {
+    const v = {};
+    L.inputs.forEach(i => { const el = $('lv-'+i.id); v[i.id] = +el.value;
+      el.style.setProperty('--fill', ((el.value - i.min)/(i.max - i.min)*100).toFixed(1) + '%');
+      $('lvv-'+i.id).textContent = moneyFull(+el.value) + (i.money ? '/mo' : ''); });
+    const r = L.calc(v);
+    const tot = r.bars.reduce((t,b)=>t+Math.max(0,b.val),0) || 1;
+    $('lo-bar').innerHTML = r.bars.map(b =>
+      `<span class="seg" style="width:${Math.max(0,b.val)/tot*100}%;background:${b.col}"></span>`).join('');
+    $('lo-key').innerHTML = r.bars.map(b =>
+      `<span><i style="background:${b.col}"></i>${b.lab} <b>${moneyFull(Math.round(b.val))}</b></span>`).join('');
+    $('lo-lab').textContent = r.out.lab;
+    $('lo-v').textContent = (r.out.fix !== undefined
+      ? r.out.val.toFixed(r.out.fix) : moneyFull(Math.round(r.out.val))) + (r.out.unit || '');
+    set($('lo-v'), r.out.cls);
+    $('lo-say').innerHTML = r.say;
+  };
+  L.inputs.forEach(i => { $('lv-'+i.id).oninput = paint; });
+  paint();
+}
+
+function paneHTML(E){
+  const P = PLAIN[E.id] || {};
+  if (pane === 0) return `
+    <p class="lead">${P.one || ''}</p>
+    <ol class="steps">${(P.steps||[]).map(s=>`<li><span>${s}</span></li>`).join('')}</ol>
+    <div class="twocard">
+     <div class="tc why"><span class="k">Why anyone does it</span><p>${P.why||''}</p></div>
+     <div class="tc catch"><span class="k">The catch</span><p>${P.catch||''}</p></div>
+    </div>
+    <details class="longer"><summary>The longer version</summary>
+      ${E.what.map(p=>`<p>${p}</p>`).join('')}</details>`;
+  if (pane === 1) return `
+    <div class="fig"><div class="fig-h"><span>Negotiation Inc</span><span>${E.number.name}</span></div>
+      <div class="fig-b">${E.number.lines.join('<br>')}</div></div>
+    <div class="figcap"><b>FIG. ${E.n}</b> &nbsp;&mdash;&nbsp; ${E.number.name}, as the software computes it. Reproduced from the desk.</div>
+    ${liveHTML(P.live)}`;
+  if (pane === 2) return `<div class="case"><div class="lab">What happened &mdash; a real shape of failure</div>
+    ${E.wrong.story.map(p=>`<p>${p}</p>`).join('')}
+    <div class="cost">${E.wrong.cost}</div></div>
+    <div class="rule"><span class="k">The rule this gives you</span><p>${P.catch||''}</p></div>`;
+  const t = E.turn, sl = t.slider;
+  return `
+    <div class="deal">${t.deal.map(d=>`<span>${d[0]} <b>${d[1]}</b></span>`).join('')}</div>
+    <div class="sliderlab"><span class="l">${sl.label}</span><span class="v mono" id="slv"></span></div>
+    <div class="track">
+      <div class="band" style="left:${(t.band[0]-sl.min)/(sl.max-sl.min)*100}%;
+        width:${(t.band[1]-t.band[0])/(sl.max-sl.min)*100}%"></div>
+      <input type="range" id="sl" min="${sl.min}" max="${sl.max}" step="${sl.step}" value="${sl.def}"
+        aria-label="${sl.label}">
+    </div>
+    <div class="scale"><span>${sl.fmt(sl.min)}</span><span>${sl.fmt(sl.max)}</span></div>
+    <div class="readout" id="ro"><span class="lab" id="rolab"></span><span class="fig2" id="rofig"></span></div>
+    <div class="subread" id="rosub"></div>
+    <div class="verdict" id="rover"></div>
+    <div class="learned"><span class="k">What lesson ${romanToInt(E.n)} gave you</span>
+      <ul>${(PLAIN[E.id]?.learned||[]).map(l=>`<li>${l}</li>`).join('')}</ul></div>
+    ${handoffHTML(E)}`;
+}
+const romanToInt = r => ['I','II','III','IV','V','VI','VII','VIII'].indexOf(r) + 1;
+function ninthHTML(){
+  return `<div class="card ninth">
+    <span class="exit-tag">Section IX &middot; in closing</span>
+    <h2>There is a desk for this.</h2>
+    <p>That was the walk-through. Eight exits, eight numbers, and the honest version of each.</p>
+    <p><span class="receipt">No email was collected</span></p>
+    <p>The software is the person who runs those eight numbers <strong>for every address you give it</strong> —
+       comps pulled, the band drawn, the working shown, the same way every sheet here showed its working.
+       It assumes you have never done this before, because on the day that mattered, nobody had.</p>
+    <p>The desk is open. And there is an arcade where the instincts are trained the fun way —
+       eight eras of ground, a daily street, and a phone that rings.</p>
+    <div class="row">
+      <a class="btn primary" href="desk.html">Open the desk &mdash; price your own deal &rarr;</a>
+      <a class="btn" href="portfolio.html">Practice on the arcade</a>
+      <a class="btn" href="#wholesale" id="again">Run the walk-through again</a>
+    </div>
+    <div class="carry">Or carry a lesson's figures over and let all eight exits argue about it:
+      ${EXITS.filter(E=>E.desk).map(E=>`<a href="${deskURL(E)}" title="${E.title}">${E.n}</a>`).join('')}</div>
+    </div>`;
+}
+function render(){
+  $('rail').innerHTML = railHTML();
+  document.querySelectorAll('#rail button').forEach(b => b.onclick = () => go(+b.dataset.ex, 0));
+  if (ex === 8) { $('main').innerHTML = ninthHTML();
+    const ag = $('again'); if (ag) ag.onclick = () => setTimeout(()=>go(0,0),0);
+    $('permalink').textContent = 'LINK TO ANY EXIT: #WHOLESALE … #LAND';
+    return; }
+  const E = EXITS[ex];
+  const nx = ex < 7 ? EXITS[ex+1].title : null;
+  $('main').innerHTML = `<div class="card">
+    <div class="lessonbar">
+      <span class="ln">Lesson ${ex+1} of 8</span>
+      <span class="lp"><i style="width:${(seen.size/8*100).toFixed(1)}%"></i></span>
+      <span class="lc">${seen.size} finished</span>
+    </div>
+    <span class="exit-tag">${E.tag}</span>
+    <h2>${E.title}</h2>
+    <div class="panebar">${PANES.map((p,i)=>`<span class="${i===pane?'on':''}${i<pane?' pass':''}" data-p="${i}"><span class="s">${i+1}</span>${p}</span>`).join('')}</div>
+    <div class="pane">${paneHTML(E)}</div>
+    <div class="cardnav">
+      <button class="btn" id="back" ${ex===0&&pane===0?'disabled':''}>Back</button>
+      <div class="dots">${PANES.map((_,i)=>`<i class="${i===pane?'on':''}"></i>`).join('')}</div>
+      <button class="btn primary" id="next">${pane<3
+        ? 'Next' : (nx ? 'Next lesson: ' + nx.replace('The ','') + ' →' : 'Finish →')}</button>
+    </div></div>`;
+  // `.panebar span` also matches the inner section-number spans now, and those
+  // carry no data-p — clicking a number called go(ex, NaN). Direct children only.
+  document.querySelectorAll('.panebar > span').forEach(s => s.onclick = () => go(ex, +s.dataset.p));
+  $('back').onclick = () => pane>0 ? go(ex,pane-1) : go(ex-1,3);
+  $('next').onclick = () => { if (pane<3) go(ex,pane+1); else { seen.add(ex); go(ex+1,0); } };
+  if (pane === 1) wireLive((PLAIN[E.id]||{}).live);
+  if (pane === 3) wireTurn(E);
+  $('permalink').textContent = 'THIS EXIT: #' + E.id.toUpperCase();
+}
+function wireTurn(E){
+  const sl = $('sl'), t = E.turn;
+  const paint = () => {
+    const v = +sl.value;
+    $('slv').textContent = t.slider.fmt(v);
+    const r = t.calc(v);
+    $('ro').className = 'readout' + (r.primary.cls==='good'?'':' '+r.primary.cls);
+    $('rolab').textContent = r.primary.lab;
+    $('rofig').textContent = r.primary.val;
+    $('rosub').innerHTML = r.sub.map(s=>`<span>${s[0]} <b>${s[1]}</b></span>`).join('');
+    $('rover').innerHTML = r.verdict;
+  };
+  sl.oninput = paint; paint();
+}
+function go(e, p){
+  ex = Math.max(0, Math.min(8, e)); pane = Math.max(0, Math.min(3, p));
+  if (ex < 8) { try { history.replaceState(null,'','#'+EXITS[ex].id); } catch(err){} }
+  else { try { history.replaceState(null,'','#desk'); } catch(err){} }
+  remember();
+  render();
+  resumeBar();
+  window.scrollTo({top:Math.min(window.scrollY, 180), behavior:'instant'});
+}
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight') { e.preventDefault(); pane<3 ? go(ex,pane+1) : (seen.add(ex), go(ex+1,0)); }
+  if (e.key === 'ArrowLeft')  { e.preventDefault(); pane>0 ? go(ex,pane-1) : go(ex-1,3); }
+});
+addEventListener('hashchange', () => route());
+const savEx = ex, savPane = pane;   // where the reader left off, before routing
+
+/* ── A COURSE OPENS AT LESSON ONE ──────────────────────────────────────────
+   This used to resume wherever the reader stopped, silently. Which is correct
+   behaviour for a document and wrong behaviour for a course: somebody who
+   comes back a week later and lands in the middle of section V has no idea
+   whether they are at the beginning, and the rail's tick marks are the only
+   clue. Worse, a first-time visitor arriving from a link that had been used
+   once on that browser opened at a random lesson.
+
+   So: no hash means lesson one, every time. Progress is not lost — it is
+   OFFERED, as one line under the card, which is both more obvious than a
+   silent jump and a decision rather than a surprise. */
+function resumeBar(){
+  const el = $('resume'); if (!el) return;
+  if (!seen.size || (ex === 0 && pane === 0 && seen.size && savEx > 0)){
+    // there is progress to offer, and we are sitting at the start
+  }
+  const show = seen.size > 0 && savEx > 0 && !(ex === savEx);
+  el.innerHTML = show
+    ? `<div class="resume"><span>You have read <b>${seen.size} of 8</b>.
+        You left off at <b>${EXITS[Math.min(savEx,7)].n} · ${EXITS[Math.min(savEx,7)].title}</b>.</span>
+       <button id="res-go" type="button">Pick up there →</button></div>` : '';
+  const g = $('res-go');
+  if (g) g.onclick = () => go(savEx, savPane);
+}
+function route(){
+  const h = location.hash.replace('#','').toLowerCase();
+  if (h === 'desk') return go(8,0);
+  const i = EXITS.findIndex(E => E.id === h);
+  // a reload carries the hash go() itself wrote — same section as the bookmark
+  // means same PANE too, or a refresh mid-lesson would lose the reader's place
+  if (i >= 0) return go(i, i === savEx ? savPane : 0);
+  go(0, 0);              // no deep link → the beginning, and offer the resume
+}
+route();
+</script></body></html>

@@ -21,6 +21,25 @@ console.log('panel:', await p.evaluate(()=>({ open:!document.getElementById('rn-
   gets:document.querySelectorAll('.ac-up li').length,
   sw:document.querySelectorAll('.ac-sw button').length, tier:window.__tier() })));
 await p.screenshot({path:'/tmp/acct.png'});
+/* ── THE SWITCHER IS A PRE-LAUNCH DEVICE, AND LIVE IT MUST BE GONE ────────
+   The plan switcher paints any tier for a screenshot, which is exactly right
+   before launch and unacceptable after it: on a live site it would let anybody
+   paint themselves The Office. previewTier() already refuses when NI_LIVE is
+   true — this asserts the CONTROL disappears with it, rather than sitting
+   there doing nothing, which is its own kind of lie. */
+const LIVE = await p.evaluate(() => window.NI_LIVE === true);
+if (LIVE){
+  const sw = await p.evaluate(() => ({
+    buttons: document.querySelectorAll('.ac-sw button').length,
+    preview: (() => { try { localStorage.setItem('ni-preview-plan','the office'); } catch(e){}
+      return window.__tier(); })(),
+  }));
+  console.log('live stage:', JSON.stringify(sw));
+  if (sw.buttons !== 0) { console.log('FAIL — the plan switcher is on a LIVE build'); process.exit(1); }
+  if (sw.preview !== 0) { console.log('FAIL — a preview flag still paints a tier on a LIVE build'); process.exit(1); }
+  console.log('PASS — the account panel reads right, and the pre-launch switcher is gone');
+  await b.close(); process.exit(0);
+}
 // switch to Underwriter and confirm the ladder moves
 await p.evaluate(()=>document.querySelector('[data-plan="Underwriter"]').click());
 await p.waitForTimeout(400);

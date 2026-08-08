@@ -94,21 +94,28 @@ h1{font-size:40px}
 .prompt{font-size:13px;color:var(--faint)}
 .prompt b{color:var(--txt)}
 .answers{display:grid;gap:9px}
+/* the answer buttons are the only thing on this page you touch, and they were
+   the only square object on a page whose every other control has a 10px
+   corner — added later than the rest and never given the radius */
 .ans{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:12px;text-align:left;
  font-family:inherit;font-size:15.5px;font-weight:650;color:var(--txt);cursor:pointer;
- background:#182234;border:1.5px solid #2b3850;padding:11px 14px}
+ background:#182234;border:1.5px solid #2b3850;padding:11px 14px;border-radius:10px}
 .ans:hover{border-color:#5a92ff;background:#1b2740}
 .ans:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .ans .key{display:inline-grid;place-items:center;width:24px;height:24px;border:1px solid #39435a;
  font-size:12px;color:var(--faint)}
 .ans .hint{font-size:12px;font-weight:400;color:var(--faint)}
+/* This floor used to sit BELOW the touch block, at the same specificity and
+   later in the file — so it silently beat the 52px written for phones, and
+   the one rule on this page authored for a thumb never applied. Base first,
+   then the override. */
+.ans{min-height:48px}
 /* a phone has no number row and no hover: the key chips are desk furniture,
-   and a thumb needs 48px of button, not 41 */
+   and a thumb wants more than a mouse does */
 @media (hover:none){
   .ans{grid-template-columns:1fr auto;min-height:52px}
   .ans .key{display:none}
 }
-.ans{min-height:48px}
 .below{margin-top:26px}
 .below .btnrow{margin-top:14px}
 .ans[disabled]{opacity:.55;cursor:default}
@@ -1220,82 +1227,6 @@ beginRun();
   out.textContent='Price a property'; out.href='desk.html#new';
  }
  }catch(e){ try{ console.warn('account chrome', e); }catch(_){}}
-})();
-</script>
-<style>
-.wl{border:1px solid var(--line-2,#c9d0dc);border-radius:16px;background:#fff;padding:15px 17px;text-align:left}
-.wl .wt{display:block;font-family:var(--serif,Georgia),serif;font-size:17px;font-weight:700;color:var(--ink,#101725)}
-.wl .ws{display:block;font-size:12.5px;line-height:1.55;color:var(--mid,#4a5162);margin-top:5px}
-.wl .ws b{color:var(--ink,#101725)}
-.wl .wf{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
-/* 16px, not 14 — under 16px iOS Safari zooms the whole page the moment the
-   field takes focus, which on the one form that is the entire pre-launch
-   funnel is a real cost. And 44px of height because this was a 30px target
-   on a phone, which is smaller than a fingertip. */
-.wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;
- min-height:44px;border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
-.wl .wf input:focus{outline:none;border-color:var(--blue,#1f5fd0);box-shadow:0 0 0 3px var(--blue-soft,#eaf0fc)}
-.wl .wf button{flex:none;cursor:pointer;min-height:44px;padding-left:18px;padding-right:18px}
-/* side by side, a phone gives the address field about nine characters. Stack. */
-@media(max-width:560px){.wl .wf{flex-direction:column;align-items:stretch}
- .wl .wf input,.wl .wf button{width:100%}}
-.wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:var(--soft,#677187)}
-.wl .wn.ok{color:var(--green,#177a4d)} .wl .wn.bad{color:var(--red,#b3372c)}
-.wl.done{border-color:var(--green-line,#bfe0cd);background:var(--green-soft,#eaf6f0)}
-</style>
-<script>
-(function(){
- var SUPPORT='support@negotiationinc.com', KEY='ni-wait-v1';
- function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
-   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
- function sent(){ try{ return localStorage.getItem(KEY)==='1'; }catch(e){ return false; } }
- function doneHTML(){ return '<div class="wl done"><span class="wt">You are on the list.</span>'+
-   '<span class="ws">You will get one email the day it opens, and nothing else.</span></div>'; }
- /* The default sentence is written for somebody standing on the plans page,
-    who has just read a price. A person who has been playing the arcade for
-    ten minutes has not, and the same paragraph read to them is a non-sequitur
-    that costs the capture. So a slot may carry its own line, and the ones that
-    sit at the end of a game or a lesson do. */
- var LINE='The desk is <b>free and finished</b> \u2014 pricing, the seven exits, the comparison, the print. '+
-   'The paid tiers are being wired to a payment rail. Leave an address and you get <b>one</b> email the day they '+
-   'open, with the founding price on it.';
- function formHTML(tier, line){ return '<div class="wl"><span class="wt">'+esc(tier)+' opens soon.</span>'+
-   '<span class="ws">'+(line||LINE)+'</span>'+
-   '<form class="wf"><input type="email" required placeholder="you@example.com" aria-label="Your email" '+
-   'autocomplete="email" spellcheck="false"><button type="submit" class="btn p sm">Tell me when it opens</button></form>'+
-   '<div class="wn" role="status"></div></div>'; }
- function wire(box, from){
-  var f=box.querySelector('form'), note=box.querySelector('.wn');
-  if(!f) return;
-  function say(t,bad){ if(note){ note.textContent=t; note.className='wn'+(bad?' bad':' ok'); } }
-  f.addEventListener('submit', function(ev){
-   ev.preventDefault();
-   var i=f.querySelector('input'), btn=f.querySelector('button');
-   var email=(i.value||'').trim().slice(0,160);
-   if(!/^[^@\s]+@[^@\s.]+\.[^@\s]{2,}$/.test(email)) return say('That does not look like an email address.',true);
-   btn.disabled=true; say('Adding you\u2026');
-   fetch('/api/list',{method:'POST',headers:{'content-type':'application/json'},
-     body:JSON.stringify({email:email,from:from||'plans'})})
-    .then(function(r){
-      if(r.ok){ try{localStorage.setItem(KEY,'1');}catch(e){} box.outerHTML=doneHTML(); return; }
-      throw new Error('list');
-    })
-    .catch(function(){
-      say('The list is not reachable right now \u2014 email '+SUPPORT+' and you will be added by hand.',true);
-      btn.disabled=false;
-    });
-  });
- }
- function paint(){
-  var slots=document.querySelectorAll('[data-waitlist]');
-  for(var k=0;k<slots.length;k++){
-   var el=slots[k], tier=el.getAttribute('data-waitlist')||'Paid plans';
-   var from=el.getAttribute('data-from')||'plans';
-   el.innerHTML = sent() ? doneHTML() : formHTML(tier, el.getAttribute('data-line'));
-   if(!sent()) wire(el.firstChild, from);
-  }
- }
- if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',paint); else paint();
 })();
 </script>
 </body></html>

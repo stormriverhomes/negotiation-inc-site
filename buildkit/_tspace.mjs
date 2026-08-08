@@ -15,7 +15,7 @@ const WIDTHS = [[1280, 'desktop'], [390, 'phone']];
 const only = process.argv[2] ? process.argv.slice(2) : null;
 
 const AUDIT = () => {
-  const R = { overflow:[], crowd:[], overlap:[], tap:[], measure:[], zoom:[] };
+  const R = { overflow:[], trapped:[], crowd:[], overlap:[], tap:[], measure:[], zoom:[] };
   const vw = document.documentElement.clientWidth;
   const nm = e => e.tagName.toLowerCase() +
     (e.id ? '#' + e.id : '') +
@@ -39,6 +39,40 @@ const AUDIT = () => {
     }
     if (!clipped && c.position !== 'fixed' && (r.right > vw + 1.5 || r.left < -1.5))
       R.overflow.push({ el:nm(e), left:+r.left.toFixed(0), right:+r.right.toFixed(0), vw });
+
+    /* ── CLIPPED IS NOT THE SAME AS SCROLLABLE, AND THIS FILE TREATED THEM
+       AS ONE ────────────────────────────────────────────────────────────
+       The check above skips anything inside a container whose overflow-x is
+       hidden, auto OR scroll — "deliberately clipped, fine". But `auto` means
+       the reader can reach it and `hidden` means they never can, and lumping
+       them together is why eighty-four green harnesses said nothing while the
+       pricing page's most expensive column sat 108px past the right edge of a
+       338px box with overflow:hidden. Not scrolled past. UNREACHABLE.
+
+       So: a container that hides its own overflow while HAVING overflow is a
+       trap, and content nobody can reach is content that does not exist. */
+    if (/hidden/.test(c.overflowX) && e.scrollWidth > e.clientWidth + 8 && e.clientWidth > 0){
+      /* A backdrop that bleeds past its box is not a trap — the land desk's
+         contour rings sit at inset:-20% ON PURPOSE and nothing is lost. What
+         matters is whether READABLE OR PRESSABLE content is stranded out
+         there, so the check looks for it rather than trusting the number. */
+      const box = e.getBoundingClientRect();
+      const lost = [...e.querySelectorAll('td,th,p,h1,h2,h3,li,button,a,input,select,label,span')]
+        .filter(d => {
+          const dr = d.getBoundingClientRect();
+          if (dr.width === 0 || dr.height === 0) return false;
+          if (dr.left > box.right + 4000) return false;          // off-canvas by design
+          const txt = (d.textContent || '').trim();
+          const pressable = /^(BUTTON|A|INPUT|SELECT)$/.test(d.tagName);
+          if (!txt && !pressable) return false;
+          return dr.right > box.right + 8;                        // stranded past the clip
+        })
+        .slice(0, 4)
+        .map(d => (d.tagName + ' "' + (d.textContent || '').trim().replace(/\s+/g,' ').slice(0, 26) + '"'));
+      if (lost.length)
+        R.trapped.push({ el:nm(e), holds:e.scrollWidth, shows:e.clientWidth,
+                         past: e.scrollWidth - e.clientWidth, lost });
+    }
 
     /* 4 · tap targets */
     /* HEIGHT ALONE IS NOT THE TEST. The wordmark is 29px tall and 150px wide;
@@ -157,6 +191,8 @@ for (const [k, r] of Object.entries(report)){
   for (const o of r.overflow || []) bad.push(`${k} · overflows the window: ${o.el} right=${o.right} vw=${o.vw}`);
   for (const o of r.overlap  || []) bad.push(`${k} · overlaps by ${o.by}px: ${o.a} / ${o.b}`);
   for (const o of r.zoom     || []) bad.push(`${k} · ${o.el} is ${o.fs}px — iOS zooms the page on focus`);
+  for (const o of r.trapped  || []) bad.push(`${k} · ${o.el} clips ${o.past}px it cannot scroll to — `
+    + `stranded: ${o.lost.join(', ')}. Nobody can reach that.`);
   for (const o of r.tap      || []) if (o.h < 30 && o.w < 60)
     bad.push(`${k} · ${o.el} is ${o.w}×${o.h} — "${o.t}"`);
 }
@@ -165,6 +201,6 @@ console.log('\n' + total + ' findings across ' + (only||PAGES).length + ' pages'
 
 await b.close();
 if (bad.length){ console.log('FAIL'); bad.forEach(x => console.log(' - ' + x)); process.exit(1); }
-console.log('PASS — nothing overflows, nothing overlaps, no field zooms an iPhone, and every '
-  + 'target is reachable with a thumb');
+console.log('PASS — nothing overflows, nothing is clipped past reach, nothing overlaps, no field '
+  + 'zooms an iPhone, and every target is reachable with a thumb');
 process.exit(0);

@@ -80,7 +80,9 @@
   .hname{font-size:25px;font-weight:600;line-height:1.15}
   .hmeta{font-size:15px;color:var(--carbon-soft);margin-top:3px}
   .chips{margin-top:9px;display:flex;gap:6px;flex-wrap:wrap}
-  .chip{font-size:13px;padding:3px 9px;border:1px solid var(--rule);color:var(--carbon-soft);background:var(--stock-2)}
+  /* same reason as .mt below: "No other offers" and "Needs a lot" are one
+     label each, and a border that breaks across two lines reads as two */
+  .chip{display:inline-block;white-space:nowrap;font-size:13px;padding:3px 9px;border:1px solid var(--rule);color:var(--carbon-soft);background:var(--stock-2)}
   .chip.good{border-color:var(--green);color:var(--green);background:var(--green-bg)}
   .chip.warn{border-color:var(--amber);color:var(--amber);background:var(--amber-bg)}
   .chip.bad{border-color:var(--red);color:var(--red);background:var(--red-bg)}
@@ -96,7 +98,12 @@
   .ctab td:first-child{text-align:left;font-family:var(--serif);font-size:15px}
   .ctab tr.you td{border-top:2px solid var(--carbon);font-weight:700;background:var(--stock-3)}
   .ctab tr.you td:first-child{font-weight:700}
-  .mt{padding:2px 7px;border:1px solid var(--rule);font-size:13px;font-family:var(--mono)}
+  /* "3 bed" and "much smaller" are single labels wearing a border. Without
+     nowrap they break mid-chip on a phone and the border draws TWICE — "3" in
+     one box and "bed" in a second box on the next line, which reads as two
+     facts instead of one and looks broken. inline-block so the padding is
+     honoured on the wrapped line too. */
+  .mt{display:inline-block;white-space:nowrap;padding:2px 7px;border:1px solid var(--rule);font-size:13px;font-family:var(--mono)}
   .mt.same{border-color:var(--green);color:var(--green);background:var(--green-bg)}
   .mt.near{border-color:var(--amber);color:var(--amber);background:var(--amber-bg)}
   .mt.off{border-color:var(--red);color:var(--red);background:var(--red-bg)}
@@ -253,6 +260,15 @@
   .bankline.warn{grid-template-columns:1fr;border-color:var(--gold,#a8873a)}
   .bankline.warn .s{color:var(--gold,#a8873a)}
   .bankline.up .n{color:var(--green)} .bankline.dn .n{color:var(--red)}
+  /* ── the sentence under the bankroll needs the whole width on a phone ────
+     Both of these boxes put the big number in a column of its own that spans
+     two rows, which leaves the explaining sentence in a 55%-wide gutter with
+     dead space beside it — three cramped lines against an empty half-box.
+     On a phone the number gets its row and the sentence gets the width. */
+  @media (max-width:560px){
+    .stake .n, .bankline .n{grid-row:auto}
+    .stake .s, .bankline .s{grid-column:1 / -1}
+  }
   .rec{margin:0 18px 16px;padding:10px 13px;border:1px solid var(--rule);background:var(--stock-2);
     font-size:14px;color:var(--carbon-soft);text-align:center}
   .rec b{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--carbon)}

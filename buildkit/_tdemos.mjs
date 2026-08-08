@@ -48,14 +48,23 @@ const BASE = `http://127.0.0.1:${port}`;
 const bad = [], out = {};
 const b = await chromium.launch();
 
-/* the cards and the desk must be talking about the same five things */
+/* the cards and the desk must be talking about the same five sheets.
+   The floor also carries a LAND card, and that one is deliberately not a
+   desk sheet — it opens land.html, which prices dirt and has no exits to
+   rank. It is checked by _tdemofloor and by the build's own guard; here it
+   is separated out rather than silently tolerated, so a house card that
+   somehow pointed away from the desk would still be caught. */
 {
   const p = await b.newPage();
   await p.goto(BASE + '/demo.html');
   await p.waitForTimeout(900);
-  const keys = await p.evaluate(() =>
-    [...document.querySelectorAll('a[href*="#demo="]')].map(a => a.getAttribute('href').split('#demo=')[1]));
-  out.cards = keys;
+  const all = await p.evaluate(() =>
+    [...document.querySelectorAll('a[href*="#demo="]')].map(a => a.getAttribute('href')));
+  const land = all.filter(h => !/^desk\.html#demo=/.test(h));
+  if (land.length !== 1 || land[0] !== 'land.html#demo=land')
+    bad.push('demo.html: expected exactly one non-desk card, the land play — got ' + JSON.stringify(land));
+  const keys = all.filter(h => /^desk\.html#demo=/.test(h)).map(h => h.split('#demo=')[1]);
+  out.cards = keys; out.land = land;
   for (const k of keys) if (!PROMISE[k]) bad.push(`demo.html offers "${k}", which this harness does not know about`);
   for (const k of Object.keys(PROMISE)) if (!keys.includes(k)) bad.push(`demo.html no longer offers "${k}"`);
   await p.close();
@@ -119,6 +128,44 @@ for (const [k, want] of Object.entries(PROMISE)){
     bad.push(`${k}: only ${out[k].priced} exits priced — a walk-through of "not priced" rows`);
   if (errs.length) bad.push(`${k}: something threw — ${errs[0]}`);
   await p.close();
+}
+
+
+/* ── A HOUSE MAY NOT BE ITS OWN COMPARABLE ─────────────────────────────────
+   The flip demo's subject was 1104 Elm Street and its first comparable sale
+   was "1104 Elm — same block". Elijah found it. A sheet that values a house
+   against itself is circular, and on the walk-through it is the first row an
+   underwriter reads. Every demo, every comp, on the street number as well as
+   the street name — "1104 Elm" and "1104 Elm Street" are the same house. */
+{
+  const p2 = await b.newPage();
+  await p2.goto(BASE + '/desk.html'); await p2.waitForTimeout(600);
+  const self = await p2.evaluate(() => {
+    const norm = s => String(s || '').toLowerCase()
+      .replace(/[—–-]/g, ' ')
+      .replace(/\b(street|st|avenue|ave|road|rd|drive|dr|court|ct|lane|ln|way|terrace|terr|place|pl)\b/g, '')
+      .replace(/\(.*?\)/g, '').replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
+    const out = [];
+    for (const [k, d] of Object.entries(DEMOS)){
+      const subj = norm(d.addr);
+      for (const c of (d.comps || [])){
+        const a = norm(c[0]);
+        if (!a || !subj) continue;
+        /* the comp's address is a prefix of the subject's, or the reverse:
+           "1104 elm" vs "1104 elm" after the suffix is stripped */
+        if (a === subj || a.startsWith(subj + ' ') || subj.startsWith(a + ' '))
+          out.push({ demo: k, subject: d.addr, comp: c[0] });
+      }
+    }
+    return out;
+  });
+  await p2.close();
+  if (self.length){
+    console.log('FAIL — a demo values a house against itself:');
+    self.forEach(x => console.log(`  ${x.demo}: subject "${x.subject}" is comped against "${x.comp}"`));
+    process.exit(1);
+  }
+  console.log('✓ no demo uses the subject property as one of its own comparables');
 }
 
 await b.close(); site.close();

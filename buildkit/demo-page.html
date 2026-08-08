@@ -1,0 +1,617 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>See how it works · Negotiation Inc</title>
+<meta name="description" content="Five properties that do not exist, each with a different right answer. Open one and the real software prices every exit against it. No account.">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE DEMO FLOOR.
+
+   The old front door offered the tool for free and hoped a stranger would type
+   an address into an empty sheet. Almost nobody does: the first screen of an
+   underwriting tool asks for the two hardest numbers in the job, and a person
+   who has neither yet leaves.
+
+   So the invitation changed. Five houses that do not exist, each already
+   carrying comps, a condition read and a seller — and each with a DIFFERENT
+   right answer, because the thesis of the whole product is that the exit moves
+   the price more than the haggling does. Click one and the real software opens
+   on it. Nothing is mocked; the only fiction is the property.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --page:#f7f8fa; --card:#fff; --ink:#101725; --mid:#4a5162; --soft:#677187;
+  --line:#e8ebf1; --line-ink:#d3d9e3; --wash:#f7f8fa;
+  --blue:#1f5fd0; --blue-deep:#173f8a; --blue-soft:#e9effb;
+  --green:#177a4d; --est:#5f6b82;
+  --r-btn:9px; --r-card:14px; --r-pill:999px;
+  --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--sans);background:var(--page);color:var(--ink);font-size:15px;
+ line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--blue)}
+.wrap{max-width:1080px;margin:0 auto;padding:26px 20px 80px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+ padding-bottom:14px;border-bottom:3px solid var(--ink)}
+.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:inherit}
+.mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.11em}
+.mark .inc{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--soft)}
+.marksub{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-top:4px}
+/* Every item in this row is optically centred on the same line. The account
+   chip carries a border and more padding than the plain links, so without an
+   explicit align-items the flex row stretched them to different heights and the
+   chip sat a pixel or two low — the kind of drift that reads as carelessness
+   long before anybody can name it. */
+nav{display:flex;align-items:center;gap:16px;font-size:13px;flex-wrap:wrap}
+nav a{display:inline-flex;align-items:center;text-decoration:none;color:var(--mid);
+ padding:6px 2px;line-height:1}
+nav a:hover{color:var(--ink)}
+nav a.acct{border:1.5px solid var(--line-ink);border-radius:var(--r-btn);padding:6px 12px;
+ color:var(--ink);font-weight:650}
+
+h1{font-family:var(--serif);font-size:38px;font-weight:700;letter-spacing:-.018em;
+ margin-top:30px;line-height:1.1}
+.lede{font-size:16.5px;color:var(--mid);margin-top:11px;max-width:62ch}
+.lede b{color:var(--ink);font-weight:650}
+.trust{display:flex;gap:22px;flex-wrap:wrap;font-size:11.5px;color:var(--soft);margin-top:14px}
+.trust b{color:var(--ink);font-weight:700}
+
+.floor{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:28px}
+.deal{display:flex;flex-direction:column;text-align:left;background:var(--card);
+ border:1px solid var(--line-ink);border-radius:var(--r-card);overflow:hidden;cursor:pointer;
+ text-decoration:none;color:inherit;font-family:inherit;padding:0;
+ transition:border-color .14s,box-shadow .14s,transform .14s}
+.deal:hover{border-color:var(--blue);box-shadow:0 6px 22px rgba(16,23,37,.10);transform:translateY(-2px)}
+.deal:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.deal canvas{display:block;width:100%;height:158px;image-rendering:pixelated;background:#101725}
+.deal .b{padding:15px 17px 17px;flex:1;display:flex;flex-direction:column}
+.deal .tag{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)}
+.deal h2{font-family:var(--serif);font-size:21px;font-weight:700;margin-top:3px}
+.deal .ad{font-size:12.5px;color:var(--soft);margin-top:1px}
+.deal p{font-size:13.5px;color:var(--mid);margin-top:9px;line-height:1.5;flex:1}
+.deal .fig{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
+.deal .fig div{font-size:11px;color:var(--soft)}
+.deal .fig b{display:block;font-family:var(--serif);font-size:16px;font-weight:700;color:var(--ink);
+ font-variant-numeric:tabular-nums}
+.deal .go{margin-top:12px;font-size:13.5px;font-weight:650;color:var(--blue)}
+
+.note{margin-top:30px;border:1px solid var(--line);border-radius:var(--r-card);background:#fff;
+ padding:18px 20px}
+.note .t{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+.note p{font-size:14px;color:var(--mid);margin-top:7px;max-width:76ch;line-height:1.6}
+.note b{color:var(--ink);font-weight:650}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{display:inline-flex;align-items:center;font-family:inherit;font-size:14.5px;font-weight:650;
+ padding:11px 18px;border:1px solid var(--line-ink);border-radius:var(--r-btn);background:#fff;
+ color:var(--ink);text-decoration:none;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+.btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.p:hover{background:var(--blue-deep);border-color:var(--blue-deep)}
+footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);display:flex;gap:18px;
+ flex-wrap:wrap;font-size:12.5px;color:var(--soft)}
+footer a{color:var(--mid);text-decoration:none}
+@media (max-width:640px){ h1{font-size:29px} }
+</style>
+</head><body>
+<div class="wrap">
+<header>
+ <div>
+  <a class="mark" href="index.html" title="Negotiation Inc"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+  <div class="marksub">See how it works</div>
+ </div>
+ <nav>
+  <a href="desk.html">The desk</a>
+  <a href="arcade.html">Arcade</a>
+  <a href="plans.html">Plans</a>
+  <a class="acct" href="office.html">Sign in</a>
+ </nav>
+</header>
+
+<h1>Five houses, and one piece of dirt.</h1>
+<p class="lede">Each one opens the real software with the work already done — comparable sales
+ scored, condition read, seller placed. <b>Nothing here is a mock-up.</b> Move any slider and it
+ re-prices, because it is the same arithmetic a paying customer runs. The only fiction is the
+ property.</p>
+<div class="trust">
+ <div><b>No account</b> to look</div>
+ <div><b>Nothing</b> leaves your browser</div>
+ <div><b>Every number</b> shows its working</div>
+</div>
+
+<div class="floor" id="floor"></div>
+
+<div class="note">
+ <div class="t">Why six</div>
+ <p>Because the whole argument of this product is in the difference between them. The same
+  house is worth a different maximum under every exit, and the gap between the best exit and
+  the obvious one is usually the entire margin. A calculator that answers <b>one</b> of these
+  questions will confidently give you the wrong number on four of these five houses —
+  not because its arithmetic is wrong, but because it was answering a question you had not
+  established was the right one.</p>
+ <p>The sixth is not a house. The desk prices seven exits on a building and <b>refuses the
+  eighth</b> — the land play — because it needs dirt and a building is not dirt. That refusal
+  used to be the end of the sentence. It now opens a room: the Land Desk, where what a parcel
+  is worth is what the finished lot sells for, minus what it costs to get there, with an
+  unconfirmed septic named on the line it is hiding inside.</p>
+ <div class="cta">
+  <a class="btn p" href="desk.html#new">Price your own property →</a>
+  <a class="btn" href="plans.html">What a workspace adds</a>
+ </div>
+</div>
+
+<footer>
+ <a href="index.html">Home</a><a href="desk.html">The desk</a><a href="arcade.html">The arcade</a>
+ <a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Billing</a>
+ <span style="margin-left:auto">Negotiation Inc · the sheet shows its working</span>
+</footer>
+</div>
+
+<script>
+'use strict';
+/* ── the houses, drawn ───────────────────────────────────────────────────────
+   Same approach as the arcade's cabinets: the art is generated from the deal
+   rather than fetched, so a scenario's condition is literally visible. Heavy
+   repairs board the windows and tarp the roof; a rental gets a second door; the
+   walk-away gets weeds and a sign that has been up too long. */
+const DEALS = [
+ { key:'flip', tag:'A flip', name:'The tired ranch', addr:'1104 Elm Street',
+   ask:168000, arv:296000, style:'ranch', wear:0.82, hour:'dusk',
+   p:'Everything is original and the kitchen is two owners old. The seller has already made an offer on the next place, so the clock is theirs, not yours.' },
+ { key:'hold', tag:'A rental', name:'The paying duplex', addr:'77 Ostend Street',
+   ask:188000, arv:236000, style:'duplex', wear:0.28, hour:'evening',
+   p:'Tenants in place and paying on the first. A retiring landlord thinning the portfolio, in no hurry at all — which changes what your terms are worth.' },
+ { key:'subto', tag:'A subject-to', name:'Behind on a 2021 loan', addr:'318 Sells Avenue',
+   ask:268000, arv:279000, style:'colonial', wear:0.30, hour:'night',
+   p:'Three months of arrears against a loan at a rate nobody is getting back. The asking price is nearly retail — and the terms are the asset, not the discount.' },
+ { key:'novation', tag:'A novation', name:'The estate, nearly retail', addr:'2210 Ashby Street',
+   ask:259000, arv:316000, style:'cottage', wear:0.16, hour:'dawn',
+   p:'An executor two states away who wants a date and a clean wire. The house barely needs anything, which closes some exits and opens the one most people never run.' },
+ { key:'walk', tag:'A walk-away', name:'The one to leave', addr:'14 Hopkins Street',
+   ask:329000, arv:300500, style:'wreck', wear:0.95, hour:'overcast',
+   p:'Priced above what the comps support, needing more work than any of them. Two exits refuse outright and the closest of the rest cannot get near the asking price. Knowing that in ninety seconds is the feature.' },
+ /* ── AND THE ONE WITH NO HOUSE ON IT ──────────────────────────────────────
+    The desk prices seven exits on a building and refuses the eighth with
+    "it needs dirt". This card is the dirt, and it is the only one that opens
+    a different room — so it says so on its face rather than surprising you
+    with a screen you did not ask for. Its second figure is not "comps say":
+    land has no comparable to a house, it has a FINISHED LOT, which is the
+    whole conceptual move the Land Desk exists to make. */
+ { key:'land', tag:'A land play', name:'The lot that isn’t one yet', addr:'1847 Saddleback Pass',
+   ask:214000, arv:298000, style:'dirt', wear:0, hour:'dawn', to:'land.html#demo=land',
+   figs:['They ask','Finished lot'],
+   p:'Two and a half treed acres on a slope, no sewer on record, and road access nobody has verified. There is nothing to walk through and no comparable sale of a house — what it is worth is what the finished lot sells for, minus what it costs to get there. The eighth exit needs dirt. This is the dirt.' },
+];
+const money = v => '$' + Math.round(v).toLocaleString('en-US');
+
+/* ── FIVE HOUSES, NOT ONE HOUSE FIVE TIMES ────────────────────────────────
+   The first version of this drew the same gable box every time and changed a
+   wear number, which is exactly what it looked like. These are five different
+   buildings with five different stories told in the props: the ranch has a
+   carport and a skip in the drive because somebody is already moving out; the
+   duplex has two mailboxes, two meters and four lit windows because people
+   live there and pay on the first; the colonial is dark except a porch light
+   with a notice taped to the door; the cottage is a tidy estate with drawn
+   curtains, a flower bed and a crisp agent's sign; the wreck has a sagging
+   ridge, a tarp, boarded windows, a leaning sign and grass to the sill.
+   Every prop is a fact from the scenario, which is the only reason to draw
+   any of them. ──────────────────────────────────────────────────────────── */
+const SKY = {
+ dusk:     ['#1b2b45','#2c4571','#101725','#e8b06a'],
+ evening:  ['#16242c','#22394a','#0e1a20','#cfe0ea'],
+ night:    ['#171531','#262246','#0f0e22','#c9cbe8'],
+ dawn:     ['#2b2440','#4a3a5c','#1d1830','#f2c9a0'],
+ overcast: ['#3b3833','#514c44','#2a2724','#b4ada2'],
+};
+
+function draw(cv, d){
+ const g = cv.getContext('2d'), W = cv.width, H = cv.height;
+ let sd = 0; for (const c of d.key) sd = (sd*31 + c.charCodeAt(0)) >>> 0;
+ const rnd = () => { sd = Math.imul(sd^sd>>>16,0x45d9f3b); sd = Math.imul(sd^sd>>>16,0x45d9f3b); sd^=sd>>>16; return (sd>>>0)/4294967296; };
+ const w = d.wear, S = SKY[d.hour] || SKY.night;
+ const px = (x,y,ww,hh,c) => { g.fillStyle=c; g.fillRect(Math.round(x),Math.round(y),Math.round(ww),Math.round(hh)); };
+ /* a gable drawn as a real triangle, one scanline at a time */
+ const gable = (x,y,ww,peak,c,eave) => {
+   for (let i=0;i<peak;i++){
+     const inset = Math.round(i*(ww/2)/peak);
+     px(x-(eave||0)+inset, y-i-1, ww+(eave||0)*2-inset*2, 1, c);
+   }
+ };
+ const GROUND = H-16;
+
+ // ── sky: a two-band gradient, stars or cloud depending on the hour ──
+ px(0,0,W,H,S[0]);
+ for (let y=0;y<GROUND;y++){
+   if (y % 3 === 0) px(0,y,W,1, y < GROUND*0.45 ? S[0] : S[1]);
+ }
+ px(0,0,W,Math.round(GROUND*0.42),S[0]);
+ px(0,Math.round(GROUND*0.42),W,GROUND-Math.round(GROUND*0.42),S[1]);
+ if (d.hour === 'overcast'){
+   for (let i=0;i<7;i++){ const cx=Math.floor(rnd()*W), cy=6+Math.floor(rnd()*22), cw=18+Math.floor(rnd()*26);
+     px(cx,cy,cw,4,'rgba(255,255,255,.055)'); px(cx+4,cy-3,cw-10,3,'rgba(255,255,255,.04)'); }
+ } else {
+   for (let i=0;i<38;i++){ const sx2=Math.floor(rnd()*W), sy2=Math.floor(rnd()*(GROUND-30));
+     px(sx2,sy2,1,1, rnd()>0.75 ? '#ffffff' : S[3]); }
+   // the moon, at a different phase per house so no two skies match
+   const mx = d.key==='hold' ? 30 : W-36, my = 11 + Math.floor(rnd()*7);
+   px(mx,my,8,8,'rgba(255,255,255,.16)'); px(mx+1,my+1,6,6,S[3]);
+   if (d.key==='subto' || d.key==='walk') px(mx+4,my,4,8, S[0]);        // waning
+ }
+ // a treeline, so the houses sit in a place rather than on a shelf
+ for (let x=0;x<W;x+=4){
+   const h2 = 5 + Math.floor(rnd()*9);
+   px(x, GROUND-h2, 4, h2, 'rgba(0,0,0,.30)');
+ }
+
+ // ── ground ──
+ px(0,GROUND,W,16,'#2a2620'); px(0,GROUND,W,1,'#3a352c');
+ px(0,H-5,W,5,'#1f1c17');                                     // the road
+
+ /* ══ the buildings ══════════════════════════════════════════════════════ */
+ const wall = w>0.6 ? '#584f43' : w>0.3 ? '#6d6252' : '#7f7462';
+ const trim = w>0.6 ? '#6a5f4f' : '#9b8f78';
+ const roof = w>0.5 ? '#3f372f' : '#6b4a3a';
+ const dark = '#241f1a';
+ const lit  = '#e8cf72', dim = '#3a352c';
+ const winC = (on) => on ? lit : dim;
+ const window_ = (x,y,ww,hh,on,boarded) => {
+   px(x-1,y-1,ww+2,hh+2,trim); px(x,y,ww,hh,winC(on));
+   if (on){ px(x,y,ww,1,'rgba(255,255,255,.45)'); px(x+Math.floor(ww/2),y,1,hh,'rgba(0,0,0,.25)'); }
+   if (boarded){ px(x-1,y+1,ww+2,2,'#8a7a58'); px(x-1,y+hh-4,ww+2,2,'#7c6d4d'); }
+ };
+ const door = (x,y,ww,hh,c) => { px(x-1,y-1,ww+2,hh+1,trim); px(x,y,ww,hh,c||dark);
+   px(x+ww-3,y+Math.floor(hh/2),1,1,'#d8c48a'); };
+
+ /* ══ THE ONE WITH NOTHING ON IT ═══════════════════════════════════════════
+    Every other card draws a building and tells its story in the props. This
+    one has to tell the opposite story — that there is nothing to walk
+    through — and the temptation is to draw an empty rectangle, which reads
+    as a card that failed to load. So the subject moves: the SLOPE is the
+    subject, the trees are the site work nobody has priced, the culvert and
+    the power pole at the road are the two facts that decide whether this is
+    a lot at all, and the survey stakes say somebody has been out here. The
+    only thing missing is the house, and its absence is the point. ═══════ */
+ if (d.style === 'dirt'){
+   const skyline = GROUND;
+   /* the shared setup already laid a flat shelf and a silhouette treeline at
+      GROUND. A hillside that falls BELOW that line leaves both showing along
+      the right-hand edge, where they read as a distant city — on a card whose
+      entire claim is that there is nothing out here. Wiped back to sky first;
+      the stars and the moon sit above it and survive. */
+   px(0, GROUND-27, W, H-(GROUND-27), S[1]);
+   /* the ground is re-drawn as a hillside falling to the road — the 11%
+      slope on the sheet, in the picture, rather than beside it */
+   for (let x=0;x<W;x++){
+     const t = x/W;
+     const top = Math.round(skyline - 26 + 30*t*t);            // falls to the NE
+     px(x, top, 1, H-top, '#3b3a2b');
+     px(x, top, 1, 2, '#4e5238');
+     if ((x+Math.floor(t*9))%7===0) px(x, top+3+Math.floor(rnd()*7), 1, 2, '#4a4a35');
+   }
+   px(0,H-5,W,5,'#1f1c17');                                    // the road at the bottom
+   px(0,H-6,W,1,'#39332a');
+   const gy = x => Math.round(skyline - 26 + 30*(x/W)*(x/W));
+   /* the trees: a stand of cedar and oak, which on a lot is not scenery —
+      it is clearing, and clearing is the biggest line in site work */
+   const tree = (x,h,c1,c2) => {
+     const base = gy(x);
+     px(x, base-h, 2, h, '#3a2f24');
+     for (let i=0;i<5;i++){
+       const w2 = Math.round((h*0.62) * (1 - i/6));
+       px(x-Math.floor(w2/2)+1, base-h-2+i*Math.round(h*0.13), w2, Math.round(h*0.2), i%2 ? c1 : c2);
+     }
+   };
+   for (const [tx,th] of [[26,30],[44,22],[62,34],[88,25],[150,28],[176,20],[206,33],[232,24]])
+     tree(tx, th, '#2e4029', '#26361f');
+   /* the survey stakes, and the dashed line a surveyor left between them —
+      the same dashed boundary the Land Desk draws, in eight-bit */
+   const stake = x => { const b = gy(x); px(x, b-9, 1, 9, '#b8a274'); px(x-1, b-11, 3, 3, '#e05a4a'); };
+   for (const sxp of [70, 120, 172]) stake(sxp);
+   for (let x=70;x<172;x+=6) px(x, gy(x)-1, 3, 1, 'rgba(232,237,245,.55)');
+   /* ── ELECTRIC AT THE STREET ──────────────────────────────────────────
+      A wire needs two poles. The first version drew one pole and ran a sine
+      off the left edge, so the line sagged, rose, sagged again and left the
+      frame from nothing — four humps of cable suspended on air. A real span
+      hangs between two points and sags once, deepest in the middle, and the
+      poles are about twice a house's eave, not four times: scaled down to 26
+      pixels so the parcel reads big and the pole reads like a pole. */
+   /* drawn AFTER the trees, or the poles stand behind the canopy they were
+      put there to be seen next to, and the span reappears out of foliage */
+   const pole = x => { const b2 = gy(x);
+     px(x, b2-26, 2, 26, '#4a4238');                       // shaft
+     px(x-5, b2-26, 12, 2, '#4a4238');                     // crossarm
+     px(x-4, b2-28, 2, 2, '#6b6153'); px(x+5, b2-28, 2, 2, '#6b6153'); };  // insulators
+   const p1 = 14, p2 = W-14;
+   pole(p1); pole(p2);
+   const y1 = gy(p1)-27, y2 = gy(p2)-27, SAG = 7;
+   for (let x=p1;x<=p2;x++){
+     const t = (x-p1)/(p2-p1);
+     px(x, Math.round(y1 + (y2-y1)*t + 4*SAG*t*(1-t)), 1, 1, 'rgba(0,0,0,.5)');
+   }
+   /* and the culvert at the frontage — where a driveway would have to cross */
+   px(96, H-8, 22, 3, '#4d453a'); px(99, H-7, 16, 1, '#20201a');
+   /* the listing sign, the same size the five houses wear, planted at the
+      ROAD where a listing sign goes — not on the ridge, where it was both
+      the wrong size and standing in the wire */
+   const sgx = 56, sgb = H-7;
+   px(sgx, sgb-13, 2, 13, '#8b98ac');
+   px(sgx-6, sgb-20, 14, 7, '#eee8da'); px(sgx-6, sgb-20, 14, 1, '#ffffff');
+   px(sgx-4, sgb-18, 10, 1, '#6b6153'); px(sgx-4, sgb-16, 7, 1, '#6b6153');
+   return;
+ }
+
+ if (d.style === 'ranch'){
+   /* long and low, a carport on the left, a skip in the drive */
+   const bw=Math.round(W*0.58), bh=22, bx=Math.round(W*0.30), by=GROUND-bh;
+   px(bx,by,bw,bh,wall); px(bx,by,bw,1,'rgba(255,255,255,.09)');
+   gable(bx,by,bw,15,roof,7);
+   px(bx-7,by,bw+14,1,'rgba(0,0,0,.30)');            // eave shadow
+   px(bx+bw-16,by-22,5,15,roof);                               // chimney
+   px(bx+bw-17,by-18,7,2,'#4d443a');
+   /* A ranch IS asymmetric — the door sits off to one side and the picture
+      window takes the long wall — but the two windows still have to share a
+      sill line and equal margins, or it reads as a mistake rather than a
+      style. Left margin and right margin are both 7. */
+   window_(bx+7,by+7,14,9,false); window_(bx+bw-21,by+7,14,9,true);
+   px(bx+14,by+7,1,9,'#6a5f4f');                       // a mullion on the picture window
+   door(bx+Math.round(bw*0.52),by+bh-13,10,13);
+   px(bx+Math.round(bw*0.52)-3,by+bh-16,16,3,roof);    // a stoop hood over it
+   // carport: a flat roof on two posts, one car-shaped shadow beneath
+   const cx=bx-30;
+   px(cx,by+2,32,2,roof); px(cx,by+4,2,18,trim); px(cx+29,by+4,2,18,trim);
+   px(cx+5,GROUND-8,22,8,'#3a3b46'); px(cx+8,GROUND-12,15,4,'#4a4c58');
+   px(cx+7,GROUND-2,4,2,'#15161c'); px(cx+21,GROUND-2,4,2,'#15161c');
+   // the skip: somebody is already gutting it
+   px(W-40,GROUND-9,26,9,'#7a4a2c'); px(W-40,GROUND-10,26,1,'#96603a');
+   px(W-36,GROUND-13,5,4,'#5b5348'); px(W-28,GROUND-12,7,3,'#6a6154');
+ }
+ else if (d.style === 'duplex'){
+   /* two storeys, two of everything: doors, mailboxes, meters, tenants */
+   const bw=Math.round(W*0.56), bh=40, bx=Math.round((W-bw)/2), by=GROUND-bh;
+   px(bx,by,bw,bh,wall); px(bx,by,bw,1,'rgba(255,255,255,.09)');
+   px(bx+Math.round(bw/2)-1,by,2,bh,'rgba(0,0,0,.22)');        // the party wall
+   gable(bx,by,bw,15,roof,6);
+   px(bx-6,by,bw+12,1,'rgba(0,0,0,.30)');
+   /* MIRRORED, properly this time.
+
+      Two previous passes fixed an overlap and left something worse: unit one
+      had its door on the inner side and its window outer, unit two had them
+      the other way round. Nothing collided, and it still read as machine-drawn
+      — because a duplex is the most symmetrical building on any street and
+      the eye checks that before it checks anything else.
+
+      So every opening is now derived from the party wall and mirrored about
+      it: the two front doors flank the centre line on a shared stoop, each
+      unit's ground-floor window sits at its own outer end, and the upper
+      windows are centred in their halves. Every x below is pw ± something. */
+   const half=Math.round(bw/2), wW=12, dW=10;
+   const pw = bx + half;              // the party wall, and the axis of everything
+   const gap = 4;                     // between each door and the centre line
+   const dx1 = pw - gap - dW, dx2 = pw + gap;
+   // upper storey: centred in each unit, both lit
+   const uwx = Math.round((half - wW) / 2);
+   window_(pw - half + uwx, by+7, wW, 9, true);
+   window_(pw + uwx,        by+7, wW, 9, true);
+   // ground floor: each unit's window at its OWN outer end, mirrored about pw
+   const outer = Math.round(half - 6 - wW);
+   window_(pw - half + 6,       by+21, wW, 9, true);
+   window_(pw + outer,          by+21, wW, 9, false);    // one back room dark
+   door(dx1, by+bh-13, dW, 13);
+   door(dx2, by+bh-13, dW, 13);
+   px(dx1-3,GROUND-1,(dx2+dW+3)-(dx1-3),1,'#4a463d');   // one stoop, both doors on it
+   px(dx1-3,by+bh-16,(dx2+dW+3)-(dx1-3),3,roof);        // one hood over both
+   // two mailboxes and two meters — the detail that says "two households".
+   // They live OFF the facade: put them on the party wall and they merge with
+   // the stoop hood, which is how the last pass turned symmetry into mush.
+   px(bx-19,GROUND-13,3,13,'#585048'); px(bx-22,GROUND-17,9,5,'#8d8578');
+   px(bx-6,GROUND-13,3,13,'#585048');  px(bx-9,GROUND-17,9,5,'#8d8578');
+   px(bx+bw+3,by+18,4,6,'#9aa3ad'); px(bx+bw+9,by+18,4,6,'#9aa3ad');
+   for (let i=0;i<9;i++) px(bx-16+i*3,GROUND-4,2,4,'#3d5230');           // clipped hedge
+ }
+ else if (d.style === 'colonial'){
+   /* square, symmetrical, dark but for a porch light — and a notice on the
+      door, which is the whole story of this deal in four pixels */
+   const bw=Math.round(W*0.44), bh=38, bx=Math.round((W-bw)/2)-8, by=GROUND-bh;
+   px(bx,by,bw,bh,wall); px(bx,by,bw,1,'rgba(255,255,255,.09)');
+   gable(bx,by,bw,20,roof,6);
+   px(bx-6,by,bw+12,1,'rgba(0,0,0,.30)');
+   px(bx+7,by-22,5,13,roof);
+   /* A colonial is symmetrical or it is nothing: equal margins, equal gaps,
+      and the door exactly on the centre line the ridge sits over. */
+   const m2=7, wW2=11;
+   [7,21].forEach(wy2 => { window_(bx+m2,by+wy2,wW2,9,false);
+                           window_(bx+bw-m2-wW2,by+wy2,wW2,9,false); });
+   const dx=bx+Math.round((bw-10)/2);
+   px(dx-7,by+bh-17,24,3,roof);                                 // porch roof
+   px(dx-7,by+bh-14,2,14,trim); px(dx+15,by+bh-14,2,14,trim);
+   door(dx,by+bh-13,10,13);
+   px(dx+11,by+bh-16,2,2,'#ffd98a');                            // porch light, on
+   px(dx+2,by+bh-9,6,5,'#d9d2c4'); px(dx+3,by+bh-8,4,1,'#a33');  // the notice
+   // garage, closed
+   px(bx+bw+3,GROUND-19,26,19,wall); gable(bx+bw+3,GROUND-19,26,7,roof,3);
+   px(bx+bw+6,GROUND-14,20,14,'#4a433a');
+   for (let i=0;i<4;i++) px(bx+bw+6,GROUND-14+i*4,20,1,'#3a342d');
+ }
+ else if (d.style === 'cottage'){
+   /* small, steep, immaculate, curtains drawn — nobody lives here now */
+   const bw=Math.round(W*0.46), bh=24, bx=Math.round((W-bw)/2), by=GROUND-bh;
+   px(bx,by,bw,bh,'#8a7f6a'); px(bx,by,bw,1,'rgba(255,255,255,.12)');
+   gable(bx,by,bw,26,'#7a4f3c',7);
+   px(bx-7,by,bw+14,1,'rgba(0,0,0,.30)');
+   // two dormers in the roof
+   // dormers, set INTO the slope rather than perched on top of it
+   const dm=(x)=>{ px(x,by-16,12,9,'#8a7f6a'); gable(x,by-16,12,6,'#6c452f',1);
+     px(x+3,by-13,6,6,'#cdbfa0'); px(x+3,by-13,6,1,'#e6dcc4'); };
+   dm(bx+9); dm(bx+bw-21);
+   px(bx+bw-12,by-31,5,12,'#6c452f');
+   window_(bx+7,by+8,12,9,false); window_(bx+bw-19,by+8,12,9,false);
+   px(bx+7,by+8,12,9,'#cdbfa0'); px(bx+bw-19,by+8,12,9,'#cdbfa0');   // drawn curtains
+   door(bx+Math.round(bw/2)-5,by+bh-12,10,12,'#3d5a46');
+   px(bx+Math.round(bw/2)-8,GROUND-1,16,1,'#5a5347');
+   for (let i=0;i<14;i++){ const fx=bx-14+i*2;                        // flower bed
+     px(fx,GROUND-4,1,4,'#3d5a30'); if (i%3===0) px(fx,GROUND-6,2,2, i%2 ? '#c4658a':'#d8a94e'); }
+   for (let i=0;i<12;i++) px(bx+bw+6+i*2,GROUND-3,1,3,'#3d5a30');
+   // a young tree: trunk, then three tapering bands of canopy
+   px(11,GROUND-20,3,20,'#4a4036');
+   px(3,GROUND-27,19,7,'#3f5a3a'); px(5,GROUND-33,15,6,'#4a6a44');
+   px(8,GROUND-37,9,4,'#577a4f');
+ }
+ else {
+   /* THE WRECK.
+
+      The first two attempts at this were a brown box with a blue smudge over
+      it, which is what "distressed" looks like when it is drawn as an absence
+      — take the good house and subtract. Damage does not read as subtraction.
+      It reads as ADDED things in the wrong places: a hole with rafters showing
+      through it, plywood where glass should be, a porch roof that has come off
+      its posts at one end, weeds standing in front of the wall rather than
+      beside it.
+
+      So this one is built out of what went wrong, in the order it went wrong:
+      a real two-storey house first, then the roof opened, then the tarp that
+      did not fix it, then the boards, then the collapse, then the years. */
+   const bw=Math.round(W*0.50), bh=40, bx=Math.round((W-bw)/2)-4, by=GROUND-bh;
+
+   // the house it used to be
+   px(bx,by,bw,bh,'#78695a'); px(bx,by,bw,1,'rgba(255,255,255,.10)');
+   px(bx,by,2,bh,'rgba(255,255,255,.06)'); px(bx+bw-2,by,2,bh,'rgba(0,0,0,.18)');
+   // clapboard, so the wall has a surface to be ruined
+   for (let y=by+3;y<GROUND;y+=4) px(bx,y,bw,1,'rgba(0,0,0,.13)');
+   // water running from the gutter line for several winters
+   for (let i=0;i<10;i++){ const stx=bx+3+Math.floor(rnd()*(bw-7));
+     px(stx,by+1,2,6+Math.floor(rnd()*14),'rgba(38,29,20,.34)'); }
+
+   /* the roof: a proper pitch, with a hole eaten out of the left slope. The
+      rafters show through the hole — that is the detail that says "structural"
+      rather than "needs a clean". */
+   /* The roof is drawn scanline by scanline from an explicit triangle, and
+      everything that happens TO it — the hole, the rafters behind the hole,
+      the tarp — is positioned from the same geometry. The earlier version
+      placed each of those by eye, which is why the rafters floated above the
+      ridge and the tarp hung in the sky. */
+   const peak=22, cx=bx+bw/2, eave=bw/2+9;
+   const halfAt = i => eave * (1 - i/peak);
+   const rowOf  = i => by - 1 - i + Math.round(Math.sin(i/peak*Math.PI)*2);  // the sag
+   // where the roof has gone: a torn opening on the near slope
+   const holeTop=4, holeBot=15, hx0=bx+Math.round(bw*0.13);
+   const holeAt = i => { const w2 = Math.round(30 - (i-holeTop)*1.1 + (rnd()>0.7?1:0));
+     return [hx0 + Math.round((i-holeTop)*0.9), w2]; };
+   for (let i=0;i<peak;i++){
+     const y=rowOf(i), h2=halfAt(i), x0=Math.round(cx-h2), w0=Math.round(h2*2);
+     px(x0,y,w0,1, i<3 ? '#6a5a49' : i<13 ? '#57493c' : '#4a3d33');
+     if (i>=holeTop && i<=holeBot){
+       const [ox,ow]=holeAt(i);
+       const c0=Math.max(x0,ox), c1=Math.min(x0+w0, ox+ow);
+       if (c1>c0){
+         px(c0,y,c1-c0,1,'#1e1813');                       // through to the dark
+         px(c0,y,1,1,'#7a6248'); px(c1-1,y,1,1,'#7a6248'); // the torn edge, splintered
+       }
+     }
+   }
+   // rafters seen THROUGH the hole, clipped to it, so they can never float
+   for (let i=holeTop+1;i<=holeBot;i++){
+     const y=rowOf(i), [ox,ow]=holeAt(i);
+     for (let k=0;k<4;k++){ const rxp=ox+3+k*7;
+       if (rxp>ox && rxp<ox+ow-1) px(rxp,y,2,1,'rgba(176,152,118,.42)'); }
+   }
+   px(Math.round(cx-eave),by,Math.round(eave*2),1,'rgba(0,0,0,.34)');   // eave shadow
+
+   /* The tarp lies ON the far side of the hole, following the same slope, so it
+      reads as fabric over a roof rather than a flag in the air. It is the
+      brightest thing in the frame on purpose — a blue tarp is the one signal
+      everybody already knows how to read. */
+   for (let i=holeTop-1;i<=holeBot+2;i++){
+     const y=rowOf(i), [ox,ow]=holeAt(Math.max(holeTop,Math.min(holeBot,i)));
+     // the tarp tracks the slope: without this offset it reads as a flag
+     const t0=ox+ow-6+Math.round((i-holeTop)*0.8), t1=t0+24;
+     const shade = i<holeTop+4 ? '#5a92cc' : i<holeTop+8 ? '#3f79b4' : '#315c88';
+     px(t0,y,t1-t0,1,shade);
+     if (i===holeTop-1) px(t0,y,t1-t0,1,'#84b9ea');       // the lit top fold
+     if ((i-holeTop)%4===0) px(t0+9,y,1,1,'rgba(255,255,255,.22)');   // creases
+   }
+   { const yTop=rowOf(holeTop-1), [ox,ow]=holeAt(holeTop);
+     px(ox+ow-10,yTop+1,4,1,'#9aa3ad');                    // ropes to the eave
+     px(ox+ow+19,yTop+3,5,1,'#9aa3ad'); }
+
+   px(bx+bw-14,by-19,6,13,'#57493c');                                // chimney, half gone
+   px(bx+bw-15,by-8,4,3,'#332b24'); px(bx+bw-9,by-13,2,4,'#332b24');
+
+   // plywood over every opening, nailed at the corners, one sheet crooked
+   const board=(x,y,w2,h2,skew)=>{
+     px(x-1,y-1,w2+2,h2+2,'#2a231d');
+     px(x,y+(skew||0),w2,h2,'#a4854f');
+     px(x,y+(skew||0),w2,1,'#c0a066'); px(x,y+h2-1+(skew||0),w2,1,'#7d6337');
+     px(x+1,y+1+(skew||0),1,1,'#3a3028'); px(x+w2-2,y+1+(skew||0),1,1,'#3a3028');
+     px(x+1,y+h2-2+(skew||0),1,1,'#3a3028'); px(x+w2-2,y+h2-2+(skew||0),1,1,'#3a3028');
+   };
+   /* Same window grid the house was built with — equal margins, one sill line
+      per storey — then plywood over it. Damage lands ON the architecture; a
+      board that misses its opening by three pixels reads as a drawing error
+      rather than a boarded window. */
+   const m3=8, wW3=13, rx=bx+bw-m3-wW3;
+   board(bx+m3,by+7,wW3,10,0); board(rx,by+7,wW3,10,1);
+   board(bx+m3,by+22,wW3,10,0);
+   px(rx,by+22,wW3,10,'#141010');                                   // one they never got to
+   px(rx-1,by+21,wW3+2,1,'#4a4036'); px(rx,by+22,wW3,1,'#3a322a');
+   px(rx+4,by+25,2,4,'#2a231d'); px(rx+8,by+23,1,6,'#2a231d');      // the frame still in it
+
+   /* the porch: still attached at one end, off its post at the other. Drawn as
+      a line with a slope, because a level porch roof would undo the whole
+      picture in one stroke. */
+   const pxs=bx+Math.round(bw*0.26), pw=40;
+   for (let i=0;i<pw;i++){ const py2=GROUND-16+Math.round(i*0.34);
+     px(pxs+i, py2, 1, 4, i<3 ? '#6d5b49' : '#5c4c3d');
+     px(pxs+i, py2, 1, 1, '#7d6a55'); }
+   px(pxs,GROUND-16,3,16,'#5c4c3d'); px(pxs,GROUND-16,3,1,'#7d6a55');   // the post that held
+   px(pxs+pw-14,GROUND-3,15,3,'#5c4c3d');                               // the one that did not
+   px(pxs+pw-3,GROUND-6,3,6,'#4a3d33');                                 // its splintered stub
+   door(bx+Math.round(bw*0.44),by+bh-13,11,13,'#241d18');
+   // an X of boards across the door
+   for (let i=0;i<12;i++){ px(bx+Math.round(bw*0.44)+i, by+bh-13+i, 2, 1, '#a4854f');
+     px(bx+Math.round(bw*0.44)+i, by+bh-2-i, 2, 1, '#a4854f'); }
+
+   /* the years: weeds drawn AFTER the house, so they stand in front of the
+      wall and reach the sill. Overgrowth is an occlusion, not a texture. */
+   for (let i=0;i<70;i++){
+     const gx=1+Math.floor(rnd()*(W-2)), gh=6+Math.floor(rnd()*13);
+     const near=gx>bx-14 && gx<bx+bw+14;
+     px(gx, GROUND-gh+3, 1, gh, near ? '#4e6033' : '#3f5029');
+     if (rnd()>0.86) px(gx-1, GROUND-gh+1, 3, 2, '#5d7040');
+   }
+   // a dead tree: trunk, then three bare limbs
+   px(W-22,GROUND-30,3,30,'#463a2e');
+   px(W-30,GROUND-30,9,2,'#463a2e'); px(W-19,GROUND-36,8,2,'#463a2e');
+   px(W-33,GROUND-36,5,2,'#463a2e'); px(W-19,GROUND-24,7,2,'#463a2e');
+   // the fence: four pickets standing, one leaning, the rest gone
+   for (const [fx,fh,tilt] of [[bx-34,11,0],[bx-27,11,0],[bx-20,7,2],[bx+bw+14,11,0]])
+     { px(fx+tilt,GROUND-fh,2,fh,'#6b5c47'); }
+   px(bx-34,GROUND-9,16,1,'#6b5c47');
+ }
+
+ /* ── the sign, last, in front of everything ── */
+ const wrecked = d.style==='wreck', lean = wrecked ? 2 : 0;
+ const sx = wrecked ? 20 : W-30;
+ px(sx+lean, GROUND-14, 2, 14, wrecked ? '#6b7180' : '#8b98ac');
+ px(sx-5+lean, GROUND-21, 14, 7, wrecked ? '#a8987d' : '#eee8da');
+ px(sx-3+lean, GROUND-19, 10, 1, '#6b6153'); px(sx-3+lean, GROUND-17, 7, 1, '#6b6153');
+ if (!wrecked) px(sx-5+lean, GROUND-21, 14, 1, '#ffffff');
+}
+
+document.getElementById('floor').innerHTML = DEALS.map((d,i) => `
+ <a class="deal" href="${d.to || ('desk.html#demo=' + d.key)}">
+  <canvas width="256" height="120" aria-label="A pixel drawing of ${d.name}"></canvas>
+  <div class="b">
+   <div class="tag">${d.tag}</div>
+   <h2>${d.name}</h2>
+   <div class="ad">${d.addr}</div>
+   <p>${d.p}</p>
+   <div class="fig">
+    <div>${(d.figs||['They ask','Comps say'])[0]}<b>${money(d.ask)}</b></div>
+    <div>${(d.figs||['They ask','Comps say'])[1]}<b>${money(d.arv)}</b></div>
+   </div>
+   <div class="go">${d.to ? 'Open the Land Desk →' : 'Open this deal →'}</div>
+  </div>
+ </a>`).join('');
+document.querySelectorAll('.deal canvas').forEach((cv,i) => draw(cv, DEALS[i]));
+</script>
+</body></html>

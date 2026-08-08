@@ -21,7 +21,7 @@ const HERE = path.dirname(new URL(import.meta.url).pathname);
 const DIST = path.join(HERE, '..', 'dist');
 const staged = [];
 if (fs.existsSync(DIST))
-  for (const f of fs.readdirSync(DIST).filter(f => /\.html$|^robots\.txt$|^sitemap\.xml$|^favicon\.ico$|^site\.webmanifest$/.test(f))){
+  for (const f of fs.readdirSync(DIST).filter(f => /\.html$|^robots\.txt$|^sitemap\.xml$|^favicon\.ico$|^site\.webmanifest$|^priors\.js$/.test(f))){
     const to = path.join(HERE, f);
     if (!fs.existsSync(to)){ fs.copyFileSync(path.join(DIST, f), to); staged.push(to); }
   }
@@ -97,7 +97,7 @@ for (const p of PAGES){
    /server looks for server.html and finds nothing. That is a property of the
    static handler, not of an intention, and it gets checked. */
 {
-  const SECRET = ['server','billing','prompt','compare','street','bid','objections'];
+  const SECRET = ['server','billing','prompt','compare','street','bid','objections','intake'];
   out.secrets = {};
   for (const n of SECRET){
     const js    = await get('/' + n + '.js');
@@ -113,8 +113,15 @@ for (const p of PAGES){
      the day it was written. */
   for (const p of ['/package.json','/render.yaml','/publish.mjs','/test-api.mjs','/test-pay.mjs',
                    '/test-urls.mjs','/suite2.mjs','/_tbank.mjs','/anything-at-all.mjs',
-                   '/.env','/SUPABASE.md','/srv/compare.js'])
+                   /* the .js rule is an ALLOWLIST of one now — priors.js, the only
+                      script a page fetches. A module nobody remembered to add to a
+                      blocklist is how compare.js shipped servable for a deploy and
+                      how intake.js was servable the day it was written. */
+                   '/anything-at-all.js','/a-new-module.js','/srv/compare.js',
+                   '/.env','/SUPABASE.md'])
     check((await get(p)).s === 404, `${p} was served`);
+  /* and the one that IS fetched still is, or every page loses its priors */
+  check((await get('/priors.js')).s === 200, 'priors.js stopped being served — the pages fetch it');
   check((await get('/../server.js')).s >= 400, 'a traversal was served');
 }
 

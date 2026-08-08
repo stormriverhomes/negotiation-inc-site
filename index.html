@@ -258,7 +258,11 @@ h2{font-size:34px;margin-top:8px}
 .doors a:focus-visible{outline:2px solid #7fb4e8;outline-offset:3px}
 
 footer{border-top:1px solid var(--line);padding:30px 0 44px;font-size:13.5px;color:var(--soft)}
-footer a{color:var(--mid);text-decoration:none;margin-right:18px}
+/* inline links with no vertical padding: at 360px this row wraps to three
+   lines about five pixels apart, and a thumb aimed at Privacy lands on Terms.
+   inline-block plus padding makes each one a 27px target and costs nothing on
+   a wide screen, where the row does not wrap at all. */
+footer a{display:inline-block;padding:5px 0;color:var(--mid);text-decoration:none;margin-right:18px}
 footer a:hover{color:var(--ink)}
 
 
@@ -811,9 +815,9 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
      <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
      <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
-   <span class="wk">One hundred places</span>
+   <span class="wk">Twenty-five places</span>
    <span class="wt">Take a founding place</span>
-   <span class="wd">$49 a month for Underwriter, held for as long as you stay: the condition read off your photos, comps pulled and scored, the letters and the lender packet.</span>
+   <span class="wd">$79 a month for Underwriter, held for your first year: the condition read off your photos, comps pulled and scored, the letters and the lender packet.</span>
    <span class="wgo">See what a plan buys <em>&rarr;</em></span>
   </a>
  </div>
@@ -946,25 +950,36 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 })();
 </script>
 <style>
-.wl{border:1px solid var(--line-2,#c9d0dc);border-radius:16px;background:#fff;padding:15px 17px;text-align:left}
-.wl .wt{display:block;font-family:var(--serif,Georgia),serif;font-size:17px;font-weight:700;color:var(--ink,#101725)}
-.wl .ws{display:block;font-size:12.5px;line-height:1.55;color:var(--mid,#4a5162);margin-top:5px}
-.wl .ws b{color:var(--ink,#101725)}
+.wl{border:1px solid #c9d0dc;border-radius:16px;background:#fff;padding:15px 17px;text-align:left}
+.wl .wt{display:block;font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:700;color:#101725}
+.wl .ws{display:block;font-size:12.5px;line-height:1.55;color:#3f4759;margin-top:5px}
+.wl .ws b{color:#101725}
 .wl .wf{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
 /* 16px, not 14 — under 16px iOS Safari zooms the whole page the moment the
    field takes focus, which on the one form that is the entire pre-launch
    funnel is a real cost. And 44px of height because this was a 30px target
    on a phone, which is smaller than a fingertip. */
 .wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;
- min-height:44px;border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
-.wl .wf input:focus{outline:none;border-color:var(--blue,#1f5fd0);box-shadow:0 0 0 3px var(--blue-soft,#eaf0fc)}
-.wl .wf button{flex:none;cursor:pointer;min-height:44px;padding-left:18px;padding-right:18px}
+ min-height:44px;border:1px solid #c9d0dc;background:#fff;color:#101725}
+.wl .wf input::placeholder{color:#6b7488;opacity:1}
+.wl .wf input:focus{outline:none;border-color:#1f5fd0;box-shadow:0 0 0 3px #eaf0fc}
+/* The card sets its own 16px corner and the field beside this button sets its
+   own 10px one — but the button borrowed .btn from whatever page it landed on,
+   and on the arcade, the course and the drill that class is square. So the one
+   form the entire pre-launch funnel runs through was shipping a rounded field
+   sitting against a sharp button, on three pages, and nothing greps for it
+   because a square corner is an absence. The widget states its own corner. */
+/* and the button's fill too, for the same reason: the arcade's blue is a
+   lighter one, chosen to sit on a dark page, and white on it measured 4.71 */
+.wl .wf button{flex:none;cursor:pointer;min-height:44px;padding-left:18px;padding-right:18px;border-radius:10px;
+ background:#1f5fd0;border:1.5px solid #1f5fd0;color:#fff;font-size:13px;font-weight:650;letter-spacing:0;text-transform:none}
+.wl .wf button:hover{background:#1a4fb0;border-color:#1a4fb0;color:#fff;transform:none;box-shadow:none}
 /* side by side, a phone gives the address field about nine characters. Stack. */
 @media(max-width:560px){.wl .wf{flex-direction:column;align-items:stretch}
  .wl .wf input,.wl .wf button{width:100%}}
-.wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:var(--soft,#677187)}
-.wl .wn.ok{color:var(--green,#177a4d)} .wl .wn.bad{color:var(--red,#b3372c)}
-.wl.done{border-color:var(--green-line,#bfe0cd);background:var(--green-soft,#eaf6f0)}
+.wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:#4a5162}
+.wl .wn.ok{color:#12633e} .wl .wn.bad{color:#a32a20}
+.wl.done{border-color:#bfe0cd;background:#eaf6f0}
 </style>
 <script>
 (function(){

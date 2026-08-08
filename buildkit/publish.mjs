@@ -23,6 +23,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import { chromium } from 'playwright';
 import fs from 'fs';
+import crypto from 'node:crypto';
 import path from 'path';
 import { execFileSync } from 'child_process';
 import zlib from 'node:zlib';
@@ -73,6 +74,18 @@ function stage(doc, file){
   }
   return doc;
 }
+/* ── THE TIER GRAMMAR, INTO EVERY ROOM THAT DECIDES ───────────────────────
+   The Desk and the Land Desk both have to answer "who is this and what may
+   they do", and until now only one of them could: land.html had no account
+   layer at all. One module, injected into both, so the answer cannot differ
+   between two rooms of the same product. */
+const TIER_SRC = fs.readFileSync('shared/tier.mjs', 'utf8').replace(/^export /gm, '');
+function injectTier(html, who){
+  if (!html.includes('/*__TIER_GRAMMAR__*/'))
+    throw new Error(who + ' lost its /*__TIER_GRAMMAR__*/ marker — nothing in it would know who is signed in');
+  return html.replace('/*__TIER_GRAMMAR__*/', () => TIER_SRC);
+}
+
 /* one flag, injected into every page, for the handful of decisions that are
    genuinely runtime rather than markup */
 const SB_URL  = process.env.NI_SUPABASE_URL  || '';
@@ -181,7 +194,37 @@ for (const d of deeds) {
 // ── one mark, per Design pass 3 item 08: the serif N over the baseline rule.
 //    The drawn deed retires into the arcade as interior art — scenery, not a
 //    second mark. At 16px the deed read as a smudge; the N-rule reads. ──
-const icon = "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='6'%20fill='%23f4efe2'/%3E%3Ctext%20x='16'%20y='21'%20font-family='Georgia,serif'%20font-size='19'%20font-weight='600'%20text-anchor='middle'%20fill='%2323201c'%3EN%3C/text%3E%3Crect%20x='7'%20y='24.5'%20width='18'%20height='2'%20fill='%2323201c'/%3E%3C/svg%3E";
+/* ── THE MARK ──────────────────────────────────────────────────────────────
+   In bookkeeping a DOUBLE RULE under a figure means the total is final: no
+   more entries below it, the number you can act on. That is what an
+   underwriting desk sells, and it happens to be two lines, which is the most
+   a favicon can carry.
+
+   Dark ground rather than the cream this used to be, because a tab strip is
+   pale in light mode and a pale icon dissolves into it. The letter is a PATH
+   rather than <text font-family="Georgia">, so it is the same N on a machine
+   that has never heard of Georgia.
+
+   Below 24px the two rules become three grey smudges, so art/icon-small.svg
+   draws one thicker rule instead and favicon.ico carries both — a mark that
+   degrades into a cleaner mark was designed; one that degrades into mush was
+   scaled. */
+const icon = "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23101a2c'/%3E%3Cpath%20fill='%23f4efe2'%20d='M15%2015h9.5l14%2021.5V15H47v2.6h-3.4v27.1h-7.9L20.3%2021.1v21h3.6V45H15v-2.6h3.5V17.6H15Z'/%3E%3Crect%20x='15'%20y='50.2'%20width='34'%20height='2.6'%20rx='1.3'%20fill='%23c9a227'/%3E%3Crect%20x='15'%20y='55.4'%20width='34'%20height='2.6'%20rx='1.3'%20fill='%23c9a227'/%3E%3C/svg%3E";
+/* every page gets the whole set: the inline SVG for anything that understands
+   one, the .ico for everything that does not and for the bare /favicon.ico a
+   browser asks for unprompted, and the touch icon for a home screen. */
+/* RELATIVE, not root-absolute. Every harness loads these pages over file://,
+   where `/favicon.ico` resolves to the filesystem root and fails — the same
+   trap the internal page links were deliberately kept out of, walked straight
+   into with the icons. `favicon.ico` from /desk resolves to /favicon.ico on
+   the server and to dist/favicon.ico on disk, and both are right.
+   The deed pages sit a directory down, so they pass '../'. */
+const ICONS = (up = '') => `<link rel="icon" href="${icon}" type="image/svg+xml">
+<link rel="icon" href="${up}favicon.ico" sizes="16x16 24x24 32x32 48x48 64x64">
+<link rel="apple-touch-icon" href="${up}art/apple-touch-icon.png">
+<link rel="manifest" href="${up}site.webmanifest">
+<meta name="theme-color" content="#101a2c">
+`;
 
 // ── shipped pages are minified; sources stay literate ──────────────────────
 // The sources carry their reasoning in comments — that is the project's
@@ -250,13 +293,32 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 </style>
 `;
 
+/* ══ THE BANKROLL, INJECTED ═══════════════════════════════════════════════
+   arcade/bank.mjs is the one place the money is defined, and it is unit-tested
+   under node. The four surfaces that touch it are standalone classic-script
+   pages, so the module is inlined into each rather than fetched — a game
+   should not wait on a network round-trip to know what you are worth, and a
+   fourth copy of these rules maintained by hand is how three cabinets stop
+   agreeing about one number.
+
+   Same pattern as the land engine, and the same guard: a page that lost its
+   marker fails the BUILD rather than shipping a cabinet whose money silently
+   does nothing. */
+const BANK_SRC = fs.readFileSync('arcade/bank.mjs', 'utf8').replace(/^export /gm, '');
+const bankInto = (html, who) => {
+  if (!html.includes('/*__ARCADE_BANK__*/'))
+    throw new Error(who + ' lost its /*__ARCADE_BANK__*/ marker — the bankroll would not be defined');
+  return html.replace('/*__ARCADE_BANK__*/', () => BANK_SRC);
+};
+
 // ── the game, told where its share links live ──────────────────────────────
 let html = fs.readFileSync('portfolio.html', 'utf8');
-html = html.replace('</head>', `<link rel="icon" href="${icon}">\n</head>`);
+html = html.replace('</head>', ICONS() + '</head>');
 if (BASE) html = html.replace('</head>', `<meta name="ni-share-base" content="${BASE}/d">\n</head>`);
 else html = html.replace('</head>', `<meta name="ni-share-base" content="d">\n</head>`);
 html = html.replace('</head>', OG('Comp Run · Negotiation Inc',
   'Eight eras of ground, a daily street, and a phone that rings. The instinct, trained the fun way.') + '</head>');
+html = bankInto(html, 'portfolio.html (Comp Run)');
 html = await minifyInline(html, 'index');
 fs.writeFileSync(path.join(out, 'comp-run.html'), html);
 
@@ -267,13 +329,14 @@ fs.writeFileSync(path.join(out, 'comp-run.html'), html);
    somebody else's save file behind is not a cabinet. It ships as its own
    page. */
 let street = fs.readFileSync('daily-street.html', 'utf8');
-street = street.replace('</head>', `<link rel="icon" href="${icon}">\n</head>`);
+street = street.replace('</head>', ICONS() + '</head>');
 street = street.replace('</head>', OG('The Daily Street · Negotiation Inc',
   'Three streets, three minutes, one sealed offer each. The same houses for everybody who plays today.') + '</head>');
 for (const must of ['The Daily Street', 'href="arcade.html"', 'How it works'])
   if (!street.includes(must)) throw new Error('daily-street.html lost: ' + must);
 if (/fonts\.googleapis|fonts\.gstatic|https?:\/\/cdn/.test(street)) throw new Error('daily-street.html reaches off-origin');
 street = await minifyInline(street, 'street');
+street = bankInto(street, 'daily-street.html');
 fs.writeFileSync(path.join(out, 'daily-street.html'), street);
 
 // ── the course ─────────────────────────────────────────────────────────────
@@ -283,7 +346,7 @@ let course = fs.readFileSync('the-eight-exits.html', 'utf8');
 course = course.replace(/href="portfolio\.html"/g, 'href="arcade.html"');
 // its own nav now points at itself, and out there it is called exits.html
 course = course.replace(/href="the-eight-exits\.html(#[a-z]*)?"/g, (m, h) => `href="exits.html${h||''}"`);
-course = course.replace('</head>', `<link rel="icon" href="${icon}">\n</head>`);
+course = course.replace('</head>', ICONS() + '</head>');
 course = course.replace('</head>', FONTS + '</head>');
 course = course.replace('</head>', OG('The Eight Exits · Negotiation Inc',
   'Every way out of a property deal, with the arithmetic shown. Fifteen minutes. No email, nothing to buy.') + '</head>');
@@ -294,7 +357,7 @@ fs.writeFileSync(path.join(out, 'exits.html'), course);
 let desk = fs.readFileSync('desk.html', 'utf8');
 desk = desk.replace(/href="portfolio\.html"/g, 'href="arcade.html"');
 desk = desk.replace(/the-eight-exits\.html/g, 'exits.html');
-desk = desk.replace('</head>', `<link rel="icon" href="${icon}">\n</head>`);
+desk = desk.replace('</head>', ICONS() + '</head>');
 desk = desk.replace('</head>', FONTS + '</head>');
 desk = desk.replace('</head>', OG('The Desk · Negotiation Inc',
   'Type what you know about a property. The sheet runs every exit, shows its working, and says what it is estimating.') + '</head>');
@@ -351,10 +414,48 @@ desk = desk.replace('</head>', OG('The Desk · Negotiation Inc',
   /* The entitlement is a LEVEL now, but the invariant is unchanged: it is
      derived in exactly one place, from exactly one record, and an account on
      its own never buys anything. */
+  /* ── THE SAME INVARIANT, ASSERTED IN BOTH PLACES IT LIVES ──────────────
+     The entitlement is derived from exactly one record, and an account on its
+     own never buys anything. desk.html holds one copy and shared/tier.mjs —
+     which the Land Desk runs on — holds the other. They are not injected into
+     each other on purpose (see the comment above TIERS in desk.html), so both
+     are guarded here, and _tcross.mjs proves they agree by BEHAVIOUR. */
   const tier = src.match(/function tierOf\(\)\{[\s\S]{0,900}?\n\}/);
   if (!tier) throw new Error('desk.html: tierOf() is not where the build expects it');
   if (!/a\.plan/.test(tier[0]) || !/trialLeft\(\)/.test(tier[0]))
     throw new Error('tierOf() no longer reads the plan and the trial');
+  {
+    const t = TIER_SRC;
+    const tf = t.match(/function tierFor\(acct, opts\)\{[\s\S]*?\n\}/);
+    if (!tf) throw new Error('shared/tier.mjs: tierFor() is not where the build expects it');
+    if (!/planTier\(acct\)/.test(tf[0]) || !/trialDaysLeft\(/.test(tf[0]))
+      throw new Error('tierFor() no longer reads the plan and the trial');
+    const pt = t.match(/function planTier\(acct\)\{[\s\S]*?\n\}/);
+    if (!pt || !/acct\.plan/.test(pt[0]))
+      throw new Error('planTier() no longer reads the plan off the account');
+    if (!/if \(!k\) return 0;/.test(pt[0]))
+      throw new Error('planTier(): a blank plan string buys a tier again');
+    const ef = t.match(/function entitledFor\(acct, n, opts\)\{[\s\S]*?\n\}/);
+    if (!ef) throw new Error('shared/tier.mjs: entitledFor() is not where the build expects it');
+    if (!/if \(o\.demo\) return false;/.test(ef[0]))
+      throw new Error('entitledFor(): a demo can spend money again');
+    if (/preview/.test(ef[0]))
+      throw new Error('entitledFor() consults the preview flag — a paint job is not a purchase');
+    /* the asymmetry that decides whether an unrecognised plan label is worth
+       anything: generous to PAINT, worth nothing to DECIDE. Routing entitled
+       through the generous reading handed Solo to any string nobody knew. */
+    if (!/paidTier\(acct\) >= n/.test(ef[0]))
+      throw new Error('entitledFor() no longer uses the strict plan reading — an unknown label buys a tier');
+    const st = t.match(/function paidTier\(acct\)\{[\s\S]*?\n\}/);
+    if (!st || !/TIERS\[k\] \|\| 0/.test(st[0]))
+      throw new Error('paidTier() went generous — that is the painting function\'s job');
+    const gen = t.match(/function planTier\(acct\)\{[\s\S]*?\n\}/);
+    if (!gen || !/TIERS\[k\] \|\| 1/.test(gen[0]))
+      throw new Error('planTier() went strict — a legacy plan label would blank somebody\'s screen');
+    const wf = t.match(/function whyNotFor\(acct, n, opts\)\{[\s\S]*?\n\}/);
+    if (!wf || !/paidTier\(acct\)/.test(wf[0]))
+      throw new Error('whyNotFor() reads a different tier than entitledFor() — the reason would not match the refusal');
+  }
   const prem = src.match(/function premium\(\)\{[^}]*\}/);
   if (!prem) throw new Error('desk.html: premium() is not where the build expects it');
   if (/signedIn\(\)/.test(prem[0]))
@@ -531,6 +632,14 @@ const assertAccountAndBilling = () => {
      refresh token left on the machine quietly signs the next person back in */
   for (const f of ['desk.html','office.html']){
     const d = fs.readFileSync(path.join(out, f), 'utf8').replace(/\s+/g,'');
+    /* Two of the worst bugs this product has had were "the fix was applied to
+       a file that does not ship". _auth.js and _tail2a.js both contain this
+       sync layer and NEITHER is built — this inline copy is the live one. So
+       the build asserts the fixes are actually in the bytes. */
+    for (const [needle, why] of [
+      ['__propWire',     'the sync would upload the raw prop and strip every dollar figure on the other device'],
+      ['deleteSheets',   'a deleted property would come back on the next visit'],
+    ]) if (!d.includes(needle)) throw new Error('desk.html is missing ' + needle + ' — ' + why);
     if (!/__authSignOut/.test(d))
       throw new Error(f + ': sign-out does not end the server session');
   }
@@ -686,6 +795,7 @@ if (fs.existsSync('priors.js')) {
 {
   let land = fs.readFileSync('land.html', 'utf8');
   const engineSrc = fs.readFileSync('land/engine.mjs', 'utf8').replace(/^export /gm, '');
+  land = injectTier(land, 'land.html');
   if (!land.includes('/*__LAND_ENGINE__*/')) throw new Error('land.html lost the engine marker');
   land = land.replace('/*__LAND_ENGINE__*/', () => engineSrc);
   if (/^export /m.test(land)) throw new Error('land.html: an export survived the injection');
@@ -705,14 +815,28 @@ if (fs.existsSync('priors.js')) {
   for (const must of ["asking:'214,000'", "acres:'2.61'", "finished:'298,000'", "lump:'41,500'",
                       'sewer:\'unknown\'', '1847 Saddleback Pass'])
     if (!land.includes(must)) throw new Error('land.html demo fixture lost: ' + must);
-  /* the floor rule: no Google credit without Google imagery. The word may
-     live in an HTML comment (the file explains itself); it may not be VISIBLE
-     — so the check runs on the document with comments stripped. */
-  if (/Google|gstatic|googleapis/i.test(land.replace(/<!--[\s\S]*?-->/g, '')))
-    throw new Error('land.html shows Google credit with no Google imagery on the page');
+  /* the floor rule: no Google credit without Google imagery. The tiles URL
+     and the CDN loader live in SCRIPT — legitimate, they run only when the
+     server says the ground is open. What may never exist is the word Google
+     in the static MARKUP: credit belongs to imagery, and the flat page shows
+     none. So comments and scripts are stripped and the visible document is
+     checked. */
+  const visible = land.replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '');   // rules and their comments are not text on a page
+  if (/Google|gstatic|googleapis/i.test(visible))
+    throw new Error('land.html shows Google credit in static markup — credit belongs to rendered imagery');
+  /* and the ground never arrives unpinned or unguarded */
+  if (!/CESIUM_V = '\d+\.\d+'/.test(land)) throw new Error('land.html: the Cesium version is not pinned');
+  if (!/api\/land\/config/.test(land)) throw new Error('land.html no longer asks the server before spending a tile session');
+  if (!/showCreditsOnScreen: true/.test(land)) throw new Error('land.html lost the attribution flag — that is a terms violation, not a style choice');
+  if (!/createGooglePhotorealistic3DTileset/.test(land))
+    throw new Error('land.html is hand-building the tiles URL again — the helper owns the session token, and without it the root loads and nothing renders');
+  if (!/CreditDisplay\.cesiumCredit/.test(land))
+    throw new Error('land.html lost the ion-watermark clear — the floor is for the people whose imagery it is');
   if (!land.includes('--ground:#0A0F18')) throw new Error('land.html lost the dark-surface tokens');
 
-  land = land.replace('</head>', `<link rel="icon" href="${icon}">\n</head>`);
+  land = land.replace('</head>', ICONS() + '</head>');
   land = land.replace('</head>', FONTS + '</head>');
   land = land.replace('</head>', OG('The Land Desk · Negotiation Inc',
     'The eighth exit needs dirt. Price the dirt: what the finished lot sells for, what it costs to get there, and the most you can pay — with the working shown.') + '</head>');
@@ -732,18 +856,38 @@ landing = landing.replace(/href="desk-page"/g, 'href="desk.html"');   // masthea
 // and JB Mono now ship from our own origin (see FONTS above), which satisfies
 // both. A Google Fonts link sneaking back in still fails the build.
 if (/fonts\.googleapis|fonts\.gstatic/.test(landing)) throw new Error('index.html requests a third-party webfont');
-landing = landing.replace('</head>', `<link rel="icon" href="${icon}">\n</head>`);
+landing = landing.replace('</head>', ICONS() + '</head>');
 landing = landing.replace('</head>', FONTS + '</head>');
 // The build fails loudly rather than shipping a front door missing a limb.
 for (const must of ['Know what to pay', 'href="demo.html"', 'href="arcade.html"',
                     'href="office.html"', 'href="plans.html"', 'art/door-now.png',
-                    'art/demo-condition.jpg', 'getElementById(\'stage\')', 'Fraunces',
+                    'art/demo-condition.png', 'getElementById(\'stage\')', 'Fraunces',
                     'Four jobs, one sheet', 'What it replaces',
                     /* the last word, and the doors that are finally links */
                     'class="finish"', 'class="ways"', '<figure><a href="arcade.html">',
                     /* the front page has to say what a plan adds, not just link to it */
                     'class="adds"', 'plans.html#bid', 'plans.html#objections'])
   if (!landing.includes(must)) throw new Error('index.html lost: ' + must);
+/* ── THE FRONT DOOR'S WEIGHT IS A FEATURE, AND FEATURES ROT ────────────────
+   The six stage screenshots are stacked at opacity 0 inside the viewport, so
+   `loading="lazy"` never deferred one of them: a phone downloaded 1.25MB to
+   look at a single picture, before the headline painted. They are deferred by
+   hand now (`data-src`, fetched one ahead of the reader) and they are PNG,
+   which for screenshots of an interface is both smaller and sharper than
+   JPEG. Both facts are load-bearing and neither is visible in a diff, so the
+   build checks them. */
+{
+  const stage = landing.slice(landing.indexOf('id="stage"'), landing.indexOf('class="showbar"'));
+  const eager = (stage.match(/\ssrc="/g) || []).length;
+  if (eager !== 1)
+    throw new Error(`index.html: ${eager} stage frames load eagerly — exactly one (the first) should`);
+  if (/\.jpg/.test(stage))
+    throw new Error('index.html: a stage frame is a JPEG again — these are screenshots of an interface, and PNG is both smaller and sharper for them');
+  if (!/data-src="art\/demo-/.test(stage))
+    throw new Error('index.html: the stage frames are no longer deferred');
+  if (!landing.includes("matchMedia('(max-width:700px)')"))
+    throw new Error('index.html: the carousel autoplays on a phone again');
+}
 /* ══ THE HERO IS A SCREENSHOT OF THE DESK, IN MARKUP ═══════════════════════
    It says so in its own comment, which is the problem: a comment cannot fail.
    The hero prints one sheet — 1128 Marrow Lane, the same one the desk loads
@@ -788,11 +932,13 @@ landing = landing.replace('</head>', OG('Negotiation Inc',
 // No script to minify on the landing any more — revision 3 has no behaviour
 // beyond links, which is its own kind of correct for a front door.
 fs.writeFileSync(path.join(out, 'index.html'), landing);
+
+
 // ── plans: the feature ladder, with every row's state on it ──────────────
 let plans = fs.readFileSync('plans.html', 'utf8');
 plans = plans.replace(/href="portfolio\.html"/g, 'href="arcade.html"');
 plans = plans.replace(/the-eight-exits\.html/g, 'exits.html');
-plans = plans.replace('</head>', `<link rel="icon" href="${icon}">\n</head>`);
+plans = plans.replace('</head>', ICONS() + '</head>');
 plans = plans.replace('</head>', FONTS + '</head>');
 plans = plans.replace('</head>', OG('Plans · Negotiation Inc',
   'Pricing a property is free forever. A plan buys back the half hour: the photo condition read, comps pulled and scored, the lender packet, and a portfolio that remembers.') + '</head>');
@@ -919,6 +1065,8 @@ if (/photo (condition )?read ships\b/.test(plans) || /not shipped yet/.test(plan
     aicompare: 'Written comparisons a month',
     aibid:     'Bid checks a month',
     ailetter:  'The other side of the table, a month',
+    aiintake:  'Reading the paperwork, a month',
+    aicomps:   'Comps pulled and scored, a month',
   };
   for (const feat of Object.keys(caps)){
     const label = SOLD[feat];
@@ -968,8 +1116,8 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
      'Use the desk without an account and we collect nothing. With one we hold your email and your sheets. No analytics, no ad pixels, no data sold, no model trained on your deals.',
      ['no analytics', 'never train']],
     ['refunds.html', 'Billing & refunds · Negotiation Inc',
-     'Fourteen days free. Thirty days money back. Cancel in two clicks and keep working to the end of the period you paid for.',
-     ['thirty days', 'cancel', 'price they joined at']],
+     'Fourteen days free with a card on file. Thirty days money back. Cancel in two clicks and keep working to the end of the period you paid for.',
+     ['thirty days', 'cancel', 'price they joined at', 'card on file']],
   ];
   for (const [file, title, desc, promises] of LEGAL){
     let doc = fs.readFileSync(file, 'utf8');
@@ -981,10 +1129,48 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
     for (const promise of promises)
       if (!new RegExp(promise, 'i').test(doc))
         throw new Error(`${file} lost the promise it exists to make: ${promise}`);
-    doc = doc.replace('</head>', `<link rel="icon" href="${icon}">\n</head>`);
+    doc = doc.replace('</head>', ICONS() + '</head>');
     doc = doc.replace('</head>', FONTS + '</head>');
     doc = doc.replace('</head>', OG(title, desc) + '</head>');
     fs.writeFileSync(path.join(out, file), doc);
+  }
+}
+
+/* ── THE TRIAL IS SOLD ONE WAY, ON EVERY PAGE ──────────────────────────────
+   The plans page said "card on file, nothing charged for 14 days". The
+   workspace door said "No card. Fourteen days of the whole product come with
+   it". The billing page said "every new account gets fourteen days of the full
+   product". Three pages of one site describing the same fortnight in three
+   incompatible ways, and the two that were wrong were the two a person reads
+   BEFORE deciding — so somebody registers expecting the product and finds a
+   free account.
+
+   checkout now pins `payment_method_collection: 'always'` and the no-card
+   grant column is off by default, so the code has one answer. This is the
+   copy holding the same line: no page may promise the fortnight without a
+   card. It is a crude check on purpose — a sentence that puts "no card" within
+   eighty characters of the trial is a sentence worth re-reading, and the two
+   legitimate uses ("no card to open it", "no card, no account" about the free
+   desk) do not mention the fourteen days at all. */
+{
+  const NEAR = /(no card|without a card|card is not|never asks for a card)/i;
+  /* by SOURCE filename — the landing page is ni-landing-v3.html until the
+     build renames it, and a guard that reads dist/ checks the thing after it
+     is too late to stop */
+  for (const f of ['plans.html', 'office.html', 'refunds.html', 'terms.html',
+                   'ni-landing-v3.html', 'demo-page.html']){
+    /* HTML comments and JS block comments both come out: this checks the copy
+       a person reads, and a note to the next developer is not a promise to a
+       customer. It found a stale one on the way past all the same — office's
+       offer panel was still described as "one button, no card" long after the
+       button started leading to a checkout that takes one. */
+    const doc = fs.readFileSync(f, 'utf8')
+      .replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    for (const m of doc.matchAll(/(fourteen days|14 days|14-day|fourteen-day)/gi)){
+      const around = doc.slice(Math.max(0, m.index - 80), m.index + 80);
+      if (NEAR.test(around))
+        throw new Error(`${f} sells the trial without a card: "…${around.replace(/\s+/g,' ').trim()}…"`);
+    }
   }
 }
 
@@ -995,7 +1181,7 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
   let office = fs.readFileSync('office.html', 'utf8');
   office = office.replace(/href="portfolio\.html"/g, 'href="arcade.html"');
   office = office.replace(/the-eight-exits\.html/g, 'exits.html');
-  office = office.replace('</head>', `<link rel="icon" href="${icon}">\n</head>`);
+  office = office.replace('</head>', ICONS() + '</head>');
   office = office.replace('</head>', FONTS + '</head>');
   /* the same ZIP priors the desk uses — the office prices sheets too */
   if (fs.existsSync('priors.js'))
@@ -1012,12 +1198,13 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
   let hub = fs.readFileSync('arcade-hub.html', 'utf8');
   hub = hub.replace(/href="portfolio\.html"/g, 'href="comp-run.html"');
   hub = hub.replace(/the-eight-exits\.html/g, 'exits.html');
-  hub = hub.replace('</head>', `<link rel="icon" href="${icon}">\n</head>`);
+  hub = hub.replace('</head>', ICONS() + '</head>');
   hub = hub.replace('</head>', FONTS + '</head>');
   hub = hub.replace('</head>', OG('The Arcade · Negotiation Inc',
     'Cabinets that train the read: Comp Run, the daily street, and the drills. Free, no account.') + '</head>');
   for (const must of ['comp-run.html', 'daily-street.html', 'exit-drill.html'])
     if (!hub.includes(must)) throw new Error('arcade.html lost a cabinet: ' + must);
+  hub = bankInto(hub, 'arcade-hub.html');
   fs.writeFileSync(path.join(out, 'arcade.html'), hub);
 }
 
@@ -1026,10 +1213,35 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
   let demo = fs.readFileSync('demo-page.html', 'utf8');
   demo = demo.replace(/href="portfolio\.html"/g, 'href="arcade.html"');
   demo = demo.replace(/the-eight-exits\.html/g, 'exits.html');
-  demo = demo.replace('</head>', `<link rel="icon" href="${icon}">\n</head>`);
+  demo = demo.replace('</head>', ICONS() + '</head>');
   demo = demo.replace('</head>', FONTS + '</head>');
   demo = demo.replace('</head>', OG('See how it works · Negotiation Inc',
-    'Five properties that do not exist, each with a different right answer. Open one and the real software prices every exit against it.') + '</head>');
+    'Six properties that do not exist, each with a different right answer — five houses and one piece of dirt. Open one and the real software prices it.') + '</head>');
+  /* ── THE FLOOR AND THE SHEETS CANNOT DRIFT APART ─────────────────────────
+     Every card on this page promises a scenario that exists. The five house
+     keys are read out of the desk's own DEMOS table, so adding a card
+     without a sheet — or renaming a sheet and orphaning its card — fails the
+     build rather than shipping a door that opens on nothing. */
+  {
+    const dsrc = fs.readFileSync('desk.html', 'utf8');
+    const i0 = dsrc.indexOf('const DEMOS = {');
+    const keys = [...dsrc.slice(i0, dsrc.indexOf('\n};', i0)).matchAll(/^\s(\w+):\s*\{/gm)].map(m => m[1]);
+    if (keys.length < 5) throw new Error('demo floor: could not read the desk\'s DEMOS table');
+    for (const k of keys)
+      if (!demo.includes(`key:'${k}'`)) throw new Error(`demo.html has no card for the desk's "${k}" sheet`);
+    for (const m of demo.matchAll(/key:'(\w+)'/g))
+      if (m[1] !== 'land' && !keys.includes(m[1]))
+        throw new Error(`demo.html offers "${m[1]}", which is not a sheet the desk can load`);
+    /* the land card is the one that leaves the desk, so it is checked against
+       the room it actually opens */
+    if (!demo.includes("to:'land.html#demo=land'"))
+      throw new Error('demo.html lost the land card\'s door');
+    const lsrc = fs.readFileSync('land.html', 'utf8');
+    if (!/#demo=land/.test(lsrc))
+      throw new Error('land.html no longer answers the door the demo floor knocks on');
+    if (!demo.includes('Five houses, and one piece of dirt'))
+      throw new Error('demo.html headline no longer counts what is on the floor');
+  }
   fs.writeFileSync(path.join(out, 'demo.html'), demo);
 }
 
@@ -1038,10 +1250,11 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
   let drill = fs.readFileSync('exit-drill.html', 'utf8');
   drill = drill.replace(/href="portfolio\.html"/g, 'href="arcade.html"');
   drill = drill.replace(/the-eight-exits\.html/g, 'exits.html');
-  drill = drill.replace('</head>', `<link rel="icon" href="${icon}">\n</head>`);
+  drill = drill.replace('</head>', ICONS() + '</head>');
   drill = drill.replace('</head>', FONTS + '</head>');
   drill = drill.replace('</head>', OG('Exit Drill · Negotiation Inc',
     'Sixty seconds, one house at a time: flip it, hold it, take the payments, run the listing, or walk.') + '</head>');
+  drill = bankInto(drill, 'exit-drill.html');
   fs.writeFileSync(path.join(out, 'exit-drill.html'), drill);
 }
 
@@ -1059,8 +1272,7 @@ for (const d of deeds){
   fs.writeFileSync(path.join(out, 'd', `${tag}.html`),
 `<!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" href="${icon}">
-<title>${ttl} · Negotiation Inc</title>
+${ICONS('../')}<title>${ttl} · Negotiation Inc</title>
 <meta name="description" content="${desc}">
 <meta property="og:type" content="website">
 <meta property="og:title" content="${ttl}">
@@ -1087,6 +1299,19 @@ font:14px ui-monospace,Menlo,monospace;display:flex;align-items:center;justify-c
    by a heavy encoder and costs nothing when it is not. */
 fs.mkdirSync(path.join(out, 'art'), { recursive: true });
 for (const f of fs.readdirSync('art')) fs.copyFileSync(path.join('art', f), path.join(out, 'art', f));
+/* /favicon.ico is requested by name, with no link tag, by browsers and by
+   every link-preview crawler. It has to be at the root or it is a 404 in
+   somebody's log forever. */
+fs.copyFileSync(path.join('art', 'favicon.ico'), path.join(out, 'favicon.ico'));
+fs.writeFileSync(path.join(out, 'site.webmanifest'), JSON.stringify({
+  name: 'Negotiation Inc', short_name: 'Negotiation',
+  description: 'Price a property against eight exits. The sheet shows its working.',
+  start_url: '/', display: 'standalone',
+  background_color: '#101a2c', theme_color: '#101a2c',
+  icons: [{ src:'art/icon-192.png', sizes:'192x192', type:'image/png' },
+          { src:'art/icon-512.png', sizes:'512x512', type:'image/png' },
+          { src:'art/apple-touch-icon.png', sizes:'180x180', type:'image/png' }],
+}, null, 1) + '\n');
 
 /* ── an indexed PNG, written by hand ────────────────────────────────────────
    The deed cards and the screenshots are flat colour: a few hundred distinct
@@ -1502,6 +1727,30 @@ async function pushSheets(rows){
     return r.ok;
   } catch(e){ return false; }
 }
+/* ── A DELETE THAT DELETES ─────────────────────────────────────────────────
+   There was no DELETE anywhere in this layer — only POST, PATCH and GET. So
+   removing a property spliced it out of localStorage and left the row on the
+   server, and the very next visit had mergeSheets find a remote pid with no
+   local twin, decide it was a sheet from another device, and put it back. A
+   deleted property came back on every load, and the same mechanism quietly
+   undid "delete everything".
+
+   Failure is soft on purpose: a delete that could not reach the network must
+   not block the local one, because the local one is what the person just
+   watched happen. A row that outlives its property is a far smaller problem
+   than a UI that refuses to respond. */
+async function deleteSheets(pids){
+  const t = await token(); if (!t || !pids || !pids.length) return false;
+  try {
+    const list = pids.filter(x => typeof x === 'string' && /^[A-Za-z0-9_-]{1,24}$/.test(x));
+    if (!list.length) return false;
+    const q = 'pid=in.(' + list.map(encodeURIComponent).join(',') + ')';
+    const r = await fetch(\`\${SB.url}/rest/v1/sheets?\${q}\`, { method:'DELETE',
+      headers:{ ...sbHead(t), Prefer:'return=minimal' } });
+    return r.ok;
+  } catch(e){ return false; }
+}
+window.__deleteSheets = deleteSheets;
 
 /* ── LAST WRITE WINS, PER PROPERTY ─────────────────────────────────────────
    Not per workspace. A person who edits one sheet on a phone and a different
@@ -1514,10 +1763,24 @@ function mergeSheets(local, remote){
   for (const r of (remote || [])){
     const at = Date.parse(r.updated) || 0;
     const cur = by.get(r.pid);
-    if (!cur || at > cur.at) by.set(r.pid, { p: cleanProp(r.blob), at, from:'remote' });
+    /* the RAW blob is kept beside the cleaned prop: cleanProp() builds a fresh
+       property and copies only the keys it knows, so anything workspace-level
+       riding along — the assumptions — is stripped before it can be read */
+    if (!cur || at > cur.at) by.set(r.pid, { p: cleanProp(r.blob), raw: r.blob, at, from:'remote' });
   }
   const out = [...by.values()].sort((a,b) => b.at - a.at).slice(0, 40).map(x => x.p);
-  return { props: out, pulled: [...by.values()].filter(x => x.from === 'remote').length };
+  /* ── AND THE ASSUMPTIONS COME BACK WITH THE NEWEST SHEET ─────────────────
+     They are workspace-level, not per-property, so "last write wins per
+     property" does not answer the question on its own — the newest sheet
+     anywhere is the one that saw them last, and that is the answer. Only from
+     a REMOTE row: a local one is already in P.adv, and re-applying it would
+     overwrite a change made in this tab a second ago. Every value is
+     re-validated against the slider that drew it on the way in. */
+  let adv = null;
+  const newest = [...by.values()].sort((a,b) => b.at - a.at)[0];
+  if (newest && newest.from === 'remote' && typeof window.__advRead === 'function')
+    adv = window.__advRead(newest.raw && newest.raw.adv);
+  return { props: out, adv, pulled: [...by.values()].filter(x => x.from === 'remote').length };
 }
 
 /* ── the boot pass ─────────────────────────────────────────────────────────
@@ -1569,6 +1832,11 @@ async function syncSheets(){
       const m = mergeSheets(P.props, remote);
       if (m.pulled){
         P.props = m.props;
+        /* the assumptions this account last set, on whichever device set them.
+           Assigned INTO the existing object rather than replacing it, because
+           S.adv is the same object by reference and half the arithmetic on the
+           desk is already holding it. */
+        if (m.adv) Object.assign(P.adv, m.adv);
         P.active = Math.max(0, Math.min(P.active, P.props.length - 1));
         loadInto(P.active); save();
         if (typeof window.__render === 'function') window.__render();
@@ -1579,8 +1847,21 @@ async function syncSheets(){
 }
 async function pushLocal(){
   if (!SB_ON || typeof P === 'undefined' || !SESS) return;
+  /* ── THROUGH THE DESK'S OWN SERIALISER ───────────────────────────────────
+     This sent \`blob: p\` — the raw in-memory prop — while the loader on the
+     other end restored figures only from the \`f\` map that save() builds. The
+     prop has no \`f\`, so every money field arrived as NOTHING: sign in on a
+     second device and the sheet came back with its name, address, comps and
+     sliders, and asking, ARV, repairs, rent, balance, PITI and arrears all
+     reading NEEDED. Then that device pushed the gutted blob back over the good
+     row and both were ruined, silently, with no error.
+
+     propWire is the one serialiser save() and the file export also use, so the
+     shape we store and the shape we send cannot drift apart again — which is
+     the only reason this was possible. */
+  const wire = (typeof window !== 'undefined' && window.__propWire) || (x => x);
   const rows = P.props.map(p => ({ pid: p.id, updated: new Date(+(p.updated || Date.now())).toISOString(),
-    blob: p }));
+    blob: wire(p) }));
   await pushSheets(rows);
 }
 /* saving is a keystroke away from constant, so the push is debounced hard —
@@ -1708,7 +1989,7 @@ async function openPortal(){
 }
 
 /* ── the wait ───────────────────────────────────────────────────────────── */
-function payNote(msg, kind){
+function payNote(msg, kind, action){
   let n = document.getElementById('paynote');
   if (!n){
     n = document.createElement('div'); n.id = 'paynote';
@@ -1721,6 +2002,22 @@ function payNote(msg, kind){
   n.style.color = '#f3efe6';
   n.style.border = '1px solid ' + (kind === 'bad' ? '#7a4040' : '#3d6b52');
   n.textContent = msg;
+  /* ── A REFUSAL THAT NAMES THE DOOR SHOULD OPEN IT ─────────────────────────
+     The server now refuses a second subscription to somebody who already has
+     one — otherwise a stale ?join=underwriter bookmark billed them twice a
+     month, indefinitely, and the product looked completely normal. The refusal
+     says the change belongs in the billing portal. Saying that and then making
+     them go and find it is how a correct answer still loses a customer, so the
+     sentence carries the button. */
+  if (action && action.label && typeof action.fn === 'function'){
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = action.label;
+    b.style.cssText = 'display:block;margin-top:10px;padding:7px 13px;border-radius:8px;'
+      + 'font:inherit;font-weight:600;cursor:pointer;color:#f3efe6;background:transparent;'
+      + 'border:1px solid currentColor';
+    b.onclick = () => { b.disabled = true; b.textContent = 'One moment…'; action.fn(); };
+    n.appendChild(b);
+  }
   return n;
 }
 async function afterStripe(){
@@ -1764,7 +2061,7 @@ async function joinFromQuery(){
   const a = (typeof signedIn === 'function') ? signedIn() : null;
   if (!a) { try { sessionStorage.setItem('ni-join', plan); } catch(e){} return; }
   const r = await startCheckout(plan);
-  if (!r.ok) payNote(r.error, 'bad');
+  if (!r.ok) payNote(r.error, 'bad', r.portal ? PORTAL_ACTION : null);
 }
 /* and the same thing again for somebody who had to sign up on the way */
 async function joinAfterDoor(){
@@ -1773,8 +2070,13 @@ async function joinAfterDoor(){
   if (!plan) return;
   try { sessionStorage.removeItem('ni-join'); } catch(e){}
   const r = await startCheckout(plan);
-  if (!r.ok) payNote(r.error, 'bad');
+  if (!r.ok) payNote(r.error, 'bad', r.portal ? PORTAL_ACTION : null);
 }
+/* the one refusal that has somewhere for the person to go */
+const PORTAL_ACTION = { label: 'Manage your plan', fn: async () => {
+  const p = await openPortal();
+  if (!p.ok) payNote(p.error || 'The billing portal could not be opened just now.', 'bad');
+} };
 
 window.__checkout   = startCheckout;
 window.__portal     = openPortal;
@@ -1795,26 +2097,52 @@ try{ joinFromQuery(); }catch(e){}
    Pre-launch only. It never silently loses an address: if the endpoint is
    unreachable it says so and hands over the mailbox, because a form that says
    thank-you into a void is worse than no form at all. */
+/* ── THIS CARD BRINGS ITS OWN COLOURS ──────────────────────────────────────
+   Every value here used to be var(--ink, #101725) — read the page's variable,
+   fall back to a sane literal. That is the right pattern for something that
+   belongs to a page and the wrong one for something INJECTED into eleven of
+   them, because the card paints itself #fff and then borrows ink from
+   whatever it landed on.
+
+   On the arcade — a warm DARK theme whose --ink, --mid and --soft are tuned
+   against #14100c — that put pale text on a white card. Measured: the status
+   line, the one that says "You are on the list" or names the error, came out
+   at 3.88:1. That is below AA, on the last step of the only funnel there
+   currently is, and it read as fine on every light page so nothing noticed.
+
+   A widget with its own surface owns its own palette. No var() below this
+   line. The literals are the same ones the light pages use. */
 const WAITLIST = `<style>
-.wl{border:1px solid var(--line-2,#c9d0dc);border-radius:16px;background:#fff;padding:15px 17px;text-align:left}
-.wl .wt{display:block;font-family:var(--serif,Georgia),serif;font-size:17px;font-weight:700;color:var(--ink,#101725)}
-.wl .ws{display:block;font-size:12.5px;line-height:1.55;color:var(--mid,#4a5162);margin-top:5px}
-.wl .ws b{color:var(--ink,#101725)}
+.wl{border:1px solid #c9d0dc;border-radius:16px;background:#fff;padding:15px 17px;text-align:left}
+.wl .wt{display:block;font-family:Georgia,'Times New Roman',serif;font-size:17px;font-weight:700;color:#101725}
+.wl .ws{display:block;font-size:12.5px;line-height:1.55;color:#3f4759;margin-top:5px}
+.wl .ws b{color:#101725}
 .wl .wf{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
 /* 16px, not 14 — under 16px iOS Safari zooms the whole page the moment the
    field takes focus, which on the one form that is the entire pre-launch
    funnel is a real cost. And 44px of height because this was a 30px target
    on a phone, which is smaller than a fingertip. */
 .wl .wf input{flex:1 1 170px;min-width:0;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;
- min-height:44px;border:1px solid var(--line-2,#c9d0dc);background:#fff;color:var(--ink,#101725)}
-.wl .wf input:focus{outline:none;border-color:var(--blue,#1f5fd0);box-shadow:0 0 0 3px var(--blue-soft,#eaf0fc)}
-.wl .wf button{flex:none;cursor:pointer;min-height:44px;padding-left:18px;padding-right:18px}
+ min-height:44px;border:1px solid #c9d0dc;background:#fff;color:#101725}
+.wl .wf input::placeholder{color:#6b7488;opacity:1}
+.wl .wf input:focus{outline:none;border-color:#1f5fd0;box-shadow:0 0 0 3px #eaf0fc}
+/* The card sets its own 16px corner and the field beside this button sets its
+   own 10px one — but the button borrowed .btn from whatever page it landed on,
+   and on the arcade, the course and the drill that class is square. So the one
+   form the entire pre-launch funnel runs through was shipping a rounded field
+   sitting against a sharp button, on three pages, and nothing greps for it
+   because a square corner is an absence. The widget states its own corner. */
+/* and the button's fill too, for the same reason: the arcade's blue is a
+   lighter one, chosen to sit on a dark page, and white on it measured 4.71 */
+.wl .wf button{flex:none;cursor:pointer;min-height:44px;padding-left:18px;padding-right:18px;border-radius:10px;
+ background:#1f5fd0;border:1.5px solid #1f5fd0;color:#fff;font-size:13px;font-weight:650;letter-spacing:0;text-transform:none}
+.wl .wf button:hover{background:#1a4fb0;border-color:#1a4fb0;color:#fff;transform:none;box-shadow:none}
 /* side by side, a phone gives the address field about nine characters. Stack. */
 @media(max-width:560px){.wl .wf{flex-direction:column;align-items:stretch}
  .wl .wf input,.wl .wf button{width:100%}}
-.wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:var(--soft,#677187)}
-.wl .wn.ok{color:var(--green,#177a4d)} .wl .wn.bad{color:var(--red,#b3372c)}
-.wl.done{border-color:var(--green-line,#bfe0cd);background:var(--green-soft,#eaf6f0)}
+.wl .wn{font-size:12px;line-height:1.45;margin-top:7px;min-height:1em;color:#4a5162}
+.wl .wn.ok{color:#12633e} .wl .wn.bad{color:#a32a20}
+.wl.done{border-color:#bfe0cd;background:#eaf6f0}
 </style>
 <script>
 (function(){
@@ -1877,7 +2205,10 @@ const WAITLIST = `<style>
    masthead that knows you, no waitlist. They are played by people who are not
    signed in and are not being sold to mid-run. */
 for (const f of ['index.html','desk.html','office.html','plans.html','exits.html','arcade.html',
-                 'demo.html','exit-drill.html','terms.html','privacy.html','refunds.html']){
+                 'demo.html','exit-drill.html','terms.html','privacy.html','refunds.html',
+                 /* land.html was missing from this list, which is why the Land Desk had no
+                    account, no masthead and no wall — it was outside the product */
+                 'land.html']){
   const q = path.join(out, f);
   let doc = fs.readFileSync(q, 'utf8');
   if (!doc.includes('</body>')) throw new Error(f + ': no </body> to append the account script to');
@@ -1886,8 +2217,14 @@ for (const f of ['index.html','desk.html','office.html','plans.html','exits.html
   if (!doc.includes('</title>')) throw new Error(f + ': no </title> to put the stage flag after');
   doc = doc.replace('</title>', '</title>' + STAGEJS);
   doc = stage(doc, f);
-  const needsAuth = (f === 'desk.html' || f === 'office.html');
-  doc = doc.replace('</body>', KNOWSYOU + (needsAuth ? NIAUTH : '') + (LIVE ? '' : WAITLIST) + '</body>');
+  const needsAuth = (f === 'desk.html' || f === 'office.html' || f === 'land.html');
+  /* stage() has already run, so any slot that only exists pre-launch is in the
+     document by now — which means we can ask the honest question: does this
+     page actually have somewhere to PUT a form? Eight of these twelve did not,
+     and were shipping the card's stylesheet and its script to fill nothing.
+     The four that do are the four the funnel lands on. */
+  const wantsWaitlist = !LIVE && /data-waitlist=/.test(doc);
+  doc = doc.replace('</body>', KNOWSYOU + (needsAuth ? NIAUTH : '') + (wantsWaitlist ? WAITLIST : '') + '</body>');
   fs.writeFileSync(q, doc);
 }
 
@@ -1909,11 +2246,32 @@ assertAccountAndBilling();
   if (marks.length) throw new Error('stage markers survived the build in: ' + marks.join(', '));
 
   if (LIVE){
-    if (/data-waitlist|opens soon|Tell me when it opens/i.test(built))
-      throw new Error('plans.html: a live build still carries the waitlist');
+    /* every page, not just this one. The stripping is structurally safe today
+       — one ternary decides it for all twelve — but the assertion covered a
+       single file, so a future edit that special-cased one page would ship a
+       waitlist onto a live site and the build would still say yes. */
+    for (const f of ['index.html','desk.html','office.html','plans.html','exits.html','arcade.html',
+                     'demo.html','exit-drill.html','terms.html','privacy.html','refunds.html','land.html']){
+      const d = fs.readFileSync(path.join(out, f), 'utf8');
+      if (/data-waitlist|opens soon|Tell me when it opens|ni-wait-v1/i.test(d))
+        throw new Error(`${f}: a live build still carries the waitlist — it catches people who came to buy`);
+    }
     if (/window\.NI_LIVE=false/.test(built))
       throw new Error('plans.html: a live build is flagged pre-launch');
   } else {
+    /* and pre-launch, the inverse pairing: a page carries the form AND the
+       script that works it, or neither. A slot with no script is a dead box. */
+    for (const f of ['index.html','desk.html','office.html','plans.html','exits.html','arcade.html',
+                     'demo.html','exit-drill.html','terms.html','privacy.html','refunds.html','land.html']){
+      const d = fs.readFileSync(path.join(out, f), 'utf8');
+      /* the needle has to be unique to the SCRIPT. It was 'ni-wait-v1' — the
+         localStorage key — and the moment office.html listed that key in the
+         set that "delete everything" clears, this guard called a page with no
+         waitlist a page with a broken waitlist. The querySelector the script
+         runs is a thing only the script contains. */
+      const slot = /data-waitlist=/.test(d), code = /querySelectorAll\('\[data-waitlist\]'\)/.test(d);
+      if (slot !== code) throw new Error(`${f}: waitlist slot=${slot} but script=${code} — one without the other`);
+    }
     if (!/data-waitlist/.test(built))
       throw new Error('plans.html: a pre-launch build has no waitlist — every visitor is spent and gone');
     if (!/window\.NI_LIVE=false/.test(built))
@@ -1952,3 +2310,76 @@ for (const f of ['index.html', 'desk.html', 'office.html', 'plans.html',
 }
 
 await b.close();
+
+/* ── LAST, BECAUSE THE SITEMAP CHECKS ITS OWN CLAIMS ────────────────────────
+   server.js has always tried to send 404.html and always fallen back to nine
+   bytes of plain text, because the file did not exist. That is the one page
+   guaranteed to be seen by somebody who is already slightly lost, and it was
+   the only page that offered them nothing.
+
+   robots.txt and sitemap.xml matter more than usual right now: every URL on
+   this site changed shape this week. A sitemap listing the CLEAN addresses is
+   how a crawler learns that /desk is the real one and /desk.html is the
+   redirect, rather than working it out a page at a time.
+
+   Both are generated from PUBLIC_PAGES so they cannot drift from what exists
+   — a sitemap listing a page that 404s is worse than no sitemap. Which is why
+   this block sits at the END of the build and not beside the landing page,
+   where it was first written: there it ran before demo.html existed and threw
+   on its own guard. The guard was right and the placement was not. */
+{
+  let nf = fs.readFileSync('404.html', 'utf8');
+  nf = nf.replace('</head>', ICONS() + '</head>');
+  nf = nf.replace('</head>', FONTS + '</head>');
+  fs.writeFileSync(path.join(out, '404.html'), nf);
+
+  /* the clean address of every page a stranger is meant to find. office is
+     behind a sign-in and 404 is noindex, so neither belongs here. */
+  const PUBLIC_PAGES = ['', 'desk', 'demo', 'exits', 'arcade', 'comp-run', 'daily-street',
+                        'exit-drill', 'land', 'plans', 'terms', 'privacy', 'refunds'];
+  const SITE_URL = (process.env.NI_SITE_URL || 'https://negotiationinc.com').replace(/\/+$/, '');
+  for (const page of PUBLIC_PAGES){
+    const f = (page || 'index') + '.html';
+    if (!fs.existsSync(path.join(out, f)))
+      throw new Error(`the sitemap would list /${page} and ${f} was not built`);
+  }
+  const day = new Date().toISOString().slice(0, 10);
+  fs.writeFileSync(path.join(out, 'sitemap.xml'),
+    '<?xml version="1.0" encoding="UTF-8"?>\n'
+    + '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    + PUBLIC_PAGES.map(p => `  <url><loc>${SITE_URL}/${p}</loc><lastmod>${day}</lastmod></url>`).join('\n')
+    + '\n</urlset>\n');
+
+  /* Allow everything: nothing on this site is secret, and the things that ARE
+     secret are refused by the server rather than asked about politely. The one
+     job this file has is naming the sitemap. */
+  fs.writeFileSync(path.join(out, 'robots.txt'),
+    'User-agent: *\nAllow: /\n\nSitemap: ' + SITE_URL + '/sitemap.xml\n');
+}
+
+/* ══ THE BUILD STAMP ═══════════════════════════════════════════════════════
+   Three batches in a row were built, tested, packaged and never reached the
+   internet, and nobody could tell — the site looked like a site, the health
+   endpoint said "on" to everything, and the only way to find out was to read
+   the live HTML looking for a sentence you remembered changing.
+
+   That is the most expensive kind of missing instrument: not one that reports
+   a problem, one whose ABSENCE makes a problem invisible. So every build now
+   signs itself, the server reports the signature, and "is what I just pushed
+   the thing that is running" is a URL rather than an archaeology exercise.
+
+   The id is a hash of the built bytes, so it is the same for the same output
+   and different for any change — including a change nobody meant to make. It
+   is NOT a git sha: the repo holds built HTML, the deploy is a file copy, and
+   a git sha would tell you which commit exists rather than which bytes are
+   being served. */
+{
+  const files = fs.readdirSync(out).filter(f => /\.(html|js|css|json|xml|txt)$/i.test(f)).sort();
+  const h = crypto.createHash('sha256');
+  for (const f of files){ h.update(f); h.update(fs.readFileSync(path.join(out, f))); }
+  const id = h.digest('hex').slice(0, 12);
+  const stamp = { id, at: new Date().toISOString(), stage: LIVE ? 'live' : 'prelaunch',
+                  files: files.length };
+  fs.writeFileSync(path.join(out, 'build.json'), JSON.stringify(stamp, null, 1) + '\n');
+  console.log('build ' + id + ' · ' + stamp.stage + ' · ' + files.length + ' files');
+}
