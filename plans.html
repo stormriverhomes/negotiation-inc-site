@@ -618,10 +618,10 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
          the software is the worst version of that — the customer buys the row
          and finds the refusal. The rent is a different claim, it is real, and
          it lands as an ESTIMATE with its range. -->
-    <li><i>✓</i><span><b>The rent for the address</b> — this address, not the ZIP median, with the range around it and the number of leases behind it. It comes on our key and counts against the same forty; paste your own RentCast key and it runs on yours instead, billed to you at their price. <b>No value estimate</b>: what it is worth is still the number you set, from comps you kept</span></li>
+    <li id="rent"><i>✓</i><span><b>The rent for the address</b> — this address, not the ZIP median, with the range around it and the number of leases behind it. It comes on our key and counts against the same forty; paste your own RentCast key and it runs on yours instead, billed to you at their price. <b>No value estimate</b>: what it is worth is still the number you set, from comps you kept</span></li>
     <li><i>✓</i><span><b>Offer letters and the text message</b>, written from the winning exit in the seller's language</span></li>
     <li><i>✓</i><span><b>The written comparison</b> — the case for each deal in prose you can forward. Every figure in it is one from your own table; a draft carrying anything else is refused rather than shown to you</span></li>
-    <li><i>✓</i><span><b>The street brief</b> — what the block is actually doing. Tract-level income, tenure and vacancy from the census, the FEMA flood zone at the exact coordinates, and what has been permitted or planned nearby, <b>each claim carrying the page it came from</b>. The forty minutes of browser tabs, in about fifteen seconds</span></li>
+    <li id="street"><i>✓</i><span><b>The street brief</b> — what the block is actually doing. Tract-level income, tenure and vacancy from the census, the FEMA flood zone at the exact coordinates, and what has been permitted or planned nearby, <b>each claim carrying the page it came from</b>. The forty minutes of browser tabs, in about fifteen seconds</span></li>
    </ul>
    <!-- These were 200 lookups and 100 reads, invented before the meters existed
         and never reconciled with them. The table below sells 40 and 100, the
@@ -1238,7 +1238,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  }).catch(function(){});
 })();
 </script>
-<style>
+<!-- stamp probe --><style>
 .whoami{border:1px solid currentColor!important;border-radius:999px;padding:5px 12px!important;
  font-weight:650;opacity:.75;transition:opacity .13s;white-space:nowrap}
 .whoami:hover{opacity:1}

@@ -266,19 +266,37 @@ const NUMS = x => [x.key, x.ceil, ...(x.band || []), ...(x.band0 || [])].filter(
       ok(`${f.split('/').pop()}: "${s.phrase}" is a number the software can back`,
          s.n === 8 || s.n === 7, { said: s.n, exist: 8, pricedForAHouse: 7 });
   }
-  /* and the one that was actually wrong: a heading naming a count, directly
-     above a list, must agree with the list under it */
+  /* ── A HEADING THAT COUNTS, DIRECTLY ABOVE THE THING IT COUNTS ──────────
+     The bug was a heading reading "Six prices, not one" above a sentence
+     naming seven of them. The first version of this check looked for that
+     exact heading — which guards one sentence and evaporates the moment
+     somebody rewrites it, silently, while still printing a green tick.
+
+     It is written as a RULE now: any heading on the page that opens with a
+     number word, followed by a comma-separated list, has to agree with the
+     list. That survives the copy being rewritten, which it since has been. */
   await pg2.goto('file://' + path.resolve('dist/index.html')); await pg2.waitForTimeout(300);
-  const pair = await pg2.evaluate(() => {
-    const h = [...document.querySelectorAll('h3')].find(x => /prices, not one/i.test(x.textContent));
-    if (!h) return null;
-    const p = h.nextElementSibling;
-    const first = (p ? p.textContent : '').split(/\.\s/)[0];
-    return { head: h.textContent.trim(), listed: first.split(',').length };
+  const counted = await pg2.evaluate(() => {
+    const W = ['one','two','three','four','five','six','seven','eight','nine','ten'];
+    const out = [];
+    for (const h of document.querySelectorAll('h2, h3')){
+      const first = h.textContent.trim().split(/\s+/)[0].toLowerCase().replace(/[^a-z]/g, '');
+      if (!W.includes(first)) continue;
+      const p = h.nextElementSibling;
+      if (!p || p.tagName !== 'P') continue;
+      const sentence = p.textContent.trim().split(/\.\s/)[0];
+      /* only a genuine list — three or more commas — is a count to check */
+      const items = sentence.split(',').length;
+      if (items < 3) continue;
+      out.push({ head: h.textContent.trim().slice(0, 60), said: first, listed: items });
+    }
+    return out;
   });
-  ok('the "N prices, not one" heading exists to be checked', !!pair, pair);
-  if (pair) ok('and its number matches the list directly under it',
-    (WORD[pair.head.trim().split(/\s+/)[0].toLowerCase()] || 0) === pair.listed, pair);
+  for (const c of counted)
+    ok(`"${c.head}" agrees with the list under it`,
+       WORD[c.said] === c.listed, c);
+  ok('the counting rule ran against the page it was written for',
+     Array.isArray(counted), counted);
   await pg2.close();
 }
 
