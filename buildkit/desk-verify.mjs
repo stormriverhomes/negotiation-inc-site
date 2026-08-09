@@ -73,7 +73,15 @@ try {
   await p.waitForFunction(() => {
     const v = (typeof vals === 'function') ? vals() : null;
     return v && v.asking === 249500 && v.arv === 291000 && v.repairs === 41300 && v.rent === 1850;
-  }, null, { timeout: 30000 });
+  /* 30s was still not enough beside a four-wide board — the harness that warns
+     against flaky reds went red flakily. The wait is for a keystroke to
+     propagate, so the ceiling only has to outlast contention, never real work.
+     75s was not enough beside a SIX-wide board: it went red on two consecutive
+     full runs and passed alone both times, which is the failure mode that
+     teaches a person to ignore reds. Raised again, and the suite gives this
+     harness a longer budget so the ceiling is reachable — a timeout the runner
+     kills first is not a timeout. */
+  }, null, { timeout: 180000 });
 } catch (e) {
   const state = await p.evaluate(() => ({
     vals: (typeof vals === 'function') ? vals() : 'no vals()',
@@ -131,6 +139,14 @@ if (!A.novationRefuses)
 const bandOf = () => p.evaluate(() => {
   S.userToggled = true; S.openId = 'wholesale'; render();
   const x = document.getElementById('x-wholesale'); if (!x) return null;
+  /* the BAND, by its own element — not the first two dollar figures with a
+     dash between them anywhere in the row. The row grew a line reading
+     "only at $128,850 · $28,850 under their price" and this regex happily
+     reported that as the band, then failed because it does not widen. A
+     harness that pattern-matches a whole row's text will keep finding the
+     wrong number as the row learns to say more. */
+  const rng = x.querySelector('.bandtop .rng');
+  if (rng) return rng.textContent.replace(/\s+/g,' ').trim();
   const mm = (x.innerText || '').match(/\$[\d,]+\s*[—–-]\s*\$[\d,]+/);
   return mm ? mm[0] : null; });
 const B0 = { band: await bandOf(), conf: shown.conf };

@@ -184,7 +184,7 @@ const NAMES = [
    a clock rather than for a fault. It also STARVES its neighbours while it
    runs — _tconfig and _tauth2 both roughly doubled beside it — so if a board
    looks slow, this is why. */
-const SLOW = { _tpay: 900000, _tcap: 900000, _tstamp: 900000 };
+const SLOW = { _tpay: 900000, _tcap: 900000, _tstamp: 900000, 'desk-verify': 600000 };
 const BUDGET = n => SLOW[n] || 300000;
 
 const BATCH = Number(process.argv[2] || 6);

@@ -120,6 +120,9 @@
   .pager .p.bought .bd{background:var(--green)}
   .pager .p.bought .rf{border-bottom-color:var(--green)}
   .pager .p:disabled{cursor:default}
+  .pager.still{border-bottom:none;padding-bottom:4px}
+  .pager.still .p{cursor:default;border-bottom-color:transparent}
+  .pager.still .n{color:var(--carbon-faint)}
   @media (max-width:420px){ .pager{gap:2px} .pager .p .n{font-size:9px} }
   .nav:disabled{opacity:.25}
 
@@ -1033,10 +1036,24 @@ function heroHTML(){
       : bk.thin
       ? 'Thin. You can still bid above it, but the borrowed part costs you points, so the margins get tight.'
       : 'Three streets. What you make is yours and what you lose is gone.')+'</span></div>';
+  /* THE TITLE SCREEN SHOWS THE STREET IT IS THE TITLE OF. It used to be 61
+     words, a button, and 890 pixels of empty desk under it — the only page in
+     the arcade with no picture of any kind, promising houses and showing none.
+     Round one's board is deterministic from the day's seed, so drawing it here
+     is the same five houses beginNow will build, not a decoration standing in
+     for them. Nothing is walked and nothing is current: it is the street
+     before you have been down it. Claude Design's answer to where the empty
+     desk goes — nothing is added to fill it, the picture that was already
+     owed simply arrives one screen earlier. */
+  let strip = '';
+  try {
+    strip = streetStrip(B.boardForRound(run.iso, new Date().getFullYear(), run.plan, 0).cards,
+                        { interactive:false });
+  } catch(e){}
   return '<div class="hero"><div class="mark">The Daily Street</div>' +
     '<h1>Buy a house for<br>less than it is <b>worth</b>.</h1>' +
     '<div class="sub">Fix what is worth fixing. Keep the difference.</div>' +
-    '<div class="meta">3 streets · 3 minutes · new houses every day</div></div>' + stake + bar +
+    '<div class="meta">3 streets · 3 minutes · new houses every day</div></div>' + strip + stake + bar +
     '<div style="padding:0 18px 20px"><button class="btn go" onclick="beginRound()">'+
     (r.days[todayISO()] ? 'Play again' : 'Play')+'</button>' +
     '<a class="back" href="arcade.html">← the floor</a></div>' + helpHTML();
@@ -1158,31 +1175,43 @@ function factsHTML(i){
   return h + '</div>';
 }
 
-function pagerHTML(){
-  /* One scale across the five, taken from the board itself rather than a fixed
-     range — a street of five similar houses should read as five similar
-     houses, and a street with an outlier should show the outlier. Width and
-     height both move so the silhouette changes rather than just the box. */
-  const sq = board.cards.map(c => c.sqft);
+/* ONE DRAWING, TWO CALL SITES. The strip is the street: five footprints on a
+   shared groundline at one scale taken from the board itself, so five similar
+   houses read as five similar houses and an outlier shows. In play it is also
+   the navigation. On the title screen it is just the street — nothing walked,
+   nothing current — and it is the reason that screen no longer needs to be a
+   separate screen. */
+function streetStrip(cards, o){
+  const sq = cards.map(c => c.sqft);
   const lo = Math.min.apply(null, sq), hi = Math.max.apply(null, sq);
   const t  = v => hi === lo ? 0.5 : (v - lo) / (hi - lo);
-  const locked = state.mode === 'offer';
-  let h = '<div class="pager">';
+  const live = !!o.interactive;
+  let h = '<div class="pager'+(live?'':' still')+'">';
   for (let i=0;i<5;i++){
-    const s = state.seen[i], c = board.cards[i], k = t(c.sqft);
+    const c = cards[i], k = t(c.sqft);
     const bw = Math.round(34 + 26 * k), bh = Math.round(26 + 20 * k);
     const rh = Math.round(11 + 7 * k),  rw = Math.round(bw / 2 + 5);
-    const cls = (state.bid && state.bid.idx === i) ? 'bought'
-              : (i === state.at ? 'on' : (s.walk || s.ask ? 'seen' : ''));
-    h += '<button class="p '+cls+'" onclick="jump('+i+')" '+(locked?'disabled':'')
-      +  ' aria-label="house '+(i+1)+', '+c.sqft.toLocaleString()+' square feet"'
-      +  (i === state.at ? ' aria-current="true"' : '') + '>'
+    const seen = o.seen ? o.seen[i] : null;
+    const cls = !live ? ''
+      : (o.bidIdx === i) ? 'bought'
+      : (i === o.at) ? 'on'
+      : (seen && (seen.walk || seen.ask)) ? 'seen' : '';
+    const lab = 'house '+(i+1)+', '+c.sqft.toLocaleString()+' square feet';
+    const tag = live ? 'button' : 'span';
+    h += '<'+tag+' class="p '+cls+'"'
+      +  (live ? ' onclick="jump('+i+')"'+(o.locked?' disabled':'')+' aria-label="'+lab+'"'
+                 +(i===o.at?' aria-current="true"':'')
+               : ' aria-hidden="true"') + '>'
       +  '<span class="rf" style="border-left-width:'+rw+'px;border-right-width:'+rw
       +  'px;border-bottom-width:'+rh+'px"></span>'
       +  '<span class="bd" style="width:'+bw+'px;height:'+bh+'px"><span class="dr"></span></span>'
-      +  '<span class="n">'+(i+1)+'</span></button>';
+      +  '<span class="n">'+(i+1)+'</span></'+tag+'>';
   }
   return h + '</div>';
+}
+function pagerHTML(){
+  return streetStrip(board.cards, { interactive:true, at:state.at, seen:state.seen,
+    bidIdx: state.bid ? state.bid.idx : -1, locked: state.mode === 'offer' });
 }
 
 function browseHTML(){
