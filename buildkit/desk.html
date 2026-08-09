@@ -10759,8 +10759,56 @@ function renderCoach(where){
 /* the beat. Four lines, each naming something the sheet genuinely just did,
    then the results. Fast enough not to annoy, slow enough to feel like an
    answer arriving rather than more of the same page. */
-const LOAD_LINES = ['Reading the property', 'Pricing every exit',
-                    'Ranking them against this seller', 'Building the offer'];
+/* ══ THE BEAT BETWEEN ASKING AND ANSWERING ═════════════════════════════════
+   THE OLD ONE WAS TOO FAST TO BE READ, WHICH MADE IT DECORATION. Four fixed
+   lines at 170ms each: nobody has ever read a sentence in 170 milliseconds,
+   so the whole 940ms was a flicker of grey text that said the same four
+   things about every property on earth. A progress narration nobody can read
+   is a spinner with extra steps.
+
+   TWO CHANGES, AND THE SECOND IS THE ONE THAT MATTERS.
+
+   Slower, and unevenly so. Each step gets its own duration and its own
+   jitter, because work is not uniform — weighing sales takes longer than
+   ranking them, and a bar that advances in identical increments is a bar
+   announcing that nothing is happening. Total lands around two seconds.
+
+   AND EVERY LINE IS TRUE OF THIS PROPERTY. Elijah asked for Claude's trick of
+   random whimsical verbs — Ruminating, Percolating — and it is charming, and
+   it is wrong HERE. This product spent a fortnight removing everything that
+   read as generated, and its single claim is that it shows you its working.
+   A whimsical verb in that spot is a small lie in the exact place the brand
+   is staked. So the lines are the easter egg instead: they change with the
+   sheet, name the property's own numbers, and every one is a thing the
+   software genuinely just did. "Weighing three comparable sales" is more
+   interesting than "Percolating" because it is true, and a stranger reads it
+   and learns what the product does. The whimsy lives in the arcade, which is
+   a different world on purpose and is allowed to be funny. */
+const SIT_LOAD = {
+ nohurry:  'Ranking them against a patient seller',
+ motivated:'Ranking them against a motivated seller',
+ urgent:   'Ranking them against a seller in a hurry',
+ estate:   'Ranking them against an estate',
+ behind:   'Ranking them against a seller behind on payments',
+};
+const NWORD = ['no','one','two','three','four','five','six','seven','eight','nine','ten'];
+function loadSteps(){
+ const v = (typeof vals === 'function') ? vals() : {};
+ const comps = (S.comps || []).filter(c => c.use !== false).length;
+ const bits = [];
+ if (S.subj && S.subj.sqft) bits.push(String(S.subj.sqft).replace(/[^\d,]/g,'') + ' sq ft');
+ if (S.subj && S.subj.beds) bits.push(String(S.subj.beds).replace(/[^\d]/g,'') + ' bed');
+ const steps = [];
+ steps.push([bits.length ? 'Reading ' + bits.join(', ') : 'Reading the property', 420, 160]);
+ if (comps) steps.push([comps === 1 ? 'Weighing one comparable sale'
+                        : 'Weighing ' + (NWORD[comps] || comps) + ' comparable sales', 560, 220]);
+ steps.push([v.repairs && String(v.repairs).replace(/\D/g,'') !== ''
+             ? 'Taking the work off the top' : 'Pricing the work it needs', 380, 150]);
+ steps.push(['Pricing all eight exits', 620, 240]);
+ steps.push([SIT_LOAD[S.sit] || 'Ranking them against this seller', 440, 180]);
+ steps.push(['Building the offer', 360, 140]);
+ return steps;
+}
 let loadT = [];
 function runUnderwrite(){
  loadT.forEach(clearTimeout); loadT = [];
@@ -10769,16 +10817,37 @@ function runUnderwrite(){
  const bar = document.querySelector('#loading .lbar i');
  const top = $('loading').getBoundingClientRect().top + window.scrollY - 60;
  window.scrollTo({ top: Math.max(0, top), behavior:'smooth' });
- LOAD_LINES.forEach((t,i)=>{
-   loadT.push(setTimeout(()=>{ $('lline').textContent = t;
-     bar.style.width = Math.round((i+1)/LOAD_LINES.length*100) + '%'; }, i*170));
+ /* somebody who has asked their machine to stop animating things has also
+    asked it to stop making them wait for a number it already has */
+ const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const steps = loadSteps();
+ if (still){
+   $('lline').textContent = steps[steps.length-1][0];
+   if (bar) bar.style.width = '100%';
+   loadT.push(setTimeout(finishUnderwrite, 120));
+   return;
+ }
+ let at = 0;
+ steps.forEach(([t, base, jit], i) => {
+   const start = at;
+   at += base + Math.round(Math.random() * jit);
+   loadT.push(setTimeout(() => {
+     $('lline').textContent = t;
+     /* the bar runs to where this step ENDS over the time the step takes, so
+        it moves continuously instead of hopping once per line */
+     if (bar){
+       bar.style.transition = 'width ' + (at - start) + 'ms linear';
+       bar.style.width = Math.round((i+1)/steps.length*100) + '%';
+     }
+   }, start));
  });
- loadT.push(setTimeout(()=>{
-   $('loading').hidden = true; $('results').hidden = false;
-   render();
-   const r = $('results').getBoundingClientRect().top + window.scrollY - 18;
-   window.scrollTo({ top: Math.max(0, r), behavior:'smooth' });
- }, LOAD_LINES.length*170 + 260));
+ loadT.push(setTimeout(finishUnderwrite, at + 240));
+}
+function finishUnderwrite(){
+ $('loading').hidden = true; $('results').hidden = false;
+ render();
+ const r = $('results').getBoundingClientRect().top + window.scrollY - 18;
+ window.scrollTo({ top: Math.max(0, r), behavior:'smooth' });
 }
 /* reduced motion, or a returning sheet: skip the theatre entirely */
 function showResults(){

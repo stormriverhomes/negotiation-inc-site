@@ -147,7 +147,16 @@ h1{font-size:40px}
    which is the wrong way round — the eye lands on the number. Same corner,
    same shape, same ink on all four pages, because the bankroll is the one
    thing that makes three cabinets one place and it was stated three ways. */
-.tally .v.m{font-size:21px;color:var(--brass)}
+/* THE FIRST FIGURE TO COUNT IN PIXELS. Claude Design's type ruling scopes the
+   face to digits and money marks on the HUD, never a word and never on paper —
+   the clipboard is a document and keeps Fraunces, the HUD is a machine and
+   keeps score. A bankroll on a dark ground plate is exactly that case, and it
+   is the only one that exists today; the Daily Street's figures stay in
+   Fraunces until its board stops being paper. 24px is on the grid, because a
+   pixel face at a fractional size shimmers, and shimmer reads as error in a
+   product whose subject is exactness. */
+.tally .v.m{font-family:'Pixelify',var(--sans);font-size:24px;font-weight:600;
+ letter-spacing:.01em;color:var(--brass)}
 .tally .v.up{color:var(--pays)} .tally .v.dn{color:var(--refuses)}
 .statrow .v.up{color:var(--green)} .statrow .v.dn{color:var(--red)}
 /* the ledger: every exit in its own units, never averaged, never "fit points" */

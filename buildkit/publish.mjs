@@ -328,7 +328,30 @@ const FONT_SRC = OFFLINE
    text on one and the 3:1 graphic floor on the other. The failure had moved,
    not gone. Every paper ink below is solved against the DARKEST paper in the
    set (#d9c8a4) at 4.5:1, so it passes at any size on any of the three. */
+const PIXEL_SRC = OFFLINE
+  ? `url('data:font/woff2;base64,${fs.readFileSync('fonts/pixelify.woff2').toString('base64')}')`
+  : `url('fonts/pixelify.woff2')`;
+/* ══ THE CABINET COUNTS IN PIXELS ══════════════════════════════════════════
+   Claude Design's type ruling, and the scope is the whole of it: this face
+   sets DIGITS AND MONEY MARKS AND NEVER A WORD. A sentence in a pixel face is
+   a costume; a figure in one is a score, and these cabinets keep score.
+
+   It survives the no-monospace rule on a technicality that is not a
+   technicality — Press Start 2P and VT323, the two faces anybody reaches for
+   first, are monospace by construction and would have walked straight into
+   the purge. Pixelify Sans is proportional. It passed the rule before it
+   passed taste, which is the correct order.
+
+   SIL OFL, 7.7KB, self-hosted from our own origin like Fraunces, because the
+   privacy page makes a promise about third-party round trips and a font CDN
+   is a third party that learns every visitor's IP. Sizes are locked to whole
+   multiples: a pixel face at a fractional size shimmers, and shimmer reads as
+   error in a product whose subject is exactness. */
 const ARCADE = `<style>
+@font-face{font-family:'Pixelify';src:${PIXEL_SRC} format('woff2');
+ font-weight:400 700;font-style:normal;font-display:swap}
+.pix{font-family:'Pixelify',var(--sans);font-variant-numeric:tabular-nums;
+ letter-spacing:.01em;font-weight:600}
 :root{--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
 .on-dark{--ground:#0d1420;--raise:#141c2b;--edge:#223047;--well:#101825;
  --ink:#e8e2d4;--ink-2:#aeb8c8;--ink-3:#8b98ac;

@@ -59,7 +59,12 @@ ck(R.sitValue.v > 50, `the seller drag did not take: ${JSON.stringify(R.sitValue
 
 // ── the offer levers ────────────────────────────────────────────────────────
 await p.fill('[data-f="rent"]','1850'); await p.press('[data-f="rent"]','Tab'); await p.waitForTimeout(250);
-await p.click('#s-run'); await p.waitForTimeout(1500);
+/* wait for the answer rather than for a guess at how long it takes — the
+   underwriting beat grew when its lines became readable, and a fixed sleep
+   would have gone red for a reason that has nothing to do with dragging. */
+await p.click('#s-run');
+await p.waitForSelector('#results:not([hidden])', { timeout: 20000 });
+await p.waitForTimeout(200);
 await mark('[data-lev="days"]');
 R.levSurvived = await drag('[data-lev="days"]', 0.15);
 R.levValue = await p.evaluate(()=>({ v:+document.querySelector('[data-lev="days"]').value,

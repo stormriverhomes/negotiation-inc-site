@@ -130,7 +130,17 @@ R.Dwalk = await p.evaluate(async ()=>{
   }
   const run = document.getElementById('s-run');
   if (run) run.click();
-  await new Promise(r=>setTimeout(r,1400));
+  /* WAIT FOR THE ANSWER, NOT FOR A NUMBER OF MILLISECONDS. This was a fixed
+     1400ms, which was comfortably longer than the underwriting beat until the
+     beat grew — the loading lines were 170ms each and unreadable, so they got
+     their own durations and jitter and the run now takes about two seconds.
+     A harness that sleeps for a guess is a harness that will go red the next
+     time somebody improves the thing it is timing, and the red will say
+     nothing about what broke. */
+  const t0 = Date.now();
+  while (document.getElementById('results').hidden && Date.now() - t0 < 20000)
+    await new Promise(r=>setTimeout(r,60));
+  await new Promise(r=>setTimeout(r,140));
   return { onAnswer:!document.getElementById('results').hidden,
            priced:[...document.querySelectorAll('.exit')].filter(x=>x.innerText.length>40).length }; });
 ck(R.Dwalk.onAnswer && R.Dwalk.priced >= 5,

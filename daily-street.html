@@ -50,6 +50,9 @@
 
   .bar{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--rule);
     background:var(--stock-2);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--carbon-soft)}
+  /* the HUD is a machine and counts in pixels; the clipboard is a document
+     and keeps Fraunces. Same figure, two voices, and the difference is the
+     difference between a score and a record. */
   .bar .m{font-size:14px;letter-spacing:0;font-variant-numeric:tabular-nums;color:var(--carbon)}
   .bar .t.warn{color:var(--red)}
 
@@ -265,6 +268,30 @@
   .renorow.big{font-size:19px;font-weight:700;border-top:1px solid var(--carbon);margin-top:7px;padding-top:9px}
   .renorow.big .n.up{color:var(--green)} .renorow.big .n.dn{color:var(--red)}
 
+  .rpat{font-family:var(--serif);font-size:13px;letter-spacing:0;text-transform:none;
+    color:var(--carbon-soft);margin-top:5px;min-height:17px}
+  /* ══ THE GAP ═══════════════════════════════════════════════════════════════
+     Claude Design's verdict from the first pass, finally cashed: the drama is
+     not the size of the number, it is the gap between the number you chose and
+     the number the engine had all along. That gap was already computed and was
+     being printed as a clause in a sentence in the middle of a paragraph. It
+     is the largest thing on the screen now, because it is the only thing on
+     the screen the player will remember. */
+  .gap{padding:20px 15px 18px;text-align:center;border-bottom:1px solid var(--rule);
+    background:var(--stock-2)}
+  .gap .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--carbon-faint)}
+  /* SET IN INK, NOT IN RED — Claude Design's ruling, and it corrects the
+     version I shipped an hour earlier. --refuses means the engine declining
+     with a reason. Losing an auction is not a refusal, it is a fact, and a
+     seller holding out for their floor is a fact about a seller rather than
+     the software saying no. Red here would have been the fourth meaning that
+     colour has ever carried, which is how a palette stops meaning anything. */
+  .gap .v{font-family:var(--serif);font-size:44px;line-height:1.02;font-weight:700;
+    font-variant-numeric:tabular-nums;margin-top:5px;color:var(--carbon)}
+  .gap.won .v{color:var(--green)}
+  .gap .n{font-size:14px;color:var(--carbon-soft);margin-top:7px}
+  @media(max-width:420px){ .gap .v{font-size:36px} }
   .rhead{padding:12px 15px;border-bottom:2px solid var(--carbon);background:var(--stock-2);font-family:var(--mono);
     font-size:11px;letter-spacing:.16em;text-transform:uppercase}
   .rrow{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 15px;border-bottom:1px solid var(--rule-soft);align-items:baseline;
@@ -413,6 +440,10 @@
 h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
 </style>
 <style>
+@font-face{font-family:'Pixelify';src:url('fonts/pixelify.woff2') format('woff2');
+ font-weight:400 700;font-style:normal;font-display:swap}
+.pix{font-family:'Pixelify',var(--sans);font-variant-numeric:tabular-nums;
+ letter-spacing:.01em;font-weight:600}
 :root{--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
 .on-dark{--ground:#0d1420;--raise:#141c2b;--edge:#223047;--well:#101825;
  --ink:#e8e2d4;--ink-2:#aeb8c8;--ink-3:#8b98ac;
@@ -1034,6 +1065,22 @@ function closeRound(){
     bid_amount: state.bid?state.bid.amount:null, looks: state.looks, capital: run.capital, financeRate: p.financeRate });
   state.revealed=0; render(); revealStep();
 }
+/* ══ THE PATTER ════════════════════════════════════════════════════════════
+   Elijah asked for Claude's random-verb trick. On the desk it would have been
+   a small lie in the exact place this product stakes its claim, so the desk
+   got true lines about the property instead. HERE it belongs: the arcade is
+   the other world and it is allowed to be funny. Every line is about the
+   RITUAL — the room, the paper, the wait — and none of them claims anything
+   about the board, because a joke that invents a fact is still a fact
+   invented. */
+var PATTER = [
+  'Opening the envelopes.', 'Somebody has used a fountain pen.',
+  'Counting the paper.', 'The room goes quiet.',
+  'One of these is folded twice.', 'A number written and crossed out.',
+  'Reading them in the order they arrived.', 'Nobody is looking at anybody.',
+  'The clerk clears his throat.', 'Two of these are the same handwriting.'
+];
+function patter(n){ return PATTER[n % PATTER.length]; }
 function revealStep(){
   if (state.revealed >= 5){
     // `settled` makes the reveal rows render already-visible. Without it the
@@ -1050,9 +1097,36 @@ function revealStep(){
     render(); return;
   }
   const rows = document.querySelectorAll('.rrow');
-  if (rows[state.revealed]) rows[state.revealed].classList.add('in');
+  const i = state.revealed;
+  if (rows[i]) rows[i].classList.add('in');
+  /* THE CAMERA WALKS THE STREET IT WAS PLAYED ON. The reveal used to be five
+     text rows fading in beside a drawing that sat still through the only
+     dramatic thing that happens in this game. The marker now moves house by
+     house, the sold board goes up as each one resolves, and by the end the
+     street is a record of the round rather than a picture of its start. */
+  const res = state.result.resolutions[i];
+  if (window.__strip){
+    window.__strip.at = i;
+    window.__strip.sold = window.__strip.sold || {};
+    if (res && res.sold_at) window.__strip.sold[i] = (res.winner === 'you') ? 'you' : 'them';
+    try { paintStreetHouses(); } catch(e){}
+  }
+  const say = document.getElementById('rpatter');
+  if (say) say.textContent = patter(i + (board.number || 0));
   state.revealed++;
-  setTimeout(revealStep, 340);
+  /* TIME IS FLAT. My first cut jittered every beat, on the same instinct that
+     made the desk's loading uneven — but Claude Design ruled the opposite here
+     and the reason is better than mine: a reveal whose pacing responds to the
+     stakes is a machine deciding how excited you should be. Cold houses take
+     the same 800ms whether they went for forty thousand or four hundred. The
+     only thing allowed to grow with the stakes is the number itself.
+
+     The one long beat is the house you bid on, and it is a HOLD rather than a
+     flourish: 1200ms in which nothing on the screen moves at all. The hold is
+     the animation. Under reduced motion it survives unchanged, because
+     stillness is what somebody who turned motion off asked for. */
+  const mine = state.bid && state.bid.idx === i;
+  setTimeout(revealStep, mine ? 1200 : 800);
 }
 function buyEstimate(){
   if (state.phase!=='renovate' || state.estimated || state.looksLeft<=0) return;
@@ -1119,7 +1193,7 @@ function render(){
   if (run.screen==='summary'){ el.innerHTML=summaryHTML(); return; }
   if (state.phase==='play'){ el.innerHTML=playHTML(); done(); if (state.mode==='offer') paintDeal(); return; }
   if (state.phase==='renovate'){ el.innerHTML=renovateHTML(); return; }
-  el.innerHTML = resolveHTML();
+  el.innerHTML = resolveHTML(); done();
 }
 
 function heroHTML(){
@@ -1340,7 +1414,7 @@ var SW = 300, SH = 78, LOTW = 60;
    the game would be a colouring book. What the picture buys is the first
    thirty seconds: somebody who cannot read "$9,500 repairs walk-through" can
    see a tarp, and that is the entire on-ramp. */
-function drawStreet(cv, cards, sel, seenMap, bidIdx){
+function drawStreet(cv, cards, sel, seenMap, bidIdx, sold){
   var g = cv.getContext('2d'); if (!g) return;
   g.imageSmoothingEnabled = false;
   var px = function(x,y,w,h,col){ g.fillStyle = col; g.fillRect(x|0,y|0,w|0,h|0); };
@@ -1404,6 +1478,17 @@ function drawStreet(cv, cards, sel, seenMap, bidIdx){
       px(hx, 51, 2, 5, '#4a4438'); px(hx, 48, 2, 3, '#8a7a58');
     }
 
+    /* THE SOLD BOARD GOES UP ON THE LAWN. The reveal walks down the street it
+       was played on, so the house that sold has to say so where the player is
+       already looking. Green when it is yours, ink when somebody else took
+       it — the same two meanings the whole product uses. */
+    if (sold && sold[n]){
+      var sc = sold[n] === 'you' ? '#2a5f3e' : '#4a4438';
+      px(sx+2, 44, 1, 10, '#8a7a58');
+      px(sx-2, 36, 12, 8, '#f8f4e8');
+      px(sx-2, 36, 12, 1, sc); px(sx-2, 43, 12, 1, sc);
+      px(sx, 38, 8, 1, sc); px(sx, 40, 6, 1, sc);
+    }
     var st = seenMap && seenMap[n];
     if (bidIdx === n){ for (var q=0;q<LOTW;q+=2) px(ox+q, 56, 1, 2, '#2a5f3e'); }
     else if (st && (st.walk || st.ask)) px(ox+2, 56, LOTW-4, 1, '#7e7869');
@@ -1418,7 +1503,7 @@ function drawStreet(cv, cards, sel, seenMap, bidIdx){
 function paintStreetHouses(){
   var cv = document.getElementById('streetcv'); if (!cv) return;
   var d = window.__strip; if (!d) return;
-  drawStreet(cv, d.cards, d.at, d.seen, d.bidIdx);
+  drawStreet(cv, d.cards, d.at, d.seen, d.bidIdx, d.sold);
 }
 
 /* ONE DRAWING, TWO CALL SITES. The strip is the street: five footprints on a
@@ -1552,7 +1637,9 @@ const STREAK = ['','','Two in a row.','Three for three. A perfect run.'];
 
 function resolveHTML(){
   const R = state.result;
-  let h = statusBar() + '<div class="rhead">Offers opened — '+esc(board.name)+'</div>';
+  let h = statusBar() + pagerHTML() +
+    '<div class="rhead">Offers opened — '+esc(board.name)+
+    '<div class="rpat" id="rpatter">'+(state.settled?'':patter(board.number||0))+'</div></div>';
   R.resolutions.forEach(function(res,i){
     const c=board.cards[i], mine=state.bid&&state.bid.idx===i, won=res.winner==='you';
     const t = board.truth ? board.truth[i] : null;
@@ -1571,11 +1658,50 @@ function resolveHTML(){
       '<div class="amt">'+(res.sold_at?M(res.sold_at):'—')+'</div></div>';
   });
   if (state.phase!=='settle') return h;
+  h += gapHTML();
   const streak = run.streak>=2 ? '<div class="streak">'+STREAK[Math.min(run.streak,3)]+'</div>' : '';
   return h + settlementHTML() + theReadHTML() + streak + '<div class="said">'+ACHE[R.outcome]+'</div>' +
     '<div style="padding:14px 15px;border-top:1px solid var(--rule)">' +
     '<button class="btn go" style="margin:0" onclick="nextRound()">' +
     (run.round+1>=B.ROUNDS ? 'See how the run went →' : 'Next street →')+'</button></div>';
+}
+
+/* THE ONE NUMBER THE PLAYER WILL REMEMBER. Every figure here is scoreRound's
+   own: `needed` is price_to_win, the number that would have taken the house,
+   and it is the engine's arithmetic rather than a dramatisation of it. A miss
+   by nine hundred dollars is a better teacher than any sentence, and it is
+   free — we already computed it and were burying it. */
+function gapHTML(){
+  const R = state.result;
+  if (R.outcome === 'won'){
+    return '<div class="gap won"><div class="k">You made</div><div class="v">' +
+      MP(R.your_spread) + '</div><div class="n">' +
+      (R.best_index === (state.bid ? state.bid.idx : -1)
+        ? 'and that was the best house on the street'
+        : 'the best on this street was ' + MP(R.best_spread)) + '</div></div>';
+  }
+  if (R.needed != null && state.bid){
+    /* THE HEADLINE HAS TO BE THE DISTANCE TO THE THING THE LABEL NAMES. First
+       version printed price_to_win under both outcomes, so a refusal said
+       "the seller would not take it — $41,000" while the line underneath gave
+       their floor as $23,500 away. Two true numbers making one false
+       impression is the same failure as a rounded estimate wearing a precise
+       figure's clothes. Refused measures to the FLOOR; outbid measures to the
+       number that would have won. */
+    const short = (R.outcome === 'refused' && R.floor != null)
+      ? R.floor - state.bid.amount
+      : R.needed - state.bid.amount;
+    return '<div class="gap"><div class="k">' +
+      (R.outcome === 'refused' ? 'The seller needed another' : 'You were outbid by') +
+      '</div><div class="v">' + M(Math.max(0, short)) + '</div><div class="n">' +
+      (R.outcome === 'refused'
+        ? 'their floor was ' + M(R.floor) + '. You offered ' + M(state.bid.amount) +
+          '. It took ' + M(R.needed) + ' to actually get it.'
+        : M(R.needed) + ' would have taken it. You offered ' + M(state.bid.amount) + '.') +
+      '</div></div>';
+  }
+  return '<div class="gap"><div class="k">You did not bid</div><div class="v">' +
+    MP(R.best_spread) + '</div><div class="n">that is what the best house on this street had in it</div></div>';
 }
 
 /* ── the read: what the street was actually worth ──────────────────────────

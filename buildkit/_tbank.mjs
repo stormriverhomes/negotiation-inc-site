@@ -43,7 +43,10 @@ for (const f of PAGES){
     for (let r=0;r<3;r++){
       await pg.waitForTimeout(120);
       await pg.evaluate(()=>{ if (state && state.phase==='play') closeRound(); });
-      await pg.waitForTimeout(2200);
+      /* the reveal walks the street now — 800ms a house, 1200ms held on the
+         one you bid — so this waits for the phase to leave `resolve` rather
+         than for a number that was tuned to a 340ms fade. */
+      await pg.waitForFunction(() => !state || state.phase !== 'resolve', null, { timeout: 30000 });
       await pg.evaluate(()=>{ if (state && state.phase==='renovate') finishReno(); });
       await pg.waitForTimeout(200);
       /* force the round's profit so the assertion is about the WIRING, not
