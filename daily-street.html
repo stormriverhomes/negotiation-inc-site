@@ -342,6 +342,41 @@
 
   .rpat{font-family:var(--serif);font-size:13px;letter-spacing:0;text-transform:none;
     color:var(--carbon-soft);margin-top:5px;min-height:17px}
+  /* ══ THE DEED ══════════════════════════════════════════════════════════════
+     Comp Run's rarity language, moved across the floor rather than reinvented:
+     five tiers, a gold double-border on the rarest, and a slow sheen that
+     crosses the top one. What is different here is that the tier is EARNED —
+     it is your spread against what the best house on the street actually held,
+     so a foil card means you found nearly all the money that was there. */
+  .deedwrap{padding:18px 15px 20px;display:flex;justify-content:center;
+    border-bottom:1px solid var(--rule);background:var(--stock-2)}
+  .dcard{position:relative;overflow:hidden;width:250px;background:var(--stock);
+    border:1px solid var(--rule);box-shadow:0 8px 20px rgba(0,0,0,.35);
+    animation:dealin .34s cubic-bezier(.3,1.4,.5,1) both}
+  @keyframes dealin{from{transform:translateY(10px) scale(.97);opacity:0}to{transform:none;opacity:1}}
+  .dcard .dc{display:block;width:100%;height:auto;image-rendering:pixelated;
+    border-bottom:1px solid var(--rule)}
+  .dbody{padding:11px 13px 13px}
+  .dnm{font-size:17px;font-weight:700;line-height:1.15}
+  .dmeta{display:flex;justify-content:space-between;align-items:baseline;margin-top:4px;
+    font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--carbon-faint);font-weight:600}
+  .dsp{font-family:'Pixelify',var(--sans);font-size:26px;margin-top:8px;color:var(--green);
+    font-variant-numeric:tabular-nums}
+  .dpc{font-size:12.5px;color:var(--carbon-soft);margin-top:2px}
+  .dcard.c3{border-color:#5f7048} .dcard.c3 .dr{color:#5f7048}
+  .dcard.c4{border-color:#7d3fa8;background:linear-gradient(180deg,#f3ecf8,var(--stock))}
+  .dcard.c4 .dr{color:#7d3fa8}
+  .dcard.c5{border-color:var(--gold,#9d5b0c);border-width:2px;
+    background:linear-gradient(180deg,#fbf1d8,var(--stock))}
+  .dcard.c5 .dr{color:var(--gold,#9d5b0c);font-weight:700}
+  .dcard.foil::after{content:'';position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 46%,rgba(212,164,74,.4) 52%,transparent 68%);
+    background-size:260% 100%;animation:sheen 3.6s ease-in-out infinite}
+  @keyframes sheen{0%{background-position:130% 0}60%,100%{background-position:-40% 0}}
+  @media(prefers-reduced-motion:reduce){
+    .dcard{animation:none} .dcard.foil::after{animation:none;opacity:.35} }
+
   /* ══ THE GAP ═══════════════════════════════════════════════════════════════
      Claude Design's verdict from the first pass, finally cashed: the drama is
      not the size of the number, it is the gap between the number you chose and
@@ -522,12 +557,17 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    and $58,300 reads as $98,300. In a game whose entire subject is money
    figures that is not a taste problem, it is a defect.
 
-   Jersey 10 is clean at both sizes, all ten digits distinct, proportional so
-   it survives the no-monospace rule, SIL OFL, 13KB, self-hosted like Fraunces.
+   Jersey 10 was clean where Pixelify was not, and Elijah then said its 2 and 5
+   looked squeezed — which was right. Jersey 10 is the condensed cut: the 2's
+   diagonal is nearly vertical and the 5's bowl is small, so both survive but
+   neither is comfortable. Same family, heavier cut, problem gone: JERSEY 25
+   opens every counter, the 2 gets a real diagonal, and it is the most arcade
+   of the three without becoming a novelty. Proportional, so it survives the
+   no-monospace rule, SIL OFL, 21KB, self-hosted like Fraunces.
    Declared at 400 and asked for at 400 — no synthetic weight anywhere, because
    thickening a pixel face closes its counters and closed counters are how this
    started. */
-@font-face{font-family:'Pixelify';src:url('fonts/jersey10.woff2') format('woff2');
+@font-face{font-family:'Pixelify';src:url('fonts/jersey25.woff2') format('woff2');
  font-weight:400;font-style:normal;font-display:swap}
 .pix{font-family:'Pixelify',var(--sans);font-variant-numeric:tabular-nums;
  letter-spacing:.02em;font-weight:400}
@@ -1281,7 +1321,7 @@ function render(){
   if (run.screen==='summary'){ el.innerHTML=clip(summaryHTML()); return; }
   if (state.phase==='play'){ el.innerHTML=playHTML(); done(); if (state.mode==='offer') paintDeal(); return; }
   if (state.phase==='renovate'){ el.innerHTML=statusBar()+pagerHTML()+clip(renovateHTML()); done(); return; }
-  el.innerHTML = resolveHTML(); done();
+  el.innerHTML = resolveHTML(); done(); try { paintDeeds(); } catch(e){}
 }
 
 function heroHTML(){
@@ -1841,6 +1881,14 @@ function resolveHTML(){
   });
   if (state.phase!=='settle') return top + clip(h);
   h += gapHTML();
+  /* the deed is minted once, at the moment the street settles */
+  let deed = '';
+  if (state.result.outcome === 'won' && state.bid){
+    const d = deedFromWin();
+    window.__lastDeed = d; saveDeed(d);
+    deed = deedHTML(d);
+  }
+  h += deed;
   const streak = run.streak>=2 ? '<div class="streak">'+STREAK[Math.min(run.streak,3)]+'</div>' : '';
   return top + clip(h + settlementHTML() + theReadHTML() + streak +
     '<div class="said">'+ACHE[R.outcome]+'</div>' +
@@ -1930,6 +1978,106 @@ function theReadHTML(){
     '<div class="note">There was '+M(best)+' of room in '+where+' at the price it would have taken to win it'+
       (R.outcome === 'won' ? ', and '+M(mine)+' in the one you bought.' : '.') + ' ' + note + '</div>' +
     '</div></div>';
+}
+
+/* ══ THE DEED ══════════════════════════════════════════════════════════════
+   THIS CABINET GENERATED FIFTEEN HOUSES A DAY, FOREVER, AND KEPT NOTHING. You
+   won one, the run ended, and it was gone — which is a strange thing to do to
+   a game whose premise is come back tomorrow.
+
+   Comp Run already solved this and nobody moved the solution across the floor:
+   it has five rarity tiers, gold double-borders on the rarest and an animated
+   foil sheen on the top two. So the house you actually buy becomes a deed you
+   keep — its street, its date, the sky it sold under, the spread you took out
+   of it — drawn in the same pixels the street is drawn in.
+
+   AND THE RARITY IS EARNED RATHER THAN ROLLED, which is the part that matters
+   and the part a normal collectible game cannot do. scoreRound already returns
+   `pct`: your spread against what the BEST house on that street actually held.
+   The card is not luck. It is a record of how much of the day's available
+   money you were good enough to find, and the foil ones say you found nearly
+   all of it. Nothing here is generated to flatter — a bad read makes a common
+   card and the card says so. */
+var DEED_KEY = 'ni.deeds.v1';
+var TIERS = [
+  { k:'c2', n:'Common',   at:0  },
+  { k:'c3', n:'Uncommon', at:40 },
+  { k:'c4', n:'Rare',     at:65 },
+  { k:'c5', n:'Foil',     at:85 }
+];
+function tierOfPct(p){ var t = TIERS[0];
+  for (var i=0;i<TIERS.length;i++) if (p >= TIERS[i].at) t = TIERS[i];
+  return t; }
+function loadDeeds(){
+  try { var d = JSON.parse(localStorage.getItem(DEED_KEY) || 'null');
+    return (d && d.v === 1 && Array.isArray(d.list)) ? d : { v:1, list:[] }; }
+  catch(e){ return { v:1, list:[] }; }
+}
+function saveDeed(d){
+  try { var all = loadDeeds();
+    /* one deed per street per day — a replay does not mint a second copy, for
+       the same reason a replay does not bank money twice */
+    var key = d.iso + ':' + d.round;
+    if (all.list.some(function(x){ return x.iso + ':' + x.round === key; })) return;
+    all.list.push(d);
+    if (all.list.length > 200) all.list = all.list.slice(-200);
+    localStorage.setItem(DEED_KEY, JSON.stringify(all));
+  } catch(e){}
+}
+/* the card face: the house you bought, under the sky it sold under */
+function drawDeed(cv, d){
+  var g = cv.getContext('2d'); if (!g) return;
+  g.imageSmoothingEnabled = false;
+  var W = 108, H = 74, S = SKIES[d.sky] || SKIES.day;
+  var px = function(a,b,c,e,f){ g.fillStyle = f; g.fillRect(a|0,b|0,c|0,e|0); };
+  _ss = (d.seed || 7) >>> 0;
+  var hy = 40;
+  px(0,0,W,20,S.bands[0]); px(0,20,W,10,S.bands[1]); px(0,30,W,hy-30,S.bands[2]);
+  if (S.far) for (var fx=0; fx<W; fx+=6) px(fx, hy-Math.round(2+_r()*5), 6, 6, S.far);
+  px(0,hy,W,14,S.grass); px(0,hy+14,W,5,S.side); px(0,hy+19,W,H-hy-19,S.road);
+  px(0,hy+14,W,1,'#0d1420');
+  var hp = { w:Math.round(38+18*(d.size||0.5)), h:Math.round(20+8*(d.size||0.5)),
+             roof:d.roof||'gable', storeys:d.storeys||1, cond:d.cond||null };
+  /* no SOLD board on the card: the board is how the STREET says a house went,
+     and a card in your hand has already said it. At card scale it also draws
+     half the width of the house, which is the giveaway that it does not
+     belong here. */
+  drawHouseP(g, S, Math.round((W-hp.w)/2), hy+9, hp, false);
+}
+function deedFromWin(){
+  var R = state.result, i = state.bid.idx, c = board.cards[i];
+  var sq = board.cards.map(function(x){ return x.sqft; });
+  var lo = Math.min.apply(null,sq), hi = Math.max.apply(null,sq);
+  var sd = 0, ad = c.address || '';
+  for (var j=0;j<ad.length;j++) sd = (sd*31 + ad.charCodeAt(j)) >>> 0;
+  var ROOFS = ['gable','hip','porch','gable'];
+  var t = hi === lo ? 0.5 : (c.sqft - lo)/(hi - lo);
+  return { iso: run.iso, round: run.round, n: board.number || 0,
+           addr: c.address, sqft: c.sqft, sky: currentSky(),
+           spread: R.your_spread, pct: R.pct, tier: tierOfPct(R.pct).k,
+           size: t, roof: ROOFS[sd % ROOFS.length], storeys: t > 0.72 ? 2 : 1,
+           cond: c.condition === 'Rough' ? 'rough' : null, seed: sd };
+}
+function deedHTML(d){
+  var T = TIERS.filter(function(x){ return x.k === d.tier; })[0] || TIERS[0];
+  return '<div class="deedwrap"><div class="dcard ' + d.tier +
+    (d.tier === 'c5' ? ' foil' : '') + '">' +
+    '<canvas class="dc" width="108" height="74" data-deed="' + d.iso + ':' + d.round + '"></canvas>' +
+    '<div class="dbody"><div class="dnm">' + esc(d.addr) + '</div>' +
+    '<div class="dmeta"><span>Street Nº ' + d.n + '</span><span class="dr">' + T.n + '</span></div>' +
+    '<div class="dsp">' + MP(d.spread) + '</div>' +
+    '<div class="dpc">' + d.pct + '% of what the street had in it</div></div></div></div>';
+}
+function paintDeeds(){
+  var list = document.querySelectorAll('canvas.dc');
+  var all = loadDeeds().list;
+  for (var i=0;i<list.length;i++){
+    var key = list[i].getAttribute('data-deed');
+    var d = all.filter(function(x){ return x.iso + ':' + x.round === key; })[0];
+    if (!d && window.__lastDeed && (window.__lastDeed.iso + ':' + window.__lastDeed.round) === key)
+      d = window.__lastDeed;
+    if (d) drawDeed(list[i], d);
+  }
 }
 
 function settlementHTML(){

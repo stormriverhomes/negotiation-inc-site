@@ -329,8 +329,8 @@ const FONT_SRC = OFFLINE
    not gone. Every paper ink below is solved against the DARKEST paper in the
    set (#d9c8a4) at 4.5:1, so it passes at any size on any of the three. */
 const PIXEL_SRC = OFFLINE
-  ? `url('data:font/woff2;base64,${fs.readFileSync('fonts/jersey10.woff2').toString('base64')}')`
-  : `url('fonts/jersey10.woff2')`;
+  ? `url('data:font/woff2;base64,${fs.readFileSync('fonts/jersey25.woff2').toString('base64')}')`
+  : `url('fonts/jersey25.woff2')`;
 /* ══ THE CABINET COUNTS IN PIXELS ══════════════════════════════════════════
    Claude Design's type ruling, and the scope is the whole of it: this face
    sets DIGITS AND MONEY MARKS AND NEVER A WORD. A sentence in a pixel face is
@@ -358,8 +358,13 @@ const ARCADE = `<style>
    and $58,300 reads as $98,300. In a game whose entire subject is money
    figures that is not a taste problem, it is a defect.
 
-   Jersey 10 is clean at both sizes, all ten digits distinct, proportional so
-   it survives the no-monospace rule, SIL OFL, 13KB, self-hosted like Fraunces.
+   Jersey 10 was clean where Pixelify was not, and Elijah then said its 2 and 5
+   looked squeezed — which was right. Jersey 10 is the condensed cut: the 2's
+   diagonal is nearly vertical and the 5's bowl is small, so both survive but
+   neither is comfortable. Same family, heavier cut, problem gone: JERSEY 25
+   opens every counter, the 2 gets a real diagonal, and it is the most arcade
+   of the three without becoming a novelty. Proportional, so it survives the
+   no-monospace rule, SIL OFL, 21KB, self-hosted like Fraunces.
    Declared at 400 and asked for at 400 — no synthetic weight anywhere, because
    thickening a pixel face closes its counters and closed counters are how this
    started. */
