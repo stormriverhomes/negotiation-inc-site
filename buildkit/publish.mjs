@@ -329,8 +329,8 @@ const FONT_SRC = OFFLINE
    not gone. Every paper ink below is solved against the DARKEST paper in the
    set (#d9c8a4) at 4.5:1, so it passes at any size on any of the three. */
 const PIXEL_SRC = OFFLINE
-  ? `url('data:font/woff2;base64,${fs.readFileSync('fonts/pixelify.woff2').toString('base64')}')`
-  : `url('fonts/pixelify.woff2')`;
+  ? `url('data:font/woff2;base64,${fs.readFileSync('fonts/jersey10.woff2').toString('base64')}')`
+  : `url('fonts/jersey10.woff2')`;
 /* ══ THE CABINET COUNTS IN PIXELS ══════════════════════════════════════════
    Claude Design's type ruling, and the scope is the whole of it: this face
    sets DIGITS AND MONEY MARKS AND NEVER A WORD. A sentence in a pixel face is
@@ -348,10 +348,25 @@ const PIXEL_SRC = OFFLINE
    multiples: a pixel face at a fractional size shimmers, and shimmer reads as
    error in a product whose subject is exactness. */
 const ARCADE = `<style>
+/* AND THE FACE IS JERSEY 10, NOT PIXELIFY, BECAUSE PIXELIFY CANNOT WRITE A 5.
+   Claude Design named Pixelify first and Jersey 10 as the licensed alternate.
+   Vendored Pixelify, shipped it, and the HUD printed $150,000 as $180,000. I
+   assumed synthetic bolding — the face was declared 400-700 and only the 400
+   file was shipped — fixed that, and it still read $180,000. So I rendered
+   both faces' digits at 24 and 36 side by side, which is the test that should
+   have come first: Pixelify's 5 is indistinguishable from its 8 at EVERY size,
+   and $58,300 reads as $98,300. In a game whose entire subject is money
+   figures that is not a taste problem, it is a defect.
+
+   Jersey 10 is clean at both sizes, all ten digits distinct, proportional so
+   it survives the no-monospace rule, SIL OFL, 13KB, self-hosted like Fraunces.
+   Declared at 400 and asked for at 400 — no synthetic weight anywhere, because
+   thickening a pixel face closes its counters and closed counters are how this
+   started. */
 @font-face{font-family:'Pixelify';src:${PIXEL_SRC} format('woff2');
- font-weight:400 700;font-style:normal;font-display:swap}
+ font-weight:400;font-style:normal;font-display:swap}
 .pix{font-family:'Pixelify',var(--sans);font-variant-numeric:tabular-nums;
- letter-spacing:.01em;font-weight:600}
+ letter-spacing:.02em;font-weight:400}
 :root{--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
 .on-dark{--ground:#0d1420;--raise:#141c2b;--edge:#223047;--well:#101825;
  --ink:#e8e2d4;--ink-2:#aeb8c8;--ink-3:#8b98ac;

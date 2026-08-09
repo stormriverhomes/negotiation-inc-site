@@ -155,7 +155,7 @@ h1{font-size:40px}
    Fraunces until its board stops being paper. 24px is on the grid, because a
    pixel face at a fractional size shimmers, and shimmer reads as error in a
    product whose subject is exactness. */
-.tally .v.m{font-family:'Pixelify',var(--sans);font-size:24px;font-weight:600;
+.tally .v.m{font-family:'Pixelify',var(--sans);font-size:24px;font-weight:400;
  letter-spacing:.01em;color:var(--brass)}
 .tally .v.up{color:var(--pays)} .tally .v.dn{color:var(--refuses)}
 .statrow .v.up{color:var(--green)} .statrow .v.dn{color:var(--red)}
@@ -254,10 +254,25 @@ h1{font-size:40px}
 h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
 </style>
 <style>
-@font-face{font-family:'Pixelify';src:url('fonts/pixelify.woff2') format('woff2');
- font-weight:400 700;font-style:normal;font-display:swap}
+/* AND THE FACE IS JERSEY 10, NOT PIXELIFY, BECAUSE PIXELIFY CANNOT WRITE A 5.
+   Claude Design named Pixelify first and Jersey 10 as the licensed alternate.
+   Vendored Pixelify, shipped it, and the HUD printed $150,000 as $180,000. I
+   assumed synthetic bolding — the face was declared 400-700 and only the 400
+   file was shipped — fixed that, and it still read $180,000. So I rendered
+   both faces' digits at 24 and 36 side by side, which is the test that should
+   have come first: Pixelify's 5 is indistinguishable from its 8 at EVERY size,
+   and $58,300 reads as $98,300. In a game whose entire subject is money
+   figures that is not a taste problem, it is a defect.
+
+   Jersey 10 is clean at both sizes, all ten digits distinct, proportional so
+   it survives the no-monospace rule, SIL OFL, 13KB, self-hosted like Fraunces.
+   Declared at 400 and asked for at 400 — no synthetic weight anywhere, because
+   thickening a pixel face closes its counters and closed counters are how this
+   started. */
+@font-face{font-family:'Pixelify';src:url('fonts/jersey10.woff2') format('woff2');
+ font-weight:400;font-style:normal;font-display:swap}
 .pix{font-family:'Pixelify',var(--sans);font-variant-numeric:tabular-nums;
- letter-spacing:.01em;font-weight:600}
+ letter-spacing:.02em;font-weight:400}
 :root{--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
 .on-dark{--ground:#0d1420;--raise:#141c2b;--edge:#223047;--well:#101825;
  --ink:#e8e2d4;--ink-2:#aeb8c8;--ink-3:#8b98ac;

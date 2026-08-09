@@ -1,5 +1,5 @@
 Fraunces — SIL Open Font License 1.1 — https://github.com/undercasetype/Fraunces
 JetBrains Mono — SIL Open Font License 1.1 — https://github.com/JetBrains/JetBrainsMono
-Pixelify Sans — SIL Open Font License 1.1 — https://github.com/eifetx/Pixelify-Sans
+Jersey 10 — SIL Open Font License 1.1 — https://github.com/scfried/soft-type-jersey
 Self-hosted on purpose: same-origin means no third-party round trip before
 first paint and no visitor IP handed to a font CDN.
