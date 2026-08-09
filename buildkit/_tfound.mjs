@@ -1,28 +1,29 @@
-/* ── THE OFFER THAT COUNTS AND CLOSES ITSELF ───────────────────────────────
-   Elijah: "I need the founding deal thing to be completely wired up because
-   I'm not comfortable keeping track of all of that and I feel it should be
-   automatic."
+/* ── THE FOUNDING OFFER IS RETIRED, AND RETIREMENT IS A TESTABLE STATE ─────
+   Elijah: "just get rid of the gold founding user thing since it's priced at
+   $129 anyways we might as well keep it like a normal pricing page."
 
-   He is right, and the reason is not convenience. A scarce offer somebody has
-   to track by hand is an offer that stays open too long — giving the discount
-   away past the point it bought anything — or closes early because nobody was
-   sure. The second is worse: it turns a written promise into a thing that
-   moved, on the page where trust is being asked for.
+   This harness used to prove the offer counted itself, closed itself, and
+   refused to sell what it could not count — four properties across two
+   hundred lines and a fake Stripe. All of that machinery is still in
+   billing.js and still correct; what changed is that nothing may reach it.
 
-   So the count is asked of STRIPE: how many live subscriptions exist on the
-   founding price. That is the only definition that cannot drift from what
-   people were actually charged, and it is right the first time after a
-   cancellation, a refund, or a subscription made by hand in the dashboard.
+   THE RIGHT TEST FOR A REMOVED FEATURE IS NOT NO TEST. A deleted harness is
+   indistinguishable from a harness that was never written, and the failure it
+   was guarding against did not go away — it inverted. Before, the danger was
+   a page that promised $79 while checkout charged $129. Now the danger is the
+   same sentence with the roles swapped: a page that says $129 while checkout
+   quietly issues $79, because somebody pasted STRIPE_PRICE_FOUNDING into
+   Render while wiring the live keys and nothing on the page would show it.
 
-   Four properties, and the last two are the ones that matter:
-     · the page says how many are left, and says it plainly when there are none
-     · checkout hands out the founding price only while places remain
-     · IT FAILS CLOSED. Stripe unreachable means no founding price is issued —
-       an unbounded discount is the same class of mistake as an unbounded key.
-     · IT FAILS OPEN ON THE PAGE. A page that cannot reach the count leaves the
-       copy exactly as written rather than flashing "sold out" at somebody on a
-       bad connection. Refusing to SELL and refusing to SAY are opposite
-       defaults on purpose. */
+   So this asserts the retirement, and it is a SHORTER test than the offer was,
+   which is the honest shape of the change:
+
+     · no shipped page names a founding place, a founding price, or $79
+     · /api/founding reports the offer off
+     · a checkout for underwriter is issued at the standard price EVEN WHEN
+       STRIPE_PRICE_FOUNDING is set — the flag is code, not configuration, and
+       this is the assertion that proves it
+     · the plans card still sells Underwriter at $129 with the trial */
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import http from 'node:http';
@@ -32,11 +33,33 @@ import path from 'node:path';
 let n = 0, bad = 0;
 const ok = (t, p, x) => { n++; if (!p){ bad++; console.log('✗ ' + t + (x !== undefined ? '  ← ' + JSON.stringify(x).slice(0,240) : '')); } else console.log('✓ ' + t); };
 
-/* ── a Stripe that can be told how many places are gone ────────────────────*/
-let TAKEN = 0, DOWN = false, made = [];
+/* ── the built pages say nothing about it ──────────────────────────────────*/
+{
+  const dir = 'dist';
+  const pages = fs.readdirSync(dir).filter(f => f.endsWith('.html'));
+  ok('there are pages to check', pages.length > 4, pages.length);
+  /* the prose, not the bytes — a comment explaining WHY the offer went is not
+     the offer, and the plans page carries a long one on purpose */
+  const decomment = s => s.replace(/<!--[\s\S]*?-->/g, ' ').replace(/\/\*[\s\S]*?\*\//g, ' ');
+  for (const f of pages){
+    const body = decomment(fs.readFileSync(path.join(dir, f), 'utf8'));
+    ok(`${f} does not name a founding place`, !/founding (price|place|twenty-five)/i.test(body),
+       (body.match(/.{40}founding (price|place|twenty-five).{40}/i) || [])[0]);
+    ok(`${f} does not quote $79 a month`, !/\$79 a month/.test(body),
+       (body.match(/.{50}\$79 a month.{30}/) || [])[0]);
+  }
+  const plans = fs.readFileSync(path.join(dir, 'plans.html'), 'utf8');
+  ok('the offer card survived as a plain Underwriter card', /class="offercard"/.test(plans));
+  ok('and it is not gold any more', !/offercard\{[^}]*var\(--gold\)/.test(plans));
+  ok('and it still names the price and the trial',
+     /\$129 a month/.test(plans) && /14 days free/i.test(plans));
+  ok('the seat-counting script is gone', !/api\/founding/.test(plans));
+}
+
+/* ── the server refuses to issue it even when the variable IS set ──────────*/
+let TAKEN = 0, made = [];
 const FOUND_PRICE = 'price_founding_25';
 const stripeStub = http.createServer(async (q, r) => {
-  if (DOWN){ r.writeHead(500); return r.end('{}'); }
   const body = await new Promise(res => { let b = ''; q.on('data', c => b += c); q.on('end', () => res(b)); });
   r.writeHead(200, { 'content-type':'application/json' });
   if (q.url.startsWith('/v1/customers/search')) return r.end(JSON.stringify({ data:[{ id:'cus_1' }] }));
@@ -46,8 +69,6 @@ const stripeStub = http.createServer(async (q, r) => {
     return r.end(JSON.stringify({ id:'cs_1', url:'https://checkout.stripe.test/x' }));
   }
   if (q.url.startsWith('/v1/subscriptions')){
-    /* the founding count asks by price; the already-subscribed check asks by
-       customer. Answering both from one handler keeps the stub honest. */
     if (q.url.includes('price=' + FOUND_PRICE))
       return r.end(JSON.stringify({ has_more:false,
         data: Array.from({ length: TAKEN }, (_, i) => ({ id:'sub_' + i, status:'active' })) }));
@@ -58,183 +79,109 @@ const stripeStub = http.createServer(async (q, r) => {
 const spPort = await new Promise(r => stripeStub.listen(0, '127.0.0.1', () => r(stripeStub.address().port)));
 
 const sb = http.createServer((q, r) => {
-  r.writeHead(200, {'content-type':'application/json'});
-  if (q.url.startsWith('/auth/v1/user')) return r.end(JSON.stringify({ id:'u-1', email:'e@x.com' }));
-  if (q.url.includes('/rest/v1/profiles')) return r.end(JSON.stringify([{ plan:null, trial:null }]));
+  r.writeHead(200, { 'content-type':'application/json' });
+  if (q.url.includes('/auth/v1/user')) return r.end(JSON.stringify({ id:'u1', email:'a@b.c' }));
+  if (q.url.includes('profiles')) return r.end(JSON.stringify([{ uid:'u1', plan:null, trial_ends:null }]));
   r.end('[]');
 });
 const sbPort = await new Promise(r => sb.listen(0, '127.0.0.1', () => r(sb.address().port)));
 
-const PORT = 3966 + (process.pid % 12);
-const srv = spawn('node', ['server.js'], { cwd:'/home/claude/srv', stdio:'ignore', env:{ ...process.env,
-  PORT:String(PORT), NI_MOCK:'1',
-  SUPABASE_URL:`http://127.0.0.1:${sbPort}`, SUPABASE_SERVICE_KEY:'k', SUPABASE_ANON_KEY:'a',
-  STRIPE_SECRET:'sk_test_stub', STRIPE_API_BASE:`http://127.0.0.1:${spPort}`,
-  STRIPE_PRICE_SOLO:'price_solo', STRIPE_PRICE_UNDERWRITER:'price_uw', STRIPE_PRICE_OFFICE:'price_off',
-  STRIPE_PRICE_FOUNDING: FOUND_PRICE, NI_FOUNDING_SEATS:'25',
-  /* the real cache is ninety seconds, which is right for a page that loads on
-     every visit and wrong for a test that moves the count every line */
-  NI_FOUNDING_TTL_MS:'0' }});
-const B = `http://127.0.0.1:${PORT}`;
-for (let i=0;i<60;i++){ try{ const r=await fetch(B+'/api/health'); if(r.ok) break; }catch(e){} await new Promise(r=>setTimeout(r,250)); }
-
-const state = () => fetch(B + '/api/founding').then(r => r.json());
-const buy = (plan) => fetch(B + '/api/checkout', { method:'POST',
-  headers:{ 'content-type':'application/json', authorization:'Bearer tok' },
-  body: JSON.stringify({ plan }) }).then(async r => ({ status:r.status, j: await r.json().catch(()=>null) }));
-const lastPrice = () => { const p = made[made.length-1]; return p ? p.get('line_items[0][price]') : null; };
-const lastMeta  = () => { const p = made[made.length-1];
-  return p ? { plan:p.get('subscription_data[metadata][plan]'),
-               founding:p.get('subscription_data[metadata][founding]') } : null; };
-
-/* ── 1 · the count, and what the page is told ──────────────────────────────*/
-{
-  TAKEN = 0;  let d = await state();
-  ok('with none taken, all twenty-five are open', d.open === true && d.left === 25, d);
-  TAKEN = 22; d = await state();
-  ok('with twenty-two taken, three are left', d.left === 3 && d.open === true, d);
-  TAKEN = 25; d = await state();
-  ok('at twenty-five it is closed', d.open === false && d.left === 0, d);
-  TAKEN = 40; d = await state();
-  ok('and it never reports a negative number of places', d.left === 0, d);
-  ok('the count names nobody', !JSON.stringify(d).match(/cus_|sub_|@/), d);
+const PORT = 8931;
+const srv = spawn(process.execPath, ['srv/server.js'], {
+  env: { ...process.env, PORT: String(PORT), NI_MOCK:'1',
+         /* THE VARIABLE IS SET ON PURPOSE. That is the whole point: the offer
+            must stay off because the code says so, not because nobody filled
+            the field in. */
+         STRIPE_PRICE_FOUNDING: FOUND_PRICE,
+         /* the rail has to be ON or the checkout route refuses before it ever
+            reaches the price map, and the assertion below would pass for the
+            wrong reason — a 503 issues no founding price either */
+         STRIPE_PRICE_SOLO: 'price_solo', STRIPE_PRICE_UNDERWRITER: 'price_uw',
+         STRIPE_PRICE_OFFICE: 'price_office', STRIPE_WEBHOOK_SECRET: 'whsec_x',
+         STRIPE_SECRET: 'sk_test_x', STRIPE_API_BASE: `http://127.0.0.1:${spPort}`,
+         NI_SUPABASE_URL: `http://127.0.0.1:${sbPort}`, NI_SUPABASE_ANON: 'anon',
+         /* billing reads the SERVICE pair, not the browser pair — PAY_ON is
+            (secret && url && service key), and without these the route 503s
+            before the price map is ever consulted */
+         SUPABASE_URL: `http://127.0.0.1:${sbPort}`, SUPABASE_SERVICE_KEY: 'svc',
+         /* whoIs() fails closed without the anon key, on purpose — see the
+            note in billing.js. Without it every checkout is a 401 and this
+            harness would prove nothing about prices. */
+         SUPABASE_ANON_KEY: 'anon',
+         NI_ALLOW_LOCAL_SB: '1' },
+  stdio: ['ignore', 'pipe', 'pipe'],
+});
+let boot = '';
+srv.stdout.on('data', d => boot += d); srv.stderr.on('data', d => boot += d);
+const base = `http://127.0.0.1:${PORT}`;
+for (let i = 0; i < 60; i++){
+  try { const r = await fetch(base + '/api/health'); if (r.ok) break; } catch(e){}
+  await new Promise(r => setTimeout(r, 250));
 }
 
-/* ── 2 · checkout hands out the founding price only while it is open ───────*/
 {
-  TAKEN = 3; made = [];
-  const r = await buy('underwriter');
-  ok('a buyer inside the twenty-five reaches checkout', r.status === 200, r);
-  ok('and gets the founding price', lastPrice() === FOUND_PRICE, lastPrice());
-  ok('and the subscription still says which PLAN it is',
-     lastMeta() && lastMeta().plan === 'underwriter', lastMeta());
-  ok('and is stamped as a founding place', lastMeta() && lastMeta().founding === '1', lastMeta());
-
-  TAKEN = 25; made = [];
-  const r2 = await buy('underwriter');
-  ok('a buyer arriving after it closed still reaches checkout', r2.status === 200, r2);
-  ok('but pays the normal price', lastPrice() === 'price_uw', lastPrice());
-  ok('and is not stamped as a founder', !(lastMeta() || {}).founding, lastMeta());
-
-  /* the offer is Underwriter's; it must not leak onto the other two tiers */
-  TAKEN = 0; made = [];
-  await buy('solo');
-  ok('the founding price never attaches to Solo', lastPrice() === 'price_solo', lastPrice());
-  made = []; await buy('the office');
-  ok('nor to The Office', lastPrice() === 'price_off', lastPrice());
+  const r = await fetch(base + '/api/founding');
+  const j = await r.json().catch(() => ({}));
+  ok('/api/founding reports the offer off', j && j.on === false, j);
+  ok('and does not leak a seat count', j && j.left === undefined && j.taken === undefined, j);
+  ok('the boot log says the variable is being ignored',
+     /founding offer is retired/i.test(boot), boot.slice(-200));
 }
 
-/* ── 3 · it fails CLOSED at the till ───────────────────────────────────────
-   Stripe unreachable must not hand out an unbounded number of founding
-   places. The same rule as every key in this service. */
 {
-  TAKEN = 0; DOWN = true; made = [];
-  const d = await state();
-  ok('an uncountable offer reports itself as unknown', d.known === false, d);
-  DOWN = false;
-  /* and a checkout during an outage: the count is refused, so no founding
-     price is issued. Nothing about the purchase itself breaks. */
-  TAKEN = 0;
-  const before = made.length;
-  DOWN = true;
-  const r = await buy('underwriter').catch(() => ({ status:0 }));
-  DOWN = false;
-  ok('no founding price is issued while the count cannot be taken',
-     made.length === before || lastPrice() !== FOUND_PRICE, { made: made.length - before, price: lastPrice() });
+  /* the one that matters: a real checkout, with the founding price available
+     to the server, must still be created at the standard price */
+  made = [];
+  const r = await fetch(base + '/api/checkout', {
+    method:'POST', headers:{ 'content-type':'application/json', authorization:'Bearer tok' },
+    body: JSON.stringify({ plan:'underwriter' }),
+  });
+  const j = await r.json().catch(() => ({}));
+  ok('a checkout is still created', r.ok || j.url || j.ok, { status:r.status, j });
+  const prices = made.flatMap(p => [...p.entries()].filter(([k]) => /price/.test(k)).map(([,v]) => v));
+  ok('and it is NOT on the founding price', !prices.includes(FOUND_PRICE), prices);
+  const meta = made.flatMap(p => [...p.entries()].filter(([k]) => /founding/.test(k)));
+  ok('and nothing is stamped as a founding place', meta.length === 0, meta);
 }
-srv.kill();
 
-/* ── 4 · the page, served over http so the fetch is real ───────────────────*/
+/* ── and the page a customer actually reads ────────────────────────────────*/
 {
   const site = http.createServer((q, r) => {
-    if (q.url.startsWith('/api/founding')){
-      r.writeHead(200, {'content-type':'application/json'});
-      return r.end(JSON.stringify(SAY));
-    }
-    const f = path.join('/home/claude/dist', q.url === '/' ? 'index.html' : q.url.split('?')[0]);
-    if (!fs.existsSync(f) || fs.statSync(f).isDirectory()){ r.writeHead(404); return r.end('no'); }
-    r.writeHead(200, {'content-type': f.endsWith('.html') ? 'text/html' : 'application/octet-stream'});
-    fs.createReadStream(f).pipe(r);
+    const f = path.join('dist', (q.url.split('?')[0] || '/').replace(/^\//, '') || 'index.html');
+    try { r.writeHead(200, { 'content-type':'text/html' }); r.end(fs.readFileSync(f)); }
+    catch(e){ r.writeHead(404); r.end('no'); }
   });
-  let SAY = {};
-  const sPort = await new Promise(r => site.listen(0, '127.0.0.1', () => r(site.address().port)));
-  const b = await chromium.launch();
-  const read = async (say) => {
-    SAY = say;
-    const pg = await b.newPage({ viewport:{ width:1280, height:1000 } });
-    const errs = []; pg.on('pageerror', e => errs.push(String(e).slice(0,150)));
-    await pg.goto(`http://127.0.0.1:${sPort}/plans.html`); await pg.waitForTimeout(900);
-    const out = await pg.evaluate(() => ({
-      k: (document.getElementById('fnd-k')||{}).textContent || '',
-      h: (document.getElementById('fnd-h')||{}).textContent || '',
-      p: (() => { const el = document.querySelector('.founding p'); return el ? el.innerText : ''; })(),
-      closed: !!document.querySelector('.founding.closed'),
-      cta: (document.getElementById('fnd-cta')||{}).textContent || '' }));
-    out.errs = errs; await pg.close(); return out;
-  };
-
-  const plenty = await read({ ok:true, on:true, known:true, seats:25, taken:5, left:20, open:true });
-  ok('with twenty left it does not create false urgency',
-     !/places left/i.test(plenty.k), plenty.k);
-
-  const few = await read({ ok:true, on:true, known:true, seats:25, taken:22, left:3, open:true });
-  ok('with three left it says three', /3 places left/.test(few.k), few.k);
-  const one = await read({ ok:true, on:true, known:true, seats:25, taken:24, left:1, open:true });
-  ok('with one left it says one, in words', /one place left/.test(one.k), one.k);
-
-  const full = await read({ ok:true, on:true, known:true, seats:25, taken:25, left:0, open:false });
-  ok('when it is gone the page says so', /taken/i.test(full.k), full.k);
-  ok('and stops advertising a price nobody can get', /gone/i.test(full.h), full.h);
-  ok('and honours what the twenty-five were promised', /held for their first year/i.test(full.p), full.p);
-  ok('and names the price that IS available', /\$129/.test(full.p), full.p);
-  /* the CTA only exists on a LIVE build — pre-launch the whole block is the
-     waitlist link, stripped by the stage markers. Asserting it on a
-     pre-launch build would be asserting the absence of the launch. */
-  if (full.cta) ok('and the button offers the thing that exists', /14 days free/i.test(full.cta), full.cta);
-  else ok('the pre-launch build has no founding CTA to change, which is correct', true);
-  ok('and it stops wearing the colour of an offer', full.closed === true, full);
-
-  /* the opposite default from the till: a page that cannot count must not
-     tell somebody on a bad connection that they missed it */
-  const blind = await read({ ok:true, on:true, known:false, seats:25 });
-  ok('a page that cannot reach the count leaves the copy alone',
-     !/taken/i.test(blind.k) && !blind.closed, blind);
-  const off = await read({ ok:true, on:false });
-  ok('and a deployment with no founding price configured says nothing about one',
-     !/taken|places left/i.test(off.k), off.k);
-
-  /* ── THE PRICE ON THE PAGE MUST BE THE PRICE THE SERVER WILL TAKE ────────
-     Found by building the LIVE stage and looking at it, which nobody had ever
-     done. This script used to return silently when the offer was off or
-     uncountable — so the card went on saying "$79 a month for Underwriter,
-     for your first year" with a live Take-a-place button, in the exact state
-     the deployment is in today: no STRIPE_PRICE_FOUNDING set.
-
-     The server is right and refuses to issue a founding price it cannot
-     count, which means the checkout would have charged $129 to somebody the
-     page had just quoted $79. Quoting one price and taking another is the
-     worst failure available to this product, and it was one unset variable
-     away on launch day. These two states are the ones nobody would have
-     thought to look at, because they look like the page working. */
-  for (const [label, say] of [
-    ['no founding price configured', { ok:true, on:false }],
-    ['Stripe unreachable',           { ok:true, on:true, known:false }],
-    ['the route itself failing',     { ok:false }],
-  ]){
-    const r = await read(say);
-    ok(`${label}: the card stops advertising $79`, !/\$79/.test(r.h + ' ' + r.p), { k:r.k, h:r.h });
-    ok(`${label}: and stops offering a place that cannot be issued`,
-       !/take a place/i.test(r.cta), r.cta);
-    ok(`${label}: and names the price the server will actually charge`,
-       /\$129/.test(r.p), r.p.slice(0, 120));
-    ok(`${label}: without pretending the offer sold out`,
-       !/taken|places left|are gone/i.test(r.k + ' ' + r.h), { k:r.k, h:r.h });
-    ok(`${label}: and throws nothing`, !r.errs.length, r.errs[0]);
+  const port = await new Promise(r => site.listen(0, '127.0.0.1', () => r(site.address().port)));
+  const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const pg = await b.newPage({ viewport:{ width:1280, height:900 } });
+  const errs = [];
+  pg.on('pageerror', e => errs.push(String(e).slice(0,140)));
+  await pg.goto(`http://127.0.0.1:${port}/plans.html`, { waitUntil:'load' });
+  await pg.waitForTimeout(600);
+  const card = await pg.evaluate(() => {
+    const el = document.querySelector('.offercard');
+    if (!el) return null;
+    const cta = el.querySelector('a.btn, .wl');
+    return { k: (el.querySelector('.k')||{}).textContent || '',
+             h: (el.querySelector('h3')||{}).textContent || '',
+             p: (el.querySelector('p')||{}).textContent || '',
+             cta: cta ? cta.textContent.trim() : '',
+             gold: getComputedStyle(el).borderColor };
+  });
+  ok('the card is on the page', !!card, card);
+  if (card){
+    ok('it is headed Underwriter', /underwriter/i.test(card.k), card.k);
+    ok('it names $129', /\$129/.test(card.h + card.p), card.h);
+    ok('it does not name $79', !/\$79/.test(card.h + card.p), card.h + card.p);
+    ok('it does not count places', !/places|twenty-five|left|taken/i.test(card.k + card.h), card.k);
+    ok('it offers the trial rather than a place', !/take a place/i.test(card.cta), card.cta);
   }
-  ok('no page errors in any of those states', !full.errs.length && !blind.errs.length, full.errs[0]);
+  ok('the page throws nothing', !errs.length, errs[0]);
   await b.close(); site.close();
 }
-stripeStub.close(); sb.close();
 
-console.log(bad ? `\n${bad} of ${n} FAILED` : `\nall ${n} hold — the offer counts itself, closes itself, refuses to sell what it cannot count, and never tells a bad connection that it missed out`);
+srv.kill(); stripeStub.close(); sb.close();
+console.log(bad ? `\n${bad} of ${n} FAILED`
+  : `\nall ${n} hold — the offer is retired on the page, off at the endpoint, and cannot be `
+    + `switched back on by an environment variable`);
 process.exit(bad ? 1 : 0);

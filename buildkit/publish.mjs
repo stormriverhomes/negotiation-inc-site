@@ -744,6 +744,14 @@ desk = desk.replace('</head>', OG('The Desk · Negotiation Inc',
                        /* a second sheet is free — asking for money here was a funnel bug */
                        "plans.html#properties", 'prompt(\'Name this property'])
     if (src.includes(never)) throw new Error('desk.html brought back a retired device: ' + never);
+  /* ── NO PAGE MAY ASK FOR A VENDOR CREDENTIAL ─────────────────────────────
+     Bring-your-own-key was a password box on a public page collecting a live
+     RentCast credential — the exact thing RentCast's own documentation says
+     never to do. It came out of the desk, the plans page and the server in one
+     pass. This guard exists because it is the kind of feature that grows back:
+     the next person to want comps on the free desk will reach for it, and the
+     reason it is wrong is written down in prose that a diff will not surface.
+     Checked across every shipped page, not just this one. */
   /* A refusal is the sheet's strongest opinion and has to look like one. It
      shipped for weeks as grey-on-grey, indistinguishable from a caption. */
   if (!/flag ref">Refused</.test(src)) throw new Error('desk.html: the refusal flag lost its word');
@@ -1328,7 +1336,10 @@ for (const must of ['desk.html#new', 'class="spot"',
                     'class="worth"', 'Seventy-six fields', 'class="ways"',
                     /* the two that shipped built and unadvertised */
                     'id="bid"', 'id="objections"', 'The other side of the table',
-                    'class="founding"', '>Solo<', '$39', '$129', '$249',
+                    /* the offer card is a plain Underwriter card now — the
+                       founding twenty-five and its gold went out with the
+                       Stripe seat count that priced them */
+                    'class="offercard"', '>Solo<', '$39', '$129', '$249',
                     '<th>Solo</th>', 'Two months free on annual',
                     '$1,290 a year'])
   if (!plans.includes(must)) throw new Error('plans.html lost: ' + must);
@@ -2686,7 +2697,7 @@ const WAITLIST = `<style>
     sit at the end of a game or a lesson do. */
  var LINE='The desk is <b>free and finished</b> \\u2014 pricing, the seven exits, the comparison, the print. '+
    'The paid tiers are being wired to a payment rail. Leave an address and you get <b>one</b> email the day they '+
-   'open, with the founding price on it.';
+   'open, with the price on it.';
  /* ── A SLOT THAT SITS INSIDE SOMETHING ELSE ───────────────────────────────
     The founding offer used to say "Claim a place" with a grey box directly
     beneath it headed "The paid desk opens soon." — a page arguing with itself
@@ -3075,6 +3086,65 @@ await b.close();
 }
 
 {
+  /* ══ THE MEASURE, SET ONCE, FOR EVERY PAGE ═══════════════════════════════
+     The audit measured what "too dense" actually is, page by page, and it is
+     not one fault — it is three, and every one of them is a property rather
+     than a paragraph:
+
+       · lines running to 159 characters on a wide screen. Past about 75 the
+         eye misses the return sweep and re-reads the line it just left, which
+         is felt as effort and blamed on the writing.
+       · body copy set at 1.4 and tighter, so the descenders of one line sit in
+         the caps of the next. This is literally "the words are too close
+         together" and it is one number.
+       · paragraphs nine pixels apart in a sixteen-pixel line, which is not a
+         gap. 124 of those on the terms page alone: the wall people see there
+         is mostly this, not the word count.
+
+     Injected LAST so it wins on the cascade without touching fourteen files,
+     and deliberately narrow: it sets leading, a maximum measure, and a
+     paragraph gap, and it touches nothing else. `max-width` can only ever make
+     a line wrap sooner, and adjacent margins collapse to the larger of the two
+     — so neither rule can push anything out of a layout that fits today.
+
+     THE SPACING PROPERTIES CARRY !important AND THE MEASURE DOES NOT. That
+     asymmetry is the whole design of this block. Every page here sets its own
+     `.legal li` or `.q p` rules, which beat a bare `li+li` on specificity no
+     matter how late it is injected — the first version of this changed nothing
+     on the three densest pages and the audit said so, which is the only reason
+     it was caught. Leading and gaps are safe to force: they can make a page
+     taller and they cannot make it overflow. `max-width` is left weak on
+     purpose, because a page that deliberately sets a wider measure for a table
+     or a code block has a reason and should keep it.
+
+     Display type is exempt. A 46px headline at 1.62 is a ransom note; the
+     reason the audit stopped reporting every h1 on the site is that leading is
+     judged against what the type is FOR, and so is this. */
+  const PROSE = `<style>
+p,li,dd,blockquote,figcaption{max-width:68ch}
+p,li,dd,blockquote{line-height:1.62!important}
+p+p,p+ul,ul+p,p+ol,ol+p{margin-top:1.05em!important}
+li+li{margin-top:.72em!important}
+h1,h2,h3,h4{max-width:34ch}
+h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
+@media (max-width:520px){p,li,dd,blockquote{line-height:1.66!important}}
+</style>`;
+  /* the demo pages live one directory down and are read by the same eyes —
+     the guard pass below already walks both, and a normalisation layer that
+     covers fewer pages than the guard that checks them is a layer with a hole
+     in it */
+  const sheets = fs.readdirSync(out).filter(x => x.endsWith('.html'))
+    .concat(fs.existsSync(path.join(out, 'd'))
+      ? fs.readdirSync(path.join(out, 'd')).filter(x => x.endsWith('.html')).map(x => 'd/' + x) : []);
+  for (const f of sheets){
+    const q = path.join(out, f);
+    const src = fs.readFileSync(q, 'utf8');
+    if (!src.includes('</head>')) continue;
+    fs.writeFileSync(q, src.replace('</head>', PROSE + '</head>'));
+  }
+}
+
+{
   /* NI_ALLOW_LOCAL_SB already means one thing and one thing only: this build
      is pointed at a Supabase STUB on a loopback port, for a harness. _tpay
      stands one up and builds against it, so the loopback rules would refuse
@@ -3108,6 +3178,18 @@ await b.close();
   const HOSTS = [
     [/onrender\.com/i,               'the hosting provider'],
     [/negotiation-inc-site\./i,      'the pre-domain service name'],
+    /* checked on the PROSE, not the bytes, so the plans page and the desk are
+       free to explain in a comment why bring-your-own-key was removed. What
+       may not survive is the offer itself, in any of the three shapes it had:
+       the phrase, the field, or the button. */
+    [/bring your own(?![^<.]{0,40}\bremoved\b)[^<.]{0,40}key/i, 'the bring-your-own-key offer'],
+    [/paste (?:your |it |in )?[^<.]{0,30}RentCast key/i, 'a prompt to paste a vendor key'],
+    [/id="rc-key"|id="rc-save"|id="rc-byok"/,             'the vendor-key input or its buttons'],
+    /* the founding twenty-five is retired. A page that still names it is
+       quoting a price the checkout will not honour, which is the worst
+       failure this product has available to it. */
+    [/founding (?:price|place|twenty-five)/i,             'the retired founding offer'],
+    [/\$79 a month/,                                      'the retired founding price'],
     ...(LOCAL_OK ? [] : [
       [/https?:\/\/localhost/i,      'a localhost URL'],
       [/https?:\/\/127\.0\.0\.1/,    'a loopback URL'],
@@ -3130,7 +3212,18 @@ await b.close();
     const body = decomment(raw);
     for (const [re, what] of HOSTS){
       const m = body.match(re);
-      if (m) throw new Error(`${f} names ${what} (${m[0]}) — a built page must only ever say negotiationinc.com`);
+      /* two classes share this pass because both are "what does the page SAY",
+         but they fail for different reasons and a wrong reason sends the next
+         person to the wrong file */
+      const WHY = /vendor-key|bring-your-own/.test(what)
+        ? `bring-your-own-key was removed on purpose: RentCast's own documentation says a key `
+          + `must never be exposed in front-end code, so no shipped page may ask for one. `
+          + `Comps are pulled on our key or not at all.`
+        : /founding/.test(what)
+        ? `the founding twenty-five is retired and its Stripe price is not set, so a page `
+          + `naming it would quote a number the checkout will not honour. Underwriter is $129.`
+        : `a built page must only ever say negotiationinc.com`;
+      if (m) throw new Error(`${f} names ${what} (${m[0]}) — ${WHY}`);
     }
   }
 }

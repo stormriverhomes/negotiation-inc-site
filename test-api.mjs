@@ -1394,7 +1394,8 @@ const OK = { 'x-ni-access':'letmein', ...PAID };
 
      · nobody unentitled reaches a vendor who bills us per request
      · the vendor's OWN value estimate never reaches the customer
-     · a refusal is never a dead end — a plan that cannot pull can still BYOK */
+     · a refusal names the plan that has it rather than dangling a key box —
+       BYOK is gone, so the refusal must be a door, not a dead end */
 {
   out.P = {};
   const srv = await boot({ ...ACC, NI_MOCK:'1', RENTCAST_KEY:'rc-test' });
@@ -1406,10 +1407,14 @@ const OK = { 'x-ni-access':'letmein', ...PAID };
   for (const [who, tok] of [['signed out', null], ['free', 'tok-free'], ['solo', 'tok-solo']]){
     const r = await pull(tok ? AS(tok) : {});
     const j = await r.json();
-    out.P[who] = { status:r.status, byok:j.byok };
+    out.P[who] = { status:r.status, entitlement:j.entitlement, error:j.error };
     check(r.status === 403, `P: a ${who} caller reached the comp vendor (${r.status})`);
-    check(j.ok === false && j.byok === true,
-      `P: the ${who} refusal does not offer the bring-your-own-key path — that is a dead end`);
+    check(j.ok === false && !!j.entitlement,
+      `P: the ${who} refusal does not say WHICH entitlement is missing`);
+    check(!/rentcast key|bring your own/i.test(String(j.error || '')),
+      `P: the ${who} refusal still offers the bring-your-own-key path, which no longer exists`);
+    check(j.byok === undefined,
+      `P: the ${who} refusal still carries a byok flag`);
   }
 
   /* who may */

@@ -81,36 +81,40 @@ h1 em{font-style:normal;color:var(--blue)}
  border:1px solid var(--gold-soft);background:var(--gold-soft);border-radius:var(--r-pill);
  font-size:13.5px;color:var(--gold)}
 .prelaunch b{color:#5f4813;font-weight:700;white-space:nowrap}
-/* The founding offer. Twenty-five places at a held price for twelve months.
-   It was a hundred places at a permanent discount, and the arithmetic on that
-   was worse than it looked: against the list price it forgoes eight thousand a
-   month FOREVER — ninety-six thousand a year, every year, or sixteen per cent
-   of a fifty-thousand MRR target given away before the first customer arrives.
-   Seats 26–100 buy no evidence the first 25 did not already buy, so the tail
-   of that offer was pure cost.
+/* ══ THE OFFER CARD, AND WHY IT IS NO LONGER A FOUNDING OFFER ═════════════
+   This was twenty-five founding places at $79 for a year, in gold, with a live
+   seat count read from Stripe. It is gone, and the reasoning is worth keeping
+   because the offer was not a bad one — it was the wrong SHAPE for a pricing
+   page that has to work on the day somebody arrives cold.
 
-   Twenty-five at $79 for a year costs $15,000 in total and then heals. It is
-   also the more honest offer: "forever" from a company with no entity yet is a
-   promise a reader half-discounts anyway, and a term you can actually keep is
-   worth more than one you cannot. The old note follows, because the reasoning
-   about SCARCITY still holds — it is the DURATION that was the mistake.
-   The founding offer. Twenty-five places at a price that holds for a year, which is
-   the only honest form of urgency: the number is finite and checkable, and the
-   people who take it are the ones who tell you what to build next. */
+   A scarcity card does two jobs at once and they fight. It has to sell the
+   plan AND explain the terms of a discount that expires — what happens at
+   renewal, how many are left, what "founding" buys, why the number is
+   twenty-five. That is four paragraphs before a reader has learned what the
+   product costs. The card was the loudest thing on the page and it was mostly
+   footnotes.
+
+   And it carried a live failure mode. The price came from a Stripe lookup, so
+   the card could say $79 in three states where checkout would charge $129 —
+   an unset environment variable, an unreadable seat count, or Stripe
+   unreachable. There was a fallback for all three, correctly written, and the
+   whole apparatus existed to make a discount safe rather than to sell
+   anything. One price on the page and the same price at the till needs none
+   of it.
+
+   So the card is now what the fallback already said: Underwriter, $129, the
+   trial, the cancel. Same slot, same weight, no gold. */
 .topgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,.7fr);
  gap:46px;align-items:start}
 @media(max-width:1000px){ .topgrid{grid-template-columns:1fr;gap:22px} }
-.founding{padding:20px 22px;border-radius:var(--r-card);
- border:1.5px solid var(--gold);background:linear-gradient(180deg,var(--gold-soft),#fff);
+.offercard{padding:20px 22px;border-radius:var(--r-card);
+ border:1px solid var(--line-2);background:var(--wash);
  display:flex;flex-direction:column;align-items:flex-start;gap:14px}
-@media(min-width:1001px){ .founding{margin-top:38px} }
-.founding .btn{width:100%}
-.founding .k{font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
-/* closed reads as a fact that already happened, not as a thing being sold */
-.founding.closed{background:var(--wash);border-color:var(--line-2)}
-.founding.closed .k{color:var(--soft)}
-.founding h3{font-size:20px;margin-top:3px}
-.founding p{font-size:14px;color:var(--mid);margin-top:4px;max-width:64ch;line-height:1.5}
+@media(min-width:1001px){ .offercard{margin-top:38px} }
+.offercard .btn{width:100%}
+.offercard .k{font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+.offercard h3{font-size:20px;margin-top:3px;line-height:1.25}
+.offercard p{font-size:14px;color:var(--mid);margin-top:5px;max-width:60ch;line-height:1.62}
 .billing{display:flex;align-items:center;gap:9px;margin-top:16px;font-size:13.5px;color:var(--soft);flex-wrap:wrap}
 /* the interpunct is a separator between two things on one line. When the line
    wraps it becomes a full stop with nothing before it, sitting alone at the
@@ -298,7 +302,13 @@ tbody tr:last-child td{border-bottom:0}
 td .y{color:var(--green);font-weight:800}
 td.hi{background:rgba(31,95,208,.035)}
 td .n{color:var(--faint)}
-td small{display:block;font-size:12px;color:var(--soft);margin-top:2px;font-weight:400}
+/* THE SENTENCE UNDER EACH ROW IS THE ROW. It was 12px, which is caption size,
+   and it is not a caption — it is the only place the table says what a feature
+   actually does. Twenty-five of them on this page, all running prose, all set
+   two sizes below the thing they explain. 13.5 with real leading, and the
+   colour lifted off --soft so it stops reading as a footnote to itself. */
+td small{display:block;font-size:13.5px;color:var(--mid);margin-top:5px;font-weight:400;
+ line-height:1.58;max-width:56ch}
 .sec td{background:var(--wash);font-weight:700;font-family:var(--serif);font-size:16.5px;text-align:left;
  letter-spacing:-.01em}
 .sec:hover td{background:var(--wash)}
@@ -332,7 +342,7 @@ td:first-child b{font-weight:650;color:var(--ink)}
 .way .wi{color:var(--soft);line-height:0;margin-bottom:2px}
 .way .wk{font-size:10px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--soft)}
 .way .wt{font-family:var(--serif);font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
-.way .wd{font-size:14px;color:var(--mid);line-height:1.5;flex:1}
+.way .wd{font-size:15px;color:var(--mid);line-height:1.6;flex:1}
 .way .wd b{color:var(--ink);font-weight:650}
 .way .wgo{margin-top:5px;font-size:13.5px;font-weight:650;color:var(--blue);display:inline-flex;
  align-items:center;gap:7px}
@@ -408,31 +418,18 @@ tr.soonrow td b{font-weight:650}
   deals you looked at last week.</p>
  </div>
 
- <div class="founding">
+ <div class="offercard">
   <div>
-   <div class="k" id="fnd-k">The founding twenty-five</div>
-   <h3 id="fnd-h">$79 a month for Underwriter, for your first year.</h3>
-   <p>Twenty-five places, and then it closes. In exchange we want the thing money cannot buy at
-    this stage: what breaks, what is missing, and what you would have paid for instead. On the
-    day it renews you go to whatever Underwriter costs then — you will hear from us thirty days
-    before, and cancelling is one click, as it is on every plan. <b>We would rather tell you the
-    real term than promise you forever</b>, which is a word a company this young should be
-    careful with.</p>
+   <div class="k">Underwriter</div>
+   <h3>$129 a month. The typing, done for you.</h3>
+   <p>The condition read off your photographs, comps pulled and scored on our key, the street
+    read, the letters and the lender packet. Fourteen days free with nothing charged until day
+    fifteen, and cancelling is one click.</p>
   </div>
-<!--LIVE--><a class="btn p" id="fnd-cta" href="office.html?join=underwriter">Take a place →</a><!--/LIVE-->
+<!--LIVE--><a class="btn p" href="office.html?join=underwriter">Start 14 days free &rarr;</a><!--/LIVE-->
 <!--SOON-->
- <!-- ── ONE BLOCK, NOT TWO ───────────────────────────────────────────────
-      This card said "Claim a place →" and pointed at a grey box directly
-      underneath it headed "The paid desk opens soon." So the page named a
-      price, offered to take it, and then told you it was not open — three
-      moves, in that order, inside one screen. The offer and the way to take
-      it are now the same block, and the box is gone.
-
-      The wording is the honest version of what claiming a place means before
-      the rail is switched on: your address, and the founding price comes to
-      it on day one. Nothing is charged and nothing pretends to be. -->
- <div id="waitlist" data-waitlist="The paid desk" data-bare data-from="plans-founding"
-   data-line="Leave your address and you have the place: <b>one</b> email the day it opens, with this price on it and nothing else. No card, and nothing charged now."
+ <div id="waitlist" data-waitlist="The paid desk" data-bare data-from="plans-underwriter"
+   data-line="Leave your address and you get <b>one</b> email the day it opens, with the price on it and nothing else. No card, and nothing charged now."
    style="margin-top:4px"></div>
 <!--/SOON-->
  </div>
@@ -580,7 +577,7 @@ tr.soonrow td b{font-weight:650}
          the software is the worst version of that — the customer buys the row
          and finds the refusal. The rent is a different claim, it is real, and
          it lands as an ESTIMATE with its range. -->
-    <li id="rent"><i>✓</i><span><b>The rent for the address</b> — this address, not the ZIP median, with the range around it and the number of leases behind it. It comes on our key and counts against the same forty; paste your own RentCast key and it runs on yours instead, billed to you at their price. <b>No value estimate</b>: what it is worth is still the number you set, from comps you kept</span></li>
+    <li id="rent"><i>✓</i><span><b>The rent for the address</b> — this address, not the ZIP median, with the range around it and the number of leases behind it. It comes on our key and counts against the same forty — no vendor account, nothing to paste. <b>No value estimate</b>: what it is worth is still the number you set, from comps you kept</span></li>
     <li><i>✓</i><span><b>Offer letters and the text message</b>, written from the winning exit in the seller's language</span></li>
     <li><i>✓</i><span><b>The written comparison</b> — the case for each deal in prose you can forward. Every figure in it is one from your own table; a draft carrying anything else is refused rather than shown to you</span></li>
     <li id="street"><i>✓</i><span><b>The street brief</b> — what the block is actually doing. Tract-level income, tenure and vacancy from the census, the FEMA flood zone at the exact coordinates, and what has been permitted or planned nearby, <b>each claim carrying the page it came from</b>. The forty minutes of browser tabs, in about fifteen seconds</span></li>
@@ -700,10 +697,8 @@ tr.soonrow td b{font-weight:650}
    <p>Type the address; recent sales arrive on the workbench already adjusted for size, beds, baths,
     time and condition, each with a comparability score and the reasons for it. It runs on
     <b>our key</b>, so there is no vendor account to open and nothing to paste — forty pulls a month
-    on Underwriter, a hundred and twenty on The Office, counted and shown. If you would rather it
-    ran on <b>your own RentCast key</b>, paste it in and it does: kept in your browser, never sent
-    to us, billed to you at their price. That is also how the free desk pulls comps.
-    Either way it is still not an AVM: the sales arrive <b>unscored</b>, the range is drawn from the
+    on Underwriter, a hundred and twenty on The Office, counted and shown.
+    It is still not an AVM: the sales arrive <b>unscored</b>, the range is drawn from the
     ones you keep, and the ARV is the one you set.</p>
    <div class="saves"><b>Saves ~10 minutes</b>, and the band gets narrower with every comp</div>
   </div>
@@ -1036,7 +1031,7 @@ tr.soonrow td b{font-weight:650}
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">60</td><td>180</td></tr>
    <tr><td><b>Reading the paperwork, a month</b><small>drop the listing screenshots — the sheet fills itself, and every figure quotes the line it came from</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">80</td><td>240</td></tr>
-   <tr><td><b>Property lookups a month</b><small>one allowance, shared by the comp pull and the rent lookup — each is one request to RentCast, <b>on our key</b>. No vendor account, nothing to paste. Comps land <b>unscored</b>: the comparability score and the ARV stay yours. On the free desk, bring your own key instead and the requests are billed to you at their price</small></td>
+   <tr><td><b>Property lookups a month</b><small>one allowance, shared by the comp pull and the rent lookup — each is one request to RentCast, <b>on our key</b>. No vendor account, nothing to paste. Comps land <b>unscored</b>: the comparability score and the ARV stay yours. The free desk types its comps in, and a row you type is scored and weighted exactly like a row that arrives</small></td>
      <td><span class="n">—</span><small>your own key</small></td><td><span class="n">—</span><small>your own key</small></td><td class="hi">40</td><td>120</td></tr>
    <tr class="sec"><td colspan="5">The walk-through and the arcade</td></tr>
    <tr><td><b>The eight lessons, with live controls</b><small>free forever, no account</small></td>
@@ -1086,9 +1081,11 @@ tr.soonrow td b{font-weight:650}
   <h4>Where do the comps come from?</h4>
   <p>Public records and licensed feeds, never scraped from a portal that forbids it. On Underwriter
    and The Office the pull runs on <b>our</b> RentCast key and is metered — forty a month, or a
-   hundred and twenty. You can also paste in <b>your own</b> key, on any tier including the free
-   desk, in which case the lookups are billed to you by RentCast and we never see the key or the
-   results. Whichever way they arrive, they arrive <b>unscored</b>.</p>
+   hundred and twenty. There is no vendor account to open and nothing to paste; we used to let you
+   supply your own key and we took it out, because RentCast's own documentation says a key should
+   never be exposed in front-end code and a password box on a public page is exactly that. The
+   free desk types its comps in — and a row you type is scored, adjusted and weighted by the same
+   arithmetic as a row that arrives. Either way they arrive <b>unscored</b>.</p>
  </div>
  <div class="q">
   <h4>What happens when the trial ends?</h4>
@@ -1144,10 +1141,10 @@ tr.soonrow td b{font-weight:650}
      <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
      <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
      <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
-   <span class="wk">Twenty-five places</span>
-   <span class="wt">Take a founding place</span>
-   <span class="wd">$79 a month for Underwriter, held for your first year &mdash; then whatever Underwriter costs at renewal, told to you thirty days before.</span>
-   <span class="wgo">Take a place <em>&rarr;</em></span>
+   <span class="wk">14 days free &middot; cancel in one click</span>
+   <span class="wt">Start on Underwriter</span>
+   <span class="wd">$129 a month. The condition read off your photographs, comps pulled, the packet formatted &mdash; nothing charged until day fifteen.</span>
+   <span class="wgo">Start the trial <em>&rarr;</em></span>
   </a>
  </div>
 </div>
@@ -1160,70 +1157,4 @@ tr.soonrow td b{font-weight:650}
 </footer>
 
 </div>
-<script>
-/* ── THE OFFER COUNTS AND CLOSES ITSELF ────────────────────────────────────
-   A scarce offer somebody has to track by hand is an offer that stays open too
-   long or closes early because nobody was sure, and both are worse than not
-   running one. The count comes from Stripe — how many subscriptions exist on
-   the founding price — because that is the only definition that cannot drift
-   from what people were actually charged.
-
-   The page is written as if the offer is OPEN, and this only ever narrows it.
-   So a failed request, a blocked network or a pre-launch build with no billing
-   configured all leave exactly what the HTML already said, rather than
-   flashing "sold out" at somebody on a bad connection. */
-(function(){
- var k = document.getElementById('fnd-k'),
-     h = document.getElementById('fnd-h'),
-     cta = document.getElementById('fnd-cta'),
-     box = k && k.closest('.founding');
- if (!k) return;
- fetch('/api/founding').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
-  /* ── AN OFFER THE SERVER CANNOT ISSUE MUST NOT BE ON THE PAGE ──────────
-     This returned silently, which meant the card went on saying "$79 a month
-     for Underwriter, for your first year" with a live "Take a place" button
-     in three states where that is not true: no STRIPE_PRICE_FOUNDING set, the
-     seat count unreadable, or Stripe unreachable.
-
-     The server is already correct and refuses to issue a founding price it
-     cannot count — so the checkout would have charged $129 to somebody the
-     page had just quoted $79. Telling a customer one price and taking another
-     is the worst failure available to this product, and it was one unset
-     environment variable away on launch day.
-
-     The card falls back to the plain Underwriter pitch instead. It sells the
-     same plan at the price the server will actually charge. */
-  if (!d || !d.ok || !d.on || !d.known){
-    if (k) k.textContent = 'Underwriter';
-    if (h) h.textContent = 'The typing, done for you.';
-    var p0 = box && box.querySelector('p');
-    if (p0) p0.innerHTML = 'The condition read off your photographs, comps pulled and scored on our '
-      + 'key, the street read, the letters and the lender packet. <b>$129 a month</b>, fourteen days '
-      + 'free with nothing charged until day fifteen, and cancelling is one click.';
-    if (cta) cta.textContent = 'Start 14 days free \u2192';
-    if (box) box.classList.add('plain');
-    return;
-  }
-  if (d.open){
-   /* the number is the whole point of the offer, so it goes in the eyebrow
-      where the count belongs, not buried in a paragraph */
-   k.textContent = d.left === 1 ? 'The founding twenty-five \u00b7 one place left'
-                 : d.left <= 8  ? 'The founding twenty-five \u00b7 ' + d.left + ' places left'
-                                : 'The founding twenty-five';
-   return;
-  }
-  /* full. It says so plainly and stops offering something that is gone —
-     an offer you can still click after it closed is worse than no offer. */
-  k.textContent = 'The founding twenty-five \u00b7 taken';
-  h.textContent = 'All twenty-five places are gone.';
-  var p = box && box.querySelector('p');
-  if (p) p.innerHTML = 'They went to the people who were early, and the price they were '
-    + 'promised is held for their first year exactly as it was written. Underwriter is '
-    + '<b>$129 a month</b> from here, with the same fourteen days free and the same one-click '
-    + 'cancel.';
-  if (cta){ cta.textContent = 'Start 14 days free \u2192'; cta.href = 'office.html?join=underwriter'; }
-  if (box) box.classList.add('closed');
- }).catch(function(){});
-})();
-</script>
 </body></html>

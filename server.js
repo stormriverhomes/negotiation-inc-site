@@ -1266,9 +1266,8 @@ const ALLOW_ORIGIN = String(process.env.NI_ALLOW_ORIGIN || '')
    right answer for one reason and the wrong answer for another.
 
    Right: RentCast's free tier is fifty requests a month. A shared key behind a
-   public site would be spent in an afternoon, so the free desk cannot have one
-   and BYOK is the only honest way to offer it there. That stays exactly as it
-   was.
+   public site would be spent in an afternoon, so the free desk cannot have one.
+   That part was never wrong and the free desk still types its comps in.
 
    Wrong: plans.html sells "the comps arrive pulled and scored" under
    Underwriter, and they did not arrive — the customer still had to go and get
@@ -1282,7 +1281,10 @@ const ALLOW_ORIGIN = String(process.env.NI_ALLOW_ORIGIN || '')
    paying customer to do the thing the vendor warns against is not a feature.
 
    So: paid gets it on our key, server-side, metered per account, exactly like
-   every other paid feature. Free keeps BYOK. The key is an environment
+   every other paid feature, and BYOK is gone from the product entirely — a
+   password box on a public page asking for a live vendor credential is the
+   thing the vendor warns against, and offering it only to the free desk did
+   not make it a better idea, only a quieter one. The key is an environment
    variable and it is never in this file, the repository, or any response.
 
    THEIR ESTIMATE IS STILL DISCARDED. The endpoint returns a value estimate
@@ -1397,11 +1399,11 @@ app.post('/api/lookup/rent', express.json({ limit: '4kb' }), async (req, res) =>
       nosession:    'The rent lookup needs an account. Nothing was sent.',
       noprofile:    'The rent lookup needs an account. Nothing was sent.',
       lookup:       'The account could not be checked just now. Nothing was sent.',
-      free:         'The rent lookup arrives with Underwriter, and with the fourteen-day trial. On the free desk, type the rent or bring your own RentCast key.',
-      lowtier:      'The rent lookup arrives with Underwriter. On this plan you can type the rent or bring your own RentCast key.',
+      free:         'The rent lookup arrives with Underwriter, and with the fourteen-day trial. On the free desk, type the rent in.',
+      lowtier:      'The rent lookup arrives with Underwriter. On this plan, type the rent in.',
     };
     const code = (ent.why === 'unconfigured' || ent.why === 'lookup') ? 503 : 403;
-    return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why, byok: true });
+    return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
   }
 
   /* the SAME meter as the comp pull, on purpose — see the note above */
@@ -1468,11 +1470,11 @@ app.post('/api/comps', express.json({ limit: '4kb' }), async (req, res) => {
       nosession:    'Pulling comps needs an account. Nothing was sent.',
       noprofile:    'Pulling comps needs an account. Nothing was sent.',
       lookup:       'The account could not be checked just now. Nothing was sent.',
-      free:         'Comps arrive pulled with Underwriter, and with the fourteen-day trial. On the free desk you can still bring your own RentCast key.',
-      lowtier:      'Comps arrive pulled with Underwriter. On this plan you can still bring your own RentCast key.',
+      free:         'Comps arrive pulled with Underwriter, and with the fourteen-day trial. On the free desk, add them by hand — a row you type is scored the same way.',
+      lowtier:      'Comps arrive pulled with Underwriter. On this plan, add them by hand — a row you type is scored the same way.',
     };
     const code = (ent.why === 'unconfigured' || ent.why === 'lookup') ? 503 : 403;
-    return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why, byok: true });
+    return fail(code, SAY[ent.why] || SAY.nosession, { entitlement: ent.why });
   }
 
   const meter = await meterFails(res, ent, 'aicomps', 'of these');
@@ -1895,7 +1897,7 @@ async function opsData(){
              pctOfBudget: LIM.dailyUsd ? Math.round(day.usd / LIM.dailyUsd * 100) : null },
     features: {
       read:    (KEY || MOCK) ? 'on' : 'off',
-      comps:   RENTCAST_KEY ? 'on' : 'byok',
+      comps:   RENTCAST_KEY ? 'on' : 'off',
       land:    TILES_KEY ? (tiles.n >= TILES_CAP ? 'quota' : 'on') : 'flat',
       census:  process.env.CENSUS_KEY ? 'on' : 'partial',
       accounts: ACCOUNTS_ON() ? 'on' : 'off',
@@ -2182,7 +2184,7 @@ app.get('/api/health', (_req, res) => {
     object:  ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
     intake:  ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
     land: TILES_KEY ? (tiles.n >= TILES_CAP ? 'quota' : 'on') : 'flat',
-    comps:   ((ACCESS || ACCOUNTS_ON()) && (RENTCAST_KEY || MOCK)) ? 'on' : 'byok',
+    comps:   ((ACCESS || ACCOUNTS_ON()) && (RENTCAST_KEY || MOCK)) ? 'on' : 'off',
     gate: ACCESS ? 'code+account' : ACCOUNTS_ON() ? 'account' : 'none',
     list: LIST_ON ? 'on' : 'off',
     /* named columns only when something IS open — a health endpoint that lists

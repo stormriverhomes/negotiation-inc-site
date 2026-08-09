@@ -1419,16 +1419,14 @@ body.traytight .tray{padding-bottom:11px}
 .rch b{font-family:var(--serif);font-size:16px;font-weight:700}
 .rch .tag{font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
  padding:2px 7px;border-radius:var(--r-pill)}
-.rch .tag.byo{background:#fff;color:var(--soft);border:1px solid var(--line-ink)}
 .rch .tag.live{background:var(--green-soft,#e6f4ec);color:var(--green)}
 .rch .use{margin-left:auto;font-size:11.5px;color:var(--soft);font-variant-numeric:tabular-nums}
 .rch .use b{font-family:var(--sans);font-size:11.5px;color:var(--ink)}
+.rch .use a{color:var(--blue);font-weight:650;text-decoration:none}
+.rch .use a:hover{text-decoration:underline}
 .rc p{font-size:13px;color:var(--mid);line-height:1.55;margin-top:6px;max-width:74ch}
 .rc p b{color:var(--ink);font-weight:650}
 .rcf{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:11px}
-.rcf input{flex:1;min-width:220px;font-family:var(--sans);font-size:13.5px;padding:9px 12px;
- border:1px solid var(--line-ink);border-radius:var(--r-in);background:#fff;color:var(--ink)}
-.rcf input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
 .btn.sm{font-size:13px;padding:8px 14px}
 .rcerr{margin-top:10px;font-size:12.5px;color:var(--red);background:var(--red-soft,#fdeceb);
  border:1px solid rgba(199,58,56,.24);border-radius:var(--r-in);padding:9px 11px;line-height:1.5}
@@ -7025,99 +7023,43 @@ function loadDemo(key){
  return true;
 }
 
-/* ══ RENTCAST, BRING YOUR OWN KEY ══════════════════════════════════════════
-   Comparable sales are the hardest part of the job to do by hand, and they are
-   the one part a data feed can genuinely do for you. So this fetches candidate
-   sales from RentCast and drops them onto the workbench — where they are
-   scored, adjusted and accepted or rejected by the person, exactly like the
-   ones they typed. Nothing about the arithmetic changes.
+/* ══ RENTCAST, ON OUR KEY, AND ONLY OURS ═══════════════════════════════════
+   Comparable sales are the hardest part of the job to do by hand and the one
+   part a data feed can genuinely do for you. They arrive from the server, on
+   our key, metered per account — and they arrive UNSCORED, because the claim
+   of the workbench is that you reach your own ARV from sales you scored.
 
-   Three decisions worth writing down, because each one had an easier wrong
-   answer.
+   THIS USED TO ASK THE READER FOR THEIR OWN KEY, AND THAT IS GONE. The reason
+   it existed was real: RentCast's free tier is fifty requests a month, which a
+   public site spends in an afternoon, so a shared key could not be offered to
+   everybody and bring-your-own was the only way the free desk could have the
+   feature at all.
 
-   · THE KEY IS THEIRS, NOT OURS. RentCast's free tier is fifty requests a
-     month. Across every visitor to a public site that is roughly one and a
-     half lookups a day — the first afternoon of traffic would spend the month.
-     A shared key is not a cheap version of this feature, it is a broken one.
-     So the key is the reader's own, it is stored in their browser and nowhere
-     else, it is never sent anywhere except api.rentcast.io, and it is never in
-     this file or in the repository this file ships from.
+   The reason it is gone is better. RentCast's own documentation says an API
+   key "should never be exposed in any client-side, front-end or publicly-
+   accessible code" — and the panel was a password box on a public page asking
+   people to do exactly that. A product that tells you to hold information
+   carefully and then asks you to paste a live credential into it is arguing
+   with itself, and the argument was visible on the page people pay from.
 
-   · THEIR ESTIMATE IS DISCARDED. The endpoint returns a value estimate. We
-     take the `comparables` array and throw the estimate away, unread. This is
-     not squeamishness: the entire claim of the workbench is that you arrive at
-     your own ARV from sales you scored. Printing somebody else's AVM at the
-     top of it would make that sentence false, and the sentence is the product.
+   So: comps are pulled on our key or they are not pulled. Free types them, and
+   typing them is not a lesser version of the job — it IS the job, which is why
+   the workbench scores hand-entered rows and fed rows identically.
 
-   · IT NEVER SPENDS A REQUEST WITHOUT SAYING SO. The count is kept locally and
-     shown before the click, because fifty is a small number and a person who
-     discovers that at request forty-nine is entitled to be angry. */
-const RC_KEY = 'ni-rentcast-key', RC_LOG = 'ni-rentcast-log', RC_FREE_MONTH = 50;
-const rcKey = () => { try { const k = localStorage.getItem(RC_KEY);
-  return (typeof k === 'string' && /^[A-Za-z0-9_-]{16,80}$/.test(k)) ? k : null; } catch(e){ return null; } };
-function rcCount(){                       // requests this calendar month, locally counted
-  try { const l = JSON.parse(localStorage.getItem(RC_LOG) || '[]');
-    const m = new Date().toISOString().slice(0,7);
-    return Array.isArray(l) ? l.filter(x => typeof x === 'string' && x.slice(0,7) === m).length : 0;
-  } catch(e){ return 0; }
-}
-function rcSpend(){
-  try { const l = JSON.parse(localStorage.getItem(RC_LOG) || '[]');
-    const keep = (Array.isArray(l) ? l : []).slice(-200);
-    keep.push(new Date().toISOString());
-    localStorage.setItem(RC_LOG, JSON.stringify(keep)); } catch(e){}
-}
+   AND WE CLEAN UP AFTER OURSELVES. Anybody who saved a key under the old panel
+   has a live vendor credential sitting in their browser storage with no UI
+   left to remove it. It is deleted on load, once, quietly. Leaving it there
+   would be the same mistake with the interface taken away. */
+(function purgeOldRentCastKey(){
+  try {
+    for (const k of ['ni-rentcast-key','ni-rentcast-log']) localStorage.removeItem(k);
+  } catch(e){}
+})();
+
 let RC = { busy:false, msg:null, err:null,
   /* `month` is the allowance the SERVER reports back — never counted here, so
-     the figure on screen is the one the meter actually holds. `byok` lets a
-     paid account fall back to its own key when the pull is unavailable, so a
-     refusal is never a dead end. */
-  month:null, byok:false };
-
-/** Ask RentCast for candidate comps around an address. Returns rows in the
- *  workbench's own shape, or throws with something a person can act on. */
-async function rcFetch(addr){
-  const key = rcKey(); if (!key) throw new Error('No key saved.');
-  const u = new URL('https://api.rentcast.io/v1/avm/value');
-  u.searchParams.set('address', addr);
-  u.searchParams.set('compCount', '10');
-  /* A hung request is the worst outcome, not the rarest: some networks black-
-     hole the connection rather than refusing it, and without this the strip
-     spins until the tab is closed. Fifteen seconds, then an honest answer. */
-  const ac = new AbortController();
-  const bell = setTimeout(() => ac.abort(), 15000);
-  let r;
-  try { r = await fetch(u, { signal: ac.signal, headers: { 'X-Api-Key': key, accept:'application/json' } }); }
-  catch(e){
-    /* A browser cannot tell a CORS refusal from a dead network — both arrive as
-       an opaque TypeError with nothing in it. Say both, rather than guess. */
-    throw new Error(e && e.name === 'AbortError'
-      ? 'RentCast did not answer within fifteen seconds. Try again, or check the RentCast status page.'
-      : 'The request never completed. Either the network is blocked here, or RentCast is refusing ' +
-        'requests from a browser on this domain. Nothing was spent.');
-  } finally { clearTimeout(bell); }
-  rcSpend();
-  if (r.status === 401) throw new Error('RentCast rejected that key. Check it and save it again.');
-  if (r.status === 404) throw new Error('RentCast has no record at that address. Try the full street address with the ZIP.');
-  if (r.status === 429) throw new Error('You are out of RentCast requests for this month.');
-  if (!r.ok) throw new Error('RentCast returned ' + r.status + '.');
-  const j = await r.json();
-  const raw = Array.isArray(j && j.comparables) ? j.comparables : [];
-  if (!raw.length) throw new Error('RentCast found no comparable sales near that address.');
-  const monthsSince = d => { const t = Date.parse(d); if (!Number.isFinite(t)) return '';
-    return String(Math.max(0, Math.round((Date.now()-t)/2629800000))); };
-  return raw.slice(0, 12).map((c,i) => ({
-    id: 'rc' + i + Math.random().toString(36).slice(2,6),
-    addr: String(c.formattedAddress || c.addressLine1 || 'Comparable ' + (i+1)).slice(0,90),
-    price: c.price ? String(Math.round(c.price)) : '',
-    sqft:  c.squareFootage ? String(Math.round(c.squareFootage)) : '',
-    beds:  c.bedrooms != null ? String(c.bedrooms) : '',
-    baths: c.bathrooms != null ? String(c.bathrooms) : '',
-    sold:  monthsSince(c.lastSeenDate || c.listedDate || c.removedDate),
-    dist:  c.distance != null ? (Math.round(c.distance*100)/100).toFixed(2) : '',
-    cond: 0, use: true, src: 'rentcast',
-  })).filter(c => c.price && c.sqft);
-}
+     the figure on screen is the one the meter actually holds. */
+  month:null };
 
 /* ══ THE LOCKED SHELF ══════════════════════════════════════════════════════
    The marketing for this product is the product with some of it switched off,
@@ -8462,51 +8404,26 @@ const GOODCOL = pc => CONDCOL(100 - Math.max(0, Math.min(100, pc)));
 const SCORE_COL = sc => GOODCOL(sc);
 const compFmt = v => v === null || v === undefined ? '—' : fmt(v);
 
-/** The RentCast strip: either an offer to fetch, or the door to save a key. */
+/** The RentCast strip. Two states now, not three: the pull, or the reason you
+ *  do not have it. The third state was a password box, and it is gone. */
 function rcPanel(){
- const key = rcKey(), used = rcCount(), left = Math.max(0, RC_FREE_MONTH - used);
- const room = premium() ? 12 : compRoom().room;
- /* ── PAID PULLS ON OUR KEY. FREE BRINGS ITS OWN. ─────────────────────────
-    plans.html sells "the comps arrive pulled and scored" under Underwriter and
-    they did not arrive: the customer had to go and get a RentCast account,
-    generate a key, paste it into their own browser, and live inside somebody
-    else's fifty-a-month. RentCast's own documentation says a key "should never
-    be exposed in any client-side, front-end or publicly-accessible code" — so
-    the paid experience was asking a paying customer to do the thing the vendor
-    warns against, to get a thing the pricing page said they had already bought.
-
-    Entitlement, not tier: a demo paints at tier 3 and a preview flag paints
-    anything, and neither may spend money at a vendor who bills us per request. */
- if (entitled(2) && !RC.byok) return rcPanelPaid();
- if (RC.busy) return `<div class="rc busy"><span class="sp"></span>
-   <div><b>Asking RentCast for sales near ${esc(S.addr || 'this address')}…</b>
-    <p>Their value estimate is discarded on arrival. You are getting the sales, to score yourself.</p></div></div>`;
- if (!key) return `<div class="rc">
-   <div class="rch"><span class="tag byo">bring your own key</span>
-    <b>Pull candidate comps from RentCast</b></div>
-   <p>Free RentCast accounts get ${RC_FREE_MONTH} lookups a month. Paste your key and it stays
-    <b>in this browser only</b> — it goes nowhere but RentCast, and there is no server here to
-    send it to. <a href="https://app.rentcast.io/app/api" target="_blank" rel="noopener noreferrer">Get a key →</a></p>
-   <div class="rcf"><input id="rc-key" type="password" autocomplete="off" spellcheck="false"
-     placeholder="Paste your RentCast API key" aria-label="RentCast API key">
-    <button class="btn p sm" type="button" id="rc-save">Save the key</button></div>
-   ${RC.err ? `<div class="rcerr">${esc(RC.err)}</div>` : ''}
-  </div>`;
- return `<div class="rc on">
-   <div class="rch"><span class="tag live">connected</span>
-    <b>RentCast</b><span class="use">${used} of ${RC_FREE_MONTH} used this month${
-      left <= 5 ? ` · <b>${left} left</b>` : ''}</span></div>
-   <p>One lookup returns up to ten recent sales near this address. ${
-     premium() ? 'They arrive unscored — the comparability score, the adjustments and the ARV stay yours.'
-     : `Your free tier takes <b>${room}</b> of them${room ? '' : ' — the workbench is full'}. A plan takes all ten.`}
-    <b>Their value estimate is not used.</b></p>
-   <div class="rcf">
-    <button class="btn p sm" type="button" id="rc-go"${(!S.addr.trim() || !room || left<=0) ? ' disabled' : ''}>${
-      !S.addr.trim() ? 'Enter an address first' : left<=0 ? 'No lookups left this month'
-      : !room ? 'Free tier is full at three' : 'Fetch comps · 1 lookup'}</button>
-    <button class="btn sm" type="button" id="rc-forget">Forget the key</button></div>
-   ${RC.err ? `<div class="rcerr">${esc(RC.err)}</div>` : ''}
-   ${RC.msg ? `<div class="rcok">${esc(RC.msg)}</div>` : ''}
+ /* Entitlement, not tier: a demo paints at tier 3 and a preview flag paints
+    anything, and neither may spend money at a vendor who bills us per
+    request. */
+ if (entitled(2)) return rcPanelPaid();
+ /* THE FREE STATE IS ONE LINE ON PURPOSE. It used to be a panel with a
+    heading, three sentences, an outbound link to go and open a vendor account,
+    a password field and two buttons — more furniture than the workbench it sat
+    above, for a feature the free desk does not have. What a person on the free
+    desk needs to know here is one fact and one door, and the workbench below
+    it does the actual job either way: rows you type score exactly like rows
+    that arrive. */
+ return `<div class="rc">
+   <div class="rch"><b>Comps arrive pulled with Underwriter</b>
+    <span class="use"><a href="plans.html">See the plans &rarr;</a></span></div>
+   <p>Up to ten recent sales near the address, unscored, on our key — nothing for you to set up.
+    Until then, add them below by hand: a row you type is scored, adjusted and weighted exactly
+    like a row that arrives.</p>
   </div>`;
 }
 
@@ -8546,8 +8463,7 @@ function rcPanelPaid(){
      yours, which is the whole point of the workbench. <b>Their value estimate is not used.</b></p>
     <div class="rcf">
      <button class="btn p sm" type="button" id="rc-pull"${(noAddr || out) ? ' disabled' : ''}>${
-       noAddr ? 'Enter an address first' : out ? 'No pulls left this month' : 'Pull comps'}</button>
-     ${RC.byok ? '' : '<button class="btn sm" type="button" id="rc-byok">Use my own RentCast key instead</button>'}</div>
+       noAddr ? 'Enter an address first' : out ? 'No pulls left this month' : 'Pull comps'}</button></div>
     ${RC.err ? `<div class="rcerr">${esc(RC.err)}</div>` : ''}
     ${RC.msg ? `<div class="rcok">${esc(RC.msg)}</div>` : ''}
    </div>`;
@@ -8568,9 +8484,6 @@ async function rcPull(){
     RC.busy = false;
     if (!r.ok || !j || !j.ok){
       RC.err = (j && j.error) || 'The pull did not come back. Nothing on your sheet changed.';
-      /* a plan that cannot pull can still bring a key — say so rather than
-         leaving somebody at a dead end */
-      if (j && j.byok) RC.byok = true;
       return renderComps();
     }
     RC.month = j.month || null;
@@ -8743,32 +8656,8 @@ function renderComps(){
    if (S.compOpen && !S.comps.length) addComp(); else render(); };
  const a = $('cw-add'); if (a) a.onclick = () => addComp();
  // ── RentCast ──
- { const sv = $('rc-save');
-   if (sv) sv.onclick = () => {
-     const el = $('rc-key'), v = (el ? el.value : '').trim();
-     if (!/^[A-Za-z0-9_-]{16,80}$/.test(v)){
-       RC.err = 'That does not look like a RentCast key. They are a long run of letters and digits.';
-       render(); return; }
-     try { localStorage.setItem(RC_KEY, v); } catch(e){
-       RC.err = 'This browser refused to store the key — private mode blocks it.'; render(); return; }
-     RC.err = null; RC.msg = 'Key saved in this browser.'; render();
-   };
-   const fg = $('rc-forget');
-   if (fg) fg.onclick = () => { try { localStorage.removeItem(RC_KEY); } catch(e){}
-     RC.err = null; RC.msg = null; render(); };
-   const pull = $('rc-pull');
+ { const pull = $('rc-pull');
    if (pull) pull.onclick = () => rcPull();
-   const byok = $('rc-byok');
-   if (byok) byok.onclick = () => { RC.byok = true; RC.err = null; RC.msg = null; render(); };
-   const go = $('rc-go');
-   if (go) go.onclick = async () => {
-     RC.busy = true; RC.err = null; RC.msg = null; render();
-     try {
-       rcTake(await rcFetch(S.addr.trim()));
-       save();
-     } catch(e){ RC.err = e.message || String(e); }
-     RC.busy = false; render();
-   };
  }
  box.querySelectorAll('[data-cx]').forEach(b => b.onclick = () => {
    S.comps.splice(+b.dataset.cx, 1); save(); render(); });

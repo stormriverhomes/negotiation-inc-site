@@ -162,6 +162,34 @@ h1{font-size:46px}
 h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
 </style>
 <style>
+/* AND THE FACE IS JERSEY 10, NOT PIXELIFY, BECAUSE PIXELIFY CANNOT WRITE A 5.
+   Claude Design named Pixelify first and Jersey 10 as the licensed alternate.
+   Vendored Pixelify, shipped it, and the HUD printed $150,000 as $180,000. I
+   assumed synthetic bolding — the face was declared 400-700 and only the 400
+   file was shipped — fixed that, and it still read $180,000. So I rendered
+   both faces' digits at 24 and 36 side by side, which is the test that should
+   have come first: Pixelify's 5 is indistinguishable from its 8 at EVERY size,
+   and $58,300 reads as $98,300. In a game whose entire subject is money
+   figures that is not a taste problem, it is a defect.
+
+   Jersey 10 was clean where Pixelify was not, and Elijah then said its 2 and 5
+   looked squeezed — which was right. Jersey 10 is the condensed cut: the 2's
+   diagonal is nearly vertical and the 5's bowl is small, so both survive but
+   neither is comfortable. Same family, heavier cut, problem gone: JERSEY 25
+   opens every counter, the 2 gets a real diagonal, and it is the most arcade
+   of the three without becoming a novelty. Proportional, so it survives the
+   no-monospace rule, SIL OFL, 21KB, self-hosted like Fraunces.
+   Declared at 400 and asked for at 400 — no synthetic weight anywhere, because
+   thickening a pixel face closes its counters and closed counters are how this
+   started. */
+@font-face{font-family:'Pixelify';src:url('fonts/jersey25.woff2') format('woff2');
+ font-weight:400;font-style:normal;font-display:swap}
+/* the same file under a second name, because a canvas font string cannot read
+   a CSS variable and the share card sets its figures on a canvas */
+@font-face{font-family:'Jersey';src:url('fonts/jersey25.woff2') format('woff2');
+ font-weight:400;font-style:normal;font-display:swap}
+.pix{font-family:'Pixelify',var(--sans);font-variant-numeric:tabular-nums;
+ letter-spacing:.02em;font-weight:400}
 :root{--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
 .on-dark{--ground:#0d1420;--raise:#141c2b;--edge:#223047;--well:#101825;
  --ink:#e8e2d4;--ink-2:#aeb8c8;--ink-3:#8b98ac;
@@ -202,7 +230,15 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 <meta name="twitter:image" content="https://negotiationinc.com/og/page-arcade.png">
 <meta property="og:url" content="https://negotiationinc.com/arcade">
 <link rel="canonical" href="https://negotiationinc.com/arcade">
-</head>
+<style>
+p,li,dd,blockquote,figcaption{max-width:68ch}
+p,li,dd,blockquote{line-height:1.62!important}
+p+p,p+ul,ul+p,p+ol,ol+p{margin-top:1.05em!important}
+li+li{margin-top:.72em!important}
+h1,h2,h3,h4{max-width:34ch}
+h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
+@media (max-width:520px){p,li,dd,blockquote{line-height:1.66!important}}
+</style></head>
 <body class="on-dark">
 
 <header>
@@ -323,7 +359,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      has been playing a game, not for somebody who has just read a price — the
      plans-page paragraph read to an arcade player is a non-sequitur. -->
 <div class="wrap" style="padding-top:6px" data-waitlist="The paid desk" data-from="arcade"
-  data-line="The arithmetic in these cabinets is the arithmetic the real desk runs &mdash; that part is <b>free and finished</b>, on your own addresses, today. The paid tiers are being wired to a payment rail. Leave an address and you get <b>one</b> email the day they open, with the founding price on it."></div>
+  data-line="The arithmetic in these cabinets is the arithmetic the real desk runs &mdash; that part is <b>free and finished</b>, on your own addresses, today. The paid tiers are being wired to a payment rail. Leave an address and you get <b>one</b> email the day they open, with the price on it."></div>
 
 
 <script>
@@ -784,7 +820,7 @@ function signed(n){
     sit at the end of a game or a lesson do. */
  var LINE='The desk is <b>free and finished</b> \u2014 pricing, the seven exits, the comparison, the print. '+
    'The paid tiers are being wired to a payment rail. Leave an address and you get <b>one</b> email the day they '+
-   'open, with the founding price on it.';
+   'open, with the price on it.';
  /* ── A SLOT THAT SITS INSIDE SOMETHING ELSE ───────────────────────────────
     The founding offer used to say "Claim a place" with a grey box directly
     beneath it headed "The paid desk opens soon." — a page arguing with itself

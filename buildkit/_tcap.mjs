@@ -63,7 +63,7 @@ const PAGES = [
      page arguing with itself about whether it is selling — and says so, which
      is worth more on the ops page than knowing only that it was "the plans
      page". */
-  { f: 'plans.html',  from: 'plans-founding' },
+  { f: 'plans.html',  from: 'plans-underwriter' },
   { f: 'arcade.html', from: 'arcade'  },
   { f: 'exits.html',  from: 'course'  },
 ];

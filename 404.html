@@ -97,7 +97,15 @@ footer a:hover{color:var(--ink);border-bottom-color:currentColor}
 .mono,.num,[class*="fig"],[class*="num"]{font-variant-numeric:tabular-nums}
 h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
 </style>
-</head><body>
+<style>
+p,li,dd,blockquote,figcaption{max-width:68ch}
+p,li,dd,blockquote{line-height:1.62!important}
+p+p,p+ul,ul+p,p+ol,ol+p{margin-top:1.05em!important}
+li+li{margin-top:.72em!important}
+h1,h2,h3,h4{max-width:34ch}
+h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
+@media (max-width:520px){p,li,dd,blockquote{line-height:1.66!important}}
+</style></head><body>
 
 <header><div class="wrap"><div class="mast">
  <a class="mark" href="/"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>

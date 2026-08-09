@@ -97,7 +97,25 @@ const PRICE = {
    places": the promise is a price held for whoever holds a place, and somebody
    who left is not holding one. It also cannot be gamed — leaving costs the
    founding price permanently, since re-subscribing takes whatever is open. */
-const FOUNDING_PRICE = process.env.STRIPE_PRICE_FOUNDING || '';
+/* ── RETIRED, AND SWITCHED OFF AT THE SOURCE ──────────────────────────────
+   The plans page no longer sells a founding place, so the checkout must not
+   issue a founding price — and "must not" cannot be left resting on an
+   environment variable that is currently unset. The whole point of the machine
+   below is that it fails CLOSED, and the safest closed state is the one that
+   does not depend on a dashboard field nobody is looking at.
+
+   So the flag is code, not configuration. The counting, the seat maths and the
+   webhook stamping stay exactly as they were and are all reachable again by
+   flipping one boolean — the reasoning above was sound and the offer may come
+   back. What it may not do is come back by accident, on the day somebody
+   pastes STRIPE_PRICE_FOUNDING into Render out of habit while wiring the live
+   keys, and quietly starts charging $79 to a page that says $129. */
+const FOUNDING_ON    = false;
+const FOUNDING_PRICE = FOUNDING_ON ? (process.env.STRIPE_PRICE_FOUNDING || '') : '';
+if (!FOUNDING_ON && process.env.STRIPE_PRICE_FOUNDING)
+  console.warn('[billing] STRIPE_PRICE_FOUNDING is set but the founding offer is retired '
+    + '(FOUNDING_ON = false in billing.js). No founding price will be issued and the plans '
+    + 'page does not name one. Unset the variable, or flip the flag deliberately.');
 const FOUNDING_SEATS = Number(process.env.NI_FOUNDING_SEATS || 25);
 const FOUNDING_TIER  = 'underwriter';       // what a founding place actually buys
 
