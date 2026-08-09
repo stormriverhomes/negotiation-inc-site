@@ -50,9 +50,6 @@
 
   .bar{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--rule);
     background:var(--stock-2);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--carbon-soft)}
-  /* the HUD is a machine and counts in pixels; the clipboard is a document
-     and keeps Fraunces. Same figure, two voices, and the difference is the
-     difference between a score and a record. */
   .bar .m{font-size:14px;letter-spacing:0;font-variant-numeric:tabular-nums;color:var(--carbon)}
   .bar .t.warn{color:var(--red)}
 
@@ -268,30 +265,6 @@
   .renorow.big{font-size:19px;font-weight:700;border-top:1px solid var(--carbon);margin-top:7px;padding-top:9px}
   .renorow.big .n.up{color:var(--green)} .renorow.big .n.dn{color:var(--red)}
 
-  .rpat{font-family:var(--serif);font-size:13px;letter-spacing:0;text-transform:none;
-    color:var(--carbon-soft);margin-top:5px;min-height:17px}
-  /* ══ THE GAP ═══════════════════════════════════════════════════════════════
-     Claude Design's verdict from the first pass, finally cashed: the drama is
-     not the size of the number, it is the gap between the number you chose and
-     the number the engine had all along. That gap was already computed and was
-     being printed as a clause in a sentence in the middle of a paragraph. It
-     is the largest thing on the screen now, because it is the only thing on
-     the screen the player will remember. */
-  .gap{padding:20px 15px 18px;text-align:center;border-bottom:1px solid var(--rule);
-    background:var(--stock-2)}
-  .gap .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
-    color:var(--carbon-faint)}
-  /* SET IN INK, NOT IN RED — Claude Design's ruling, and it corrects the
-     version I shipped an hour earlier. --refuses means the engine declining
-     with a reason. Losing an auction is not a refusal, it is a fact, and a
-     seller holding out for their floor is a fact about a seller rather than
-     the software saying no. Red here would have been the fourth meaning that
-     colour has ever carried, which is how a palette stops meaning anything. */
-  .gap .v{font-family:var(--serif);font-size:44px;line-height:1.02;font-weight:700;
-    font-variant-numeric:tabular-nums;margin-top:5px;color:var(--carbon)}
-  .gap.won .v{color:var(--green)}
-  .gap .n{font-size:14px;color:var(--carbon-soft);margin-top:7px}
-  @media(max-width:420px){ .gap .v{font-size:36px} }
   .rhead{padding:12px 15px;border-bottom:2px solid var(--carbon);background:var(--stock-2);font-family:var(--mono);
     font-size:11px;letter-spacing:.16em;text-transform:uppercase}
   .rrow{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 15px;border-bottom:1px solid var(--rule-soft);align-items:baseline;
@@ -1758,22 +1731,6 @@ function closeRound(){
     bid_amount: state.bid?state.bid.amount:null, looks: state.looks, capital: run.capital, financeRate: p.financeRate });
   state.revealed=0; render(); revealStep();
 }
-/* ══ THE PATTER ════════════════════════════════════════════════════════════
-   Elijah asked for Claude's random-verb trick. On the desk it would have been
-   a small lie in the exact place this product stakes its claim, so the desk
-   got true lines about the property instead. HERE it belongs: the arcade is
-   the other world and it is allowed to be funny. Every line is about the
-   RITUAL — the room, the paper, the wait — and none of them claims anything
-   about the board, because a joke that invents a fact is still a fact
-   invented. */
-var PATTER = [
-  'Opening the envelopes.', 'Somebody has used a fountain pen.',
-  'Counting the paper.', 'The room goes quiet.',
-  'One of these is folded twice.', 'A number written and crossed out.',
-  'Reading them in the order they arrived.', 'Nobody is looking at anybody.',
-  'The clerk clears his throat.', 'Two of these are the same handwriting.'
-];
-function patter(n){ return PATTER[n % PATTER.length]; }
 function revealStep(){
   if (state.revealed >= 5){
     // `settled` makes the reveal rows render already-visible. Without it the
@@ -1790,36 +1747,9 @@ function revealStep(){
     render(); return;
   }
   const rows = document.querySelectorAll('.rrow');
-  const i = state.revealed;
-  if (rows[i]) rows[i].classList.add('in');
-  /* THE CAMERA WALKS THE STREET IT WAS PLAYED ON. The reveal used to be five
-     text rows fading in beside a drawing that sat still through the only
-     dramatic thing that happens in this game. The marker now moves house by
-     house, the sold board goes up as each one resolves, and by the end the
-     street is a record of the round rather than a picture of its start. */
-  const res = state.result.resolutions[i];
-  if (window.__strip){
-    window.__strip.at = i;
-    window.__strip.sold = window.__strip.sold || {};
-    if (res && res.sold_at) window.__strip.sold[i] = (res.winner === 'you') ? 'you' : 'them';
-    try { paintStreetHouses(); } catch(e){}
-  }
-  const say = document.getElementById('rpatter');
-  if (say) say.textContent = patter(i + (board.number || 0));
+  if (rows[state.revealed]) rows[state.revealed].classList.add('in');
   state.revealed++;
-  /* TIME IS FLAT. My first cut jittered every beat, on the same instinct that
-     made the desk's loading uneven — but Claude Design ruled the opposite here
-     and the reason is better than mine: a reveal whose pacing responds to the
-     stakes is a machine deciding how excited you should be. Cold houses take
-     the same 800ms whether they went for forty thousand or four hundred. The
-     only thing allowed to grow with the stakes is the number itself.
-
-     The one long beat is the house you bid on, and it is a HOLD rather than a
-     flourish: 1200ms in which nothing on the screen moves at all. The hold is
-     the animation. Under reduced motion it survives unchanged, because
-     stillness is what somebody who turned motion off asked for. */
-  const mine = state.bid && state.bid.idx === i;
-  setTimeout(revealStep, mine ? 1200 : 800);
+  setTimeout(revealStep, 340);
 }
 function buyEstimate(){
   if (state.phase!=='renovate' || state.estimated || state.looksLeft<=0) return;
@@ -1886,7 +1816,7 @@ function render(){
   if (run.screen==='summary'){ el.innerHTML=summaryHTML(); return; }
   if (state.phase==='play'){ el.innerHTML=playHTML(); done(); if (state.mode==='offer') paintDeal(); return; }
   if (state.phase==='renovate'){ el.innerHTML=renovateHTML(); return; }
-  el.innerHTML = resolveHTML(); done();
+  el.innerHTML = resolveHTML();
 }
 
 function heroHTML(){
@@ -2084,208 +2014,108 @@ function factsHTML(i){
    Drawn at 48x36 and scaled by whole numbers with image-rendering:pixelated,
    so a pixel is a pixel at every size. No anti-aliasing anywhere, which is
    what separates pixel art from a small drawing. */
+var SKY  = ['#a9c6de','#c2d8ea','#d9e7f2','#eaf1f6'];
+var COND = {
+  Clean: { wall:'#ece6d8', trim:'#f8f4e8', roof:'#7c6f5d', win:'#bcd9ee', weeds:0, tarp:0, boards:0, door:'#5b6d84' },
+  Dated: { wall:'#ddd2ba', trim:'#e9e1cd', roof:'#63594a', win:'#9db3c2', weeds:6, tarp:0, boards:0, door:'#6b6153' },
+  Rough: { wall:'#bfb298', trim:'#cdc2a8', roof:'#4a4038', win:'#7f8279', weeds:14, tarp:1, boards:1, door:'#4d463c' }
+};
+var SW = 300, SH = 78, LOTW = 60;
+
 /* ══ THE STREET ════════════════════════════════════════════════════════════
-   Claude Design's sixth pass, built. Five layers, six skies, and a silhouette
-   vocabulary — because the version this replaces drew five houses that were
-   the same house five times, in one flat light, and Elijah's verdict was that
-   it did not look like a game. It did not.
+   Five houses, one pavement, one sky. Not five thumbnails — a street you look
+   down, which is the thing this cabinet is named after and the thing it had
+   never once drawn. The Exit Drill proved the mechanism: its night house
+   boards its own windows and grows weeds as the repair ratio climbs. This is
+   that idea in daylight, because you walk a street in daylight.
 
-   WEATHER IS THE MODIFIER NOW. The daily seed already varies the market —
-   quiet market, auction week, probate calendar, thin data, firm sellers — and
-   the play screen used to print that as a sentence. It is the sky instead:
-   rain on the quiet days, dusk on auction night, fog when the recorder is
-   behind. A modifier you can see needs no caption, so the caption is gone.
-
-   TWO LAWS MAKE AA SURVIVABLE ACROSS ALL SIX WITHOUT SIX SEPARATE AUDITS, and
-   they are the reason this is a system rather than six pictures:
-     1 · words and figures NEVER stand on sky or scene. They stand on an
-         object or the ground plate, so text contrast is solved once.
-     2 · scene tones are SKY VARIABLES, not constants. The daylight house
-         fails 3:1 against rain, dusk and fog no matter which single value you
-         pick — so every sky ships its own house tone, solved against the band
-         its roofline meets. A palette is not a constant; the light is.
-
-   AND THE HONESTY RULE SURVIVES THE MAKEOVER INTACT. Footprint is square feet,
-   a second storey is the top square-foot band, wear is the card's condition,
-   and the figures on the kerb are the buyer count the card already prints.
-   Roof shape, porch, tree and lamp are seeded style and are keyed to nothing —
-   a roof that told you the repair bill would hand over the thing the looks
-   exist to sell. */
-var SKIES = {
-  day:    { bands:['#7d9bb0','#96b0bf','#a8bdc8'], house:'#4a5a63', roof:'#38434e', win:'#26303c', door:'#8c6a3a', grass:'#9aad82', side:'#7d8794', road:'#3e4854', far:'#8fa2b0', weather:'clouds', cloud:'#d8e2e8', tarp:'#6d94bd', board:'#8a734f' },
-  noon:   { bands:['#8fa9b8','#a9c0cc','#c4d2d8'], house:'#4a5a63', roof:'#38434e', win:'#26303c', door:'#8c6a3a', grass:'#93a67c', side:'#87919d', road:'#434d59', far:'#9db0bc', weather:'shadows', shadow:'#26303c', sun:'#f2ead2', tarp:'#6d94bd', board:'#8a734f' },
-  rain:   { bands:['#4e5d6b','#5a6a78','#78838c'], house:'#2e3844', roof:'#26303c', win:'#1a222c', door:'#6a5236', grass:'#6d7d5e', side:'#6d7784', road:'#333d49', far:'#65727e', weather:'rain', streak:'#eef2f5', tarp:'#5d84ad', board:'#a08050' },
-  dusk:   { bands:['#3a3a5c','#8c5f57','#b8764f'], house:'#141c2b', roof:'#141c2b', win:'#141c2b', litwin:'#d9a05a', door:'#141c2b', grass:'#2e3a3e', side:'#5d6874', road:'#26303c', far:'#2e3448', weather:'dusk', sun:'#e8c27a', pool:'#8a7358', tarp:'#5d84ad', board:'#a08050' },
-  winter: { bands:['#9aa8b4','#b4c2cc','#c8d2da'], house:'#4a5a63', roof:'#38434e', win:'#26303c', door:'#8c6a3a', grass:'#c2cad0', side:'#a9b2bc', road:'#5a646f', far:'#8b99a6', weather:'winter', snow:'#f2f4f6', tree:'#3a4650', tarp:'#6d94bd', board:'#8a734f' },
-  fog:    { bands:['#6d7884','#6d7884','#6d7884'], house:'#1c2430', roof:'#1c2430', win:'#1c2430', door:'#1c2430', grass:'#66705e', side:'#7d8794', road:'#3e4854', far:null, weather:'fog', bar:'#79848f', tarp:'#7da0c4', board:'#a08050' }
-};
-/* the map from what the engine already rolled to what you can see */
-var SKY_OF = { open_market:'day', firm_sellers:'noon', quiet_market:'rain',
-               auction_week:'dusk', estate_week:'winter', thin_data:'fog' };
-var SW = 366, SH = 170;
-/* the caption died and the sky took its job — so the sky says it out loud for
-   anybody who cannot see it. One string dies, one aria-label is born. */
-var SKY_LABEL = {
-  day:'Today\u2019s street, clear morning', noon:'Today\u2019s street, hard noon \u2014 sellers are firm',
-  rain:'Today\u2019s street in the rain \u2014 a quiet market', dusk:'Today\u2019s street at dusk \u2014 auction week',
-  winter:'Today\u2019s street after snow \u2014 the probate calendar', fog:'Today\u2019s street in fog \u2014 thin data'
-};
-
-var _ss = 42;
-function _r(){ _ss = (_ss*1664525 + 1013904223) >>> 0; return _ss / 4294967296; }
-
-function drawHouseP(g, S, x, gy, hp, sold){
-  var px = function(a,b,c,d,e){ g.fillStyle = e; g.fillRect(a|0,b|0,c|0,d|0); };
-  var w = hp.w, bh = hp.h, cx = x + w/2;
-  var rh = Math.max(4, Math.round(w * (hp.roof === 'hip' ? 0.16 : 0.24)));
-  px(x, gy-bh, w, bh, S.house);
-  var half = function(r){ var f = (r+1)/rh;
-    return hp.roof === 'hip' ? Math.round(w*0.2 + f*(w/2+1-w*0.2)) : Math.round(f*(w/2+1)); };
-  for (var r=0; r<rh; r++){
-    var hw = half(r);
-    px(Math.round(cx-hw), gy-bh-rh+r, hw*2, 1, (S.snow && r < 2) ? S.snow : S.roof);
-  }
-  if (hp.storeys === 2) px(x, gy-Math.round(bh/2), w, 1, S.roof);
-  var floors = hp.storeys || 1, ww = 4, wh = 5;
-  var winY = []; for (var f=0; f<floors; f++) winY.push(gy - bh + Math.round(bh*(f+0.22)/floors));
-  var cols = Math.max(1, Math.floor((w-8)/(ww+5)));
-  var firstWin = null;
-  for (var fi=0; fi<winY.length; fi++){
-    for (var c2=0; c2<cols; c2++){
-      var wx = Math.round(x + 4 + c2*((w-8-ww)/(Math.max(1,cols-1)||1)));
-      if (fi === floors-1 && Math.abs(wx+ww/2-cx) < ww+1) continue;
-      px(wx, winY[fi], ww, wh, S.litwin || S.win);
-      if (!firstWin) firstWin = [wx, winY[fi]];
-    }
-  }
-  var dw = 5, dh = 8;
-  px(Math.round(cx-dw/2), gy-dh, dw, dh, (S.litwin && hp.cond !== 'rough') ? S.litwin : S.door);
-  if (hp.roof === 'porch'){
-    px(Math.round(cx-dw/2)-3, gy-dh-3, dw+6, 1, S.roof);
-    px(Math.round(cx-dw/2)-3, gy-dh-2, 1, dh+2, S.roof);
-    px(Math.round(cx+dw/2)+2, gy-dh-2, 1, dh+2, S.roof);
-  }
-  if (hp.cond === 'rough'){
-    for (var r2=Math.round(rh*0.25); r2<rh; r2++){
-      var hw2 = half(r2);
-      px(Math.round(cx-hw2), gy-bh-rh+r2, Math.max(3, Math.round(hw2*0.85)), 1, S.tarp);
-    }
-    if (firstWin) px(firstWin[0]-1, firstWin[1]-1, ww+2, wh+2, S.board);
-    for (var i2=0; i2<5; i2++) px(x-2+Math.round(_r()*(w+2)), gy-3, 1, 3, '#26303c');
-  }
-  px(x-1, gy, w+2, 1, '#0d1420');
-  if (sold){
-    px(x+3, gy-11, 2, 11, '#6a5236');
-    px(x-1, gy-20, 14, 9, '#e9e2d0');
-    var ink = sold === 'you' ? '#2a5f3e' : '#22201c';
-    px(x, gy-18, 12, 1, ink); px(x+1, gy-16, 10, 1, ink); px(x+2, gy-14, 7, 1, ink);
-  }
-}
-
-function drawStreet(cv, cards, sel, seenMap, bidIdx, sold, skyKey){
+   THE HONESTY RULE, AND IT IS THE WHOLE DESIGN: the drawing shows ONLY what
+   the card already gives you for free. Condition, square feet, bedrooms and
+   how many other buyers have been by are printed before you spend a look.
+   Repairs and ARV are not, and nothing here encodes them — a roof that told
+   you the repair bill would hand over the thing the looks exist to sell, and
+   the game would be a colouring book. What the picture buys is the first
+   thirty seconds: somebody who cannot read "$9,500 repairs walk-through" can
+   see a tarp, and that is the entire on-ramp. */
+function drawStreet(cv, cards, sel, seenMap, bidIdx){
   var g = cv.getContext('2d'); if (!g) return;
   g.imageSmoothingEnabled = false;
-  _ss = 42;
-  var S = SKIES[skyKey || 'day'] || SKIES.day;
-  var px = function(a,b,c,d,e){ g.fillStyle = e; g.fillRect(a|0,b|0,c|0,d|0); };
-  var hy = 96;
-  g.clearRect(0,0,SW,SH);
-  px(0, 0, SW, Math.round(hy*0.5), S.bands[0]);
-  px(0, Math.round(hy*0.5), SW, Math.round(hy*0.28), S.bands[1]);
-  px(0, Math.round(hy*0.78), SW, hy-Math.round(hy*0.78), S.bands[2]);
+  var px = function(x,y,w,h,col){ g.fillStyle = col; g.fillRect(x|0,y|0,w|0,h|0); };
 
-  if (S.weather === 'dusk'){
-    var rr = 7; for (var dy=-rr; dy<=rr; dy++){ var hw3 = Math.round(Math.sqrt(rr*rr-dy*dy));
-      px(Math.round(SW*0.3)-hw3, hy-14+dy, hw3*2, 1, S.sun); }
-    for (var st=0; st<10; st++) px(Math.round(_r()*SW), Math.round(_r()*hy*0.4), 1, 1, '#e8e2d4');
-  }
-  if (S.weather === 'shadows'){
-    var sr = 5; for (var dy2=-sr; dy2<=sr; dy2++){ var hw4 = Math.round(Math.sqrt(sr*sr-dy2*dy2));
-      px(Math.round(SW*0.82)-hw4, Math.round(hy*0.18)+dy2, hw4*2, 1, S.sun); }
-  }
-  if (S.weather === 'clouds'){
-    for (var cI=0; cI<3; cI++){ var cxx = Math.round(_r()*SW*0.9), cy = Math.round(6+_r()*hy*0.3),
-      cw = Math.round(16+_r()*14);
-      px(cxx, cy, cw, 3, S.cloud); px(cxx+4, cy-3, cw-10, 3, S.cloud); }
-  }
-  if (S.far) for (var fx=0; fx<SW; fx+=7){ var fh = Math.round(3+_r()*8); px(fx, hy-fh, 7, fh, S.far); }
+  for (var i=0;i<SKY.length;i++) px(0, i*5, SW, 6, SKY[i]);
+  px(0, 20, SW, 22, '#a4b587');
+  px(0, 41, SW, 14, '#8fa76c');
+  px(0, 55, SW,  3, '#c0b8a2');
+  px(0, 58, SW, SH-58, '#9b978a');
+  for (var d=0; d<SW; d+=16) px(d, 68, 9, 1, '#c7c2b4');
 
-  var lawnH = 22, sideY = hy+lawnH, sideH = 16;
-  px(0, hy, SW, lawnH, S.grass);
-  px(0, sideY, SW, sideH, S.side);
-  px(0, sideY+sideH, SW, SH-sideY-sideH, S.road);
-  px(0, sideY, SW, 1, '#0d1420'); px(0, sideY+sideH, SW, 1, '#0d1420');
-  for (var ln=0; ln<SW; ln+=22) px(ln, sideY+sideH+9, 12, 2, '#c7c2b4');
-
-  var gy = hy + 13;
-  var sq = cards.map(function(c){ return c.sqft; });
-  var lo = Math.min.apply(null, sq), hi = Math.max.apply(null, sq);
-  var ROOFS = ['gable','hip','porch','gable'];
-  var hs = cards.map(function(c, n){
-    var t = hi === lo ? 0.5 : (c.sqft - lo) / (hi - lo);
+  for (var n=0;n<5;n++){
+    var c = cards[n]; if (!c) continue;
+    var k = COND[c.condition] || COND.Dated;
     var sd = 0, ad = c.address || ('h'+n);
-    for (var j=0; j<ad.length; j++) sd = (sd*31 + ad.charCodeAt(j)) >>> 0;
-    return { w: Math.round(38 + 24*t), h: Math.round(20 + 12*t),
-             roof: ROOFS[sd % ROOFS.length],
-             storeys: t > 0.72 ? 2 : 1,
-             cond: c.condition === 'Rough' ? 'rough' : null };
-  });
-  var tw = hs.reduce(function(a,p){ return a + p.w; }, 0);
-  var gap = Math.round((SW - tw - 16) / 4), xs = [], x = 8;
-  hs.forEach(function(p){ xs.push(x); x += p.w + gap; });
+    for (var j=0;j<ad.length;j++) sd = (sd*31 + ad.charCodeAt(j)) >>> 0;
+    var rnd = function(){ sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296; };
 
-  if (S.weather === 'winter'){
-    var tx = xs[1] - Math.round(gap*0.5);
-    px(tx, gy-16, 2, 16, S.tree); px(tx-4, gy-13, 4, 1, S.tree); px(tx+2, gy-10, 4, 1, S.tree);
-  }
-  hs.forEach(function(p, n){
-    if (S.weather === 'shadows') px(xs[n]-1, gy+1, p.w+2, 2, S.shadow);
-    drawHouseP(g, S, xs[n], gy, p, sold && sold[n]);
-    /* the board out front, and the kerb figures the card already counted */
-    var sx = xs[n] + 3;
-    px(sx+2, gy+4, 1, 7, '#b0a894'); px(sx, gy, 8, 5, '#f8f4e8'); px(sx+1, gy+1, 6, 1, '#a1251e');
-    var heads = Math.min(3, cards[n].interest || 0);
-    for (var h2=0; h2<heads; h2++){
-      var hx = xs[n] + p.w - 10 - h2*6;
-      px(hx, sideY+3, 3, 7, '#2a3240'); px(hx, sideY-1, 3, 4, '#c9a07a');
-      px(hx-1, sideY+2, 5, 1, '#2a3240');
+    var ox = n * LOTW;
+    var t  = Math.max(0, Math.min(1, (c.sqft - 700) / 1600));
+    var bw = Math.round(26 + 20*t), bh = Math.round(13 + 7*t);
+    var bx = ox + Math.round((LOTW - bw)/2), by = 45 - bh;
+    var rise = 7 + Math.round(3*t);
+
+    px(bx-1, by+bh-1, bw+2, 2, '#7d9160');
+    px(bx, by, bw, bh, k.wall);
+    px(bx, by, bw, 1, k.trim);
+    for (var r=0; r<=rise; r++){
+      var inset = Math.round(r * 3 / rise);
+      px(bx-3+inset, by-rise+r, bw+6-2*inset, 1, k.roof);
     }
-    var st2 = seenMap && seenMap[n];
-    if (bidIdx === n) for (var q=0; q<p.w+gap; q+=3) px(xs[n]+q-4, sideY+sideH+2, 2, 2, '#57a878');
-    else if (st2 && (st2.walk || st2.ask)) px(xs[n]-4, sideY+sideH+3, p.w+8, 1, '#8b98ac');
+    px(bx+bw-7, by-rise-4, 3, 5, k.roof);
+    if (k.tarp) px(bx+3, by-rise+2, 8, 3, '#3a6ea5');
+
+    var dw = 5, dx = bx + ((bw/2)|0) - 2;
+    px(dx, by+bh-8, dw, 8, k.door);
+    px(dx+dw-2, by+bh-4, 1, 1, '#d8c66a');
+
+    var wins = Math.max(1, Math.min(3, (c.beds||3) - 1));
+    var span = (bw - 6) / wins;
+    for (var w=0; w<wins; w++){
+      var wx = bx + 3 + Math.round(w*span);
+      if (wx + 4 > dx - 1 && wx < dx + dw + 1) continue;
+      if (wx + 4 > bx + bw - 2) break;
+      px(wx, by+3, 4, 4, k.win);
+      px(wx, by+3, 4, 1, k.trim);
+      if (k.boards) px(wx-1, by+4, 6, 1, '#8a7a58');
+    }
+
+    for (var wd=0; wd<k.weeds; wd++)
+      px(ox + 2 + ((rnd()*(LOTW-4))|0), 42 + ((rnd()*11)|0), 1, 2, '#66803f');
+    if (!k.weeds) for (var sh=0; sh<3; sh++)
+      px(bx + 3 + sh*Math.round((bw-6)/3), by+bh-3, 3, 3, '#5f7a44');
+
+    var sx = ox + 4;
+    px(sx+2, 47, 1, 7, '#b0a894'); px(sx, 43, 7, 5, '#f8f4e8'); px(sx+1, 44, 5, 1, '#a1251e');
+
+    var heads = Math.min(3, c.interest || 0);
+    for (var hI=0; hI<heads; hI++){
+      var hx = ox + LOTW - 9 - hI*5;
+      px(hx, 51, 2, 5, '#4a4438'); px(hx, 48, 2, 3, '#8a7a58');
+    }
+
+    var st = seenMap && seenMap[n];
+    if (bidIdx === n){ for (var q=0;q<LOTW;q+=2) px(ox+q, 56, 1, 2, '#2a5f3e'); }
+    else if (st && (st.walk || st.ask)) px(ox+2, 56, LOTW-4, 1, '#7e7869');
     if (sel === n){
-      px(xs[n]-4, sideY+sideH+2, p.w+8, 2, '#a8873a');
-      var mcx = xs[n] + Math.round(p.w/2);
-      px(mcx-4, sideY+sideH+5, 9, 1, '#a8873a');
-      px(mcx-3, sideY+sideH+6, 7, 1, '#a8873a');
-      px(mcx-2, sideY+sideH+7, 5, 1, '#a8873a');
-      px(mcx-1, sideY+sideH+8, 3, 1, '#a8873a');
+      px(ox+2, 57, LOTW-4, 2, '#704e17');
+      px(ox + 30 - 3, 60, 7, 1, '#704e17');
+      px(ox + 30 - 2, 61, 5, 1, '#704e17');
+      px(ox + 30 - 1, 62, 3, 1, '#704e17');
     }
-  });
-
-  if (S.weather === 'rain'){
-    for (var ri=0; ri<70; ri++){ var rx = Math.round(_r()*SW), ry = Math.round(_r()*(sideY-6));
-      px(rx, ry, 1, 4, S.streak); px(rx-1, ry+4, 1, 2, S.streak); }
   }
-  if (S.weather === 'fog'){
-    px(0, gy-30, SW, 3, S.bar); px(0, gy-18, SW, 4, S.bar); px(0, gy-7, SW, 3, S.bar);
-  }
-  if (S.weather === 'dusk'){
-    var lx = Math.round(SW*0.62);
-    px(lx, sideY-18, 2, 18, '#1c2430'); px(lx-2, sideY-21, 6, 3, S.sun);
-    px(lx-7, sideY+2, 16, 3, S.pool); px(lx-4, sideY+5, 10, 2, S.pool);
-  }
-}
-function currentSky(){
-  try {
-    var m = run.plan.rounds[run.round].modifier;
-    return SKY_OF[m && m.id] || 'day';
-  } catch(e){ return 'day'; }
 }
 function paintStreetHouses(){
   var cv = document.getElementById('streetcv'); if (!cv) return;
   var d = window.__strip; if (!d) return;
-  drawStreet(cv, d.cards, d.at, d.seen, d.bidIdx, d.sold, d.sky);
+  drawStreet(cv, d.cards, d.at, d.seen, d.bidIdx);
 }
 
 /* ONE DRAWING, TWO CALL SITES. The strip is the street: five footprints on a
@@ -2297,8 +2127,7 @@ function paintStreetHouses(){
 function streetStrip(cards, o){
   const live = !!o.interactive;
   window.__strip = { cards: cards, at: live ? o.at : -1, seen: live ? o.seen : null,
-                     bidIdx: live ? o.bidIdx : -1, sky: o.sky || currentSky(),
-                     sold: (window.__strip && window.__strip.sold) || null };
+                     bidIdx: live ? o.bidIdx : -1 };
   const labels = [];
   for (let i=0;i<5;i++){
     const c = cards[i];
@@ -2310,8 +2139,7 @@ function streetStrip(cards, o){
       + '>'+(i+1)+'</'+(live?'button':'span')+'>');
   }
   return '<div class="street'+(live?'':' still')+'">'
-    + '<canvas id="streetcv" width="366" height="170" role="img" aria-label="'
-    + esc(SKY_LABEL[o.sky || currentSky()] || 'the street') + '"></canvas>'
+    + '<canvas id="streetcv" width="300" height="78" aria-hidden="true"></canvas>'
     + '<div class="lots">'+labels.join('')+'</div></div>';
 }
 function pagerHTML(){
@@ -2421,9 +2249,7 @@ const STREAK = ['','','Two in a row.','Three for three. A perfect run.'];
 
 function resolveHTML(){
   const R = state.result;
-  let h = statusBar() + pagerHTML() +
-    '<div class="rhead">Offers opened — '+esc(board.name)+
-    '<div class="rpat" id="rpatter">'+(state.settled?'':patter(board.number||0))+'</div></div>';
+  let h = statusBar() + '<div class="rhead">Offers opened — '+esc(board.name)+'</div>';
   R.resolutions.forEach(function(res,i){
     const c=board.cards[i], mine=state.bid&&state.bid.idx===i, won=res.winner==='you';
     const t = board.truth ? board.truth[i] : null;
@@ -2442,50 +2268,11 @@ function resolveHTML(){
       '<div class="amt">'+(res.sold_at?M(res.sold_at):'—')+'</div></div>';
   });
   if (state.phase!=='settle') return h;
-  h += gapHTML();
   const streak = run.streak>=2 ? '<div class="streak">'+STREAK[Math.min(run.streak,3)]+'</div>' : '';
   return h + settlementHTML() + theReadHTML() + streak + '<div class="said">'+ACHE[R.outcome]+'</div>' +
     '<div style="padding:14px 15px;border-top:1px solid var(--rule)">' +
     '<button class="btn go" style="margin:0" onclick="nextRound()">' +
     (run.round+1>=B.ROUNDS ? 'See how the run went →' : 'Next street →')+'</button></div>';
-}
-
-/* THE ONE NUMBER THE PLAYER WILL REMEMBER. Every figure here is scoreRound's
-   own: `needed` is price_to_win, the number that would have taken the house,
-   and it is the engine's arithmetic rather than a dramatisation of it. A miss
-   by nine hundred dollars is a better teacher than any sentence, and it is
-   free — we already computed it and were burying it. */
-function gapHTML(){
-  const R = state.result;
-  if (R.outcome === 'won'){
-    return '<div class="gap won"><div class="k">You made</div><div class="v">' +
-      MP(R.your_spread) + '</div><div class="n">' +
-      (R.best_index === (state.bid ? state.bid.idx : -1)
-        ? 'and that was the best house on the street'
-        : 'the best on this street was ' + MP(R.best_spread)) + '</div></div>';
-  }
-  if (R.needed != null && state.bid){
-    /* THE HEADLINE HAS TO BE THE DISTANCE TO THE THING THE LABEL NAMES. First
-       version printed price_to_win under both outcomes, so a refusal said
-       "the seller would not take it — $41,000" while the line underneath gave
-       their floor as $23,500 away. Two true numbers making one false
-       impression is the same failure as a rounded estimate wearing a precise
-       figure's clothes. Refused measures to the FLOOR; outbid measures to the
-       number that would have won. */
-    const short = (R.outcome === 'refused' && R.floor != null)
-      ? R.floor - state.bid.amount
-      : R.needed - state.bid.amount;
-    return '<div class="gap"><div class="k">' +
-      (R.outcome === 'refused' ? 'The seller needed another' : 'You were outbid by') +
-      '</div><div class="v">' + M(Math.max(0, short)) + '</div><div class="n">' +
-      (R.outcome === 'refused'
-        ? 'their floor was ' + M(R.floor) + '. You offered ' + M(state.bid.amount) +
-          '. It took ' + M(R.needed) + ' to actually get it.'
-        : M(R.needed) + ' would have taken it. You offered ' + M(state.bid.amount) + '.') +
-      '</div></div>';
-  }
-  return '<div class="gap"><div class="k">You did not bid</div><div class="v">' +
-    MP(R.best_spread) + '</div><div class="n">that is what the best house on this street had in it</div></div>';
 }
 
 /* ── the read: what the street was actually worth ──────────────────────────
