@@ -882,38 +882,40 @@ body.traytight .tray{padding-bottom:11px}
 .walk.locked:hover,.walk.locked:focus-visible{border-color:var(--blue);
  box-shadow:0 6px 22px rgba(26,80,175,.15)}
 .walk.locked:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
-.wkart{position:relative;height:150px;margin:12px 0 0;overflow:hidden;isolation:isolate;
- background:linear-gradient(#9dc3ea 0 38%,#cfe3f2 38% 46%,#7d9b6a 46% 56%,#6f6f6d 56% 100%)}
-/* A STREET, DRAWN — houses either side, a road running away between them.
-   The first version was four soft gradients and it blurred down to a grey
-   smear: you could tell something was behind the glass but not that it was a
-   street, which is the one thing the teaser has to say. More shapes, harder
-   edges, and a lighter blur — the blur means "not yours yet", not "nothing
-   here", and those look identical when you overdo it. */
-.wkart::before{content:"";position:absolute;inset:0;
+.wkart{position:relative;height:168px;margin:12px 0 0;overflow:hidden;isolation:isolate;
+ background:linear-gradient(178deg,#8fb6dd 0%,#bcd3e6 34%,#cdd3c6 47%,#9aa096 61%,#7c8079 100%)}
+/* ── A BLUR, NOT BLURRED BLOCKS ────────────────────────────────────────────
+   The first two versions drew a street out of hard-edged rectangles and then
+   blurred them a little, and Elijah called it exactly right: "weak blurred
+   pixel art... it makes it feel like a toy and not a legitimate feature."
+
+   The mistake was thinking the teaser had to depict a street. It does not —
+   the heading says "Walk the street" three centimetres above it. What it has
+   to do is look like something EXPENSIVE is behind the glass, and a small blur
+   on recognisable shapes achieves the opposite: the eye resolves the shapes,
+   finds cardboard houses, and prices the whole feature accordingly.
+
+   So there are no objects here at all. Six large soft colour fields — warm
+   light top left, sky, a green mass, a cool shadow low right — at a blur
+   radius wide enough that nothing has an edge to resolve. That is what an
+   out-of-focus photograph actually looks like: light and depth, no geometry.
+   Frosted glass over a bright day, which is the promise; blurred Lego, which
+   was what shipped, is a promise about Lego. */
+.wkart::before{content:"";position:absolute;inset:-14%;
  background:
-  linear-gradient(to bottom right,transparent 49.4%,#8e8e8b 49.4% 50.6%,transparent 50.6%) 50% 56%/56% 44% no-repeat,
-  linear-gradient(to bottom left,transparent 49.4%,#8e8e8b 49.4% 50.6%,transparent 50.6%) 50% 56%/56% 44% no-repeat,
-  linear-gradient(135deg,transparent 48%,#8a5f4a 48%) 1% 30%/74px 30px no-repeat,
-  linear-gradient(#e8e2d6 0 100%) 1% 47%/74px 42px no-repeat,
-  linear-gradient(135deg,transparent 48%,#7d5744 48%) 15% 36%/58px 24px no-repeat,
-  linear-gradient(#ddd6c8 0 100%) 15% 50%/58px 34px no-repeat,
-  linear-gradient(135deg,transparent 48%,#6f4d3c 48%) 26% 41%/44px 18px no-repeat,
-  linear-gradient(#d2cabb 0 100%) 26% 52%/44px 26px no-repeat,
-  linear-gradient(225deg,transparent 48%,#8a5f4a 48%) 99% 30%/74px 30px no-repeat,
-  linear-gradient(#e5dfd2 0 100%) 99% 47%/74px 42px no-repeat,
-  linear-gradient(225deg,transparent 48%,#7d5744 48%) 85% 36%/58px 24px no-repeat,
-  linear-gradient(#dad3c4 0 100%) 85% 50%/58px 34px no-repeat,
-  linear-gradient(225deg,transparent 48%,#6f4d3c 48%) 74% 41%/44px 18px no-repeat,
-  linear-gradient(#cfc7b8 0 100%) 74% 52%/44px 26px no-repeat,
-  radial-gradient(closest-side,#5f7f4c 88%,transparent) 34% 44%/30px 40px no-repeat,
-  radial-gradient(closest-side,#5f7f4c 88%,transparent) 66% 45%/26px 34px no-repeat;
- filter:blur(4.5px) saturate(1.02);transform:scale(1.06)}
-/* the veil lifts off the middle so the street is legible and closes at the
-   bottom so the card has somewhere to end */
+  radial-gradient(38% 46% at 16% 22%, rgba(255,246,222,.95), transparent 70%),
+  radial-gradient(46% 40% at 78% 16%, rgba(168,205,238,.92), transparent 72%),
+  radial-gradient(52% 44% at 30% 78%, rgba(108,142,96,.88),  transparent 70%),
+  radial-gradient(40% 34% at 84% 70%, rgba(86,102,110,.78),  transparent 72%),
+  radial-gradient(30% 26% at 56% 52%, rgba(226,214,190,.72), transparent 74%),
+  radial-gradient(24% 30% at 66% 88%, rgba(58,68,74,.55),    transparent 76%);
+ filter:blur(26px) saturate(1.16);transform:scale(1.12)}
+/* the glass itself: a light wash that lifts off the middle, and a vignette so
+   the panel has edges without needing a border drawn on the art */
 .wkart::after{content:"";position:absolute;inset:0;
- background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,.10) 40%,
-   rgba(255,255,255,.34) 74%,#fff)}
+ background:
+  radial-gradient(120% 90% at 50% 42%, rgba(255,255,255,.04), rgba(255,255,255,.30) 62%, rgba(255,255,255,.66) 100%),
+  linear-gradient(180deg, rgba(255,255,255,.34), rgba(255,255,255,.06) 46%, rgba(255,255,255,.42) 100%)}
 /* the sheen: one transform, hover and focus only, never a loop */
 .wksheen{position:absolute;top:0;bottom:0;width:46%;z-index:2;pointer-events:none;
  background:linear-gradient(105deg,transparent,rgba(255,255,255,.72),transparent);
@@ -1295,6 +1297,41 @@ body.traytight .tray{padding-bottom:11px}
 .rtrack .dot{position:absolute;top:14px;width:16px;height:16px;border-radius:50%;transform:translateX(-8px);
  border:2px solid #fff;box-shadow:0 1px 3px rgba(16,23,37,.3)}
 .rtrack .mid{position:absolute;top:8px;width:2px;height:28px;background:var(--ink);transform:translateX(-1px)}
+/* ══ THE DOTS OPEN ═════════════════════════════════════════════════════════
+   Elijah: "in the working range section of the comps, make it so you can hover
+   over the dots and then maybe expand info on them or check the street view."
+
+   Each dot was already the whole comp — where it landed after adjustment, and
+   its score in the colour — and the only way to read one was a browser tooltip
+   holding a truncated sentence. That is the densest picture on the sheet and
+   the least reachable thing on it.
+
+   Everything in the card is a figure already on this page. Nothing here is
+   computed for the popover, because a figure that exists in one place only is
+   a figure nobody can check. */
+.rtrack .dot{cursor:pointer}
+.rtrack .dot:hover,.rtrack .dot:focus-visible{transform:translateX(-8px) scale(1.32);z-index:4}
+.rtrack .dot:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.rtrack .dot{transition:transform .13s ease}
+.dotpop{position:absolute;z-index:9;top:40px;width:262px;padding:11px 13px 12px;
+ border:1px solid var(--line-ink);border-radius:var(--r-card);background:#fff;
+ box-shadow:0 10px 30px rgba(16,23,37,.16);font-size:12.5px;line-height:1.5}
+.dotpop[hidden]{display:none}
+.dotpop .pa{font-weight:700;color:var(--ink);font-size:13px;line-height:1.35}
+.dotpop .pv{display:flex;justify-content:space-between;gap:10px;margin-top:7px;
+ font-variant-numeric:tabular-nums;color:var(--mid)}
+.dotpop .pv b{color:var(--ink);font-weight:700}
+.dotpop .pg{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;margin-top:8px;
+ padding-top:8px;border-top:1px solid var(--line);color:var(--soft);font-size:12px;
+ font-variant-numeric:tabular-nums}
+.dotpop .pg b{color:var(--mid);font-weight:650}
+.dotpop .pwalk{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:12.5px;
+ font-weight:650;color:var(--blue);text-decoration:none;cursor:pointer;background:none;
+ border:0;padding:0;font-family:var(--sans)}
+.dotpop .pwalk:hover{text-decoration:underline}
+@media (max-width:560px){ .dotpop{width:min(262px,78vw)} }
+@media (prefers-reduced-motion:reduce){ .rtrack .dot{transition:none}
+ .rtrack .dot:hover,.rtrack .dot:focus-visible{transform:translateX(-8px)} }
 .rfoot{display:flex;justify-content:space-between;font-size:11.5px;color:var(--soft);margin-top:2px;
  font-variant-numeric:tabular-nums}
 .range .say{font-size:13px;color:var(--mid);margin-top:12px;line-height:1.55;max-width:64ch}
@@ -5780,6 +5817,14 @@ function renderShell(){
  if (!a && !guest){ if (!el.hidden){ el.hidden = true; el.innerHTML = ''; delete el.dataset.sig; }
    document.body.classList.remove('hasrail','asguest'); return; }
  el.hidden = false; document.body.classList.add('hasrail');
+ /* built here rather than inline in the foot: the build slices the six hundred
+    characters after the rail-foot class to prove the arcade is still last,
+    and a ternary spelled out down there pushes the arcade past the window and
+    trips a guard that is right to be tight. One short name, one long reason,
+    and the guard keeps its teeth. */
+ const shopLink = premium()
+   ? '<a class="rn-lnk" href="office.html#account">Billing</a>'
+   : '<a class="rn-lnk" href="plans.html">Plans</a>';
  document.body.classList.toggle('asguest', guest);
  if (guest){ renderGuestShell(el); return; }
  /* Private browsing throws on every read. Unguarded, this took the whole
@@ -5848,9 +5893,22 @@ function renderShell(){
        So: last in the list, and labelled with what it actually is rather
        than with the name we gave it. Somebody who wants games will find them;
        somebody who only wants the software never has to wonder. -->
+  <!-- ── THE RAIL STOPS SHOPPING ONCE YOU HAVE BOUGHT ────────────────────
+       "Plans" sat in the foot at every tier including the one that owns
+       everything — a shop window shown to somebody already inside the shop.
+       What a paying customer wants from that slot is the opposite thing: the
+       card, the invoices, the cancel. Somebody on Solo who wants Underwriter
+       still has a door — the account panel's upgrade card, which names the
+       price and what it adds, and is a better door than a word in a nav. The
+       signed-out rail keeps Plans, because there the shop window is the point.
+
+       The reasoning lives out here rather than inside the block because the
+       build slices the six hundred characters after the rail-foot class
+       the arcade is still last in it, and a long comment pushed the arcade out
+       of the window and tripped a guard that was right to be tight. -->
   <div class="rn-foot">
    <a class="rn-lnk" href="exits.html">The eight exits</a>
-   <a class="rn-lnk" href="plans.html">Plans</a>
+   ${shopLink}
    <a class="rn-lnk side" href="arcade.html" title="Practice games — optional, free, and they run the desk's own arithmetic">The arcade<em>games</em></a>
   </div>`;
  if (el.dataset.sig !== html){ el.innerHTML = html; el.dataset.sig = html;
@@ -7211,6 +7269,78 @@ const LOCKED = {
 };
 
 
+/* ══ THE RANGE DOTS OPEN ═══════════════════════════════════════════════════
+   Hover or focus a dot and the comp behind it says what it is. Everything in
+   the card is already on the page — the adjusted figure the dot is standing
+   on, the score its colour encodes, and the five fields the workbench scored
+   it by. Nothing is computed here, because a figure that exists in one place
+   only is a figure nobody can check.
+
+   AND IT IS THE WAY INTO THE WALK. The dot furthest from the cluster is the
+   comp most worth standing outside, and until now the two lived at opposite
+   ends of the sheet with no line between them. "Walk this one" moves the walk
+   panel to that address and scrolls to it — one gesture from "this comp looks
+   wrong" to "let me look at the street it is on."
+
+   Keyboard reaches all of it: the dots are buttons, Escape closes, and the
+   card follows focus as well as the pointer, because a picture only the mouse
+   can read is a picture half the people cannot. */
+function dotPopHTML(r){
+  const f = (v, s) => (v === null || v === undefined || v === '') ? '—' : (s || String(v));
+  const walkable = String(r.addr || '').trim().length >= 8;
+  return `<div class="pa">${esc(r.addr || 'Comparable')}</div>
+   <div class="pv"><span>Adjusted</span><b>${fmt(r.adjusted)}</b></div>
+   <div class="pv"><span>Sold at</span><b>${r.price ? fmt(r.price) : '—'}</b></div>
+   <div class="pv"><span>Comparability</span><b>${f(r.score)}</b></div>
+   <div class="pg">
+    <span>Size</span><b>${f(r.sqft, r.sqft ? r.sqft.toLocaleString('en-US') + ' sq ft' : '')}</b>
+    <span>Beds / baths</span><b>${f(r.beds)} / ${f(r.baths)}</b>
+    <span>Sold</span><b>${r.months === null || r.months === undefined ? '—'
+      : r.months === 0 ? 'this month' : r.months + ' mo ago'}</b>
+    <span>Distance</span><b>${r.dist === null || r.dist === undefined ? '—' : r.dist + ' mi'}</b>
+    <span>Condition</span><b>${esc(r.condLab || '—')}</b>
+   </div>
+   ${walkable ? `<button class="pwalk" type="button" data-walk="${esc(r.addr)}">
+     ${entitled(2) ? 'Walk this one' : 'See what this street looks like'}
+     <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor"
+       stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+       focusable="false"><path d="M2 8h11"/><path d="M9 4l4 4-4 4"/></svg></button>` : ''}`;
+}
+
+function wireDots(){
+  const track = document.querySelector('.rtrack'); if (!track) return;
+  const pop = document.getElementById('dotpop'); if (!pop) return;
+  const rows = (typeof compRows === 'function' ? compRows() : []).filter(r => r.ok);
+  const hide = () => { pop.hidden = true; };
+  const show = el => {
+    const r = rows[+el.dataset.ri]; if (!r) return;
+    pop.innerHTML = dotPopHTML(r);
+    pop.hidden = false;
+    /* the card is 262 wide inside a track that is not — clamp it to the track
+       rather than letting it hang off the panel on a phone */
+    const w = pop.offsetWidth, tw = track.clientWidth;
+    const left = Math.max(0, Math.min(tw - w, el.offsetLeft - w / 2));
+    pop.style.left = left + 'px';
+    const walk = pop.querySelector('[data-walk]');
+    if (walk) walk.onclick = () => {
+      hide();
+      const stops = walkStops();
+      const i = stops.findIndex(x => x.addr.toLowerCase() === walk.dataset.walk.toLowerCase());
+      const box = document.getElementById('walkbox');
+      if (i >= 0 && entitled(2)) walkGo(i);
+      if (box) try { box.scrollIntoView({ block:'center', behavior:'smooth' }); } catch(e){}
+    };
+  };
+  track.querySelectorAll('.dot').forEach(d => {
+    d.onmouseenter = () => show(d);
+    d.onfocus = () => show(d);
+    d.onclick = () => show(d);
+    d.onblur = ev => { if (!pop.contains(ev.relatedTarget)) hide(); };
+  });
+  track.onmouseleave = () => hide();
+  track.onkeydown = ev => { if (ev.key === 'Escape') hide(); };
+}
+
 /* ══ WALK THE STREET · THE BROWSER HALF ════════════════════════════════════
    Elijah: "being able to check it at the end so you can go back and walk
    through the neighborhood and get a better feel for the property and/or the
@@ -7326,8 +7456,13 @@ function renderWalk(){
       &mdash; it is a feel for the block, not evidence about the house today.</p>`;
   }
 
-  box.innerHTML = `<div class="walk"><div class="wkh"><span class="k">Underwriter</span>
-    <b>Walk the street</b></div>
+  /* NO TIER CHIP ON THE UNLOCKED FACE. It shipped with one — "UNDERWRITER ·
+     Walk the street" — on the panel you only ever see BECAUSE you are on
+     Underwriter. A price tag is for somebody deciding; on the other side of
+     the decision it is the product congratulating itself at the customer, and
+     it was the one thing the tier audit found surviving all the way to the top
+     tier. The chip belongs on the locked face and nowhere else. */
+  box.innerHTML = `<div class="walk"><div class="wkh"><b>Walk the street</b></div>
    <div class="wkbar">${chips}${modes}</div>${body}</div>`;
 }
 
@@ -8822,7 +8957,9 @@ function renderComps(){
    const pad = (R.max - R.min) * 0.18 + 1;
    const lo = R.min - pad, hi = R.max + pad, span = Math.max(1, hi - lo);
    const pos = v => Math.max(0, Math.min(100, (v - lo)/span*100));
-   const dots = R.rows.map(r => `<span class="dot" style="left:${pos(r.adjusted)}%;background:${SCORE_COL(r.score)}"
+   const dots = R.rows.map((r, ri) => `<span class="dot" data-ri="${ri}" tabindex="0" role="button"
+      style="left:${pos(r.adjusted)}%;background:${SCORE_COL(r.score)}"
+      aria-label="${esc(r.addr||'comp')}, adjusted to ${fmt(r.adjusted)}, score ${r.score}"
       title="${esc(r.addr||'comp')} — ${fmt(r.adjusted)}, score ${r.score}"></span>`).join('');
    const inBand = arvNow !== null && arvNow >= R.lo && arvNow <= R.hi;
    rangeHTML = `<div class="range">
@@ -8837,6 +8974,7 @@ function renderComps(){
      <span class="band" style="left:${pos(R.lo)}%;width:${Math.max(2,pos(R.hi)-pos(R.lo))}%"></span>
      ${dots}
      ${arvNow !== null ? `<span class="mid" style="left:${pos(arvNow)}%"></span>` : ''}
+     <div class="dotpop" id="dotpop" hidden></div>
     </div>
     <div class="rfoot"><span>${fmt(R.min)}</span><span>the spread across ${R.n} comps</span><span>${fmt(R.max)}</span></div>
     <div class="say">${R.n} comps, weighted by how comparable each one is. The band is where the
@@ -8953,6 +9091,7 @@ function renderComps(){
      S.subj[k] = v; save(); renderComps(); };
    el.onchange = commit; el.onblur = commit; });
  wireAudit();                       // the subject block draws chips of its own
+ wireDots();                        // and the range's dots open
  box.querySelectorAll('[data-ca]').forEach(el => { const commit = () => {
      /* the market moves in BOTH directions and 2026 has metros where it is
         moving down. The old parse stripped the minus sign, so typing −4

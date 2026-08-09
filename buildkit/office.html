@@ -509,7 +509,7 @@ footer a{color:var(--mid);text-decoration:none;margin-right:16px}
   <nav class="masknav">
       <a href="desk.html">The desk</a>
    <a href="portfolio.html">Arcade</a>
-   <a href="plans.html">Plans</a>
+   <a href="plans.html" id="mast-plans">Plans</a>
    <span class="who hidden" id="who"><span class="av" id="av">·</span>
     <span id="whoname" style="font-size:14px"></span>
     <button class="btn q sm" id="out">Sign out</button></span>
@@ -1143,7 +1143,9 @@ function renderShell(a, props, active, nameOf, spreadOf, filledOf, onPlan, left)
        somebody who only wants the software never has to wonder. -->
   <div class="rn-foot">
    <a class="rn-lnk" href="the-eight-exits.html">The eight exits</a>
-   <a class="rn-lnk" href="plans.html">Plans</a>
+   ${onPlan
+     ? '<a class="rn-lnk" href="#account" id="rn-billing">Billing</a>'
+     : '<a class="rn-lnk" href="plans.html">Plans</a>'}
    <a class="rn-lnk side" href="portfolio.html" title="Practice games — optional, free, and they run the desk's own arithmetic">The arcade<em>games</em></a>
   </div>`;
  if (el.dataset.sig !== html){ el.innerHTML = html; el.dataset.sig = html;
@@ -1154,6 +1156,14 @@ function renderShell(a, props, active, nameOf, spreadOf, filledOf, onPlan, left)
      else { box.hidden = true; ACCT_SAY = null; }
      ACCT_OPEN = !box.hidden;
      w.classList.toggle('open', !box.hidden); };
+   /* "Billing" in the foot is the account panel by another name — a paying
+      customer looking for the card and the invoices should not have to know
+      that they live behind their own face at the top of the rail */
+   const bl = $('rn-billing');
+   if (bl) bl.onclick = ev => { ev.preventDefault();
+     const box = $('rn-acct');
+     if (box && box.hidden && w) w.onclick();
+     if (w) try { w.scrollIntoView({ block:'start', behavior:'smooth' }); } catch(e){} };
    const t = $('rn-toggle');
    if (t){ t.onclick = () => { const tight = document.body.classList.toggle('railtight');
      try { localStorage.setItem('ni-rail', tight ? 'tight' : 'wide'); } catch(e){}
@@ -1522,6 +1532,17 @@ function boot(){
      reads as one place rather than two pages that happen to know your name. */
   renderShell(a, props, (v3 && typeof v3.active === 'number') ? v3.active : 0,
               nameOf, spreadOf, filledOf, onPlan, left);
+  /* the masthead stops selling plans to somebody who has bought one — the
+     same rule as the rail foot, applied to the other nav this page has. It
+     lives HERE, after onPlan's const, because a block above the declaration
+     reads it from the temporal dead zone and takes the whole boot down — the
+     exact trap the comment in renderShell already warns about. */
+  { const mp = $('mast-plans');
+    if (mp && onPlan){ mp.textContent = 'Billing'; mp.href = '#account';
+      mp.onclick = ev => { ev.preventDefault();
+        const w = $('rn-who'); if (w){ const box = $('rn-acct');
+          if (box && box.hidden) w.onclick();
+          try { w.scrollIntoView({ block:'start', behavior:'smooth' }); } catch(e){} } }; } }
 
   /* the one offer worth making on this page: a member who has never started
      their fourteen days. One button, and it says what it opens and what it
