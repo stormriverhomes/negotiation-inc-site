@@ -89,41 +89,23 @@
   .who .n{font-weight:600;font-size:15px}
   .who .t{font-size:14px;color:var(--carbon-soft)}
 
-  /* THE STREET IS THE NAVIGATION. This was five dots and two arrows: a position
-     indicator that told you where you were and nothing about where you were
-     going. Five footprints on one groundline at one shared scale are the
-     position indicator AND the comparison AND the picture this cabinet did not
-     have — the file carried no canvas, no image and no SVG anywhere in it, in
-     an arcade whose whole identity is drawn. `much smaller` and `a bit bigger`
-     are things you now see before you read them. Claude Design's answer, and
-     their deletion: keeping the dots alongside the drawing would have said the
-     drawing was decoration. */
-  .pager{display:flex;align-items:flex-end;justify-content:center;gap:4px;padding:14px 10px 0;
-    border-bottom:1px solid var(--rule-soft)}
-  .pager .p{flex:1 1 0;min-width:0;background:none;border:none;padding:0 0 9px;cursor:pointer;
-    display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
-    border-bottom:3px solid transparent;position:relative}
-  .pager .p .rf{width:0;height:0;border-left-color:transparent;border-right-color:transparent;
-    border-left-style:solid;border-right-style:solid;border-bottom-style:solid;
-    border-bottom-color:var(--carbon-faint)}
-  .pager .p .bd{background:var(--rule);display:flex;align-items:flex-end;justify-content:center}
-  .pager .p .dr{width:6px;height:9px;background:var(--stock-3)}
-  .pager .p .n{font-size:10px;letter-spacing:.1em;color:var(--carbon-faint);margin-top:7px;
-    font-variant-numeric:tabular-nums}
-  /* seen: you have spent a look here. bought: your offer is on it. */
-  .pager .p.seen .bd{background:var(--carbon-faint)}
-  .pager .p.seen .rf{border-bottom-color:var(--carbon-soft)}
-  .pager .p.on{border-bottom-color:var(--brass)}
-  .pager .p.on .bd{background:var(--carbon)}
-  .pager .p.on .rf{border-bottom-color:var(--carbon)}
-  .pager .p.on .n{color:var(--carbon);font-weight:700}
-  .pager .p.bought .bd{background:var(--green)}
-  .pager .p.bought .rf{border-bottom-color:var(--green)}
-  .pager .p:disabled{cursor:default}
-  .pager.still{border-bottom:none;padding-bottom:4px}
-  .pager.still .p{cursor:default;border-bottom-color:transparent}
-  .pager.still .n{color:var(--carbon-faint)}
-  @media (max-width:420px){ .pager{gap:2px} .pager .p .n{font-size:9px} }
+  /* THE STREET IS THE NAVIGATION AND THE PICTURE AND THE COMPARISON. This was
+     five dots and two arrows — a position indicator that told you where you
+     were and nothing about where you were going — on a page that contained no
+     canvas, no image and no SVG anywhere in it. One drawing replaces all
+     three: five houses on one pavement at one scale, sized by their real
+     square feet, worn by their real condition. */
+  .street{padding:0;border-bottom:1px solid var(--rule-soft);background:#eaf1f6}
+  .street canvas{display:block;width:100%;height:auto;image-rendering:pixelated;
+    image-rendering:crisp-edges}
+  .street .lots{display:flex;background:var(--stock-2);border-top:1px solid var(--rule-soft)}
+  .street .lots > *{flex:1 1 0;text-align:center;padding:7px 0 8px;font-size:11px;
+    letter-spacing:.1em;color:var(--carbon-faint);background:none;border:none;
+    border-right:1px solid var(--rule-soft);font-variant-numeric:tabular-nums;cursor:pointer}
+  .street .lots > *:last-child{border-right:none}
+  .street .lots > *.on{color:var(--carbon);font-weight:700;background:var(--stock)}
+  .street .lots > *:disabled{cursor:default}
+  .street.still .lots > *{cursor:default}
   .nav:disabled{opacity:.25}
 
   .house{padding:16px 16px 18px}
@@ -180,6 +162,53 @@
 
   /* ── deal bar ── */
   .deal{margin-top:16px;border-top:1px solid var(--rule);padding-top:14px}
+  /* ══ THE HEAT SCALE ══════════════════════════════════════════════════════
+     The whole product in one bar. Every point on this track is a price, and
+     the colour under it is what that price does to you: green while you keep
+     money, red past the number where you stop. The boundary is not decoration
+     — it is walkAway, the figure the desk itself would print, and it is the
+     one number this game exists to teach.
+
+     AND THE BOUNDARY IS FUZZY UNTIL YOU LOOK. You are handed two comparable
+     sales that disagree, so the line lives inside a band rather than on a
+     pixel, and the band is drawn as a band. Spend a look on what it needs and
+     the repair figure resolves and the band tightens under your hand. That is
+     the provenance grammar — ENTERED outranks ESTIMATE — rendered as focus,
+     and it is the most honest thing in the arcade: the software does not get
+     sharper because you paid, it gets sharper because you asked. */
+  /* the six below are set by paintHeat at runtime. They are declared here too
+     because an undefined var() does not fall back to something close — the
+     whole declaration is invalid and the background vanishes, which _tvars
+     caught within a minute. The defaults are a neutral bar with no claim in
+     it: correct for the half second before the first paint, and correct
+     forever for anybody whose JavaScript did not run. */
+  .heat{--h1:var(--stock-3);--h2:var(--stock-3);--h3:var(--stock-3);
+    --gA:0%;--gB:50%;--gC:100%;
+    position:relative;height:14px;margin:14px 0 0;border:1px solid var(--rule);
+    background:linear-gradient(90deg,var(--h1) 0%,var(--h1) var(--gA),
+      var(--h2) var(--gB),var(--h3) var(--gC),var(--h3) 100%)}
+  .heat .band{position:absolute;top:0;bottom:0;
+    background:repeating-linear-gradient(45deg,rgba(34,32,28,.30) 0 3px,rgba(34,32,28,0) 3px 6px);
+    border-left:1px solid rgba(34,32,28,.30);border-right:1px solid rgba(34,32,28,.30)}
+  .heat .line{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--carbon)}
+  .heat .askt{position:absolute;top:-6px;width:1px;height:7px;background:var(--carbon-soft)}
+  .heat .askl{position:absolute;top:-22px;transform:translateX(-50%);white-space:nowrap;
+    font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--carbon-faint)}
+  .deal input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;
+    background:none;margin:2px 0 0;display:block}
+  .deal input[type=range]:focus{outline:none}
+  .deal input[type=range]:focus-visible{outline:2px solid var(--carbon);outline-offset:2px}
+  .deal input[type=range]::-webkit-slider-runnable-track{height:30px;background:none}
+  .deal input[type=range]::-moz-range-track{height:30px;background:none}
+  /* the handle is a surveyor's marker, not a dot: a stem that lands ON the
+     scale above it, so the thing you are pointing at is unambiguous */
+  .deal input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:18px;height:26px;margin-top:2px;cursor:grab;border:1px solid var(--carbon);
+    background:linear-gradient(180deg,var(--stock) 0 55%,var(--stock-3) 55% 100%);
+    box-shadow:0 1px 0 rgba(0,0,0,.25),inset 0 0 0 1px var(--stock)}
+  .deal input[type=range]::-moz-range-thumb{width:18px;height:26px;cursor:grab;border-radius:0;
+    border:1px solid var(--carbon);background:var(--stock);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+  .deal input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;background:var(--stock-2)}
   .dealbar{display:flex;height:44px;border:1px solid var(--carbon);background:var(--stock-3);overflow:hidden}
   .dealbar i{height:100%;transition:width .08s linear}
   .dealbar .pay{background:var(--carbon)} .dealbar .keep{background:var(--green)}
@@ -194,6 +223,8 @@
   .keepbig .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--carbon-faint)}
   .keepbig .v{font-family:var(--mono);font-size:36px;font-variant-numeric:tabular-nums;line-height:1.05;color:var(--green)}
   .keepbig .v.bad{color:var(--red)}
+  .keepbig .v.est{color:var(--carbon-soft);font-size:26px}
+  .heat .askl{top:-15px}
   .keepbig .n{font-size:14px;color:var(--carbon-soft);margin-top:4px}
   input[type=range]{width:100%;accent-color:var(--carbon);margin:16px 0 0}
   .offerrow{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--carbon-faint);margin-top:2px}
@@ -1579,6 +1610,83 @@ function dealParts(i){
   const points = Math.round(borrowed * p.financeRate);
   return { total:r.value, fix:(r.repairs!=null?r.repairs:0), pay:state.price, keep:r.walkAway-state.price-points, sure:r.sure };
 }
+
+/* ══ THE SCALE, PAINTED ════════════════════════════════════════════════════
+   Everything here is derived from what the player already knows: the comp
+   spread they were handed, the repair figure if and only if they walked it,
+   and the asking price, which is printed on the card. Nothing consults the
+   truth. A heat scale that knew the answer would be the answer. */
+function paintHeat(){
+  const el = document.getElementById('heat'); if (!el) return;
+  const i = state.at, c = board.cards[i], r = read(i), p = run.plan.rounds[run.round];
+  const rg = sliderRange(i), span = rg[1] - rg[0];
+  const pos = v => Math.max(0, Math.min(100, ((v - rg[0]) / span) * 100));
+  /* the walk-away is a BAND, because two sales disagree. Repairs come off both
+     ends the moment they are known, which is why looking tightens it. */
+  /* AND WHEN YOU HAVE NOT LOOKED, THERE IS NO LINE. The first version put the
+     boundary at zero repairs, which is the most optimistic number in the room
+     and would have painted a green scale under a house with a hole in the
+     roof — a lie by omission, in the one product built not to tell them. With
+     repairs unknown the band spans what a house of this age plausibly needs,
+     3% to 15% of value, and no line is drawn at all, because you do not have
+     one. Spend the look and the band collapses onto a figure you can stand on.
+     That is the entire thesis of the software, played rather than explained. */
+  const fix = r.repairs != null ? r.repairs : 0;
+  const wLo = r.repairs != null ? r.lo - fix : r.lo - r.value * 0.15;
+  const wHi = r.repairs != null ? r.hi - fix : r.hi - r.value * 0.03;
+  const wMid = r.repairs != null ? r.walkAway : (wLo + wHi) / 2;
+  /* borrowing moves the line: over your capital every dollar costs points, so
+     break-even arrives earlier. Solved rather than approximated. */
+  const be = wMid <= run.capital ? wMid
+           : (wMid + run.capital * p.financeRate) / (1 + p.financeRate);
+  const a = Math.max(0, pos(wLo) - 6), b = pos(be), cEnd = Math.min(100, pos(wHi) + 6);
+  el.style.setProperty('--h1', 'var(--green-bg)');
+  el.style.setProperty('--h2', 'rgba(154,107,31,.30)');
+  el.style.setProperty('--h3', 'rgba(179,55,44,.34)');
+  el.style.setProperty('--gA', a.toFixed(1) + '%');
+  el.style.setProperty('--gB', b.toFixed(1) + '%');
+  el.style.setProperty('--gC', cEnd.toFixed(1) + '%');
+  const band = document.getElementById('hband');
+  if (band){ const l = pos(wLo), w = Math.max(1.2, pos(wHi) - l);
+    band.style.left = l + '%'; band.style.width = w + '%';
+    /* a look does not narrow the comps, it removes the repair guess — so the
+       band stays and the LINE inside it becomes something you can trust */
+    band.style.opacity = r.sure ? '.45' : '1'; }
+  const line = document.getElementById('hline');
+  if (line){ line.style.left = 'calc(' + b.toFixed(1) + '% - 1px)';
+    line.style.display = r.sure ? 'block' : 'none'; }
+  const at = document.getElementById('haskt'), al = document.getElementById('haskl');
+  if (at) at.style.left = pos(c.asking) + '%';
+  if (al) al.style.left = pos(c.asking) + '%';
+  /* the floating price label under the thumb is gone: it collided with the
+     handle at every position and it was printing, one line lower and larger,
+     the number "your offer" already prints. */
+  const borrowed = Math.max(0, state.price - run.capital);
+  const pts = Math.round(borrowed * p.financeRate);
+  return { sure:r.sure, keepLo: wLo - state.price - pts, keepHi: wHi - state.price - pts };
+}
+/* THE NUMBER MOVES, BECAUSE THE NUMBER IS THE POINT. A figure that snaps has
+   no weight; one that runs to its new value reads as a consequence of the hand
+   on the slider. 180ms, transform-free, and it goes straight to the answer for
+   anyone who has asked their machine to stop animating things. */
+var KEEP_ANIM = null;
+function setKeep(el, target){
+  const fmt = v => v >= 0 ? M(v) : '−' + M(-v);
+  if (matchMedia('(prefers-reduced-motion:reduce)').matches){ el.textContent = fmt(target); return; }
+  const from = (typeof el.__v === 'number') ? el.__v : target;
+  if (KEEP_ANIM) cancelAnimationFrame(KEEP_ANIM);
+  const t0 = performance.now(), dur = 180;
+  const step = now => {
+    const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+    const v = from + (target - from) * e;
+    el.textContent = fmt(Math.round(v / 100) * 100);
+    if (k < 1) KEEP_ANIM = requestAnimationFrame(step);
+    else { el.textContent = fmt(target); el.__v = target; }
+  };
+  el.__v = target;
+  KEEP_ANIM = requestAnimationFrame(step);
+}
+
 function paintDeal(){
   const d = dealParts(state.at), pctOf = v => Math.max(0,(v/d.total)*100);
   const bar = document.getElementById('dealbar');
@@ -1589,8 +1697,21 @@ function paintDeal(){
         '<i class="fix" style="width:'+Math.max(0,100-pay-pctOf(d.keep))+'%"></i>'
       : '<i class="pay" style="width:'+Math.max(0,100-Math.min(40,pctOf(-d.keep)))+'%"></i><i class="over" style="width:'+Math.min(40,pctOf(-d.keep))+'%"></i>';
   }
+  const hb = paintHeat();
   const kv=document.getElementById('keepv');
-  if (kv){ kv.textContent = d.keep>=0 ? M(d.keep) : '−'+M(-d.keep); kv.className='v'+(d.keep>=0?'':' bad'); }
+  if (kv){
+    /* AND THE BIG NUMBER OBEYS THE SAME RULE AS THE SCALE. It was printing a
+       precise green figure computed from zero repairs while the caption
+       underneath admitted you had not checked what it needs — the exact shape
+       of the lie the heat band was just fixed to stop telling. Until you
+       look it is a RANGE, and it is slate rather than green, because green in
+       this product means money that pays and a number you have not earned the
+       right to is not that. */
+    if (hb && !hb.sure){
+      kv.textContent = M(Math.round(hb.keepLo/100)*100) + '–' + M(Math.round(hb.keepHi/100)*100);
+      kv.className = 'v est'; kv.__v = null;
+    } else { setKeep(kv, d.keep); kv.className='v'+(d.keep>=0?'':' bad'); }
+  }
   const kn=document.getElementById('keepn');
   if (kn) kn.textContent = d.keep>=0 ? (d.sure ? 'if you win it, before the work you choose' : 'but you have not checked what it needs')
                                      : 'you would lose money on this';
@@ -1687,10 +1808,13 @@ function nextRound(){
 
 function render(){
   const el = document.getElementById('board');
-  if (run.screen==='hero'){ el.innerHTML=heroHTML(); return; }
+  /* every screen that can carry the strip repaints it, because innerHTML
+     throws away a canvas's bitmap along with the canvas */
+  const done = () => { try { paintStreetHouses(); } catch(e){} };
+  if (run.screen==='hero'){ el.innerHTML=heroHTML(); done(); return; }
   if (run.screen==='card'){ el.innerHTML=cardHTML(); return; }
   if (run.screen==='summary'){ el.innerHTML=summaryHTML(); return; }
-  if (state.phase==='play'){ el.innerHTML=playHTML(); if (state.mode==='offer') paintDeal(); return; }
+  if (state.phase==='play'){ el.innerHTML=playHTML(); done(); if (state.mode==='offer') paintDeal(); return; }
   if (state.phase==='renovate'){ el.innerHTML=renovateHTML(); return; }
   el.innerHTML = resolveHTML();
 }
@@ -1872,6 +1996,128 @@ function factsHTML(i){
   return h + '</div>';
 }
 
+
+/* ══ THE HOUSE, DRAWN ══════════════════════════════════════════════════════
+   A complete beginner cannot read "$9,500 repairs walk-through" and feel
+   anything. They can absolutely see a tarp on a roof. The Exit Drill already
+   proved the idea — its night house boards its windows and grows weeds as the
+   repair ratio climbs — and this is that idea moved to the cabinet that needed
+   it most, in daylight, because you walk a street in daylight.
+
+   THE HONESTY RULE, WHICH IS THE WHOLE DESIGN: the drawing shows ONLY what the
+   card already tells you for free. Condition, size, bedroom count and how many
+   other buyers have been by are printed on the card before you spend a look.
+   Repairs and ARV are not, and nothing in the picture encodes them — a house
+   whose roof told you its repair bill would hand over the thing the looks are
+   for, and the game would be a colouring book.
+
+   Drawn at 48x36 and scaled by whole numbers with image-rendering:pixelated,
+   so a pixel is a pixel at every size. No anti-aliasing anywhere, which is
+   what separates pixel art from a small drawing. */
+var SKY  = ['#a9c6de','#c2d8ea','#d9e7f2','#eaf1f6'];
+var COND = {
+  Clean: { wall:'#ece6d8', trim:'#f8f4e8', roof:'#7c6f5d', win:'#bcd9ee', weeds:0, tarp:0, boards:0, door:'#5b6d84' },
+  Dated: { wall:'#ddd2ba', trim:'#e9e1cd', roof:'#63594a', win:'#9db3c2', weeds:6, tarp:0, boards:0, door:'#6b6153' },
+  Rough: { wall:'#bfb298', trim:'#cdc2a8', roof:'#4a4038', win:'#7f8279', weeds:14, tarp:1, boards:1, door:'#4d463c' }
+};
+var SW = 300, SH = 78, LOTW = 60;
+
+/* ══ THE STREET ════════════════════════════════════════════════════════════
+   Five houses, one pavement, one sky. Not five thumbnails — a street you look
+   down, which is the thing this cabinet is named after and the thing it had
+   never once drawn. The Exit Drill proved the mechanism: its night house
+   boards its own windows and grows weeds as the repair ratio climbs. This is
+   that idea in daylight, because you walk a street in daylight.
+
+   THE HONESTY RULE, AND IT IS THE WHOLE DESIGN: the drawing shows ONLY what
+   the card already gives you for free. Condition, square feet, bedrooms and
+   how many other buyers have been by are printed before you spend a look.
+   Repairs and ARV are not, and nothing here encodes them — a roof that told
+   you the repair bill would hand over the thing the looks exist to sell, and
+   the game would be a colouring book. What the picture buys is the first
+   thirty seconds: somebody who cannot read "$9,500 repairs walk-through" can
+   see a tarp, and that is the entire on-ramp. */
+function drawStreet(cv, cards, sel, seenMap, bidIdx){
+  var g = cv.getContext('2d'); if (!g) return;
+  g.imageSmoothingEnabled = false;
+  var px = function(x,y,w,h,col){ g.fillStyle = col; g.fillRect(x|0,y|0,w|0,h|0); };
+
+  for (var i=0;i<SKY.length;i++) px(0, i*5, SW, 6, SKY[i]);
+  px(0, 20, SW, 22, '#a4b587');
+  px(0, 41, SW, 14, '#8fa76c');
+  px(0, 55, SW,  3, '#c0b8a2');
+  px(0, 58, SW, SH-58, '#9b978a');
+  for (var d=0; d<SW; d+=16) px(d, 68, 9, 1, '#c7c2b4');
+
+  for (var n=0;n<5;n++){
+    var c = cards[n]; if (!c) continue;
+    var k = COND[c.condition] || COND.Dated;
+    var sd = 0, ad = c.address || ('h'+n);
+    for (var j=0;j<ad.length;j++) sd = (sd*31 + ad.charCodeAt(j)) >>> 0;
+    var rnd = function(){ sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296; };
+
+    var ox = n * LOTW;
+    var t  = Math.max(0, Math.min(1, (c.sqft - 700) / 1600));
+    var bw = Math.round(26 + 20*t), bh = Math.round(13 + 7*t);
+    var bx = ox + Math.round((LOTW - bw)/2), by = 45 - bh;
+    var rise = 7 + Math.round(3*t);
+
+    px(bx-1, by+bh-1, bw+2, 2, '#7d9160');
+    px(bx, by, bw, bh, k.wall);
+    px(bx, by, bw, 1, k.trim);
+    for (var r=0; r<=rise; r++){
+      var inset = Math.round(r * 3 / rise);
+      px(bx-3+inset, by-rise+r, bw+6-2*inset, 1, k.roof);
+    }
+    px(bx+bw-7, by-rise-4, 3, 5, k.roof);
+    if (k.tarp) px(bx+3, by-rise+2, 8, 3, '#3a6ea5');
+
+    var dw = 5, dx = bx + ((bw/2)|0) - 2;
+    px(dx, by+bh-8, dw, 8, k.door);
+    px(dx+dw-2, by+bh-4, 1, 1, '#d8c66a');
+
+    var wins = Math.max(1, Math.min(3, (c.beds||3) - 1));
+    var span = (bw - 6) / wins;
+    for (var w=0; w<wins; w++){
+      var wx = bx + 3 + Math.round(w*span);
+      if (wx + 4 > dx - 1 && wx < dx + dw + 1) continue;
+      if (wx + 4 > bx + bw - 2) break;
+      px(wx, by+3, 4, 4, k.win);
+      px(wx, by+3, 4, 1, k.trim);
+      if (k.boards) px(wx-1, by+4, 6, 1, '#8a7a58');
+    }
+
+    for (var wd=0; wd<k.weeds; wd++)
+      px(ox + 2 + ((rnd()*(LOTW-4))|0), 42 + ((rnd()*11)|0), 1, 2, '#66803f');
+    if (!k.weeds) for (var sh=0; sh<3; sh++)
+      px(bx + 3 + sh*Math.round((bw-6)/3), by+bh-3, 3, 3, '#5f7a44');
+
+    var sx = ox + 4;
+    px(sx+2, 47, 1, 7, '#b0a894'); px(sx, 43, 7, 5, '#f8f4e8'); px(sx+1, 44, 5, 1, '#a1251e');
+
+    var heads = Math.min(3, c.interest || 0);
+    for (var hI=0; hI<heads; hI++){
+      var hx = ox + LOTW - 9 - hI*5;
+      px(hx, 51, 2, 5, '#4a4438'); px(hx, 48, 2, 3, '#8a7a58');
+    }
+
+    var st = seenMap && seenMap[n];
+    if (bidIdx === n){ for (var q=0;q<LOTW;q+=2) px(ox+q, 56, 1, 2, '#2a5f3e'); }
+    else if (st && (st.walk || st.ask)) px(ox+2, 56, LOTW-4, 1, '#7e7869');
+    if (sel === n){
+      px(ox+2, 57, LOTW-4, 2, '#704e17');
+      px(ox + 30 - 3, 60, 7, 1, '#704e17');
+      px(ox + 30 - 2, 61, 5, 1, '#704e17');
+      px(ox + 30 - 1, 62, 3, 1, '#704e17');
+    }
+  }
+}
+function paintStreetHouses(){
+  var cv = document.getElementById('streetcv'); if (!cv) return;
+  var d = window.__strip; if (!d) return;
+  drawStreet(cv, d.cards, d.at, d.seen, d.bidIdx);
+}
+
 /* ONE DRAWING, TWO CALL SITES. The strip is the street: five footprints on a
    shared groundline at one scale taken from the board itself, so five similar
    houses read as five similar houses and an outlier shows. In play it is also
@@ -1879,32 +2125,22 @@ function factsHTML(i){
    nothing current — and it is the reason that screen no longer needs to be a
    separate screen. */
 function streetStrip(cards, o){
-  const sq = cards.map(c => c.sqft);
-  const lo = Math.min.apply(null, sq), hi = Math.max.apply(null, sq);
-  const t  = v => hi === lo ? 0.5 : (v - lo) / (hi - lo);
   const live = !!o.interactive;
-  let h = '<div class="pager'+(live?'':' still')+'">';
+  window.__strip = { cards: cards, at: live ? o.at : -1, seen: live ? o.seen : null,
+                     bidIdx: live ? o.bidIdx : -1 };
+  const labels = [];
   for (let i=0;i<5;i++){
-    const c = cards[i], k = t(c.sqft);
-    const bw = Math.round(34 + 26 * k), bh = Math.round(26 + 20 * k);
-    const rh = Math.round(11 + 7 * k),  rw = Math.round(bw / 2 + 5);
-    const seen = o.seen ? o.seen[i] : null;
-    const cls = !live ? ''
-      : (o.bidIdx === i) ? 'bought'
-      : (i === o.at) ? 'on'
-      : (seen && (seen.walk || seen.ask)) ? 'seen' : '';
-    const lab = 'house '+(i+1)+', '+c.sqft.toLocaleString()+' square feet';
-    const tag = live ? 'button' : 'span';
-    h += '<'+tag+' class="p '+cls+'"'
-      +  (live ? ' onclick="jump('+i+')"'+(o.locked?' disabled':'')+' aria-label="'+lab+'"'
-                 +(i===o.at?' aria-current="true"':'')
-               : ' aria-hidden="true"') + '>'
-      +  '<span class="rf" style="border-left-width:'+rw+'px;border-right-width:'+rw
-      +  'px;border-bottom-width:'+rh+'px"></span>'
-      +  '<span class="bd" style="width:'+bw+'px;height:'+bh+'px"><span class="dr"></span></span>'
-      +  '<span class="n">'+(i+1)+'</span></'+tag+'>';
+    const c = cards[i];
+    labels.push('<'+(live?'button':'span')+' class="lot'+(live && i===o.at ? ' on':'')+'"'
+      + (live ? ' onclick="jump('+i+')"'+(o.locked?' disabled':'')
+                + ' aria-label="house '+(i+1)+', '+c.sqft.toLocaleString()+' square feet, '
+                + (c.condition||'').toLowerCase()+'"'+(i===o.at?' aria-current="true"':'')
+              : ' aria-hidden="true"')
+      + '>'+(i+1)+'</'+(live?'button':'span')+'>');
   }
-  return h + '</div>';
+  return '<div class="street'+(live?'':' still')+'">'
+    + '<canvas id="streetcv" width="300" height="78" aria-hidden="true"></canvas>'
+    + '<div class="lots">'+labels.join('')+'</div></div>';
 }
 function pagerHTML(){
   return streetStrip(board.cards, { interactive:true, at:state.at, seen:state.seen,
@@ -1933,7 +2169,10 @@ function offerHTML(){
     '<div class="deal"><div class="dealbar" id="dealbar"></div>' +
       '<div class="dealkey"><span><i class="sw pay"></i>you pay</span><span><i class="sw keep"></i>you keep</span><span><i class="sw fix"></i>repairs</span></div>' +
       '<div class="keepbig"><div class="k">You keep</div><div class="v" id="keepv"></div><div class="n" id="keepn"></div></div>' +
-      '<input type="range" min="'+range[0]+'" max="'+range[1]+'" step="500" value="'+state.price+'" oninput="setPrice(this.value)">' +
+      '<div class="heat" id="heat"><div class="band" id="hband"></div><div class="line" id="hline"></div>' +
+        '<div class="askt" id="haskt"></div><div class="askl" id="haskl">asking</div></div>' +
+      '<input type="range" id="pricer" min="'+range[0]+'" max="'+range[1]+'" step="500" value="'+state.price+'" '+
+        'aria-label="your offer" oninput="setPrice(this.value)">' +
       '<div class="offerrow"><span>your offer <span id="offerv"></span></span><span>asking '+M(c.asking)+'</span></div>' +
       '<div class="rival '+hint[0]+'">'+hint[1]+'</div>' +
       '<button class="btn go" onclick="sealOffer()">Seal this offer</button>' +
