@@ -337,6 +337,11 @@ input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blu
  font-size:12.5px;color:var(--soft);line-height:1.5}
 .gate .fine b{color:var(--mid)}
 .err{color:#b3372c;font-size:13px;margin-top:9px;display:none}
+/* red is a refusal with a reason and nothing else. "Check your email" is the
+   opposite of a refusal — it is the signup working — so it cannot borrow the
+   colour that means it failed. `.ok` is the same line in the green that means
+   money that pays: 7.49:1 on the card, 7.04:1 on the wash. */
+.err.ok{color:#2a5f3e}
 
 /* ── the hub ── */
 /* ── the instrument panel ───────────────────────────────────────────────
@@ -878,26 +883,31 @@ window.__authDoorInit = function(on){
   tabEls.forEach(t => t.onclick = () => {
     setMode(t.dataset.mode);
     const e = document.getElementById('g-err');
-    if (e) e.textContent = t.dataset.mode === 'in'
-      ? 'Your email and your password.'
-      : 'A name and an email, and the desk is yours.';
+    if (e){ e.classList.remove('ok');
+            e.textContent = t.dataset.mode === 'in'
+              ? 'Your email and your password.'
+              : 'A name and an email, and the desk is yours.'; }
   });
 
   const fg = document.getElementById('g-forgot');
   if (fg) fg.onclick = ev => { ev.preventDefault(); setMode('recover');
     const e = document.getElementById('g-err');
-    if (e){ e.textContent = 'Your address, and a link comes to it.'; e.style.display = 'block'; } };
+    if (e){ e.classList.remove('ok');
+            e.textContent = 'Your address, and a link comes to it.';
+            e.style.display = 'block'; } };
 
   const rs = document.getElementById('g-resend');
   if (rs) rs.onclick = async ev => { ev.preventDefault();
     const em = document.getElementById('g-email'), e = document.getElementById('g-err');
-    const say = t => { if (e){ e.textContent = t; e.style.display = 'block'; } };
+    const say = (t, ok) => { if (e){ e.classList.toggle('ok', !!ok);
+                                    e.textContent = t; e.style.display = 'block'; } };
     if (!em || !em.value.trim()) return say('Put the address in first.');
     rs.textContent = 'Sending\u2026';
     const r = window.__authResend ? await window.__authResend(em.value.trim()) : { ok:false };
     rs.textContent = 'Send the confirmation again \u2192';
     say(r.ok ? 'Sent. It can take a minute, and it does land in spam sometimes.'
-             : (r.error || 'That did not send. Email support@negotiationinc.com and we will confirm it by hand.'));
+             : (r.error || 'That did not send. Email support@negotiationinc.com and we will confirm it by hand.'),
+        r.ok);
   };
 
   /* ── ARRIVING FROM AN EMAIL ──────────────────────────────────────────────
@@ -933,12 +943,16 @@ window.__authDoorInit = function(on){
     if (e){ e.textContent = 'Choose a new password and you are back in.'; e.style.display = 'block'; }
   } else if (arrived && arrived.error){
     const e = document.getElementById('g-err');
-    if (e){ e.textContent = arrived.error + ' \u2014 ask for a fresh link below.'; e.style.display = 'block'; }
+    if (e){ e.classList.remove('ok');
+            e.textContent = arrived.error + ' \u2014 ask for a fresh link below.';
+            e.style.display = 'block'; }
     setMode('recover');
   } else if (/[?&]confirmed=1/.test(location.search)){
     setMode('in');
     const e = document.getElementById('g-err');
-    if (e){ e.textContent = 'Address confirmed. Sign in and the desk is yours.'; e.style.display = 'block'; }
+    if (e){ e.classList.add('ok');
+            e.textContent = 'Address confirmed. Sign in and the desk is yours.';
+            e.style.display = 'block'; }
   }
 };
 /* the build-time path: a preview build or a file:// copy has both values and
@@ -949,7 +963,8 @@ $('gate-form').onsubmit = async e => {
   const name = $('g-name').value.trim().slice(0,60);
   const email = $('g-email').value.trim().slice(0,120);
   const err = $('g-err');
-  const bad = t => { err.textContent = t; err.style.display = 'block'; };
+  const bad = t => { err.classList.remove('ok'); err.textContent = t; err.style.display = 'block'; };
+  const fine = t => { err.classList.add('ok'); err.textContent = t; err.style.display = 'block'; };
   /* ── THE TWO NEW MODES ARE HANDLED FIRST AND RETURN ─────────────────────
      Both of them end here: neither creates a local workspace record, because
      neither one is a person arriving — one is a person asking for an email,
@@ -964,7 +979,7 @@ $('gate-form').onsubmit = async e => {
        that email" is a free membership check for anybody holding a list — and
        it is also the honest answer, because from here we do not know whether
        the mail was delivered. */
-    return bad(r.ok
+    return (r.ok ? fine : bad)(r.ok
       ? 'If there is an account on that address, a link is on its way. It can take a minute, and it does land in spam sometimes.'
       : (r.error || 'That did not send. Email support@negotiationinc.com and we will sort it by hand.'));
   }
@@ -1001,7 +1016,7 @@ $('gate-form').onsubmit = async e => {
       /* a confirmation that lands in spam, or an address with a typo in it, is
          a dead end unless there is a way to send it again */
       const rs = $('g-resend'); if (rs) rs.hidden = false;
-      return bad('Check your email for the link, then come back and sign in.');
+      return fine('Account made. Click the link in your email, then come back and sign in.');
     }
   }
   /* An account is not a plan. Registering used to switch the whole product on
