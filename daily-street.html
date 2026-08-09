@@ -342,6 +342,36 @@
 
   .rpat{font-family:var(--serif);font-size:13px;letter-spacing:0;text-transform:none;
     color:var(--carbon-soft);margin-top:5px;min-height:17px}
+  .sharebtns{display:flex;gap:9px;padding:0 15px}
+  .sharebtns .copybtn{flex:1 1 0;margin:0}
+
+  /* ══ THE SHELF ═════════════════════════════════════════════════════════════
+     Twelve frames, and the empty ones are the point. Comp Run's register is
+     forty slots with thirty-nine empty on the first day, and that wall is why
+     anybody opens it again — the pleasure of a collection is the shape of the
+     hole in it. Rarity is carried by the frame, not by the picture, because
+     the picture is a house and a house is not rare. */
+  .shelf{border-top:1px solid var(--rule);background:var(--stock-2);padding:14px 15px 16px}
+  .shhead{display:flex;justify-content:space-between;align-items:baseline;
+    font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--carbon-faint);font-weight:600;margin-bottom:10px}
+  .shgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+  @media(max-width:560px){ .shgrid{grid-template-columns:repeat(4,1fr)} }
+  .slot{position:relative;overflow:hidden;background:var(--stock);
+    border:1px solid var(--rule);cursor:default}
+  .slot .dc{display:block;width:100%;height:auto;image-rendering:pixelated}
+  .slot .sl{font-family:'Pixelify',var(--sans);font-size:12px;text-align:center;
+    padding:3px 0 4px;color:var(--carbon-soft);border-top:1px solid var(--rule-soft)}
+  .slot.empty{background:repeating-linear-gradient(45deg,var(--stock-3) 0 4px,var(--stock-2) 4px 8px);
+    border-style:dashed;min-height:52px;display:flex;align-items:flex-end}
+  .slot.empty .sl{width:100%;border-top:none;color:var(--carbon-faint);opacity:.6}
+  .slot.c3{border-color:#5f7048} .slot.c4{border-color:#7d3fa8}
+  .slot.c5{border-color:var(--gold,#9d5b0c);border-width:2px}
+  .slot.foil::after{content:'';position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.5) 47%,rgba(212,164,74,.38) 53%,transparent 68%);
+    background-size:260% 100%;animation:sheen 3.6s ease-in-out infinite}
+  @media(prefers-reduced-motion:reduce){ .slot.foil::after{animation:none;opacity:.35} }
+
   /* ══ THE DEED ══════════════════════════════════════════════════════════════
      Comp Run's rarity language, moved across the floor rather than reinvented:
      five tiers, a gold double-border on the rarest, and a slow sheen that
@@ -568,6 +598,10 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
    thickening a pixel face closes its counters and closed counters are how this
    started. */
 @font-face{font-family:'Pixelify';src:url('fonts/jersey25.woff2') format('woff2');
+ font-weight:400;font-style:normal;font-display:swap}
+/* the same file under a second name, because a canvas font string cannot read
+   a CSS variable and the share card sets its figures on a canvas */
+@font-face{font-family:'Jersey';src:url('fonts/jersey25.woff2') format('woff2');
  font-weight:400;font-style:normal;font-display:swap}
 .pix{font-family:'Pixelify',var(--sans);font-variant-numeric:tabular-nums;
  letter-spacing:.02em;font-weight:400}
@@ -1315,13 +1349,49 @@ function render(){
   /* every screen that can carry the strip repaints it, because innerHTML
      throws away a canvas's bitmap along with the canvas */
   const done = () => { try { paintStreetHouses(); } catch(e){} };
-  if (run.screen==='hero'){ el.innerHTML=heroHTML(); done(); return; }
+  if (run.screen==='hero'){ el.innerHTML=heroHTML(); done(); try { paintDeeds(); } catch(e){} return; }
   /* the interstitials have no scene of their own, so they are all clipboard */
   if (run.screen==='card'){ el.innerHTML=clip(cardHTML()); return; }
-  if (run.screen==='summary'){ el.innerHTML=clip(summaryHTML()); return; }
+  if (run.screen==='summary'){ el.innerHTML=clip(summaryHTML() + shelfHTML()); try { paintDeeds(); } catch(e){} return; }
   if (state.phase==='play'){ el.innerHTML=playHTML(); done(); if (state.mode==='offer') paintDeal(); return; }
   if (state.phase==='renovate'){ el.innerHTML=statusBar()+pagerHTML()+clip(renovateHTML()); done(); return; }
   el.innerHTML = resolveHTML(); done(); try { paintDeeds(); } catch(e){}
+}
+
+/* ══ THE SHELF ═════════════════════════════════════════════════════════════
+   A deed that only exists in localStorage is a deed nobody owns. Comp Run's
+   register is forty slots and thirty-nine of them are empty on day one, and
+   that wall of empty is the reason people come back — the pleasure of a
+   collection is the shape of the hole in it.
+
+   So the shelf shows TWELVE slots: what you have taken, newest first, and the
+   empty frames after them. Twelve because three streets a day fills it in four
+   days, which is long enough to be a goal and short enough to be reachable —
+   and when it overflows the oldest scroll off rather than the wall growing
+   forever, because a collection you cannot see the end of is a list.
+
+   The counter is honest about the whole holding: "9 of 12 shown" when there
+   are more behind. Nothing here is generated, sampled or rounded — each card
+   is one house somebody actually bought on a street the whole world played. */
+var SHELF = 12;
+function shelfHTML(){
+  var all = loadDeeds().list;
+  if (!all.length) return '';
+  var recent = all.slice(-SHELF).reverse();
+  var foils = all.filter(function(d){ return d.tier === 'c5'; }).length;
+  var h = '<div class="shelf"><div class="shhead">' +
+    '<span class="k">The deeds</span>' +
+    '<span class="n">' + all.length + (all.length > SHELF ? ' held · ' + SHELF + ' shown' : (all.length === 1 ? ' held' : ' held')) +
+    (foils ? ' · ' + foils + ' foil' : '') + '</span></div><div class="shgrid">';
+  for (var i=0; i<SHELF; i++){
+    var d = recent[i];
+    if (d) h += '<div class="slot ' + d.tier + (d.tier === 'c5' ? ' foil' : '') + '" ' +
+      'title="' + esc(d.addr) + ' — street № ' + d.n + ', ' + MP(d.spread) + '">' +
+      '<canvas class="dc" width="108" height="74" data-deed="' + d.iso + ':' + d.round + '"></canvas>' +
+      '<div class="sl">' + esc(String(d.addr).split(' ')[0]) + '</div></div>';
+    else h += '<div class="slot empty" aria-hidden="true"><div class="sl">—</div></div>';
+  }
+  return h + '</div></div>';
 }
 
 function heroHTML(){
@@ -1382,7 +1452,7 @@ function heroHTML(){
     '<div class="meta">3 streets · 3 minutes · new houses every day</div></div>' + stake + bar +
     '<div style="padding:0 18px 20px"><button class="btn go" onclick="beginRound()">'+
     (r.days[todayISO()] ? 'Play again' : 'Play')+'</button>' +
-    '<a class="back" href="arcade.html">← the floor</a></div>' + helpHTML());
+    '<a class="back" href="arcade.html">← the floor</a></div>' + shelfHTML() + helpHTML());
 }
 
 function statusBar(){
@@ -2167,9 +2237,108 @@ function summaryHTML(){
     '<div class="legend"><span><b>🟩</b> you bought it</span><span><b>🟥</b> you offered and lost</span>' +
       '<span><b>🟨</b> you looked</span><span><b>⬜</b> you never looked</span></div>' +
     '<div class="share">'+esc(share)+'</div>' +
-    '<button class="copybtn" id="cp" onclick="copyShare()">Copy result</button>' +
+    '<div class="sharebtns"><button class="copybtn" id="cp" onclick="copyShare()">Copy result</button>' +
+    '<button class="copybtn" id="cardbtn" onclick="shareCard()">Copy the card</button></div>' +
     '<div class="filter">This is a game. The real version asks the same questions — what is it worth, what does it need, what will they take, who else is bidding — except the houses are real. <a href="#" onclick="return false">Run a real address →</a></div>' +
     '<button class="btn ghost" style="margin:14px 15px;width:calc(100% - 30px)" onclick="newRun()">Play again</button>';
+}
+
+/* ══ THE CARD ══════════════════════════════════════════════════════════════
+   The run already had a share string — the emoji grid, Wordle's trick — and it
+   is good and it stays. What it could not do is show anybody what the street
+   LOOKED like, and the street is now the reason to look.
+
+   So: 1200x630, one canvas, the arcade's own art. The day's real sky, the
+   day's real five silhouettes, the house you took wearing its board. Drawn at
+   400x210 and scaled by three, because whole numbers are the only way a pixel
+   stays a pixel, and 1200x630 is what every link preview on the internet
+   expects.
+
+   TYPE NEVER STANDS ON SKY. Claude Design's first law, and the reason this one
+   card survives all six weathers without six separate contrast audits: the
+   plate takes the lower band, every figure sits on the plate, and the sky is
+   left to be weather. A loss card is the same card — the street as it sold,
+   the gap where the spread would be — because a share image that only exists
+   when you win is an advertisement, and this is a record. */
+function buildShareCard(){
+  var cv = document.createElement('canvas');
+  cv.width = 1200; cv.height = 630;
+  var g = cv.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  var scene = document.createElement('canvas'); scene.width = SW; scene.height = SH;
+  var last = window.__lastDeed;
+  var soldMap = null;
+  if (last && typeof last.round === 'number' && run.lines && run.lines.length){
+    soldMap = {};
+  }
+  drawStreet(scene, board.cards, -1, null, -1, (window.__strip && window.__strip.sold) || null, currentSky());
+  /* the scene fills the top; 1200/366 is not whole, so it is drawn at 3x from
+     a 400-wide crop of the same street rather than stretched */
+  g.fillStyle = '#0d1420'; g.fillRect(0,0,1200,630);
+  g.drawImage(scene, 0, 8, SW, 132, 0, 96, 1200, Math.round(132 * (1200/SW)));
+  var plateY = 630 - 168;
+  g.fillStyle = '#0d1420'; g.fillRect(0, plateY, 1200, 168);
+  g.fillStyle = '#223047'; g.fillRect(0, plateY, 1200, 2);
+
+  var end = run.capital, start = run.opening != null ? run.opening : B.START_CAPITAL;
+  var delta = end - start, up = delta >= 0;
+  var pill = function(t, x, y, s, col){ g.fillStyle = col; g.font = s; g.textBaseline = 'alphabetic';
+    g.fillText(t, x, y); return g.measureText(t).width; };
+  var SANS = '-apple-system, "Segoe UI", Roboto, sans-serif';
+
+  /* AND I BROKE THE LAW THREE LINES AFTER WRITING IT. The first version set
+     the title straight onto the sky, where it was invisible on a clear morning
+     and would have been worse in fog. Type never stands on sky — so the header
+     gets its own plate, exactly like the footer, and the card now survives all
+     six weathers for the reason the law says it will. */
+  g.fillStyle = '#0d1420'; g.fillRect(0, 0, 1200, 96);
+  g.fillStyle = '#223047'; g.fillRect(0, 94, 1200, 2);
+  g.textAlign = 'left';
+  pill('THE DAILY STREET', 60, 60, '600 20px ' + SANS, '#8b98ac');
+  g.textAlign = 'right';
+  pill('No. ' + (board.number || run.plan.number || 0), 1140, 64, '400 34px Jersey, ' + SANS, '#e8e2d4');
+
+  g.textAlign = 'left';
+  pill(up ? 'TOOK HOME' : 'WENT HOME DOWN', 60, plateY + 52, '600 20px ' + SANS, '#8b98ac');
+  pill((up ? '+' : '−') + '$' + Math.abs(delta).toLocaleString('en-US'),
+       60, plateY + 118, '400 76px Jersey, ' + SANS, up ? '#57a878' : '#e8e2d4');
+
+  g.textAlign = 'right';
+  var deeds = loadDeeds().list, foils = deeds.filter(function(d){ return d.tier === 'c5'; }).length;
+  pill(deeds.length + ' deed' + (deeds.length === 1 ? '' : 's') + (foils ? ' · ' + foils + ' foil' : ''),
+       1140, plateY + 52, '400 24px ' + SANS, '#aeb8c8');
+  pill('negotiationinc.com · a new street tomorrow', 1140, plateY + 118, '400 24px ' + SANS, '#8b98ac');
+  return cv;
+}
+function shareCard(){
+  var btn = document.getElementById('cardbtn');
+  var say = function(t, cls){ if (btn){ btn.textContent = t; btn.className = 'copybtn' + (cls||''); } };
+  var cv;
+  try { cv = buildShareCard(); } catch(e){ say('Could not draw it'); return; }
+  cv.toBlob(function(blob){
+    if (!blob) return say('Could not draw it');
+    /* clipboard first — one tap into a post is the whole point. Safari and
+       Firefox refuse image writes, so the download is not a fallback for
+       failure, it is the other half of the feature. */
+    var done = function(){ say('Copied ✓', ' done'); };
+    var save = function(){
+      try {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'daily-street-' + (board.number || 0) + '.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+        say('Saved ✓', ' done');
+      } catch(e){ say('Could not save it'); }
+    };
+    if (navigator.clipboard && window.ClipboardItem){
+      try {
+        navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(done, save);
+        return;
+      } catch(e){}
+    }
+    save();
+  }, 'image/png');
 }
 
 function copyShare(){

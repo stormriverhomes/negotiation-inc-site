@@ -370,6 +370,10 @@ const ARCADE = `<style>
    started. */
 @font-face{font-family:'Pixelify';src:${PIXEL_SRC} format('woff2');
  font-weight:400;font-style:normal;font-display:swap}
+/* the same file under a second name, because a canvas font string cannot read
+   a CSS variable and the share card sets its figures on a canvas */
+@font-face{font-family:'Jersey';src:${PIXEL_SRC} format('woff2');
+ font-weight:400;font-style:normal;font-display:swap}
 .pix{font-family:'Pixelify',var(--sans);font-variant-numeric:tabular-nums;
  letter-spacing:.02em;font-weight:400}
 :root{--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
