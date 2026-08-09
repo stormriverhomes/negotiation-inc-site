@@ -310,6 +310,27 @@
 <meta name="twitter:image" content="https://negotiationinc.com/og/page-arcade.png">
 <meta property="og:url" content="https://negotiationinc.com/daily-street">
 <link rel="canonical" href="https://negotiationinc.com/daily-street">
+<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Fraunces ships its "wonk" letterforms on by default — the single-storey f
+   and its friends. They read as a novelty at body sizes and Elijah clipped
+   them immediately. WONK 0 keeps the face and drops the party trick. */
+@font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
+ font-weight:100 900;font-style:normal;font-display:swap;
+ font-variation-settings:'WONK' 0}
+:root{
+ --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
+ /* NO MONOSPACE ANYWHERE IN THE SOFTWARE. Small letterspaced caps set in a
+    monospace face is the single most recognisable "an AI made this" tell on
+    the internet right now, and it was on every label we shipped. The eyebrows
+    keep their letterspacing; they lose the typewriter. Tabular figures come
+    from font-feature-settings instead, which is what they were always for.
+    (The arcade keeps its own type. It is a different world on purpose.) */
+ --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif !important;
+}
+.mono,.num,[class*="fig"],[class*="num"]{font-variant-numeric:tabular-nums}
+h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
+</style>
 <meta name="description" content="Three streets, three minutes, one sealed offer each. The same houses for everybody who plays today.">
 </head>
 <body>

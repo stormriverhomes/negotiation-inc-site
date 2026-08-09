@@ -5,13 +5,20 @@
 <meta name="description" content="Eight eras of ground, a daily street, and a phone that rings. The instinct, trained the fun way. Free forever, no account.">
 <style>
 :root{--manila:#d9c8a4;--cream:#f4efe2;--news:#e8e2d4;--pink:#f0d9d5;--ink:#23201c;--mid:#47423b;
- --soft:#5a544b;--rule:#b9ae95;--hi:#cdc3ac;--red:#a8271f;--green:#2c6142;--gold:#9d5b0c}
+ --soft:#5a544b;--rule:#b9ae95;--hi:#cdc3ac;--red:#a8271f;--green:#2c6142;--gold:#9d5b0c;
+ /* The build's FONTS block overrides both of these with !important, which is
+    how the typewriter left the software. They are declared here anyway so
+    portfolio.html opened straight off disk is the same game, not a fallback
+    of one — and so _tvars can see that every var() this file uses is a
+    property this file defines. */
+ --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+ --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
 *{box-sizing:border-box}html,body{margin:0}
 body{background:var(--manila);
  background-image:repeating-linear-gradient(0deg,rgba(35,32,28,.015) 0 2px,transparent 2px 4px),
   radial-gradient(130% 90% at 50% -20%,rgba(255,255,255,.22),transparent 62%);
  background-attachment:fixed;color:var(--ink);
- font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;line-height:1.45;
+ font-family:var(--serif);line-height:1.45;
  padding:14px 12px 40px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 .wrap{max-width:1280px;margin:0 auto;position:relative;z-index:1}
 /* THE STREET, BEHIND EVERYTHING. Real pixels scaled to cover the viewport —
@@ -26,15 +33,15 @@ body{background:var(--manila);
 .sheet{background:rgba(244,239,226,.94)!important;backdrop-filter:saturate(1.06)}
 .sheet[style*="--news"],#streetHost{background:rgba(232,226,212,.94)!important}
 .mast{text-shadow:0 1px 0 rgba(244,239,226,.7)}
-.mono{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
-.eyebrow{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;font-weight:700;letter-spacing:.17em;
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.17em;
  text-transform:uppercase;color:var(--soft)}
 .sheet{position:relative;border:1px solid var(--rule);background:var(--cream);
  box-shadow:0 1px 0 rgba(35,32,28,.10),0 8px 22px -14px rgba(35,32,28,.5)}
 .sheet.stapled::before{content:'';position:absolute;left:12px;top:10px;width:14px;height:3px;
  background:#8d8577;transform:rotate(-38deg);box-shadow:0 3px 4px -2px rgba(35,32,28,.5);z-index:2}
 button{font:inherit;cursor:pointer}
-.btn{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:.12em;
+.btn{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;
  text-transform:uppercase;color:var(--ink);background:var(--cream);border:1.5px solid var(--ink);padding:6px 10px;
  transition:background .07s,color .07s,transform .05s,box-shadow .07s;-webkit-font-smoothing:antialiased;backface-visibility:hidden;touch-action:manipulation;user-select:none}
 .btn{position:relative;transition:background .12s,color .12s,transform .07s,box-shadow .12s}
@@ -68,7 +75,7 @@ button{font:inherit;cursor:pointer}
 .btn:disabled{opacity:.32;cursor:not-allowed}.btn.on{background:var(--ink);color:var(--cream)}
 .mast{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
  border-bottom:2px solid var(--ink);padding-bottom:7px}
-.hero{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;
+.hero{font-family:var(--mono);font-variant-numeric:tabular-nums;
  font-size:34px;line-height:1;letter-spacing:-.045em;white-space:nowrap;
  text-shadow:0 1px 0 rgba(255,255,255,.55),0 2px 3px rgba(35,32,28,.10)}
 .hero .cur{font-size:.52em;font-style:normal;font-weight:700;vertical-align:.72em;
@@ -80,12 +87,12 @@ button{font:inherit;cursor:pointer}
 #rate .tick{font-style:normal;font-size:.8em;color:var(--green);margin-right:4px;vertical-align:.12em}
 /* The rate is the second headline, not a footnote. It is the number every
    purchase in the game is trying to move. */
-.ratebar{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;
+.ratebar{font-family:var(--mono);font-variant-numeric:tabular-nums;
  font-size:19px;font-weight:800;letter-spacing:-.035em;color:var(--green);line-height:1.1;margin-top:3px;
  text-shadow:0 1px 0 rgba(255,255,255,.5)}
 .ratebar .per{font-size:.62em;font-weight:600;color:var(--soft);margin-left:1px;letter-spacing:0}
 @media(max-width:640px){.ratebar{font-size:16px}}
-#buffs{font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+#buffs{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
  color:var(--gold);margin-top:3px;display:none}
 @media(max-width:640px){.hero{font-size:26px}}
 
@@ -103,7 +110,7 @@ button{font:inherit;cursor:pointer}
    grey aside. Both stop the moment the buff does; nothing is left glowing. */
 #buffs{display:none;margin-top:5px;justify-content:flex-end;gap:6px;flex-wrap:wrap}
 #buffs.on{display:flex}
-.buff{font-family:ui-monospace,Menlo,monospace;font-size:10px;font-weight:700;letter-spacing:.1em;
+.buff{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;
  text-transform:uppercase;padding:3px 8px;border-radius:999px;white-space:nowrap;
  border:1.5px solid;animation:buffTick 1s steps(2) infinite}
 .buff.rate{color:#2c6142;border-color:#2c6142;background:rgba(44,97,66,.12)}
@@ -145,30 +152,30 @@ body.fz .ratebar{animation:fzGlow 1.25s ease-in-out infinite;border-radius:6px}
 .rung.locked .co{font-size:11px;color:var(--gold);opacity:1}
 .rung img{width:40px;height:40px;image-rendering:pixelated;display:block;pointer-events:none}
 .nm{font-size:15px;font-weight:600;line-height:1.15}
-.qty{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--gold);letter-spacing:.04em}
+.qty{font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:.04em}
 .sub{font-size:11.5px;color:var(--soft);margin-top:1px}
-.co{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-variant-numeric:tabular-nums;font-size:14.5px;
+.co{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:14.5px;
  font-weight:600;letter-spacing:-.02em;text-align:right;white-space:nowrap}
 .afford .co{color:var(--green);font-weight:800;text-shadow:0 1px 0 rgba(255,255,255,.6)}
-.own{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-variant-numeric:tabular-nums;font-size:19px;
+.own{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:19px;
  font-weight:700;color:var(--mid);text-align:right;letter-spacing:-.03em}
 .afford .co{color:var(--green);font-weight:700}
 .up{display:grid;grid-template-columns:26px 1fr auto;gap:9px;align-items:center;width:100%;text-align:left;touch-action:manipulation;user-select:none;
  background:var(--news);border:1px solid var(--rule);padding:8px 10px;margin-bottom:6px;color:inherit;font:inherit;
  box-shadow:0 2px 0 -1px rgba(35,32,28,.22),0 5px 10px -8px rgba(35,32,28,.45)}
 .up:hover:not(:disabled){background:var(--cream)}.up:disabled{opacity:.38;cursor:not-allowed}
-.up .g{font-family:ui-monospace,Menlo,monospace;font-size:13px;text-align:center;color:var(--gold)}
+.up .g{font-family:var(--mono);font-size:13px;text-align:center;color:var(--gold)}
 .up .t{font-size:12.5px;font-weight:600;line-height:1.2;display:block}
 .up .d{font-size:11px;color:var(--soft);margin-top:1px;line-height:1.3;display:block}
-.up .c{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.up .c{font-family:var(--mono);font-size:12px}
 /* the door */
 #door{width:100%;max-width:340px;height:auto;image-rendering:pixelated;display:block;margin:0 auto;
  cursor:pointer;border:1px solid var(--rule);transition:transform .07s}
 #door:active{transform:translateY(2px)}
 .doorwrap{text-align:center}
-.knockhint{font-family:ui-monospace,Menlo,monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+.knockhint{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
  margin-top:7px}
-#doorval{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--green);margin-top:1px}
+#doorval{font-family:var(--mono);font-size:12px;color:var(--green);margin-top:1px}
 /* ══ THE FIRST NINETY SECONDS ══════════════════════════════════════════════
    Comp Run had no first-run teaching of any kind. A stranger arrives at a
    monochrome sheet with a drawing of a door on it, six buttons that all look
@@ -188,14 +195,14 @@ body.fz .ratebar{animation:fzGlow 1.25s ease-in-out infinite;border-radius:6px}
                 to{opacity:1;transform:translateX(-50%) translateY(0)}}
 .cr-coach[hidden]{display:none}
 .cr-n{flex:none;width:22px;height:22px;border-radius:50%;background:var(--gold,#a8873a);color:#231f18;
- font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:800;
+ font-family:var(--mono);font-size:11px;font-weight:800;
  display:flex;align-items:center;justify-content:center;margin-top:1px}
 .cr-b{flex:1;min-width:0}
-.cr-t{font-family:Georgia,serif;font-size:16px;font-weight:700;line-height:1.25}
+.cr-t{font-family:var(--serif);font-size:16px;font-weight:700;line-height:1.25}
 .cr-m{font-size:13px;line-height:1.5;margin-top:3px;color:#ded6c4}
 .cr-m b{color:#fff}
 .cr-acts{display:flex;gap:14px;align-items:center;margin-top:9px}
-.cr-skip{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.12em;
+.cr-skip{font-family:var(--mono);font-size:10px;letter-spacing:.12em;
  text-transform:uppercase;color:#b6ab95;background:none;border:0;padding:6px 2px;cursor:pointer;
  text-decoration:underline;text-underline-offset:3px}
 .cr-skip:hover{color:#fff}
@@ -231,7 +238,7 @@ body.fz .ratebar{animation:fzGlow 1.25s ease-in-out infinite;border-radius:6px}
 .phone .ph-t{position:absolute;left:4px;bottom:2px;height:3px;background:var(--red);width:calc(100% - 8px)}
 /* milestone stamp — the one element allowed to be dramatic, because it is rare */
 .mstamp{position:fixed;left:50%;top:36%;z-index:90;max-width:80vw;text-align:center;
- font-family:ui-monospace,Menlo,monospace;font-size:24px;letter-spacing:.16em;text-transform:uppercase;
+ font-family:var(--mono);font-size:24px;letter-spacing:.16em;text-transform:uppercase;
  color:var(--red);border:4px solid var(--red);padding:10px 18px 8px;background:rgba(244,239,226,.9);
  mix-blend-mode:multiply;pointer-events:none;
  animation:slam .45s cubic-bezier(.2,1.6,.4,1) forwards, mfade 1.5s forwards}
@@ -250,7 +257,7 @@ body.fz .ratebar{animation:fzGlow 1.25s ease-in-out infinite;border-radius:6px}
 /* conditions of sale */
 .cond{font-size:12px;color:var(--soft);padding:2px 0;display:flex;gap:6px;align-items:baseline;line-height:1.35}
 .cond.met{color:var(--green)}
-.cond .tick{font-family:ui-monospace,Menlo,monospace;width:12px;flex:none}
+.cond .tick{font-family:var(--mono);width:12px;flex:none}
 .btn.gold{border-color:var(--gold);color:var(--gold)}
 .btn.gold:hover{background:var(--gold);color:var(--cream)}
 #prestige.armed{box-shadow:0 0 0 2px var(--gold),0 8px 22px -14px rgba(35,32,28,.5)}
@@ -268,7 +275,7 @@ body.fz .ratebar{animation:fzGlow 1.25s ease-in-out infinite;border-radius:6px}
 .lotart{width:100%;height:auto;aspect-ratio:78/46;image-rendering:pixelated;display:block;
  border-bottom:1px solid var(--rule)}
 .lotbody{padding:8px 10px 9px}
-.tag{display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:8.5px;letter-spacing:.1em;
+.tag{display:inline-block;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;
  text-transform:uppercase;padding:1.5px 5px;border:1px solid var(--rule);color:var(--soft);margin-top:6px}
 .tag.warm{border-color:var(--gold);color:var(--gold)}
 .tag.hot{border-color:var(--red);color:var(--red);background:rgba(168,39,31,.06)}
@@ -299,7 +306,7 @@ body.fz .ratebar{animation:fzGlow 1.25s ease-in-out infinite;border-radius:6px}
 .bidband.none::after{background:#a8271f}
 .bidtrack .bidslider{position:relative;z-index:2}
 #bidrec{font-size:11.5px;line-height:1.4;color:var(--soft);margin:5px 0 2px;min-height:1.2em}
-#bidrec .rec{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.09em;color:#1f5fd0;font-weight:700}
+#bidrec .rec{font-family:var(--mono);font-size:10px;letter-spacing:.09em;color:#1f5fd0;font-weight:700}
 #bidrec .rec.no{color:var(--red)}
 .stwhy{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:7px 0 8px}
 .stwhy span{font-size:11.5px;line-height:1.35;color:var(--mid);background:rgba(157,91,12,.07);
@@ -308,7 +315,7 @@ body.fz .ratebar{animation:fzGlow 1.25s ease-in-out infinite;border-radius:6px}
 @media(max-width:620px){.stwhy{grid-template-columns:1fr}}
 .bidscale{display:flex;justify-content:space-between;font-size:8.5px;letter-spacing:.09em;
  text-transform:uppercase;color:var(--soft)}
-.stamp{display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:13px;letter-spacing:.14em;
+.stamp{display:inline-block;font-family:var(--mono);font-size:13px;letter-spacing:.14em;
  text-transform:uppercase;color:var(--red);border:2.5px solid var(--red);padding:4px 9px 3px;
  transform:rotate(-5deg);opacity:.93;mix-blend-mode:multiply;white-space:nowrap}
 .stamp.good{color:var(--green);border-color:var(--green)}
@@ -319,7 +326,7 @@ body.fz .ratebar{animation:fzGlow 1.25s ease-in-out infinite;border-radius:6px}
 #file p{margin:0}
 #file p[data-empty]{padding:6px 0;font-size:13px}
 .fday{position:sticky;top:0;z-index:1;background:var(--news);
- font-family:ui-monospace,Menlo,monospace;font-size:8.5px;letter-spacing:.19em;text-transform:uppercase;
+ font-family:var(--mono);font-size:8.5px;letter-spacing:.19em;text-transform:uppercase;
  color:var(--soft);padding:7px 0 3px;margin-top:2px;
  border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:baseline}
 .fday:first-child{margin-top:0}
@@ -337,14 +344,14 @@ body.fz .ratebar{animation:fzGlow 1.25s ease-in-out infinite;border-radius:6px}
 #returned.gone{animation:goaway .32s ease-in forwards}
 @keyframes land{0%{transform:translateY(-26px) scale(.97);opacity:0}60%{opacity:1}100%{transform:none;opacity:1}}
 @keyframes goaway{to{transform:translateY(-14px);opacity:0}}
-#ret-fig{font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;
+#ret-fig{font-family:var(--mono);font-variant-numeric:tabular-nums;
  font-size:34px;line-height:1;color:var(--green);letter-spacing:-.02em}
 @media(max-width:640px){#ret-fig{font-size:26px}}
 body.shake{animation:deskshake .42s cubic-bezier(.36,.07,.19,.97)}
 @keyframes deskshake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(3px,-2px)}
  30%,50%,70%{transform:translate(-4px,2px)}40%,60%{transform:translate(4px,-1px)}}
 .newin{animation:fade .8s ease-out}@keyframes fade{from{background:#efe4c2}to{background:transparent}}
-.float{position:fixed;font-family:ui-monospace,Menlo,monospace;font-size:14px;font-weight:700;color:var(--green);
+.float{position:fixed;font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green);
  pointer-events:none;z-index:80;animation:rise 1s ease-out forwards;text-shadow:0 1px 0 var(--cream)}
 .float.big{font-size:17px;color:var(--gold)}.float.bad{color:var(--red)}
 .float.rate{font-size:13px;color:var(--green);letter-spacing:.02em;
@@ -372,19 +379,19 @@ body.shake{animation:deskshake .42s cubic-bezier(.36,.07,.19,.97)}
  font-size:11.5px;line-height:1.35;padding:6px 9px;pointer-events:none;
  box-shadow:0 6px 16px -8px rgba(35,32,28,.7)}
 .regrow{display:flex;align-items:center;gap:3px;margin-bottom:3px}
-.rege{font-family:ui-monospace,Menlo,monospace;font-size:8.5px;color:var(--soft);width:34px;flex:none;letter-spacing:.04em}
+.rege{font-family:var(--mono);font-size:8.5px;color:var(--soft);width:34px;flex:none;letter-spacing:.04em}
 .regd{width:16px;height:11px;border:1px solid var(--rule);background:var(--news);cursor:help;transition:transform .08s}
 .regd.on{background:var(--gold);border-color:var(--gold)}
 .regd:hover{transform:scale(1.22)}
 .regrow.whole .regd{border-color:var(--ink)}
 .regrow.whole .rege{color:var(--gold);font-weight:700}
-.plot .ph{display:block;font-family:ui-monospace,Menlo,monospace;font-size:8px;letter-spacing:.1em;
+.plot .ph{display:block;font-family:var(--mono);font-size:8px;letter-spacing:.1em;
  text-transform:uppercase;color:var(--gold);margin-top:1px}
 .plot.mine .ph{color:#d9b478}
 .ac{cursor:help;transition:transform .08s}
 .ac:hover{transform:scale(1.28)}
 .ac{width:17px;height:17px;line-height:17px;text-align:center;border:1px solid var(--rule);
- font-family:ui-monospace,Menlo,monospace;font-size:9px;color:var(--hi);background:var(--news);cursor:default}
+ font-family:var(--mono);font-size:9px;color:var(--hi);background:var(--news);cursor:default}
 .ac.on{background:var(--ink);color:var(--cream);border-color:var(--ink)}
 dialog{border:1px solid var(--rule);background:var(--pink);color:var(--ink);max-width:560px;width:93vw;padding:0;font-family:inherit}
 #claim{max-width:640px;background:var(--cream)}
@@ -406,9 +413,9 @@ dialog{border:1px solid var(--rule);background:var(--pink);color:var(--ink);max-
 .deed .dart{width:100%;height:auto;aspect-ratio:108/66;image-rendering:pixelated;display:block;
  border-bottom:1px solid rgba(157,91,12,.4)}
 .deed .dnm{font-size:10.5px;font-weight:700;line-height:1.15;padding:4px 5px 0;min-height:2.3em}
-.deed .dera{font-family:ui-monospace,Menlo,monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;
+.deed .dera{font-family:var(--mono);font-size:7px;letter-spacing:.1em;text-transform:uppercase;
  color:var(--gold);padding:1px 5px 0}
-.deed .dbon{font-family:ui-monospace,Menlo,monospace;font-size:7px;letter-spacing:.08em;color:var(--soft);padding:1px 5px 0}
+.deed .dbon{font-family:var(--mono);font-size:7px;letter-spacing:.08em;color:var(--soft);padding:1px 5px 0}
 .deed::after{content:'';position:absolute;inset:0;pointer-events:none;
  background:linear-gradient(115deg,transparent 34%,rgba(255,255,255,.5) 48%,rgba(212,164,74,.34) 54%,transparent 70%);
  background-size:280% 100%;animation:sheen 4.4s ease-in-out infinite}
@@ -432,7 +439,7 @@ dialog{border:1px solid var(--rule);background:var(--pink);color:var(--ink);max-
 /* what your own ground tells you — the only place the register speaks aloud */
 .know{margin-top:6px;padding:6px 8px;border-left:2px solid var(--gold);background:rgba(216,178,86,.13);
  font-size:11px;line-height:1.38;color:var(--ink);text-align:left}
-.know b{font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.know b{font-family:var(--mono);font-size:11px}
 .knowhead{margin:-3px 0 9px;padding:7px 10px;border-left:3px solid var(--gold);
  background:rgba(216,178,86,.10);font-size:11.5px;line-height:1.45;color:var(--mid)}
 .knowhead b{color:var(--ink)}
@@ -444,12 +451,12 @@ dialog{border:1px solid var(--rule);background:var(--pink);color:var(--ink);max-
 .endh{font-size:40px;font-weight:600;line-height:1.1;margin:6px 0 14px}
 .endgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:2px 10px;
  padding:12px 0;border-top:1px solid #4d463c;border-bottom:1px solid #4d463c}
-.endgrid span{font-family:ui-monospace,Menlo,monospace;font-size:8.5px;letter-spacing:.09em;
+.endgrid span{font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;
  text-transform:uppercase;color:#a8873a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .endbody{margin-top:15px}
 .endbody p{font-size:15px;line-height:1.62;color:#c2b8a2;margin:0 0 11px}
 .endbody p.last{font-size:19px;line-height:1.45;color:#e8e2d4;font-weight:600;margin-top:16px}
-.endfoot{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;letter-spacing:.18em;
+.endfoot{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;
  text-transform:uppercase;color:#6b6153}
 @media(max-width:620px){.endh{font-size:30px}}
 /* the money line on the settlement sheet — the one place the game says a deal
@@ -458,12 +465,12 @@ dialog{border:1px solid var(--rule);background:var(--pink);color:var(--ink);max-
 .paidline.flat{border-left-color:var(--rule);background:rgba(35,32,28,.045)}
 .dealrow{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
 .dealrow + .dealrow{margin-top:5px;padding-top:5px;border-top:1px solid rgba(35,32,28,.10)}
-.paidlab{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;letter-spacing:.18em;
+.paidlab{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;
  text-transform:uppercase;color:var(--soft)}
-.dealfig{font-family:ui-monospace,Menlo,monospace;font-size:30px;font-weight:700;color:var(--green);line-height:1.05}
-.paidfig{font-family:ui-monospace,Menlo,monospace;font-size:22px;font-weight:700;color:var(--green);line-height:1.05}
+.dealfig{font-family:var(--mono);font-size:30px;font-weight:700;color:var(--green);line-height:1.05}
+.paidfig{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--green);line-height:1.05}
 .paidline.flat .paidfig{font-size:17px;color:var(--mid)}
-.paidnote{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;letter-spacing:.12em;
+.paidnote{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;
  text-transform:uppercase;color:var(--soft);margin-left:auto}
 /* ── the rolodex ─────────────────────────────────────────────────────────── */
 .agent{border:1px solid var(--rule);background:var(--news);padding:7px 9px 8px;margin-bottom:6px}
@@ -520,7 +527,7 @@ dialog{border:1px solid var(--rule);background:var(--pink);color:var(--ink);max-
 .landtext p{font-size:14.5px;line-height:1.6;color:#c2b8a2;margin:0 0 11px}
 .landtext p.landsub{font-size:13px;color:#8a8072}
 #land-play{margin-top:6px;padding:11px 20px;font-size:14px}
-.landfoot{font-family:ui-monospace,Menlo,monospace;font-size:9.5px;letter-spacing:.2em;
+.landfoot{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;
  text-transform:uppercase;color:#6b6153;margin-top:18px}
 @media(max-width:620px){#land-card{width:250px;height:350px}.landh{font-size:26px}}
 .miss{margin-top:9px;padding:8px 11px;border-left:3px solid var(--gold);background:rgba(216,178,86,.10);
@@ -532,7 +539,7 @@ dialog{border:1px solid var(--rule);background:var(--pink);color:var(--ink);max-
 .cur .chint{font-size:10.5px;color:var(--soft);line-height:1.35;margin-top:3px;font-style:italic}
 .cur .cline{font-size:10.5px;color:var(--mid);line-height:1.35;margin-top:3px}
 .cur.got{border-color:var(--gold);background:linear-gradient(180deg,#fbf3de,var(--news))}
-.cur.miss .cnm2{font-family:ui-monospace,Menlo,monospace;color:var(--soft);letter-spacing:.12em}
+.cur.miss .cnm2{font-family:var(--mono);color:var(--soft);letter-spacing:.12em}
 .bkera{margin-bottom:12px}
 .bkh{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;font-weight:700;
  border-bottom:1px solid var(--rule);padding-bottom:3px;margin-bottom:6px}
@@ -546,9 +553,9 @@ dialog{border:1px solid var(--rule);background:var(--pink);color:var(--ink);max-
 .card .cart img{width:40px;height:40px;image-rendering:pixelated}
 .cnm{font-size:9px;font-weight:700;line-height:1.15;margin-top:3px;min-height:2.3em;
  display:flex;align-items:center;justify-content:center}
-.cr{font-family:ui-monospace,Menlo,monospace;font-size:6.5px;letter-spacing:.13em;text-transform:uppercase;
+.cr{font-family:var(--mono);font-size:6.5px;letter-spacing:.13em;text-transform:uppercase;
  color:var(--soft);margin-top:1px}
-.cown{position:absolute;top:3px;right:3px;font-family:ui-monospace,Menlo,monospace;font-size:8px;
+.cown{position:absolute;top:3px;right:3px;font-family:var(--mono);font-size:8px;
  font-weight:700;background:var(--ink);color:var(--cream);padding:1px 3px}
 .card.locked{opacity:.4;border-style:dashed}
 .card.locked .cnm{color:var(--soft);font-size:14px}
@@ -574,7 +581,7 @@ dialog{border:1px solid var(--rule);background:var(--pink);color:var(--ink);max-
 .plot.mine{background:var(--ink);color:var(--cream);border-color:var(--ink)}
 .plot:disabled{cursor:default}
 .plot .pn{display:block;font-size:11.5px;font-weight:700}
-.plot .pr{display:block;font-family:ui-monospace,Menlo,monospace;font-size:8.5px;letter-spacing:.08em;
+.plot .pr{display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;
  text-transform:uppercase;color:var(--red);margin-top:1px}
 .plot.mine .pr{color:#e8a49c}
 /* THE COMP REPORT. Blue, because blue is the software and nothing else in
@@ -592,33 +599,33 @@ dialog{border:1px solid var(--rule);background:var(--pink);color:var(--ink);max-
  background:repeating-linear-gradient(180deg,rgba(22,64,127,.035) 0 1px,transparent 1px 3px)}
 .comp-h{display:flex;justify-content:space-between;align-items:center;gap:10px;
  background:var(--b2);color:#fff;padding:6px 10px 5px}
-.comp-mark{font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:10px;font-weight:800;
+.comp-mark{font-family:var(--mono);font-size:10px;font-weight:800;
  letter-spacing:.2em}
 .comp-mark b{color:#7fa8f0;margin-left:4px;font-weight:800}
-.comp-t{font-family:ui-monospace,Menlo,monospace;font-size:8px;letter-spacing:.16em;
+.comp-t{font-family:var(--mono);font-size:8px;letter-spacing:.16em;
  text-transform:uppercase;color:#a9c4ef}
 .comp-sub{display:grid;grid-template-columns:1fr 40px 46px 1.15fr;gap:10px;padding:5px 10px 4px;
- font-family:ui-monospace,Menlo,monospace;font-size:7.5px;letter-spacing:.16em;color:#7d95c2;
+ font-family:var(--mono);font-size:7.5px;letter-spacing:.16em;color:#7d95c2;
  border-bottom:1.5px solid var(--b2);background:#f4f7fe}
 .comp-sub span:nth-child(2),.comp-sub span:nth-child(3){text-align:right}
 .comp-r{display:grid;grid-template-columns:1fr 40px 46px 1.15fr;gap:10px;align-items:center;
  padding:5px 10px 4px;border-bottom:1px solid var(--bl)}
 .comp-r:nth-child(odd){background:#fafcff}
 .comp-n{font-size:12px;font-weight:700;color:#101c31;letter-spacing:-.005em}
-.comp-c,.comp-i{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:11.5px;text-align:right;
+.comp-c,.comp-i{font-family:var(--mono);font-size:11.5px;text-align:right;
  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .comp-c{color:#6b82ab}
 .comp-i{font-weight:800;color:var(--b2)}
 .comp-b{grid-column:4;height:8px;background:#eaf0fb;border:1px solid #b9c9e6;position:relative;overflow:hidden}
 .comp-b i{display:block;height:100%;background:var(--b);
  box-shadow:inset 0 -2px 0 rgba(22,64,127,.35),inset 0 1px 0 rgba(255,255,255,.32)}
-.comp-v{grid-column:1/-1;font-family:ui-monospace,Menlo,monospace;font-size:7.5px;letter-spacing:.15em;
+.comp-v{grid-column:1/-1;font-family:var(--mono);font-size:7.5px;letter-spacing:.15em;
  color:#8a9ec4;margin-top:-1px}
 .comp-f{font-size:10.5px;line-height:1.42;color:#3d5178;padding:8px 10px;background:#f4f7fe;
  border-top:1.5px solid var(--b2)}
 .comp-f b{color:var(--b2);font-weight:700}
 .comp-s{display:flex;justify-content:space-between;align-items:center;gap:8px;
- font-family:ui-monospace,Menlo,monospace;font-size:7.5px;letter-spacing:.15em;color:#8a9ec4;
+ font-family:var(--mono);font-size:7.5px;letter-spacing:.15em;color:#8a9ec4;
  padding:4px 10px 5px;border-top:1px solid var(--bl);background:#fff}
 .comp-s .dot{width:5px;height:5px;background:#2fa36a;display:inline-block;margin-right:5px;
  animation:live 1.7s ease-in-out infinite;vertical-align:.5px}
@@ -636,7 +643,7 @@ dialog::backdrop{background:rgba(35,32,28,.42)}
  background:var(--cream);border:1px solid var(--rule);padding:7px 9px;letter-spacing:.02em}
 table{width:100%;border-collapse:collapse;font-size:14px}
 td{padding:5px 8px 5px 0;border-bottom:1px solid var(--hi)}
-td.n{text-align:right;font-family:ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums;padding-right:0}
+td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;padding-right:0}
 /* ── REDUCED MOTION ───────────────────────────────────────────────────────
    This block was 170 lines UP, above every rule it disables. Same specificity,
    earlier in the sheet, so it lost every cascade it entered — the receipt still
@@ -2483,7 +2490,7 @@ function drawReceipt(cv, title, line, amount, kind) {
   px(10, 10, 5, 5, '#e0d8c6'); px(W - 40, 8, 30, 1, '#e8e2d4');
 
   g.textBaseline = 'top';
-  g.fillStyle = soft; g.font = '600 8.5px ui-monospace, "SF Mono", Menlo, Consolas, monospace';
+  g.fillStyle = soft; g.font = '600 8.5px -apple-system, "Segoe UI", Roboto, sans-serif';
   g.letterSpacing = '1.6px';
   g.fillText('NEGOTIATION INC   ·   THE RECORD', 23, 11.5);
   g.letterSpacing = '0px';
@@ -2507,9 +2514,9 @@ function drawReceipt(cv, title, line, amount, kind) {
 
   px(12, 70, W - 24, 1, rule);
 
-  g.fillStyle = soft; g.font = '600 8px ui-monospace, "SF Mono", Menlo, monospace';
+  g.fillStyle = soft; g.font = '600 8px -apple-system, "Segoe UI", Roboto, sans-serif';
   g.letterSpacing = '1.8px'; g.fillText('CREDITED', 12, 76); g.letterSpacing = '0px';
-  const MONO = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace';
+  const MONO = '-apple-system, "Segoe UI", Roboto, sans-serif';
   for (const fs of [19, 17, 15, 13, 11.5]) {
     g.font = '700 ' + fs + 'px ' + MONO;
     if (g.measureText(amount).width <= W - 88 || fs === 11.5) {   // 88 leaves the stamp its corner
@@ -2522,7 +2529,7 @@ function drawReceipt(cv, title, line, amount, kind) {
   g.translate(W - 40, 82); g.rotate(-0.13);
   g.strokeStyle = accent; g.lineWidth = 2;
   g.strokeRect(-28, -13, 56, 25);
-  g.fillStyle = accent; g.font = '700 10px ui-monospace, "SF Mono", Menlo, monospace';
+  g.fillStyle = accent; g.font = '700 10px -apple-system, "Segoe UI", Roboto, sans-serif';
   g.letterSpacing = '2px';
   g.textAlign = 'center'; g.fillText('PAID', 1, -6);
   g.restore(); g.letterSpacing = '0px';
@@ -3845,7 +3852,7 @@ function drawDeedShare(cv, eraId, idx, opts){
 
   // ── set line ──
   g.textBaseline = 'top';
-  g.fillStyle = soft; g.font = '600 12px ui-monospace, Menlo, monospace';
+  g.fillStyle = soft; g.font = '600 12px -apple-system, "Segoe UI", Roboto, sans-serif';
   g.letterSpacing = '3px';
   g.fillText('NEGOTIATION INC', 30, 30);
   g.textAlign = 'right';
@@ -3874,7 +3881,7 @@ function drawDeedShare(cv, eraId, idx, opts){
   // ── the set tab: only a whole century earns one ──
   let y = 340;
   if (o.foil) {
-    g.fillStyle = gold; g.font = '600 10px ui-monospace, Menlo, monospace';
+    g.fillStyle = gold; g.font = '600 10px -apple-system, "Segoe UI", Roboto, sans-serif';
     g.letterSpacing = '2.4px';
     g.fillText('ALL FIVE \u00b7 THE WHOLE ERA', 30, y);
     g.letterSpacing = '0px'; y += 18;
@@ -3890,7 +3897,7 @@ function drawDeedShare(cv, eraId, idx, opts){
 
   // ── what it does, which is the only stat on the card ──
   px(30, 428, W - 60, 1, rule);
-  g.fillStyle = gold; g.font = '700 30px ui-monospace, Menlo, monospace';
+  g.fillStyle = gold; g.font = '700 30px -apple-system, "Segoe UI", Roboto, sans-serif';
   g.fillText('+2%', 30, 448);
   g.fillStyle = soft; g.font = serif(15);
   g.fillText('income, permanently, in every era after this one', 96, 457);
@@ -3906,7 +3913,7 @@ function drawDeedShare(cv, eraId, idx, opts){
   // ── the footer. Two labels on one baseline collided in the first draft;
   //    they are now measured apart rather than hoped apart. ──
   px(30, 596, W - 60, 1, rule);
-  g.fillStyle = soft; g.font = '600 11px ui-monospace, Menlo, monospace';
+  g.fillStyle = soft; g.font = '600 11px -apple-system, "Segoe UI", Roboto, sans-serif';
   g.letterSpacing = '1.6px';
   g.fillText((idx + 1) + ' OF 5  \u00b7  ' + when.toUpperCase(), 30, 610);
   g.textAlign = 'right';
@@ -5725,7 +5732,7 @@ function drawShareCard(cv, stamp, pct, picked, n){
   for (let x = 8; x < W - 8; x += 10) px(x, H - 4, 5, 4, '#f4efe2');   // the tear-off
 
   g.textBaseline = 'top';
-  g.fillStyle = soft; g.font = '600 13px ui-monospace, Menlo, monospace';
+  g.fillStyle = soft; g.font = '600 13px -apple-system, "Segoe UI", Roboto, sans-serif';
   g.letterSpacing = '3px';
   g.fillText('NEGOTIATION INC', 34, 30);
   g.letterSpacing = '0px';
@@ -5739,12 +5746,12 @@ function drawShareCard(cv, stamp, pct, picked, n){
   for (let i = 0; i < 10; i++)
     px(33 + i * 30, 140, 26, 26, i < filled ? (good ? '#2c6142' : '#a8271f') : '#ddd5c2');
 
-  g.fillStyle = ink; g.font = '700 46px ui-monospace, Menlo, monospace';
+  g.fillStyle = ink; g.font = '700 46px -apple-system, "Segoe UI", Roboto, sans-serif';
   g.fillText(pct + '%', 33, 186);
   g.fillStyle = soft; g.font = '15px "Iowan Old Style", Palatino, Georgia, serif';
   g.fillText('of the best play on the street', 130, 200);
 
-  g.fillStyle = soft; g.font = '600 12px ui-monospace, Menlo, monospace';
+  g.fillStyle = soft; g.font = '600 12px -apple-system, "Segoe UI", Roboto, sans-serif';
   g.letterSpacing = '1.5px';
   g.fillText('LOT ' + (picked + 1) + ' OF ' + n + '   \u00b7   ' + stamp, 33, 252);
   g.fillText(((S.streak || 1) + ' CONSECUTIVE ' + ((S.streak || 1) === 1 ? 'DAY' : 'DAYS') + ' ON FILE').toUpperCase(), 33, 274);
@@ -5754,7 +5761,7 @@ function drawShareCard(cv, stamp, pct, picked, n){
   g.save(); g.translate(W - 108, 96); g.rotate(-0.11);
   g.strokeStyle = good ? '#2c6142' : '#a8271f'; g.lineWidth = 4;
   g.strokeRect(-64, -26, 128, 52);
-  g.fillStyle = good ? '#2c6142' : '#a8271f'; g.font = '700 22px ui-monospace, Menlo, monospace';
+  g.fillStyle = good ? '#2c6142' : '#a8271f'; g.font = '700 22px -apple-system, "Segoe UI", Roboto, sans-serif';
   g.textAlign = 'center'; g.letterSpacing = '2px';
   g.fillText(stamp, 0, -12);
   g.restore(); g.textAlign = 'left'; g.letterSpacing = '0px';

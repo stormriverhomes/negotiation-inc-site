@@ -545,6 +545,15 @@ if (BASE) html = html.replace('</head>', `<meta name="ni-share-base" content="${
 else html = html.replace('</head>', `<meta name="ni-share-base" content="d">\n</head>`);
 html = html.replace('</head>', OG('Comp Run · Negotiation Inc',
   'Eight eras of ground, a daily street, and a phone that rings. The instinct, trained the fun way.', 'comp-run') + '</head>');
+/* THE TYPEWRITER SURVIVED IN TWO OF THE FOUR ARCADE PAGES. The purge that took
+   monospace out of the software went in through FONTS, and FONTS was wired to
+   the hub and the drill and not to these two — the note above it even says the
+   arcade keeps its own type, which was true of the hub and the drill for about
+   a day and then stopped being true. So Elijah was looking at a floor where two
+   cabinets are Fraunces and two are Georgia, two have letterspaced caps in a
+   typewriter and two do not, and there is no reading of that which is on
+   purpose. Both games now take the same face as everything else we ship. */
+html = html.replace('</head>', FONTS + '</head>');
 html = bankInto(html, 'portfolio.html (Comp Run)');
 html = await minifyInline(html, 'index');
 fs.writeFileSync(path.join(out, 'comp-run.html'), html);
@@ -562,6 +571,7 @@ street = street.replace('</head>', OG('The Daily Street · Negotiation Inc',
 for (const must of ['The Daily Street', 'href="arcade.html"', 'How it works'])
   if (!street.includes(must)) throw new Error('daily-street.html lost: ' + must);
 if (/fonts\.googleapis|fonts\.gstatic|https?:\/\/cdn/.test(street)) throw new Error('daily-street.html reaches off-origin');
+street = street.replace('</head>', FONTS + '</head>');
 street = await minifyInline(street, 'street');
 street = bankInto(street, 'daily-street.html');
 fs.writeFileSync(path.join(out, 'daily-street.html'), street);
@@ -2961,9 +2971,18 @@ await b.close();
      behind by a harness IS a comment, so the check that was meant to catch it
      stripped it first and reported green. Two lists, two passes: one asks
      what the page SAYS, the other asks what is in the file. */
-  const LITTER = [
+  /* AND THE HARNESS THAT PLANTS THE PROBE HAS TO BE ABLE TO BUILD. _tstamp
+     proves the id moves by writing "<!-- stamp probe -->" into plans.html and
+     building, which is the exact string this sweep exists to catch — so the
+     sweep and the test that justifies it deadlocked, and _tstamp went red the
+     hour the sweep started reading raw bytes. The exemption is the output
+     directory rather than a flag: _tstamp builds into dist-stamp, nothing but
+     `dist` is ever copied to the repo, and a directory a deploy cannot reach
+     is a guarantee no environment variable can be set wrong. */
+  const SHIPS = out === 'dist';
+  const LITTER = SHIPS ? [
     [/stamp probe|__TEST_PROBE__|TODO: remove|XXX HACK/i, 'a test probe or a note left behind'],
-  ];
+  ] : [];
   const HOSTS = [
     [/onrender\.com/i,               'the hosting provider'],
     [/negotiation-inc-site\./i,      'the pre-domain service name'],

@@ -22,6 +22,31 @@
      E · nothing in the opening throws
 */
 import { chromium } from 'playwright';
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+
+/* SERVED, NOT OPENED. This harness read the built page off file:// and failed
+   the day Comp Run started taking the same @font-face as everything else we
+   ship: the preload carries `crossorigin`, which forces a CORS-mode fetch, and
+   Chrome hands every file:// document an opaque origin, so that one request is
+   refused and logs an error. The refusal is a property of file://, not of the
+   page — over https the preload is what makes one download serve every page.
+   Assertion E is "nothing in the opening throws", and it should be measuring
+   the game, so the game gets an origin. */
+const MIME = { '.html':'text/html', '.js':'text/javascript', '.css':'text/css',
+  '.json':'application/json', '.woff2':'font/woff2', '.png':'image/png',
+  '.svg':'image/svg+xml', '.ico':'image/x-icon', '.txt':'text/plain', '.xml':'application/xml' };
+const ROOT = '/home/claude/dist';
+const site = http.createServer((q, r) => {
+  const f = path.join(ROOT, decodeURIComponent(q.url.split('?')[0]));
+  if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory())
+    { r.writeHead(404); return r.end('no'); }
+  r.writeHead(200, { 'content-type': MIME[path.extname(f)] || 'application/octet-stream' });
+  fs.createReadStream(f).pipe(r);
+});
+const PORT = await new Promise(r => site.listen(0, '127.0.0.1', () => r(site.address().port)));
+const BASE = `http://127.0.0.1:${PORT}`;
 
 const b = await chromium.launch();
 const p = await b.newPage({ viewport:{ width:1280, height:1000 } });
@@ -29,7 +54,7 @@ const bad = [], out = {}, errs = [];
 p.on('pageerror', e => errs.push(e.message));
 p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
 
-await p.goto('file:///home/claude/dist/comp-run.html');
+await p.goto(BASE + '/comp-run.html');
 await p.evaluate(() => localStorage.clear());
 await p.reload(); await p.waitForTimeout(1200);
 
@@ -145,7 +170,7 @@ await p.reload(); await p.waitForTimeout(1200);
 if (errs.length) bad.push('E: the opening threw — ' + errs[0]);
 out.E_errs = errs;
 
-await b.close();
+await b.close(); site.close();
 console.log(JSON.stringify(out, null, 1));
 if (bad.length){
   console.log('FAIL');
