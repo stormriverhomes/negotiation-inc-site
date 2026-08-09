@@ -89,12 +89,38 @@
   .who .n{font-weight:600;font-size:15px}
   .who .t{font-size:14px;color:var(--carbon-soft)}
 
-  .pager{display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 14px;border-bottom:1px solid var(--rule-soft)}
-  .pager .p{width:34px;height:5px;background:var(--rule);border:none;padding:0}
-  .pager .p.on{background:var(--carbon)}
-  .pager .p.bought{background:var(--green)}
-  .pager .p.seen{background:var(--carbon-faint)}
-  .nav{background:none;border:none;color:var(--carbon-soft);font-size:19px;padding:0 6px;line-height:1}
+  /* THE STREET IS THE NAVIGATION. This was five dots and two arrows: a position
+     indicator that told you where you were and nothing about where you were
+     going. Five footprints on one groundline at one shared scale are the
+     position indicator AND the comparison AND the picture this cabinet did not
+     have — the file carried no canvas, no image and no SVG anywhere in it, in
+     an arcade whose whole identity is drawn. `much smaller` and `a bit bigger`
+     are things you now see before you read them. Claude Design's answer, and
+     their deletion: keeping the dots alongside the drawing would have said the
+     drawing was decoration. */
+  .pager{display:flex;align-items:flex-end;justify-content:center;gap:4px;padding:14px 10px 0;
+    border-bottom:1px solid var(--rule-soft)}
+  .pager .p{flex:1 1 0;min-width:0;background:none;border:none;padding:0 0 9px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+    border-bottom:3px solid transparent;position:relative}
+  .pager .p .rf{width:0;height:0;border-left-color:transparent;border-right-color:transparent;
+    border-left-style:solid;border-right-style:solid;border-bottom-style:solid;
+    border-bottom-color:var(--carbon-faint)}
+  .pager .p .bd{background:var(--rule);display:flex;align-items:flex-end;justify-content:center}
+  .pager .p .dr{width:6px;height:9px;background:var(--stock-3)}
+  .pager .p .n{font-size:10px;letter-spacing:.1em;color:var(--carbon-faint);margin-top:7px;
+    font-variant-numeric:tabular-nums}
+  /* seen: you have spent a look here. bought: your offer is on it. */
+  .pager .p.seen .bd{background:var(--carbon-faint)}
+  .pager .p.seen .rf{border-bottom-color:var(--carbon-soft)}
+  .pager .p.on{border-bottom-color:var(--brass)}
+  .pager .p.on .bd{background:var(--carbon)}
+  .pager .p.on .rf{border-bottom-color:var(--carbon)}
+  .pager .p.on .n{color:var(--carbon);font-weight:700}
+  .pager .p.bought .bd{background:var(--green)}
+  .pager .p.bought .rf{border-bottom-color:var(--green)}
+  .pager .p:disabled{cursor:default}
+  @media (max-width:420px){ .pager{gap:2px} .pager .p .n{font-size:9px} }
   .nav:disabled{opacity:.25}
 
   .house{padding:16px 16px 18px}
@@ -1133,13 +1159,30 @@ function factsHTML(i){
 }
 
 function pagerHTML(){
-  let h = '<div class="pager"><button class="nav" onclick="go(-1)" '+(state.mode==='offer'?'disabled':'')+'>◀</button>';
+  /* One scale across the five, taken from the board itself rather than a fixed
+     range — a street of five similar houses should read as five similar
+     houses, and a street with an outlier should show the outlier. Width and
+     height both move so the silhouette changes rather than just the box. */
+  const sq = board.cards.map(c => c.sqft);
+  const lo = Math.min.apply(null, sq), hi = Math.max.apply(null, sq);
+  const t  = v => hi === lo ? 0.5 : (v - lo) / (hi - lo);
+  const locked = state.mode === 'offer';
+  let h = '<div class="pager">';
   for (let i=0;i<5;i++){
-    const s=state.seen[i];
-    const cls = (state.bid&&state.bid.idx===i)?'bought':(i===state.at?'on':(s.walk||s.ask?'seen':''));
-    h += '<button class="p '+cls+'" onclick="jump('+i+')" aria-label="house '+(i+1)+'"></button>';
+    const s = state.seen[i], c = board.cards[i], k = t(c.sqft);
+    const bw = Math.round(34 + 26 * k), bh = Math.round(26 + 20 * k);
+    const rh = Math.round(11 + 7 * k),  rw = Math.round(bw / 2 + 5);
+    const cls = (state.bid && state.bid.idx === i) ? 'bought'
+              : (i === state.at ? 'on' : (s.walk || s.ask ? 'seen' : ''));
+    h += '<button class="p '+cls+'" onclick="jump('+i+')" '+(locked?'disabled':'')
+      +  ' aria-label="house '+(i+1)+', '+c.sqft.toLocaleString()+' square feet"'
+      +  (i === state.at ? ' aria-current="true"' : '') + '>'
+      +  '<span class="rf" style="border-left-width:'+rw+'px;border-right-width:'+rw
+      +  'px;border-bottom-width:'+rh+'px"></span>'
+      +  '<span class="bd" style="width:'+bw+'px;height:'+bh+'px"><span class="dr"></span></span>'
+      +  '<span class="n">'+(i+1)+'</span></button>';
   }
-  return h + '<button class="nav" onclick="go(1)" '+(state.mode==='offer'?'disabled':'')+'>▶</button></div>';
+  return h + '</div>';
 }
 
 function browseHTML(){

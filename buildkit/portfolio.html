@@ -36,6 +36,22 @@ body{background:var(--manila);
    rather than the town scrolling with it. */
 #world{position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;object-position:50% 68%;
  image-rendering:pixelated;z-index:0;pointer-events:none}
+/* EVERY SHEET IS PAPER AND NOW SAYS SO. Claude Design's diagnosis, and it is a
+   scoping bug rather than a colour one: these panels are paper objects lying on
+   a drawn street, and they were inheriting whatever inks the page had. The one
+   that showed was the lit press — brass on paper is #704e17, solved against the
+   darkest paper in the set, and it was rendering in the dark side's #a8873a.
+   The street itself declares nothing, because a picture is not a ground and
+   never needs an ink.
+
+   AND THE STREET KEEPS THE EDGE. I had a working spike that inset it into a
+   framed cabinet screen by narrowing the content to 980px, and it is not going
+   in. The rule turned out not to be about paper at all: the edge belongs to
+   what you are INSIDE of, and objects stop short of it. The drill hands you one
+   house and asks what it is worth, so that house is on the desk and takes an
+   edge. Comp Run does not ask you to judge the street. It asks you to work it.
+   You are standing on it. Insetting the best art in the product to make it
+   agree with a clause would have been the clause failing, not the art. */
 /* The sheets go very slightly transparent so the street reads underneath as a
    place rather than a wallpaper — 6% is enough to feel it and not enough to
    cost a single character of legibility. */
@@ -700,7 +716,7 @@ td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;
    <span id="props">0</span> holdings &middot; <span id="day">day 1</span><span id="streak" style="display:none;color:var(--gold)"></span></div>
   <div id="buffs"></div></div>
 </div>
-<div id="returned" class="sheet stapled" style="display:none;background:var(--pink);margin-top:12px;padding:11px 15px 11px 32px">
+<div id="returned" class="sheet stapled on-paper" style="display:none;background:var(--pink);margin-top:12px;padding:11px 15px 11px 32px">
  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
   <div><div class="eyebrow">While you were out</div>
    <div id="ret-fig">&mdash;</div>
@@ -709,10 +725,16 @@ td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;
   <button class="btn" id="ret-x">Dismiss</button></div></div>
 <div class="cols">
  <div>
-  <div class="sheet stapled" style="padding:11px 15px 5px 32px">
+  <div class="sheet stapled on-paper" style="padding:11px 15px 5px 32px">
    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
     <span class="eyebrow">The operation</span>
-    <span style="display:flex;gap:4px"><span class="eyebrow" style="align-self:center">buy</span>
+    <!-- FIVE CONTROLS THAT MODIFY A PURCHASE, ON A SCREEN WHERE NO PURCHASE IS
+         POSSIBLE. Claude Design's "defer, not delete", and they were right that
+         it is a timing bug rather than a wrong control: buying ten at once is
+         genuinely good later and meaningless with twelve dollars and nothing
+         owned. It appears the first time two of anything can be bought at
+         once, which is also the first moment the question it answers exists. -->
+    <span id="qty" hidden style="display:flex;gap:4px"><span class="eyebrow" style="align-self:center">buy</span>
      <button class="btn on" data-q="1">&times;1</button><button class="btn" data-q="10">&times;10</button>
      <button class="btn" data-q="100">&times;100</button><button class="btn" data-q="next">next</button><button class="btn" data-q="max">max</button></span></div>
    <div id="ladder" style="margin-top:5px"></div>
@@ -721,8 +743,8 @@ td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;
     <span id="next-l" style="font-size:12.5px;color:var(--soft)">&mdash;</span>
     <span class="mono" id="next-w" style="font-size:12.5px;color:var(--gold);white-space:nowrap">&mdash;</span></div></div>
 
-  <div id="streetHost" class="sheet stapled" style="display:none;margin-top:11px;padding:11px 15px 11px 32px"></div>
-  <div class="sheet stapled" style="margin-top:11px;padding:10px 15px 7px 32px">
+  <div id="streetHost" class="sheet stapled on-paper" style="display:none;margin-top:11px;padding:11px 15px 11px 32px"></div>
+  <div class="sheet stapled on-paper" style="margin-top:11px;padding:10px 15px 7px 32px">
    <div class="eyebrow">The file</div>
    <div id="file" style="margin-top:3px"><p data-empty="1" style="color:var(--soft)">Nothing on file yet. It will not stay that way.</p></div></div>
  </div>
@@ -736,7 +758,7 @@ td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;
   <button class="cr-x" id="cr-x" aria-label="Dismiss">&times;</button>
  </div>
  <div class="doorcol">
-  <div class="sheet stapled" style="padding:12px 13px 13px 30px">
+  <div class="sheet stapled on-paper" style="padding:12px 13px 13px 30px">
    <div class="doorwrap">
     <canvas id="door" width="180" height="150"></canvas>
     <div class="knockhint">Knock</div>
@@ -746,21 +768,21 @@ td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;
    <button class="btn go" id="comp" style="width:100%;margin-top:11px">Work today&rsquo;s street</button>
    <button class="btn" id="st-arch" style="width:100%;margin-top:6px">Yesterday&rsquo;s street &middot; unscored</button>
    <div class="mono" style="font-size:9.5px;color:var(--soft);margin-top:5px;line-height:1.55" id="compnote"></div></div>
-  <div id="prestige" class="sheet stapled" style="display:none;margin-top:11px;padding:11px 13px 12px 30px"></div>
+  <div id="prestige" class="sheet stapled on-paper" style="display:none;margin-top:11px;padding:11px 13px 12px 30px"></div>
  </div>
  <div>
-  <div class="sheet stapled" style="padding:11px 13px 9px 30px">
+  <div class="sheet stapled on-paper" style="padding:11px 13px 9px 30px">
    <div style="display:flex;justify-content:space-between;align-items:baseline">
     <span class="eyebrow">Upgrades</span><span class="eyebrow" id="upnote"></span></div>
    <div id="ups" style="margin-top:7px"></div></div>
-  <div class="sheet stapled" style="margin-top:11px;padding:11px 13px 12px 30px">
+  <div class="sheet stapled on-paper" style="margin-top:11px;padding:11px 13px 12px 30px">
    <div style="display:flex;justify-content:space-between;align-items:baseline">
     <span class="eyebrow">The record</span><span class="eyebrow" id="achnote"></span></div>
    <div style="font-size:11.5px;color:var(--soft);margin-top:3px;line-height:1.35">
     Things the office writes down. Each one lifts every dollar you earn by 1.5%, permanently.
     <span id="achverb">Hover</span> a square to read it.</div>
    <div id="ach" style="margin-top:7px;display:flex;flex-wrap:wrap;gap:3px"></div></div>
-  <div class="sheet stapled" style="margin-top:11px;padding:11px 13px 12px 30px">
+  <div class="sheet stapled on-paper" style="margin-top:11px;padding:11px 13px 12px 30px">
    <div style="display:flex;justify-content:space-between;align-items:baseline">
     <span class="eyebrow">The register</span><span class="eyebrow" id="regnote"></span></div>
    <div style="font-size:11.5px;color:var(--soft);margin-top:3px;line-height:1.35">
@@ -769,7 +791,7 @@ td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;
    <div id="reg" style="margin-top:8px"></div>
    <div class="miss" id="regmiss" style="margin-top:8px;font-size:11.5px"></div>
    <button class="btn" id="openbook" style="width:100%;margin-top:10px">Open the portfolio book</button></div>
-  <div class="sheet stapled" id="rolodex" style="display:none;margin-top:11px;padding:11px 15px 12px 32px">
+  <div class="sheet stapled on-paper" id="rolodex" style="display:none;margin-top:11px;padding:11px 15px 12px 32px">
    <div style="display:flex;justify-content:space-between;align-items:baseline">
     <span class="eyebrow">The rolodex</span><span class="eyebrow" id="rolonote"></span></div>
    <div style="font-size:11.5px;color:var(--soft);margin-top:3px;line-height:1.35">
@@ -4342,6 +4364,14 @@ function nextTarget(i){
   if (above < RUNGS.length && !unlocked(above) && REQ(above) > have) out.push(REQ(above));
   return out.length ? Math.min(...out) : null;
 }
+/* Once shown it stays shown — a control that comes and goes is worse than one
+   that arrives late, and by the time it arrives the player has bought things. */
+function qtyStripCheck(){
+  const q = $('qty'); if (!q || !q.hidden) return;
+  if (S.qtyseen || RUNGS.some((_, i) => unlocked(i) && maxAffordable(i) >= 2)){
+    q.hidden = false; S.qtyseen = 1;
+  }
+}
 const qtyFor = i => buyQty === 'max' ? maxAffordable(i)
   : buyQty === 'next' ? Math.max(1, (nextTarget(i) || (S.own[i] + 1)) - (S.own[i] || 0))
   : buyQty;
@@ -7087,7 +7117,7 @@ function renderNext(){
   const need = t.c - S.cash, r = rate();
   $('next-w').textContent = need <= 0 ? 'now' : r > 0 ? dur(need/r) : 'knock a door';
 }
-function render(){ checkAch(); renderTop(); renderLadder(); renderUps(); renderNext(); renderPrestige(); renderAch(); renderRegister(); paintWorld(); save(); }
+function render(){ checkAch(); renderTop(); renderLadder(); renderUps(); renderNext(); renderPrestige(); renderAch(); renderRegister(); qtyStripCheck(); paintWorld(); save(); }
 
 // ── The clock. One game-month = one real second. ───────────────────────────
 let last = Date.now();
@@ -7123,7 +7153,7 @@ setInterval(() => {
 // anything, and an achievement that only fires on the next purchase is one the
 // player has already stopped waiting for.
 setInterval(() => {
-  checkAch(); renderLadder(); renderUps(); renderAch(); renderRegister(); paintWorld();
+  checkAch(); renderLadder(); renderUps(); renderAch(); renderRegister(); qtyStripCheck(); paintWorld();
   marketTick(); rolodexTick();
   if ((S.missed || 0) >= 40) findCurio('denise');
   if ((S.refused || 0) >= 10) findCurio('refused');
