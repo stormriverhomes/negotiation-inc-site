@@ -843,11 +843,24 @@ window.__authDoorInit = function(on){
     row(em, m === 'reset');
     if (pw) pw.setAttribute('autocomplete', m === 'up' ? 'new-password'
                                           : m === 'reset' ? 'new-password' : 'current-password');
-    if (pw) pw.placeholder = m === 'reset' ? 'your new password' : 'something you will remember';
+    /* ── THE HINT BELONGS TO THE MODE, AND ONE OF THEM WAS BORROWED ───────
+       "something you will remember" is advice for choosing a password, so it
+       belongs on the door where you choose one. It was showing on SIGN IN too,
+       where the person already has a password and is being told how to pick
+       it — the field asking them to recall something, captioned as though they
+       were inventing it. Elijah caught it. Three modes, three hints, and the
+       length note only appears where a length is being chosen: telling
+       somebody signing in that six characters is the minimum is a rule about a
+       decision they made months ago. */
+    if (pw) pw.placeholder = m === 'reset' ? 'your new password'
+                           : m === 'in'    ? 'your password'
+                                           : 'something you will remember';
     const pwLab = pw && pw.previousElementSibling;
+    const SIX = ' <span style="color:var(--faint)">&mdash; six characters or more</span>';
     if (pwLab && pwLab.tagName === 'LABEL')
-      pwLab.innerHTML = m === 'reset' ? 'A new password <span style="color:var(--faint)">&mdash; six characters or more</span>'
-                                      : 'A password <span style="color:var(--faint)">&mdash; six characters or more</span>';
+      pwLab.innerHTML = m === 'reset' ? 'A new password' + SIX
+                      : m === 'in'    ? 'Your password'
+                                      : 'A password' + SIX;
     if (go) go.innerHTML = m === 'up' ? 'Create my workspace &rarr;'
                          : m === 'in' ? 'Sign in &rarr;'
                          : m === 'recover' ? 'Email me a reset link &rarr;'
@@ -1024,7 +1037,42 @@ $('gate-form').onsubmit = async e => {
       /* a confirmation that lands in spam, or an address with a typo in it, is
          a dead end unless there is a way to send it again */
       const rs = $('g-resend'); if (rs) rs.hidden = false;
-      return fine('Account made. Click the link in your email, then come back and sign in.');
+      /* ── THE TWO PEOPLE STANDING HERE ─────────────────────────────────
+         One has just made an account and has mail coming. The other typed an
+         address they already registered months ago, and Supabase — correctly,
+         so the form cannot be used to test who has an account here — returned
+         the identical response and sent nothing at all.
+
+         The old line spoke only to the first person, so the second sat
+         watching an inbox that was never going to fill. There is no way to
+         tell them apart out loud without leaking the thing Supabase is hiding,
+         so the line is written to be true for both and to hand each of them
+         the door they need: the link if it is coming, the reset if it is not.
+         `repeat` still shapes the emphasis, because it is a strong hint even
+         though it is not a fact we may state. */
+      const forgot = $('g-forgot');
+      if (forgot) forgot.hidden = false;
+      /* ── AND THE FORM STOPS INVITING THE SAME CLICK ───────────────────
+         It used to sit there afterwards still reading "Create my workspace",
+         with the details still in it, which is an invitation to press it
+         again — and pressing it again produces the identical ambiguous answer,
+         so the second press teaches nothing and feels like nothing happened.
+         The button says what state we are in and goes quiet until something
+         changes; typing anything wakes it up, because a person who realises
+         they mistyped the address should not have to reload the page. */
+      if (btn){ btn.disabled = true; btn.textContent = 'Check your email'; }
+      const wake = () => { if (!btn) return;
+        btn.disabled = false; btn.innerHTML = was; };
+      ['g-email','g-pw','g-name'].forEach(id => { const el = $(id);
+        if (el) el.addEventListener('input', wake, { once:true }); });
+      /* on a phone the message lands below the fold under a tall form, so the
+         one thing we need read is the one thing not on screen */
+      try { err.scrollIntoView({ block:'center', behavior:'smooth' }); } catch(e){}
+      return fine(r.repeat
+        ? 'If that address is new, a link is on its way \u2014 click it and come back. '
+          + 'If you have signed up before, nothing new was sent: sign in below, or reset the password.'
+        : 'Account made. Click the link in your email, then come back and sign in. '
+          + 'Already registered on that address? Nothing new was sent \u2014 reset the password instead.');
     }
   }
   /* An account is not a plan. Registering used to switch the whole product on
@@ -1997,8 +2045,27 @@ async function authSignUp(email, password, name){
     if (!r.ok) return { ok:false, error: authSay(j) };
     /* With e-mail confirmation switched on Supabase returns a user and no
        session. That is not a failure — it is a person who has to go and click
-       a link — and it has to read differently. */
-    if (!j.access_token) return { ok:true, confirm:true };
+       a link — and it has to read differently.
+
+       AND THERE IS A SECOND CASE HIDING IN THE FIRST, which cost us a launch
+       evening. Sign up again with an address that ALREADY has a confirmed
+       account and Supabase returns 200, a user object, and no session — byte
+       for byte the shape above — and sends no email at all. It does that on
+       purpose: answering "that address is taken" out loud turns the signup
+       form into a tool for testing whether somebody has an account here.
+
+       So the page said "check your email", and no email was ever going to
+       come. Elijah hit it on the first real test and reasonably concluded the
+       mail was broken; the mail was fine.
+
+       The tell is the identities array. On a genuinely new signup it holds one
+       entry. On a repeat it is empty — Supabase's documented signal, and the
+       only one it gives. We do not turn that into "you already have an
+       account", because that leaks exactly what the empty array exists to
+       hide. We say the true thing that covers both people: something was sent
+       OR nothing was, and here is the door out either way. */
+    const repeat = Array.isArray(j.identities) && j.identities.length === 0;
+    if (!j.access_token) return { ok:true, confirm:true, repeat };
     saveSess({ access_token:j.access_token, refresh_token:j.refresh_token,
                expires_at: Date.now() + (j.expires_in || 3600) * 1000, user:j.user });
     return { ok:true, user:j.user };

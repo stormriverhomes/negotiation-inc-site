@@ -2095,8 +2095,27 @@ async function authSignUp(email, password, name){
     if (!r.ok) return { ok:false, error: authSay(j) };
     /* With e-mail confirmation switched on Supabase returns a user and no
        session. That is not a failure — it is a person who has to go and click
-       a link — and it has to read differently. */
-    if (!j.access_token) return { ok:true, confirm:true };
+       a link — and it has to read differently.
+
+       AND THERE IS A SECOND CASE HIDING IN THE FIRST, which cost us a launch
+       evening. Sign up again with an address that ALREADY has a confirmed
+       account and Supabase returns 200, a user object, and no session — byte
+       for byte the shape above — and sends no email at all. It does that on
+       purpose: answering "that address is taken" out loud turns the signup
+       form into a tool for testing whether somebody has an account here.
+
+       So the page said "check your email", and no email was ever going to
+       come. Elijah hit it on the first real test and reasonably concluded the
+       mail was broken; the mail was fine.
+
+       The tell is the identities array. On a genuinely new signup it holds one
+       entry. On a repeat it is empty — Supabase's documented signal, and the
+       only one it gives. We do not turn that into "you already have an
+       account", because that leaks exactly what the empty array exists to
+       hide. We say the true thing that covers both people: something was sent
+       OR nothing was, and here is the door out either way. */
+    const repeat = Array.isArray(j.identities) && j.identities.length === 0;
+    if (!j.access_token) return { ok:true, confirm:true, repeat };
     saveSess({ access_token:j.access_token, refresh_token:j.refresh_token,
                expires_at: Date.now() + (j.expires_in || 3600) * 1000, user:j.user });
     return { ok:true, user:j.user };
@@ -3184,6 +3203,11 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
        the phrase, the field, or the button. */
     [/bring your own(?![^<.]{0,40}\bremoved\b)[^<.]{0,40}key/i, 'the bring-your-own-key offer'],
     [/paste (?:your |it |in )?[^<.]{0,30}RentCast key/i, 'a prompt to paste a vendor key'],
+    /* "on your own key" survived the first sweep on a locked card in the desk,
+       because the phrase names the offer without using either word the other
+       two patterns look for. Three shapes now, and this is the one that got
+       through: the offer described rather than made. */
+    [/on your own (?:RentCast )?key/i,                    'the bring-your-own-key offer, described'],
     [/id="rc-key"|id="rc-save"|id="rc-byok"/,             'the vendor-key input or its buttons'],
     /* the founding twenty-five is retired. A page that still names it is
        quoting a price the checkout will not honour, which is the worst

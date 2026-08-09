@@ -1665,6 +1665,70 @@ app.get('/api/land/config', async (req, res) => {
   log('land config ok', tiles.n + '/' + TILES_CAP);
   res.json({ ok:true, key: TILES_KEY });
 });
+/* ══ WALK THE STREET ═══════════════════════════════════════════════════════
+   Elijah: "being able to check it at the end so you can go back and walk
+   through the neighborhood and get a better feel for the property and/or the
+   comps."
+
+   THE ONE QUESTION THE SHEET CANNOT ANSWER. Every figure on the desk is a
+   figure — asking price, repairs, the band, the exit that clears. None of them
+   tell you that the house two doors down has a boat on the lawn, that the
+   block turns from kept to tired halfway along, or that the "comparable" three
+   streets over faces a six-lane road. That is a judgement people currently
+   make by leaving the product, opening a map, and coming back — which is the
+   forty minutes of tabs this whole desk exists to delete.
+
+   IT COSTS NOTHING PER VIEW, AND THAT CHANGES WHAT THE GATE MEANS. The Maps
+   Embed API is documented as free with unlimited requests, Street View mode
+   included — unlike the photorealistic 3D ground next door, which is billed
+   per session and is why THAT endpoint carries a daily cap, a fair-share
+   split and a hard ceiling. None of that machinery belongs here and copying it
+   would be cargo cult: a meter that measures nothing still refuses people.
+
+   So this is gated because it is a paid feature, and for no other reason. That
+   is worth being straight about in the code, because "it costs us money" is
+   the comfortable justification and it is not the true one here. What the gate
+   buys is a reason to pay; what the reader loses by not paying is an addition,
+   never a figure they worked out. The free desk still prices the house.
+
+   WHAT IS AND IS NOT HANDED OUT. The same browser key the ground uses, behind
+   the same origin check — a referrer restriction in the Google console stops
+   the key being USED elsewhere and does nothing about it being harvested from
+   a terminal, so absent Origin AND Referer is a non-browser caller and gets
+   nothing. The address is never logged, same rule as the geocoder below and
+   the waitlist. */
+app.get('/api/walk/config', async (req, res) => {
+  if (!TILES_KEY) return res.json({ ok:false, why:'unconfigured' });
+
+  /* A PLAN, NOT AN ACCOUNT — and that is the one line of difference from the
+     ground below it. The ground is a cost control priced at "sign up"; this is
+     something the plans page sells, so it has to be entitled at the tier the
+     plans page names or the pricing table is lying. */
+  const ent = await entitlementOf(req, 2);
+  if (!ent.ok){
+    log('walk config refused', ent.why);
+    return res.status(403).json({ ok:false, why: ent.why || 'plan',
+      error:'Walking the street comes with Underwriter, and with the fourteen-day trial.' });
+  }
+
+  const from = String(req.get('origin') || req.get('referer') || '');
+  if (ALLOW_ORIGIN.length && !ALLOW_ORIGIN.some(o => from.startsWith(o))){
+    log('walk config refused origin', from.slice(0, 60) || '(none)');
+    return res.status(403).json({ ok:false, why:'origin',
+      error:'That request did not come from this site.' });
+  }
+  /* the per-IP limit stays even though the requests are free: this hands out a
+     key, and a key handed out ten thousand times in an hour is a harvesting
+     run whatever Google charges for the embed */
+  if (!tileOk(req.ip || 'unknown')){
+    log('walk config 429 per-ip');
+    return res.status(429).json({ ok:false, why:'rate',
+      error:'That is a lot of requests in one hour from one place. Try again shortly.' });
+  }
+  log('walk config ok');
+  res.json({ ok:true, key: TILES_KEY });
+});
+
 app.get('/api/land/geo', async (req, res) => {
   if (!ipOk(req.ip || 'unknown'))
     return res.status(429).json({ ok:false, error:`That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.` });
@@ -1899,6 +1963,7 @@ async function opsData(){
       read:    (KEY || MOCK) ? 'on' : 'off',
       comps:   RENTCAST_KEY ? 'on' : 'off',
       land:    TILES_KEY ? (tiles.n >= TILES_CAP ? 'quota' : 'on') : 'flat',
+      walk:    TILES_KEY ? 'on' : 'off',
       census:  process.env.CENSUS_KEY ? 'on' : 'partial',
       accounts: ACCOUNTS_ON() ? 'on' : 'off',
     },
@@ -2184,6 +2249,7 @@ app.get('/api/health', (_req, res) => {
     object:  ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
     intake:  ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
     land: TILES_KEY ? (tiles.n >= TILES_CAP ? 'quota' : 'on') : 'flat',
+    walk: TILES_KEY ? 'on' : 'off',
     comps:   ((ACCESS || ACCOUNTS_ON()) && (RENTCAST_KEY || MOCK)) ? 'on' : 'off',
     gate: ACCESS ? 'code+account' : ACCOUNTS_ON() ? 'account' : 'none',
     list: LIST_ON ? 'on' : 'off',

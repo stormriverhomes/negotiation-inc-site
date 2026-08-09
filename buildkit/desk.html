@@ -846,6 +846,109 @@ body.traytight .tray{padding-bottom:11px}
 
 
 /* ── the street brief ───────────────────────────────────────────────────── */
+/* ══ WALK THE STREET · THE LOCKED FACE ═════════════════════════════════════
+   Elijah asked for "some kind of blurred gradient that looks super clickable
+   so it's like the shiny feature button that you want to click on", and the
+   interesting constraint is the one the locked shelf already wrote down: this
+   sheet does not blur a figure the reader worked out. That rule is what makes
+   the paywall survivable, and a shiny card is exactly where it would get bent.
+
+   So NOTHING REAL IS BLURRED HERE. The teaser is a drawn street — four CSS
+   gradients, no photograph, no Google request, no coordinates. It is not the
+   reader's block behind frosted glass; it is a picture of what the feature is,
+   and blurring an illustration withholds nothing because there was nothing
+   under it. It also means the teaser costs no money to show to people who are
+   not paying, which the version that fetched a real image and covered it up
+   would have done on every free sheet.
+
+   The shine is a single transform on a pseudo-element, so it composites and
+   does not repaint, and it runs on hover and focus rather than on a loop —
+   an ad that pulses at somebody trying to read the sheet under it is not
+   persuasive, it is a fly in the room. Honoured for reduced motion. */
+.walk{margin-top:14px;border:1px solid var(--line-ink);border-radius:var(--r-card);
+ background:#fff;overflow:hidden}
+.walk .wkh{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:13px 16px 0}
+.walk .wkh .k{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;
+ text-transform:uppercase;color:var(--soft)}
+.walk .wkh b{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink)}
+.walk p{font-size:13.5px;color:var(--mid);line-height:1.62;margin:6px 0 0;max-width:64ch;
+ padding:0 16px}
+.walk.locked .wkart{margin-bottom:0}
+
+/* the locked face */
+.walk.locked{cursor:pointer;border-color:var(--blue-line);
+ background:linear-gradient(180deg,var(--blue-soft),#fff)}
+.walk.locked .wkh .k{color:var(--blue)}
+.walk.locked:hover,.walk.locked:focus-visible{border-color:var(--blue);
+ box-shadow:0 6px 22px rgba(26,80,175,.15)}
+.walk.locked:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.wkart{position:relative;height:150px;margin:12px 0 0;overflow:hidden;isolation:isolate;
+ background:linear-gradient(#9dc3ea 0 38%,#cfe3f2 38% 46%,#7d9b6a 46% 56%,#6f6f6d 56% 100%)}
+/* A STREET, DRAWN — houses either side, a road running away between them.
+   The first version was four soft gradients and it blurred down to a grey
+   smear: you could tell something was behind the glass but not that it was a
+   street, which is the one thing the teaser has to say. More shapes, harder
+   edges, and a lighter blur — the blur means "not yours yet", not "nothing
+   here", and those look identical when you overdo it. */
+.wkart::before{content:"";position:absolute;inset:0;
+ background:
+  linear-gradient(to bottom right,transparent 49.4%,#8e8e8b 49.4% 50.6%,transparent 50.6%) 50% 56%/56% 44% no-repeat,
+  linear-gradient(to bottom left,transparent 49.4%,#8e8e8b 49.4% 50.6%,transparent 50.6%) 50% 56%/56% 44% no-repeat,
+  linear-gradient(135deg,transparent 48%,#8a5f4a 48%) 1% 30%/74px 30px no-repeat,
+  linear-gradient(#e8e2d6 0 100%) 1% 47%/74px 42px no-repeat,
+  linear-gradient(135deg,transparent 48%,#7d5744 48%) 15% 36%/58px 24px no-repeat,
+  linear-gradient(#ddd6c8 0 100%) 15% 50%/58px 34px no-repeat,
+  linear-gradient(135deg,transparent 48%,#6f4d3c 48%) 26% 41%/44px 18px no-repeat,
+  linear-gradient(#d2cabb 0 100%) 26% 52%/44px 26px no-repeat,
+  linear-gradient(225deg,transparent 48%,#8a5f4a 48%) 99% 30%/74px 30px no-repeat,
+  linear-gradient(#e5dfd2 0 100%) 99% 47%/74px 42px no-repeat,
+  linear-gradient(225deg,transparent 48%,#7d5744 48%) 85% 36%/58px 24px no-repeat,
+  linear-gradient(#dad3c4 0 100%) 85% 50%/58px 34px no-repeat,
+  linear-gradient(225deg,transparent 48%,#6f4d3c 48%) 74% 41%/44px 18px no-repeat,
+  linear-gradient(#cfc7b8 0 100%) 74% 52%/44px 26px no-repeat,
+  radial-gradient(closest-side,#5f7f4c 88%,transparent) 34% 44%/30px 40px no-repeat,
+  radial-gradient(closest-side,#5f7f4c 88%,transparent) 66% 45%/26px 34px no-repeat;
+ filter:blur(4.5px) saturate(1.02);transform:scale(1.06)}
+/* the veil lifts off the middle so the street is legible and closes at the
+   bottom so the card has somewhere to end */
+.wkart::after{content:"";position:absolute;inset:0;
+ background:linear-gradient(180deg,rgba(255,255,255,.30),rgba(255,255,255,.10) 40%,
+   rgba(255,255,255,.34) 74%,#fff)}
+/* the sheen: one transform, hover and focus only, never a loop */
+.wksheen{position:absolute;top:0;bottom:0;width:46%;z-index:2;pointer-events:none;
+ background:linear-gradient(105deg,transparent,rgba(255,255,255,.72),transparent);
+ transform:translateX(-160%);transition:transform .62s cubic-bezier(.22,.61,.36,1)}
+.walk.locked:hover .wksheen,.walk.locked:focus-visible .wksheen{transform:translateX(300%)}
+/* the affordance sitting on the art — a plate, because type never stands on a scene */
+.wkgo{position:absolute;z-index:3;left:50%;top:50%;transform:translate(-50%,-50%);
+ display:inline-flex;align-items:center;gap:9px;padding:11px 18px;border-radius:var(--r-pill);
+ background:var(--blue);color:#fff;font-size:14px;font-weight:700;letter-spacing:.01em;
+ box-shadow:0 6px 18px rgba(26,80,175,.34);transition:transform .16s ease}
+.walk.locked:hover .wkgo{transform:translate(-50%,-50%) scale(1.04)}
+.wkgo svg{width:15px;height:15px;flex:none}
+/* the pill IS the link now. One shiny thing, not a shiny thing beside a real
+   button doing the same job — the first version had both and the eye had to
+   pick, which is the opposite of what a teaser is for. */
+.wkgo,.wkgo:hover{text-decoration:none;color:#fff}
+@media (prefers-reduced-motion:reduce){
+ .wksheen{display:none}
+ .walk.locked:hover .wkgo{transform:translate(-50%,-50%)}
+ .wkgo{transition:none}
+}
+
+/* the live face */
+.wkbar{display:flex;gap:7px;flex-wrap:wrap;padding:11px 16px 0;align-items:center}
+.wkchip{font-size:12.5px;font-weight:650;padding:6px 11px;border-radius:var(--r-pill);
+ border:1px solid var(--line-ink);background:#fff;color:var(--mid);cursor:pointer;
+ max-width:26ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wkchip:hover{border-color:var(--blue);color:var(--blue)}
+.wkchip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.wkchip:disabled{opacity:.5;cursor:default}
+.wkmode{margin-left:auto;display:flex;gap:6px}
+.wkframe{margin-top:11px;border-top:1px solid var(--line);background:var(--wash);
+ aspect-ratio:16/9;min-height:230px}
+.wkframe iframe{display:block;width:100%;height:100%;border:0}
+.wknote{font-size:12px;color:var(--soft);padding:9px 16px 13px;line-height:1.55}
 .sbrief{margin-top:14px;padding:14px 16px 13px;border:1px solid var(--line-ink);
  border-radius:var(--r-card);background:#fff}
 .sbrief .k{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;
@@ -2414,6 +2517,7 @@ body.hasrail.railtight .trouble{left:64px}
    <input id="addr" type="text" placeholder="512 Joseph E Lowery Blvd SW, Atlanta GA 30310" autocomplete="off">
    <div class="note">Type a ZIP and the sheet offers that market's medians.</div>
    <div id="streetbrief"></div>
+   <div id="walkbox"></div>
   </div>
   <!-- ══ THE ORDER OF THIS SCREEN ═════════════════════════════════════════
        It used to be: asking price, then ARV, then the comp workbench sitting
@@ -5457,6 +5561,12 @@ function renderCore(){
     user is reading and a request that may be in flight, and rebuilding it on
     every keystroke in the address field would throw both away mid-sentence */
  if (!STREET.busy){ renderStreet(); wireStreet(); }
+ /* the walk redraws with the sheet because its stops ARE the sheet — a comp
+    added or renamed changes the chips. Suppressed mid-lookup for the same
+    reason the brief is: a redraw during an await throws away the spinner and
+    the person sees the panel flicker back to "pick a stop" while their stop
+    is loading. */
+ if (!WALK.busy){ renderWalk(); wireWalk(); }
  /* not while the textarea has the cursor in it: a re-render mid-paste would
     throw away what somebody is halfway through typing */
  if (!BIDC.busy && document.activeElement !== $('bd-text')){ renderBid(); wireBid(); }
@@ -7087,7 +7197,11 @@ const LOCKED = {
     The rule for this list: if a locked card names something, `grep` has to find
     the code that does it. */
  comps: [
-  { id:'auto',   n:'Comps pulled for the address', s:'recent sales, already adjusted, on your own key', tier:'Underwriter' },
+  { id:'auto',   n:'Comps pulled for the address', s:'up to ten recent sales, unscored, on our key', tier:'Underwriter' },
+  /* the walk is on this list because grep finds renderWalk() and /api/walk/config
+     — which is the rule for this list and the reason street view was struck off
+     it once already */
+  { id:'walk',   n:'Walk the street', s:'stand outside this house, and outside every comp', tier:'Underwriter' },
  ],
  condition: [],
  compare: [
@@ -7096,6 +7210,168 @@ const LOCKED = {
  ],
 };
 
+
+/* ══ WALK THE STREET · THE BROWSER HALF ════════════════════════════════════
+   Elijah: "being able to check it at the end so you can go back and walk
+   through the neighborhood and get a better feel for the property and/or the
+   comps."
+
+   THE SUBJECT AND EVERY COMP, IN ONE PANEL. He offered three places to put
+   this — on the property, in the comps, or at the end — and they are the same
+   panel if the panel takes an address rather than living somewhere. It sits
+   under the address field, which is where the street brief already sits and
+   the only input either of them needs; the chips along the top are the subject
+   plus whatever is on the comp workbench, so walking a comp is one click and
+   the "at the end" case is the same panel, still there, after the sheet is
+   priced.
+
+   WHY THE COMPS MATTER MORE THAN THE SUBJECT HERE. A comparable is a claim
+   that two houses are alike, and the sheet scores that claim on sqft, beds,
+   baths, distance and age — every dimension except the one an appraiser
+   actually walks the block to check. A comp three streets over that faces a
+   six-lane road is not comparable and no field on this workbench can say so.
+   This is the only thing on the desk that can.
+
+   IT NEVER GEOCODES WITHOUT BEING ASKED. The address goes to our own geocoder
+   only when somebody clicks a chip, which keeps it off the network for the
+   many sheets where nobody opens this, and means the panel costs nothing to
+   render. The address is not logged at either end. */
+let WALK = { on:null, key:null, busy:false, err:null, sel:0, mode:'sv', at:new Map() };
+
+/* the subject first, then whatever is on the workbench and has an address */
+function walkStops(){
+  const out = [];
+  const subj = String(S.addr || '').trim();
+  if (subj.length >= 8) out.push({ k:'subject', label:'This house', addr:subj });
+  (S.comps || []).forEach((c, i) => {
+    const a = String((c && c.addr) || '').trim();
+    if (a.length >= 8) out.push({ k:'c' + i, label:a, addr:a });
+  });
+  return out;
+}
+
+function renderWalk(){
+  const box = $('walkbox'); if (!box) return;
+  const stops = walkStops();
+
+  /* ── LOCKED ────────────────────────────────────────────────────────────
+     Same rule as the street brief: nothing is offered under an empty field.
+     A locked card above a sheet somebody has not started is an advertisement
+     interrupting them, not a feature they can see the shape of. */
+  if (!entitled(2)){
+    if (!stops.length){ box.innerHTML = ''; return; }
+    const why = entitleWhy(2);
+    const L = { demo:['In the demo','office.html?want=save','Start free and walk your own →'],
+                signedout:['Underwriter','office.html?want=save','Create a free account →'],
+                free:['Underwriter','plans.html','Start the fourteen days →'],
+                lowtier:['Underwriter','plans.html','See what Underwriter adds →'] }[why]
+             || ['Underwriter','plans.html','See what opens it →'];
+    const n = stops.length - 1;
+    box.innerHTML = `<div class="walk locked" data-plans="1" role="link" tabindex="0"
+      aria-label="Walk the street — ${esc(L[2].replace(/\s*→$/,''))}">
+      <div class="wkh"><span class="k">${esc(L[0])}</span><b>Walk the street</b></div>
+      <p>Stand on the sidewalk outside this house and turn around. Then do the same
+       ${n > 0 ? `at ${n === 1 ? 'the comp' : `all ${n} comps`} you are scoring it against`
+               : 'outside every comp you score it against'} &mdash; because "comparable" is a
+       claim about a street, and no field on this workbench can tell you that the one three
+       roads over faces six lanes of traffic.</p>
+      <div class="wkart">
+       <span class="wksheen"></span>
+       <a class="wkgo" href="${esc(L[1])}">${esc(L[2].replace(/\s*\u2192\s*$/, ''))}
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+         <path d="M2 8h11"/><path d="M9 4l4 4-4 4"/></svg></a>
+      </div>
+     </div>`;
+    return;
+  }
+
+  /* ── UNLOCKED ──────────────────────────────────────────────────────────*/
+  if (!stops.length){ box.innerHTML = ''; return; }
+  if (WALK.sel >= stops.length) WALK.sel = 0;
+  const here = stops[WALK.sel];
+  const at = WALK.at.get(here.addr.toLowerCase());
+  const chips = stops.map((s, i) =>
+    `<button class="wkchip${i === WALK.sel ? ' on' : ''}" type="button" data-wk="${i}"
+      title="${esc(s.addr)}">${esc(s.label)}</button>`).join('');
+  const modes = `<span class="wkmode">
+    <button class="wkchip${WALK.mode === 'sv' ? ' on' : ''}" type="button" data-wkm="sv">Street</button>
+    <button class="wkchip${WALK.mode === 'sat' ? ' on' : ''}" type="button" data-wkm="sat">Overhead</button>
+   </span>`;
+
+  let body;
+  if (WALK.err){
+    body = `<p class="wknote">${esc(WALK.err)}</p>`;
+  } else if (WALK.busy || !at){
+    body = `<p class="wknote">${WALK.busy ? 'Placing the address…'
+      : 'Pick a stop above and the view opens here. Nothing is looked up until you do.'}</p>`;
+  } else if (!WALK.key){
+    body = `<p class="wknote">The map key is not available on this deployment, so the walk cannot open.
+      Every figure on the sheet is unaffected.</p>`;
+  } else {
+    /* Maps EMBED, not the JS API: free with unlimited requests, and the pano
+       is fully draggable inside the frame, which is the whole feature. The key
+       is in the iframe URL because that is how the Embed API takes it — it is
+       a browser key, restricted by referrer in the Google console, and it is
+       the same one the 3D ground already hands this page. */
+    const q = encodeURIComponent(at.lat + ',' + at.lon);
+    const src = WALK.mode === 'sv'
+      ? `https://www.google.com/maps/embed/v1/streetview?key=${encodeURIComponent(WALK.key)}&location=${q}&heading=0&pitch=0&fov=90`
+      : `https://www.google.com/maps/embed/v1/view?key=${encodeURIComponent(WALK.key)}&center=${q}&zoom=18&maptype=satellite`;
+    body = `<div class="wkframe"><iframe src="${esc(src)}" loading="lazy" allowfullscreen
+      referrerpolicy="no-referrer-when-downgrade"
+      title="${WALK.mode === 'sv' ? 'Street view' : 'Overhead view'} of ${esc(here.label)}"></iframe></div>
+     <p class="wknote">${esc(here.addr)}${at.how === 'pin' ? ' · placed from coordinates'
+        : ' · placed by the Census geocoder'}. Street imagery is Google's and is dated
+      &mdash; it is a feel for the block, not evidence about the house today.</p>`;
+  }
+
+  box.innerHTML = `<div class="walk"><div class="wkh"><span class="k">Underwriter</span>
+    <b>Walk the street</b></div>
+   <div class="wkbar">${chips}${modes}</div>${body}</div>`;
+}
+
+async function walkGo(i){
+  const stops = walkStops();
+  if (!stops[i]) return;
+  WALK.sel = i; WALK.err = null;
+  const here = stops[i], k = here.addr.toLowerCase();
+  if (WALK.at.has(k)){ renderWalk(); return; }
+  WALK.busy = true; renderWalk();
+  try {
+    if (!WALK.key){
+      const r = await fetch((window.__NI_API || '') + '/api/walk/config', {
+        headers: (typeof window.__authHeader === 'function' ? await window.__authHeader() : {}) });
+      const j = await r.json().catch(() => ({}));
+      if (!j || !j.ok) throw new Error(j && j.error
+        ? j.error : 'The walk could not be opened. Nothing on the sheet changed.');
+      WALK.key = j.key;
+    }
+    const g = await fetch((window.__NI_API || '') + '/api/land/geo?q=' + encodeURIComponent(here.addr));
+    const gj = await g.json().catch(() => ({}));
+    if (!gj || !gj.ok) throw new Error((gj && gj.error)
+      || 'That address could not be placed on a map. Paste "lat, lng" into the address instead.');
+    WALK.at.set(k, { lat: gj.lat, lon: gj.lon, how: gj.how });
+  } catch(e){ WALK.err = e.message || String(e); }
+  WALK.busy = false; renderWalk();
+}
+
+function wireWalk(){
+  const box = $('walkbox'); if (!box) return;
+  const card = box.querySelector('.walk.locked');
+  if (card){
+    /* the whole card is the target, because a shiny thing you have to hit a
+       small link inside is a shiny thing that failed. Keyboard too — it says
+       role="link", so it has to behave like one. */
+    const go = () => { const a = card.querySelector('a[href]'); if (a) location.href = a.getAttribute('href'); };
+    card.onclick = ev => { if (!ev.target.closest('a')) go(); };
+    card.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); go(); } };
+    return;
+  }
+  box.querySelectorAll('[data-wk]').forEach(b => b.onclick = () => walkGo(+b.dataset.wk));
+  box.querySelectorAll('[data-wkm]').forEach(b => b.onclick = () => {
+    WALK.mode = b.dataset.wkm; renderWalk(); wireWalk(); });
+}
 
 /* ══ THE STREET BRIEF · THE BROWSER HALF ═══════════════════════════════════
    The one thing this sheet could never tell you: what the block is actually
