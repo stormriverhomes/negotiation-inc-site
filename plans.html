@@ -1215,7 +1215,31 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      box = k && k.closest('.founding');
  if (!k) return;
  fetch('/api/founding').then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
-  if (!d || !d.ok || !d.on || !d.known) return;
+  /* ── AN OFFER THE SERVER CANNOT ISSUE MUST NOT BE ON THE PAGE ──────────
+     This returned silently, which meant the card went on saying "$79 a month
+     for Underwriter, for your first year" with a live "Take a place" button
+     in three states where that is not true: no STRIPE_PRICE_FOUNDING set, the
+     seat count unreadable, or Stripe unreachable.
+
+     The server is already correct and refuses to issue a founding price it
+     cannot count — so the checkout would have charged $129 to somebody the
+     page had just quoted $79. Telling a customer one price and taking another
+     is the worst failure available to this product, and it was one unset
+     environment variable away on launch day.
+
+     The card falls back to the plain Underwriter pitch instead. It sells the
+     same plan at the price the server will actually charge. */
+  if (!d || !d.ok || !d.on || !d.known){
+    if (k) k.textContent = 'Underwriter';
+    if (h) h.textContent = 'The typing, done for you.';
+    var p0 = box && box.querySelector('p');
+    if (p0) p0.innerHTML = 'The condition read off your photographs, comps pulled and scored on our '
+      + 'key, the street read, the letters and the lender packet. <b>$129 a month</b>, fourteen days '
+      + 'free with nothing charged until day fifteen, and cancelling is one click.';
+    if (cta) cta.textContent = 'Start 14 days free \u2192';
+    if (box) box.classList.add('plain');
+    return;
+  }
   if (d.open){
    /* the number is the whole point of the offer, so it goes in the eyebrow
       where the count belongs, not buried in a paragraph */
@@ -1238,7 +1262,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
  }).catch(function(){});
 })();
 </script>
-<!-- stamp probe --><style>
+<style>
 .whoami{border:1px solid currentColor!important;border-radius:999px;padding:5px 12px!important;
  font-weight:650;opacity:.75;transition:opacity .13s;white-space:nowrap}
 .whoami:hover{opacity:1}

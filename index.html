@@ -371,7 +371,15 @@ footer a:hover{color:var(--ink)}
 .way.lead{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
 .way.lead .wi,.way.lead .wk{color:var(--blue)}
 .way.lead:hover,.way.lead:focus-visible{box-shadow:0 0 0 3px var(--blue-soft),0 14px 36px rgba(31,95,208,.20)}
+/* the one piece of the arcade's paper allowed on this side of the seam: a
+   rule, not a field. Revision 2 brought the whole tan world over and a
+   stranger read it as a different, older website. */
+.way.arc{border-top:3px solid #a8873a}
+.way.arc .wk{color:#8a6d28}
 .finish{border-top:1px solid var(--line);padding:52px 0 8px}
+/* at the top of the page this is an opening, not a sign-off */
+.finish.up{border-top:0;border-bottom:1px solid var(--line);padding:8px 0 44px}
+.finish.up h2{font-size:34px}
 .finish h2{font-size:32px}
 .finish .eyebrow{color:var(--soft)}
 
@@ -638,6 +646,75 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
   <div class="vpanel" id="vp" role="region" aria-live="polite"></div>
  </div>
 </div>
+
+<!-- ══ MOVED: A WAY IN, BEFORE 1,300 WORDS OF READING ═══════════════════
+     This was the LAST section on the page. The lowest-commitment things this
+     product has — a finished sheet you do not fill in, a blank one that needs
+     no account, and a free game — were offered after everything else had been
+     read, to the small number of people who got that far.
+
+     Claude Design moved it to first. The argument is not that the writing
+     below is bad; it is that a person who is ready to press something should
+     not have to earn the right to. Everything after this section is now for
+     the reader who wanted to know more before choosing, which is a different
+     and much smaller job than convincing somebody to stay. ══════════════ -->
+<section class="finish up">
+ <div class="wrap">
+  <div class="eyebrow">Three ways in</div>
+  <h2>Pick a door.</h2>
+  <div class="ways">
+  <a class="way" href="demo.html">
+   <span class="wi"><svg viewBox="0 0 40 52" width="32" height="42" aria-hidden="true" focusable="false">
+     <rect x="1.6" y="1.6" width="36.8" height="48.8" rx="3" fill="none" stroke="currentColor" stroke-width="2.4"/>
+     <rect x="8" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
+     <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
+   <span class="wk">Ninety seconds</span>
+   <span class="wt">See one already done</span>
+   <span class="wd">A finished sheet on 1128 Marrow Lane &mdash; every exit priced or refused, every number showing its working. Nothing to fill in.</span>
+   <span class="wgo">Open the worked example <em>&rarr;</em></span>
+  </a>
+  <a class="way lead" href="desk.html#new">
+   <span class="wi"><svg viewBox="0 0 40 52" width="32" height="42" aria-hidden="true" focusable="false">
+     <rect x="1.6" y="1.6" width="36.8" height="48.8" rx="3" fill="none" stroke="currentColor" stroke-width="2.4"/>
+     <rect x="8" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
+     <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
+   <span class="wk">Free &middot; no account &middot; no card</span>
+   <span class="wt">Price your own house</span>
+   <span class="wd">Your address and their asking price. Seven exits ranked against <b>this</b> seller, the repair estimate built line by line, and the words to say.</span>
+   <span class="wgo">Open a blank worksheet <em>&rarr;</em></span>
+  </a>
+  <!-- ── THE THIRD DOOR WAS A PRICE ────────────────────────────────────────
+       It sold the founding place. That was defensible when this block was the
+       LAST thing on the page and a reader had earned the pitch; at the top,
+       directly under the headline, it asks for money from somebody who has
+       not yet been told what the thing does.
+
+       Claude Design put the arcade here instead, which answers the question
+       the founder actually asked: where does the free game go for the person
+       who is on the fence. It is the lowest-commitment thing on the site, it
+       needs no account, and it was in position seven of nine. The gold rule
+       across the top is the only paper in the software's world — a hint that
+       this door opens somewhere else, without dragging the whole tan seam
+       onto the front page the way revision 2 did. -->
+  <a class="way arc" href="arcade.html">
+   <span class="wi"><svg viewBox="0 0 40 52" width="32" height="42" aria-hidden="true" focusable="false">
+     <rect x="1.6" y="1.6" width="36.8" height="48.8" rx="3" fill="none" stroke="currentColor" stroke-width="2.4"/>
+     <rect x="8" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
+     <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
+     <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
+   <span class="wk">Ninety seconds &middot; another world</span>
+   <span class="wt">Train the instinct</span>
+   <span class="wd">Buy houses in eight historical eras and find out what the judgement feels like before you spend anything on it. Three cabinets, free, no account.</span>
+   <span class="wgo">Enter the arcade <em>&rarr;</em></span>
+  </a>
+ </div>
+ </div>
+</section>
 
 <!-- ══ MOVED: THE GLOSSARY NOW COMES BEFORE THE WORDS IT DEFINES ══════
      This section was fifth. The section that used to be SECOND spent all
@@ -914,48 +991,21 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
      The page ended on "enter the arcade", which sends the one visitor who
      read all of it to go and play a game instead. Three doors, at the size
      a decision deserves, in the order we would like them taken. ══════ -->
-<section class="finish">
- <div class="wrap">
-  <div class="eyebrow">Three ways in</div>
-  <h2>Pick a door.</h2>
-  <div class="ways">
-  <a class="way" href="demo.html">
-   <span class="wi"><svg viewBox="0 0 40 52" width="32" height="42" aria-hidden="true" focusable="false">
-     <rect x="1.6" y="1.6" width="36.8" height="48.8" rx="3" fill="none" stroke="currentColor" stroke-width="2.4"/>
-     <rect x="8" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
-     <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
-     <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
-     <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
-   <span class="wk">Ninety seconds</span>
-   <span class="wt">See one already done</span>
-   <span class="wd">A finished sheet on 1128 Marrow Lane &mdash; every exit priced or refused, every number showing its working. Nothing to fill in.</span>
-   <span class="wgo">Open the worked example <em>&rarr;</em></span>
-  </a>
-  <a class="way lead" href="desk.html#new">
-   <span class="wi"><svg viewBox="0 0 40 52" width="32" height="42" aria-hidden="true" focusable="false">
-     <rect x="1.6" y="1.6" width="36.8" height="48.8" rx="3" fill="none" stroke="currentColor" stroke-width="2.4"/>
-     <rect x="8" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
-     <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
-     <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
-     <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
-   <span class="wk">Free &middot; no account &middot; no card</span>
-   <span class="wt">Price your own house</span>
-   <span class="wd">Your address and their asking price. Seven exits ranked against <b>this</b> seller, the repair estimate built line by line, and the words to say.</span>
-   <span class="wgo">Open a blank worksheet <em>&rarr;</em></span>
-  </a>
-  <a class="way" href="plans.html">
-   <span class="wi"><svg viewBox="0 0 40 52" width="32" height="42" aria-hidden="true" focusable="false">
-     <rect x="1.6" y="1.6" width="36.8" height="48.8" rx="3" fill="none" stroke="currentColor" stroke-width="2.4"/>
-     <rect x="8" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
-     <rect x="22" y="9" width="10" height="13" rx="1.5" fill="currentColor" opacity=".26"/>
-     <rect x="8" y="27" width="24" height="15" rx="1.5" fill="currentColor" opacity=".16"/>
-     <circle cx="31.4" cy="30.5" r="2.2" fill="currentColor"/></svg></span>
-   <span class="wk">Twenty-five places</span>
-   <span class="wt">Take a founding place</span>
-   <span class="wd">$79 a month for Underwriter, held for your first year: the condition read off your photos, comps pulled and scored, the letters and the lender packet.</span>
-   <span class="wgo">See what a plan buys <em>&rarr;</em></span>
-  </a>
- </div>
+
+
+<!-- The doors moved to the top, so the page now ENDS on the arcade — a game,
+     which is the wrong last word for a company. Two lines and the two actions
+     that matter, for the reader who went all the way down. -->
+<section class="band">
+ <div class="wrap" style="text-align:center">
+  <h2 style="font-size:30px">Price one and see.</h2>
+  <p style="font-size:17px;color:var(--mid);margin-top:10px;max-width:52ch;margin-left:auto;margin-right:auto">
+   It is free, it needs no account, and nothing you type leaves your browser.
+   If it is not useful in ten minutes, nothing was spent.</p>
+  <div class="cta" style="justify-content:center">
+   <a class="btn p" href="desk.html#new">Price a property</a>
+   <a class="btn" href="demo.html">See one already done &rarr;</a>
+  </div>
  </div>
 </section>
 

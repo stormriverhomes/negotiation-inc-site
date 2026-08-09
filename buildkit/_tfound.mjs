@@ -202,6 +202,35 @@ srv.kill();
   const off = await read({ ok:true, on:false });
   ok('and a deployment with no founding price configured says nothing about one',
      !/taken|places left/i.test(off.k), off.k);
+
+  /* ── THE PRICE ON THE PAGE MUST BE THE PRICE THE SERVER WILL TAKE ────────
+     Found by building the LIVE stage and looking at it, which nobody had ever
+     done. This script used to return silently when the offer was off or
+     uncountable — so the card went on saying "$79 a month for Underwriter,
+     for your first year" with a live Take-a-place button, in the exact state
+     the deployment is in today: no STRIPE_PRICE_FOUNDING set.
+
+     The server is right and refuses to issue a founding price it cannot
+     count, which means the checkout would have charged $129 to somebody the
+     page had just quoted $79. Quoting one price and taking another is the
+     worst failure available to this product, and it was one unset variable
+     away on launch day. These two states are the ones nobody would have
+     thought to look at, because they look like the page working. */
+  for (const [label, say] of [
+    ['no founding price configured', { ok:true, on:false }],
+    ['Stripe unreachable',           { ok:true, on:true, known:false }],
+    ['the route itself failing',     { ok:false }],
+  ]){
+    const r = await read(say);
+    ok(`${label}: the card stops advertising $79`, !/\$79/.test(r.h + ' ' + r.p), { k:r.k, h:r.h });
+    ok(`${label}: and stops offering a place that cannot be issued`,
+       !/take a place/i.test(r.cta), r.cta);
+    ok(`${label}: and names the price the server will actually charge`,
+       /\$129/.test(r.p), r.p.slice(0, 120));
+    ok(`${label}: without pretending the offer sold out`,
+       !/taken|places left|are gone/i.test(r.k + ' ' + r.h), { k:r.k, h:r.h });
+    ok(`${label}: and throws nothing`, !r.errs.length, r.errs[0]);
+  }
   ok('no page errors in any of those states', !full.errs.length && !blind.errs.length, full.errs[0]);
   await b.close(); site.close();
 }

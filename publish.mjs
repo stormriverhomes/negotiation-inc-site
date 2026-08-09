@@ -1090,8 +1090,12 @@ for (const must of ['Know what to pay', 'href="demo.html"', 'href="arcade.html"'
                     'href="office.html"', 'href="plans.html"', 'art/door-now.png',
                     'art/demo-condition.png', 'getElementById(\'stage\')', 'Fraunces',
                     'Four jobs, one sheet', 'What it replaces',
-                    /* the last word, and the doors that are finally links */
-                    'class="finish"', 'class="ways"', '<figure><a href="arcade.html">',
+                    /* Not the last word any more — the three doors moved to the
+                       top, so this carries a modifier now and an exact-match
+                       needle went red for the move rather than for a fault.
+                       What is being protected is that the doors EXIST and are
+                       real links, which is what the two needles say. */
+                    'class="finish', 'class="ways"', '<figure><a href="arcade.html">',
                     /* the front page has to say what a plan adds, not just link to it */
                     'class="adds"', 'plans.html#bid', 'plans.html#objections'])
   if (!landing.includes(must)) throw new Error('index.html lost: ' + must);
@@ -2945,6 +2949,21 @@ await b.close();
      the very build that proves payments work. The provider rules still apply
      — a test build has no business naming onrender either. */
   const LOCAL_OK = !!process.env.NI_ALLOW_LOCAL_SB;
+  /* _tstamp edits a real source file to prove the build id moves, and restores
+     it in a finally. A finally does not run when the process is killed, and one
+     was — so "<!-- stamp probe -->" sat in plans.html waiting for the next
+     batch to carry it to the internet. A harness that can leave litter in the
+     source tree needs the build to sweep for it. */
+  /* ── LITTER IS CHECKED ON THE RAW BYTES, HOSTNAMES ON THE PROSE ─────────
+     The first version of this put the probe pattern in with the hostnames,
+     which run against a DECOMMENTED copy so that a paragraph explaining why
+     emailRedirectTo matters is free to say the word "localhost". A probe left
+     behind by a harness IS a comment, so the check that was meant to catch it
+     stripped it first and reported green. Two lists, two passes: one asks
+     what the page SAYS, the other asks what is in the file. */
+  const LITTER = [
+    [/stamp probe|__TEST_PROBE__|TODO: remove|XXX HACK/i, 'a test probe or a note left behind'],
+  ];
   const HOSTS = [
     [/onrender\.com/i,               'the hosting provider'],
     [/negotiation-inc-site\./i,      'the pre-domain service name'],
@@ -2961,7 +2980,13 @@ await b.close();
     .concat(fs.existsSync(path.join(out, 'd'))
       ? fs.readdirSync(path.join(out, 'd')).filter(f => f.endsWith('.html')).map(f => 'd/' + f) : []);
   for (const f of pages){
-    const body = decomment(fs.readFileSync(path.join(out, f), 'utf8'));
+    const raw = fs.readFileSync(path.join(out, f), 'utf8');
+    for (const [re, what] of LITTER){
+      const m = raw.match(re);
+      if (m) throw new Error(`${f} carries ${what} (${m[0]}) — a harness edited a source file and did `
+        + 'not put it back. Its finally block does not run when the process is killed.');
+    }
+    const body = decomment(raw);
     for (const [re, what] of HOSTS){
       const m = body.match(re);
       if (m) throw new Error(`${f} names ${what} (${m[0]}) — a built page must only ever say negotiationinc.com`);
