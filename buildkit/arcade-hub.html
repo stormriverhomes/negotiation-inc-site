@@ -16,6 +16,15 @@
    separate room rather than a section of the landing page.
    ═══════════════════════════════════════════════════════════════════════════ */
 :root{
+  /* ARCADE TOKENS, LOCAL COPY. The build injects the authoritative set (see
+     ARCADE in publish.mjs) and its selectors are closer to the content, so it
+     wins. These exist so this file opened straight off disk is the same page
+     rather than a broken fallback of one — which is what _tvars is for, and
+     what it caught the moment the tokens went in. */
+  --ground:#0d1420; --raise:#141c2b; --edge:#223047; --well:#101825;
+  --ink:#e8e2d4; --ink-2:#aeb8c8; --ink-3:#8b98ac;
+  --brass:#a8873a; --pays:#3fa06a; --refuses:#d96a5a; --desk:#4881ea;
+
   --paper:#e8e2d4; --ink:#23201c; --mid:#6b6153; --soft:#8a8072; --line:#c9c0ad;
   --deep:#151a24; --deep-2:#1c2432; --edge:#223047;
   --gold:#a8873a; --blue:#3a78e8; --green:#2c6142;
@@ -76,7 +85,14 @@ h1{font-size:46px}
 .btn{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:14px;font-weight:650;
  padding:9px 15px;border:1.5px solid #39435a;background:transparent;color:#cdd6e4;text-decoration:none;cursor:pointer}
 .btn:hover{border-color:#fff;color:#fff}
-.btn.p{background:#3570d8;border-color:#3570d8;color:#fff}   /* not --blue: white on it was 4.17:1 */
+/* THE FLOOR WAS ADVERTISING ITS CABINETS IN THE SOFTWARE'S BLUE. Blue is the
+   other world's voice — it belongs on exactly one control per arcade page,
+   the link out to the desk, and nowhere else. A blue button inside a game is
+   the seam leaking inward. Brass is the arcade's own, and the fill takes the
+   ground as its ink rather than white: white on #a8873a is 3.39:1 and fails,
+   #0d1420 on it is 5.44:1 and reads as an engraved plate, which is what a
+   cabinet button should look like. */
+.btn.p{background:var(--brass);border-color:var(--brass);color:var(--ground)}
 .btn.p:hover{background:#5a92ff;border-color:#5a92ff}
 .btn.sm{font-size:12.5px;padding:7px 11px}
 .cab.soon{opacity:.72}
@@ -120,7 +136,7 @@ h1{font-size:46px}
 @media (max-width:560px){ .bank .n{font-size:34px} .bank .bk-m{text-align:left} }
 </style>
 </head>
-<body>
+<body class="on-dark">
 
 <header>
  <div class="wrap mast">

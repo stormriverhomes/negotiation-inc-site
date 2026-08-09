@@ -4,7 +4,16 @@
 <title>The Arcade &middot; Negotiation Inc</title>
 <meta name="description" content="Eight eras of ground, a daily street, and a phone that rings. The instinct, trained the fun way. Free forever, no account.">
 <style>
-:root{--manila:#d9c8a4;--cream:#f4efe2;--news:#e8e2d4;--pink:#f0d9d5;--ink:#23201c;--mid:#47423b;
+:root{
+  /* ARCADE TOKENS, LOCAL COPY. The build injects the authoritative set (see
+     ARCADE in publish.mjs) and its selectors are closer to the content, so it
+     wins. These exist so this file opened straight off disk is the same page
+     rather than a broken fallback of one — which is what _tvars is for, and
+     what it caught the moment the tokens went in. */
+  --ground:#0d1420; --raise:#141c2b; --edge:#223047; --well:#101825;
+  --ink:#e8e2d4; --ink-2:#aeb8c8; --ink-3:#8b98ac;
+  --brass:#a8873a; --pays:#3fa06a; --refuses:#d96a5a; --desk:#4881ea;
+--manila:#d9c8a4;--cream:#f4efe2;--news:#e8e2d4;--pink:#f0d9d5;--ink:#23201c;--mid:#47423b;
  --soft:#5a544b;--rule:#b9ae95;--hi:#cdc3ac;--red:#a8271f;--green:#2c6142;--gold:#9d5b0c;
  /* The build's FONTS block overrides both of these with !important, which is
     how the typewriter left the software. They are declared here anyway so
@@ -164,6 +173,17 @@ body.fz .ratebar{animation:fzGlow 1.25s ease-in-out infinite;border-radius:6px}
  background:var(--news);border:1px solid var(--rule);padding:8px 10px;margin-bottom:6px;color:inherit;font:inherit;
  box-shadow:0 2px 0 -1px rgba(35,32,28,.22),0 5px 10px -8px rgba(35,32,28,.45)}
 .up:hover:not(:disabled){background:var(--cream)}.up:disabled{opacity:.38;cursor:not-allowed}
+/* EXACTLY ONE THING IS LIT. Claude Design's second clause, and the reason
+   the coach tip's first two beats could go: the wall of things you cannot
+   have yet is the pleasure of an idle game and hiding it throws away Comp
+   Run's only long-session asset. The failure was never the wall — it was
+   that every row on it was equally bright, so none of them was a next step.
+   The cheapest thing you can actually afford gets the brass edge; brass is
+   the bankroll and the one press about to spend it, and brass is nothing
+   else on this floor. */
+.up.lit{box-shadow:inset 3px 0 0 var(--brass,#9d5b0c);background:linear-gradient(90deg,rgba(157,91,12,.10),transparent 62%)}
+#ups.haslit .up:not(.lit):not(.soon):not(:disabled){opacity:.7}
+.up.lit .t{font-weight:700}
 .up .g{font-family:var(--mono);font-size:13px;text-align:center;color:var(--gold)}
 .up .t{font-size:12.5px;font-weight:600;line-height:1.2;display:block}
 .up .d{font-size:11px;color:var(--soft);margin-top:1px;line-height:1.3;display:block}
@@ -210,7 +230,10 @@ body.fz .ratebar{animation:fzGlow 1.25s ease-in-out infinite;border-radius:6px}
  padding:6px 8px;cursor:pointer}
 .cr-x:hover{color:#fff}
 /* what the beat is pointing at */
-.cr-point{position:relative;z-index:55;animation:crPulse 1.5s ease-in-out infinite}
+/* three pulses, then it stops moving and stays. An animation that never ends
+   is nagging rather than pointing, and the ring alone does the work. */
+.cr-point{position:relative;z-index:55;outline:2px solid rgba(168,135,58,.8);outline-offset:3px;
+ animation:crPulse 1.5s ease-in-out 3}
 @keyframes crPulse{0%,100%{box-shadow:0 0 0 0 rgba(168,135,58,0)}
                    50%{box-shadow:0 0 0 5px rgba(168,135,58,.42)}}
 @media (prefers-reduced-motion:reduce){
@@ -670,7 +693,7 @@ td.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;
         beside the era label — on a phone that is a coin-flip between leaving
         and hitting nothing. inline-block and 7px of vertical padding make it
         a 26px target without moving anything on the page. -->
-   <a href="index.html" style="display:inline-block;padding:7px 0;color:var(--soft);margin-left:10px;text-decoration:none;border-bottom:1px solid currentColor">leave the arcade</a></div></div>
+   <a href="arcade.html" style="display:inline-block;padding:7px 0;color:var(--soft);margin-left:10px;text-decoration:none;border-bottom:1px solid currentColor">← the floor</a></div></div>
  <div style="text-align:right"><div class="hero" id="cash">$30</div>
   <div class="ratebar"><span id="rate">$0</span><span class="per">/sec</span></div>
   <div class="mono" style="font-size:10.5px;color:var(--soft);margin-top:2px;letter-spacing:.04em">
@@ -4930,18 +4953,28 @@ const doorCv = $('door');
    something that knocks for you, then take the day's street, which is the
    handoff to the Daily Street and the reason the arcade is attached to a
    pricing product at all. Nobody found that third thing on their own. */
+/* TWO OF THESE THREE WERE COMPENSATING FOR A SCREEN THAT DID NOT INDICATE A
+   NEXT STEP, and a modal covering the bottom third of the first viewport is an
+   expensive way to say "press the biggest thing on the page". The lit press
+   says it instead, in place, without covering anything — so "knock on the
+   door" and "now buy something that knocks for you" are gone.
+
+   THE THIRD ONE STAYS, AGAINST THE ADVICE, and the reason is written three
+   lines above where the advice would have deleted it: nobody found the day's
+   street on their own. It is not a purchase, so no lit press can carry it —
+   it is a DESTINATION, the handoff from this cabinet to the Daily Street, and
+   it is the only thing on this page that routes a player to another cabinet.
+   Deleting it would have cost the arcade a connection on exactly the axis
+   this pass exists to fix. It now fires only after the player has knocked and
+   bought, so the first viewport is clean, which was the actual complaint. */
 const CR_BEATS = [
-  { id:'knock', t:'Knock on the door.',
-    m:'That is the whole job at the start — press the door and somebody answers. '
-     + 'Every knock is <b>money in the tin</b>.',
-    at:() => document.querySelector('.doorwrap'),
-    done:() => (S.knocks || 0) >= 3 },
-  { id:'buy',   t:'Now buy something that knocks for you.',
-    m:'A bandit sign works the street while you do not. This is the whole game: '
-     + '<b>turn knocks into things that knock</b>, then leave them running.',
-    at:() => document.getElementById('ladder') || document.getElementById('ups'),
-    done:() => (S.bought || []).length > 0 || S.own.some(n => n > 0) },
   { id:'street',t:'Then take today’s street.',
+    /* and it waits its turn. This was the THIRD beat and the order was not
+       arbitrary: knock, automate, then the street. A ring on the street at
+       day one, with twelve dollars in the tin, points past the loop the game
+       is trying to teach. Three knocks is the whole gate — by then the player
+       has found the door on their own, which they always did. */
+    when:() => (S.knocks || 0) >= 3,
     m:'Five real houses, scored against real comparable sales — the same arithmetic the desk '
      + 'runs. It pays once a day and it is <b>where the money actually is</b>.',
     at:() => document.getElementById('comp'),
@@ -4952,35 +4985,33 @@ function crSeen(){ return !!(S.taught || {}).all; }
 function crMark(id){ S.taught = S.taught || {}; S.taught[id] = 1; save(); }
 function crClearPoint(){ document.querySelectorAll('.cr-point').forEach(e => e.classList.remove('cr-point')); }
 function crHide(){ const b = document.getElementById('cr-coach'); if (b) b.hidden = true; crClearPoint(); crEl = null; }
+/* THE COACH IS NOW A MARK RATHER THAN A MODAL. The box it used to open covered
+   the bottom third of the first viewport, and what it said was "press the
+   biggest thing on the page" — the door is 250 pixels wide with KNOCK written
+   under it. What survives is the pointer: a brass ring on the one control the
+   player has not found yet, in place, covering nothing. The box element and
+   its dismiss controls stay in the document because the reduced-motion rule
+   and the phone scroll below still key off this path, and because a mark that
+   cannot be turned off is a mark that outstays its welcome. */
 function crShow(){
   const box = document.getElementById('cr-coach'); if (!box) return;
-  if (crSeen()) return crHide();
-  /* the first beat that has neither been done nor dismissed */
-  const b = CR_BEATS.find(x => !(S.taught || {})[x.id] && !x.done());
-  if (!b) { crMark('all'); return crHide(); }
+  box.hidden = true;
+  if (crSeen()) return crClearPoint();
+  const b = CR_BEATS.find(x => !(S.taught || {})[x.id] && !x.done() && (!x.when || x.when()));
+  if (!b) return crClearPoint();
   crAt = CR_BEATS.indexOf(b);
-  document.getElementById('cr-n').textContent = String(crAt + 1);
-  document.getElementById('cr-t').textContent = b.t;
-  document.getElementById('cr-m').innerHTML = b.m;
-  box.hidden = false;
   crClearPoint();
   const target = b.at();
-  if (target) {
-    target.classList.add('cr-point'); crEl = target;
-    /* on a phone the coach sits at the bottom and the thing it is pointing at
-       is often a screen and a half away — a pulsing outline nobody can see is
-       an instruction nobody can follow */
-    const r = target.getBoundingClientRect();
-    if (r.top < 8 || r.bottom > innerHeight - 150)
-      try { target.scrollIntoView({ behavior:'smooth', block:'center' }); } catch(e){}
-  }
+  if (target) { target.classList.add('cr-point'); crEl = target; }
 }
 /* called after anything that could complete a beat. Cheap: it is one find()
    over three objects, and it only touches the DOM when the beat changes. */
 function crCheck(){
   if (crSeen()) return;
-  const b = CR_BEATS[crAt];
-  if (b && b.done()) { crMark(b.id); crShow(); }
+  /* crShow is now idempotent and cheap — one find() over one object — so it
+     runs on every check rather than only when a beat completes. It has to:
+     the beat's gate is a knock count, and nothing "completes" when you knock. */
+  crShow();
 }
 (function crWire(){
   const x = document.getElementById('cr-x'), off = document.getElementById('cr-off');
@@ -7001,9 +7032,17 @@ function renderUps(){
     .sort((a,b) => (UPGRADES[a][1] - S.own[UPGRADES[a][0]]) - (UPGRADES[b][1] - S.own[UPGRADES[b][0]]));
   const nextMark = locked.find(k => UPGRADES[k][9]);
   const soon = [...new Set([locked[0], nextMark].filter(k => k !== undefined))].slice(0, 2);
+  /* `avail` is already sorted by cost, so the first affordable entry IS the
+     cheapest thing the player can do right now. That is the lit press. */
+  const litK = avail.find(k => S.cash >= upgradeCost(k));
+  /* and the dimming only applies when there IS something lit. You open this
+     game with $12 and the cheapest upgrade is $40, so for the first minute
+     nothing is affordable — a panel with every row dimmed and none bright is
+     strictly worse than the one we started with. */
+  $('ups').classList.toggle('haslit', litK !== undefined);
   $('ups').innerHTML = (avail.length ? avail.map(k => {
     const u = UPGRADES[k], c = upgradeCost(k), can = S.cash >= c;
-    return `<button class="up${u[9]?' land':''}" data-u="${k}" ${can?'':'disabled'}>
+    return `<button class="up${u[9]?' land':''}${k===litK?' lit':''}" data-u="${k}" ${can?'':'disabled'}>
       <span class="g">${u[3]}</span>
       <span><span class="t">${u[4]}</span><span class="d">${u[5]}</span></span>
       <span class="c" style="color:${can?'var(--green)':'inherit'}">${money(c)}</span></button>`;

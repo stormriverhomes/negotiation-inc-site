@@ -6,13 +6,24 @@
    immediately clear", which is generous. A game nobody can start is a game
    nobody plays, and this one is the funnel's front half.
 
-     A · a first-time player is taught, on desktop and on a phone
-     B · the beats advance BY DOING, not by pressing next — a tutorial you can
-         finish without playing has taught you to skip tutorials
-     C · the beat points at something, and at something ON SCREEN
-     D · one press dismisses one beat; "do not show these" dismisses the set,
-         forever, across a reload
-     E · a returning player who already knocked is never taught beat one
+     THE CONTRACT CHANGED IN THE FOURTH PASS AND SO DID THIS FILE. The coach
+     was three beats delivered as a modal fixed to the bottom of the viewport,
+     and it covered the bottom third of the first screen to say "press the
+     biggest thing on the page". Two of the three beats are now carried by the
+     lit press — the cheapest thing you can afford wears a brass edge — and
+     what is left of the coach is the pointer alone: a brass ring, in place,
+     covering nothing. The one beat that survives is the day's street, because
+     it is a DESTINATION rather than a purchase, no lit press can carry it, and
+     the note in the source records that nobody found it on their own.
+
+     A · a first-time player is INTERRUPTED BY NOTHING: no modal, no ring. The
+         door is 250px wide with KNOCK written under it and it always was.
+     B · the ring arrives by DOING — three knocks — and not before. A mark on
+         the street at twelve dollars points past the loop the game teaches.
+     C · when the ring is up it is on something, and on something ON SCREEN
+     D · the modal never opens at any point; "do not show these" still clears
+         the mark, forever, across a reload
+     E · a returning player who already knocked gets the street and only it
      F · the door takes a knock anywhere on the block that looks pressable
      G · exactly one control is coloured as the primary action, and it is the
          one that leads to the Daily Street
@@ -56,19 +67,19 @@ for (const [w, h, tag] of [[1280, 1000, 'desktop'], [390, 844, 'phone']]){
   /* ── A/C · taught, and pointed at something visible ─────────────────────── */
   const p = await open(w, h);
   const b1 = await beat(p);
-  out[tag + ' · beat 1'] = b1;
-  if (!b1.shown)       bad.push(`${tag}: a first-time player is taught nothing`);
-  if (b1.n !== '1')    bad.push(`${tag}: the first beat is numbered ${b1.n}`);
-  if (!b1.points)      bad.push(`${tag}: the beat points at nothing`);
-  if (b1.onScreen === false) bad.push(`${tag}: the beat points at something off screen`);
+  out[tag + ' · at load'] = b1;
+  if (b1.shown)   bad.push(`${tag}: the coach modal opened on a first-time player — it covers the bottom third`);
+  if (b1.points)  bad.push(`${tag}: something is ringed at twelve dollars (${b1.points}) — the first press is the door and the door needs no ring`);
 
-  /* ── B · it advances by doing ───────────────────────────────────────────── */
+  /* ── B · the ring arrives by doing ──────────────────────────────────────── */
   await p.evaluate(() => { const d = document.querySelector('.doorwrap');
     for (let i = 0; i < 3; i++) d.dispatchEvent(new MouseEvent('click', { bubbles:true, clientX:80, clientY:80 })); });
   await p.waitForTimeout(500);
   const b2 = await beat(p);
-  out[tag + ' · beat 2'] = b2;
-  if (b2.n !== '2')    bad.push(`${tag}: knocking three times did not advance the beat (still ${b2.n})`);
+  out[tag + ' · after three knocks'] = b2;
+  if (b2.shown)          bad.push(`${tag}: the modal opened after knocking`);
+  if (b2.points !== 'comp') bad.push(`${tag}: three knocks did not put the ring on the day's street (it is on ${b2.points})`);
+  if (b2.onScreen === false) bad.push(`${tag}: the ring is on something off screen`);
   /* ── F · the knock landed, from the wrap rather than the canvas ─────────── */
   const knocks = await p.evaluate(() => S.knocks || 0);
   out[tag + ' · knocks'] = knocks;
@@ -95,20 +106,22 @@ for (const [w, h, tag] of [[1280, 1000, 'desktop'], [390, 844, 'phone']]){
 /* ── D · dismissal, one and all ──────────────────────────────────────────── */
 {
   const p = await open(1280, 1000);
-  await p.evaluate(() => document.getElementById('cr-x').click());
-  await p.waitForTimeout(250);
-  out.afterX = await beat(p);
-  if (!out.afterX.shown) bad.push('D: dismissing one beat dismissed the whole set');
-  if (out.afterX.n === '1') bad.push('D: dismissing the first beat left the first beat up');
+  await p.evaluate(() => { const d = document.querySelector('.doorwrap');
+    for (let i = 0; i < 4; i++) d.dispatchEvent(new MouseEvent('click', { bubbles:true, clientX:80, clientY:80 })); });
+  await p.waitForTimeout(400);
+  out.beforeOff = await beat(p);
+  if (out.beforeOff.shown)  bad.push('D: the modal opened at some point in the run');
+  if (!out.beforeOff.points) bad.push('D: there is no mark to dismiss');
   await p.evaluate(() => document.getElementById('cr-off').click());
   await p.waitForTimeout(250);
   out.afterOff = await beat(p);
-  if (out.afterOff.shown) bad.push('D: "do not show these" did not');
+  if (out.afterOff.shown)  bad.push('D: "do not show these" opened the modal');
+  if (out.afterOff.points) bad.push('D: "do not show these" did not clear the mark');
   await p.reload();
   await p.waitForFunction(() => typeof crShow === 'function', null, { timeout:20000 });
   await p.waitForTimeout(1100);
   out.afterReload = await beat(p);
-  if (out.afterReload.shown) bad.push('D: "do not show these" did not survive a reload');
+  if (out.afterReload.points) bad.push('D: "do not show these" did not survive a reload');
   await p.close();
 }
 
@@ -118,10 +131,9 @@ for (const [w, h, tag] of [[1280, 1000, 'desktop'], [390, 844, 'phone']]){
     knocks: 40, compDone: 0, t: 0, day: 0, era:0, prestige:0 });
   const r = await beat(p);
   out.returning = r;
-  if (r.shown && r.n === '1')
-    bad.push('E: somebody with forty knocks and an upgrade is being taught to press the door');
-  if (r.shown && r.title && !/street/i.test(r.title))
-    bad.push(`E: the returning player got beat "${r.title}" instead of the one thing they have not done`);
+  if (r.shown) bad.push('E: the returning player got a modal');
+  if (r.points !== 'comp')
+    bad.push(`E: somebody with forty knocks and an upgrade, who has never run a street, is being pointed at ${r.points} instead of the street`);
   await p.close();
 }
 
@@ -243,9 +255,9 @@ for (const [w, h, tag] of [[1280, 1000, 'desktop'], [390, 844, 'phone']]){
 await b.close();
 console.log(JSON.stringify(out, null, 1));
 if (bad.length){ console.log('FAIL'); bad.forEach(x => console.log(' - ' + x)); process.exit(1); }
-console.log('PASS — Comp Run teaches its first three moves on desktop and on a phone, each beat '
-  + 'advances by doing rather than by pressing next and points at something on screen, one press '
-  + 'dismisses one and "do not show these" survives a reload, a returning player is only shown what '
-  + 'they have not done, the whole door block takes a knock, and exactly one control — the street — '
-  + 'is coloured as the action');
+console.log('PASS — Comp Run opens with nothing covering it and nothing ringed, the mark arrives on '
+  + "the day's street after three knocks and never as a modal, it points at something on screen at "
+  + 'both widths, "do not show these" clears it across a reload, a returning player is pointed only '
+  + 'at what they have not done, the whole door block takes a knock, and exactly one control — the '
+  + 'street — is coloured as the action');
 process.exit(0);

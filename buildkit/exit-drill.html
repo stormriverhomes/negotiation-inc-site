@@ -17,6 +17,15 @@
    ranking, so the game cannot drift from the tool it advertises.
    ═══════════════════════════════════════════════════════════════════════════ */
 :root{
+  /* ARCADE TOKENS, LOCAL COPY. The build injects the authoritative set (see
+     ARCADE in publish.mjs) and its selectors are closer to the content, so it
+     wins. These exist so this file opened straight off disk is the same page
+     rather than a broken fallback of one — which is what _tvars is for, and
+     what it caught the moment the tokens went in. */
+  --ground:#0d1420; --raise:#141c2b; --edge:#223047; --well:#101825;
+  --ink:#e8e2d4; --ink-2:#aeb8c8; --ink-3:#8b98ac;
+  --brass:#a8873a; --pays:#3fa06a; --refuses:#d96a5a; --desk:#4881ea;
+
   --ink:#23201c; --deep:#0d1420; --panel:#141c2b; --edge:#223047; --well:#101825;
   --txt:#e8e2d4; --dim:#aeb8c8; --faint:#8b98ac; --gold:#a8873a; --blue:#3a78e8;
   --green:#3fa06a; --red:#d96a5a;
@@ -134,7 +143,12 @@ h1{font-size:40px}
 .feetag{float:right;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:none;
   color:var(--green);border:1px solid var(--green);padding:1px 6px;margin-left:10px}
 .feetag.dn{color:var(--red);border-color:var(--red)}
-.tally .v.m{font-size:21px} .tally .v.up{color:var(--green)} .tally .v.dn{color:var(--red)}
+/* BRASS IS THE BANKROLL. The label was already gold and the figure was not,
+   which is the wrong way round — the eye lands on the number. Same corner,
+   same shape, same ink on all four pages, because the bankroll is the one
+   thing that makes three cabinets one place and it was stated three ways. */
+.tally .v.m{font-size:21px;color:var(--brass)}
+.tally .v.up{color:var(--pays)} .tally .v.dn{color:var(--refuses)}
 .statrow .v.up{color:var(--green)} .statrow .v.dn{color:var(--red)}
 /* the ledger: every exit in its own units, never averaged, never "fit points" */
 .ldg{margin-top:9px;border-top:1px solid var(--edge)}
@@ -177,7 +191,9 @@ h1{font-size:40px}
 .start .sub{font-size:15.5px;color:var(--dim);line-height:1.55}
 .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
 .rule{border:1px solid #2b3850;background:#151f31;padding:13px 15px;display:grid;gap:5px;border-radius:10px}
-.rule .n{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#5b8dee}
+/* and these three were blue, which is the other world's voice. Blue appears
+   once per arcade page, on the link out to the desk, and nowhere else. */
+.rule .n{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
 .rule .t{font-size:14.5px;font-weight:650;color:var(--txt)}
 .rule .d{font-size:12.5px;color:var(--faint);line-height:1.45}
 .ladder{display:grid;gap:5px}
@@ -203,7 +219,7 @@ h1{font-size:40px}
 .hidden{display:none !important}
 </style>
 </head>
-<body>
+<body class="on-dark">
 
 <header>
  <div class="wrap mast">

@@ -305,6 +305,59 @@ const OFFLINE = process.env.OFFLINE === '1';
 const FONT_SRC = OFFLINE
   ? `url('data:font/woff2;base64,${fs.readFileSync('fonts/fraunces.woff2').toString('base64')}')`
   : `url('fonts/fraunces.woff2')`;
+/* ══ ONE ARCADE ═══════════════════════════════════════════════════════════
+   Four pages carried three golds, three greens and three reds, two grounds
+   and two ink scales, and Elijah could feel it without being able to name it.
+   A meaning does not get to have three values. What it gets is one name and
+   two inks — one that passes on dark, one that passes on paper — and the
+   ground selects. A cabinet declares its ground once and never names a colour
+   again. (Claude Design's fourth pass; the rule is theirs.)
+
+   THE GROUND RULE, which is the part worth more than the palette: paper is
+   never a page background. It is only ever an object ON the dark — finite
+   width, one edge, one shadow. The moment a paper colour reaches the browser
+   edge it reads as a second, older website, which is exactly what a visitor
+   said about revision 2 of the landing page. The moment it stops short, it
+   reads as a document lying on a desk in a dark room. That single restriction
+   turns "two grounds" into one ground and one material.
+
+   AND THE PAPER INKS ARE NOT THE ONES THE DESIGN HANDED OVER. Its note said
+   the contrast failure was designed out — #a8873a fails on white, so brass on
+   paper resolves to #9a6b1f and the class is gone. Measured: #9a6b1f is
+   3.61:1 on the paper ground and 2.83:1 on the manila well, so it fails AA
+   text on one and the 3:1 graphic floor on the other. The failure had moved,
+   not gone. Every paper ink below is solved against the DARKEST paper in the
+   set (#d9c8a4) at 4.5:1, so it passes at any size on any of the three. */
+const ARCADE = `<style>
+:root{--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
+.on-dark{--ground:#0d1420;--raise:#141c2b;--edge:#223047;--well:#101825;
+ --ink:#e8e2d4;--ink-2:#aeb8c8;--ink-3:#8b98ac;
+ --brass:#a8873a;--pays:#3fa06a;--refuses:#d96a5a;--desk:#4881ea}
+.on-paper{--ground:#e9e2d0;--raise:#f6f1e3;--edge:#c9bfa6;--well:#d9c8a4;
+ --ink:#22201c;--ink-2:#4a4438;--ink-3:#5a5447;
+ --brass:#704e17;--pays:#2a5f3e;--refuses:#a1251e;--desk:#1a50af}
+/* paper is a thing on the dark, never the dark itself */
+.sheet{background:var(--ground);border:1px solid var(--edge);
+ box-shadow:0 12px 30px rgba(0,0,0,.5)}
+/* the spine: same corner, same shape, every cabinet. brass is the bankroll
+   and the one press about to spend it, and brass is nothing else. */
+.nifloor{display:flex;justify-content:space-between;align-items:center;gap:18px;
+ padding:14px 18px;border-bottom:1px solid var(--edge)}
+.nifloor .out{font-family:var(--sans);font-size:14px;color:var(--ink-2);
+ text-decoration:none;padding:8px 2px}
+.nifloor .out:hover{color:var(--ink)}
+.nifloor .slots{display:flex;gap:26px;align-items:flex-end}
+.nifloor .slot{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.nifloor .k{font-family:var(--sans);font-size:10px;letter-spacing:.18em;
+ text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.nifloor .v{font-size:20px;font-weight:600;letter-spacing:-.01em;
+ font-variant-numeric:tabular-nums;color:var(--ink)}
+.nifloor .slot.bank .v{color:var(--brass)}
+@media(max-width:560px){.nifloor{padding:11px 13px}.nifloor .v{font-size:17px}
+ .nifloor .slots{gap:16px}}
+</style>
+`;
+
 const FONTS = `${OFFLINE ? '' : `<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>`}
 <style>
 /* Fraunces ships its "wonk" letterforms on by default — the single-storey f
@@ -553,7 +606,7 @@ html = html.replace('</head>', OG('Comp Run · Negotiation Inc',
    cabinets are Fraunces and two are Georgia, two have letterspaced caps in a
    typewriter and two do not, and there is no reading of that which is on
    purpose. Both games now take the same face as everything else we ship. */
-html = html.replace('</head>', FONTS + '</head>');
+html = html.replace('</head>', FONTS + ARCADE + '</head>');
 html = bankInto(html, 'portfolio.html (Comp Run)');
 html = await minifyInline(html, 'index');
 fs.writeFileSync(path.join(out, 'comp-run.html'), html);
@@ -571,7 +624,7 @@ street = street.replace('</head>', OG('The Daily Street · Negotiation Inc',
 for (const must of ['The Daily Street', 'href="arcade.html"', 'How it works'])
   if (!street.includes(must)) throw new Error('daily-street.html lost: ' + must);
 if (/fonts\.googleapis|fonts\.gstatic|https?:\/\/cdn/.test(street)) throw new Error('daily-street.html reaches off-origin');
-street = street.replace('</head>', FONTS + '</head>');
+street = street.replace('</head>', FONTS + ARCADE + '</head>');
 street = await minifyInline(street, 'street');
 street = bankInto(street, 'daily-street.html');
 fs.writeFileSync(path.join(out, 'daily-street.html'), street);
@@ -1470,7 +1523,7 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
   hub = hub.replace(/href="portfolio\.html"/g, 'href="comp-run.html"');
   hub = hub.replace(/the-eight-exits\.html/g, 'exits.html');
   hub = hub.replace('</head>', ICONS() + '</head>');
-  hub = hub.replace('</head>', FONTS + '</head>');
+  hub = hub.replace('</head>', FONTS + ARCADE + '</head>');
   hub = hub.replace('</head>', OG('The Arcade · Negotiation Inc',
     'Cabinets that train the read: Comp Run, the daily street, and the drills. Free, no account.', 'arcade') + '</head>');
   for (const must of ['comp-run.html', 'daily-street.html', 'exit-drill.html'])
@@ -1522,7 +1575,7 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
   drill = drill.replace(/href="portfolio\.html"/g, 'href="arcade.html"');
   drill = drill.replace(/the-eight-exits\.html/g, 'exits.html');
   drill = drill.replace('</head>', ICONS() + '</head>');
-  drill = drill.replace('</head>', FONTS + '</head>');
+  drill = drill.replace('</head>', FONTS + ARCADE + '</head>');
   drill = drill.replace('</head>', OG('Exit Drill · Negotiation Inc',
     'Sixty seconds, one house at a time: flip it, hold it, take the payments, run the listing, or walk.', 'exit-drill') + '</head>');
   drill = bankInto(drill, 'exit-drill.html');
@@ -2952,6 +3005,28 @@ await b.close();
    and a page that has not decided is not a page that ships. Comments are
    exempt on purpose: the prose that explains WHY emailRedirectTo has to be
    set must be free to say the word "localhost". */
+{
+  /* ── THE FOUR ARCADE SOURCES MUST DECLARE EVERY TOKEN THE BUILD INJECTS ───
+     The tokens live in one place (ARCADE, above) and the build's selectors sit
+     closer to the content, so the injected values are the ones that paint. But
+     a source that USES var(--brass) and never declares it is a file that is one
+     page through the build and a different, broken page opened off disk — an
+     undefined var() with no fallback does not degrade, it invalidates the whole
+     declaration and the property snaps to its initial value. _tvars caught that
+     within a minute of the tokens going in. This asserts the local copies keep
+     existing, by name, so the next person to add a token cannot forget. */
+  const NEED = [...ARCADE.matchAll(/(--[\w-]+)\s*:/g)].map(m => m[1])
+    .filter(n => n !== '--sans');
+  for (const f of ['arcade-hub.html', 'exit-drill.html', 'portfolio.html', 'daily-street.html']){
+    const src = fs.readFileSync(f, 'utf8');
+    const has = new Set([...src.matchAll(/(--[\w-]+)\s*:/g)].map(m => m[1]));
+    const missing = [...new Set(NEED)].filter(n => !has.has(n));
+    if (missing.length) throw new Error(`${f} uses the arcade tokens but declares none of `
+      + `${missing.join(', ')} itself — opened off disk it is a different page. `
+      + 'Copy the block from ARCADE in publish.mjs into its :root.');
+  }
+}
+
 {
   /* NI_ALLOW_LOCAL_SB already means one thing and one thing only: this build
      is pointed at a Supabase STUB on a loopback port, for a harness. _tpay

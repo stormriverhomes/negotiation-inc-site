@@ -16,6 +16,15 @@
    separate room rather than a section of the landing page.
    ═══════════════════════════════════════════════════════════════════════════ */
 :root{
+  /* ARCADE TOKENS, LOCAL COPY. The build injects the authoritative set (see
+     ARCADE in publish.mjs) and its selectors are closer to the content, so it
+     wins. These exist so this file opened straight off disk is the same page
+     rather than a broken fallback of one — which is what _tvars is for, and
+     what it caught the moment the tokens went in. */
+  --ground:#0d1420; --raise:#141c2b; --edge:#223047; --well:#101825;
+  --ink:#e8e2d4; --ink-2:#aeb8c8; --ink-3:#8b98ac;
+  --brass:#a8873a; --pays:#3fa06a; --refuses:#d96a5a; --desk:#4881ea;
+
   --paper:#e8e2d4; --ink:#23201c; --mid:#6b6153; --soft:#8a8072; --line:#c9c0ad;
   --deep:#151a24; --deep-2:#1c2432; --edge:#223047;
   --gold:#a8873a; --blue:#3a78e8; --green:#2c6142;
@@ -76,7 +85,14 @@ h1{font-size:46px}
 .btn{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:14px;font-weight:650;
  padding:9px 15px;border:1.5px solid #39435a;background:transparent;color:#cdd6e4;text-decoration:none;cursor:pointer}
 .btn:hover{border-color:#fff;color:#fff}
-.btn.p{background:#3570d8;border-color:#3570d8;color:#fff}   /* not --blue: white on it was 4.17:1 */
+/* THE FLOOR WAS ADVERTISING ITS CABINETS IN THE SOFTWARE'S BLUE. Blue is the
+   other world's voice — it belongs on exactly one control per arcade page,
+   the link out to the desk, and nowhere else. A blue button inside a game is
+   the seam leaking inward. Brass is the arcade's own, and the fill takes the
+   ground as its ink rather than white: white on #a8873a is 3.39:1 and fails,
+   #0d1420 on it is 5.44:1 and reads as an engraved plate, which is what a
+   cabinet button should look like. */
+.btn.p{background:var(--brass);border-color:var(--brass);color:var(--ground)}
 .btn.p:hover{background:#5a92ff;border-color:#5a92ff}
 .btn.sm{font-size:12.5px;padding:7px 11px}
 .cab.soon{opacity:.72}
@@ -145,6 +161,34 @@ h1{font-size:46px}
 .mono,.num,[class*="fig"],[class*="num"]{font-variant-numeric:tabular-nums}
 h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
 </style>
+<style>
+:root{--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
+.on-dark{--ground:#0d1420;--raise:#141c2b;--edge:#223047;--well:#101825;
+ --ink:#e8e2d4;--ink-2:#aeb8c8;--ink-3:#8b98ac;
+ --brass:#a8873a;--pays:#3fa06a;--refuses:#d96a5a;--desk:#4881ea}
+.on-paper{--ground:#e9e2d0;--raise:#f6f1e3;--edge:#c9bfa6;--well:#d9c8a4;
+ --ink:#22201c;--ink-2:#4a4438;--ink-3:#5a5447;
+ --brass:#704e17;--pays:#2a5f3e;--refuses:#a1251e;--desk:#1a50af}
+/* paper is a thing on the dark, never the dark itself */
+.sheet{background:var(--ground);border:1px solid var(--edge);
+ box-shadow:0 12px 30px rgba(0,0,0,.5)}
+/* the spine: same corner, same shape, every cabinet. brass is the bankroll
+   and the one press about to spend it, and brass is nothing else. */
+.nifloor{display:flex;justify-content:space-between;align-items:center;gap:18px;
+ padding:14px 18px;border-bottom:1px solid var(--edge)}
+.nifloor .out{font-family:var(--sans);font-size:14px;color:var(--ink-2);
+ text-decoration:none;padding:8px 2px}
+.nifloor .out:hover{color:var(--ink)}
+.nifloor .slots{display:flex;gap:26px;align-items:flex-end}
+.nifloor .slot{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.nifloor .k{font-family:var(--sans);font-size:10px;letter-spacing:.18em;
+ text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.nifloor .v{font-size:20px;font-weight:600;letter-spacing:-.01em;
+ font-variant-numeric:tabular-nums;color:var(--ink)}
+.nifloor .slot.bank .v{color:var(--brass)}
+@media(max-width:560px){.nifloor{padding:11px 13px}.nifloor .v{font-size:17px}
+ .nifloor .slots{gap:16px}}
+</style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Negotiation Inc">
 <meta property="og:title" content="The Arcade · Negotiation Inc">
@@ -159,7 +203,7 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 <meta property="og:url" content="https://negotiationinc.com/arcade">
 <link rel="canonical" href="https://negotiationinc.com/arcade">
 </head>
-<body>
+<body class="on-dark">
 
 <header>
  <div class="wrap mast">
