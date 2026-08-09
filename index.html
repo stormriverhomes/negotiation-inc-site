@@ -250,6 +250,81 @@ h2{font-size:34px;margin-top:8px}
 .eight{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
  border:1px solid var(--line);margin-top:30px}
 
+
+/* ══ THE SPREAD ════════════════════════════════════════════════════════════
+   Claude Design's rule, applied: a section earns a picture when its claim has
+   a SHAPE. This claim's shape is a spread, so it gets an axis and no more.
+   Constant 1.5px rules at every size — the thing that reads as drafting
+   rather than as clip art — and colour only where colour already means
+   something: green on the money, ink on the asking price, red on the absence.
+   Nothing here is decoration; every mark is a number's position. */
+.spread{margin-top:34px;border:1px solid var(--line);border-radius:var(--r-card);
+ background:#fff;padding:26px 30px 24px}
+.sp-k{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.18em;
+ text-transform:uppercase;color:var(--soft)}
+.sp-plot{position:relative;height:196px;margin:26px 10px 0}
+.sp-mark,.sp-ask{position:absolute;transform:translateX(-50%);text-align:center;white-space:nowrap}
+.sp-mark .sp-nm,.sp-ask .sp-nm{display:block;font-family:var(--mono);font-size:10px;font-weight:700;
+ letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.sp-mark .sp-v{display:block;font-family:var(--serif);font-weight:700;font-size:23px;
+ letter-spacing:-.02em;color:var(--green);font-variant-numeric:tabular-nums;margin-top:2px}
+.sp-mark.hi{top:0}.sp-mark.hi .sp-v{font-size:31px}
+.sp-mark{top:62px}
+/* The asking price sits thirteen points below the flip on a fifty-thousand
+   axis, so both labels centred on their own lines collided — measured, not
+   eyeballed. Asking hangs to the LEFT of its line and the flip keeps the
+   right-hand air, which is also the correct reading order: the number you
+   have to clear, then the number that clears it. */
+.sp-ask{top:0;transform:translateX(-100%);margin-left:-12px;text-align:right}
+.sp-ask .sp-nm{color:var(--ink);text-align:right}
+.sp-ask .sp-v{display:block;font-family:var(--serif);font-weight:700;font-size:23px;
+ letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:2px;text-align:right}
+.sp-axis{position:absolute;left:0;right:0;top:126px;height:1.5px;background:var(--ink)}
+.sp-tick{position:absolute;top:119px;width:1.5px;height:14px;background:var(--ink)}
+.sp-tick.tall{top:114px;height:24px}
+/* the asking price is a line you have to clear, so it is drawn as one */
+.sp-ask::before{content:"";position:absolute;right:-12px;top:52px;width:1.5px;height:74px;
+ background:repeating-linear-gradient(to bottom,var(--ink) 0 5px,transparent 5px 10px)}
+.sp-brace{position:absolute;top:150px;height:12px;border:1.5px solid var(--line-2);border-top:none}
+.sp-gap{position:absolute;top:168px;text-align:center}
+.sp-gap b{display:block;font-family:var(--serif);font-weight:700;font-size:21px;letter-spacing:-.018em;
+ font-variant-numeric:tabular-nums}
+.sp-gap span{display:block;font-size:13px;color:var(--mid);margin-top:2px}
+.sp-end{position:absolute;top:136px;font-family:var(--mono);font-size:10px;font-weight:700;
+ letter-spacing:.1em;color:var(--soft)}
+.sp-end.l{left:0}.sp-end.r{right:0}
+.sp-note{margin-top:34px;font-size:15px;line-height:1.55;color:var(--mid);max-width:74ch}
+.sp-note b{color:var(--ink);font-weight:650}
+.sp-off{margin-top:24px;padding-top:22px;border-top:1px solid var(--line)}
+.sp-offk{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.16em;
+ text-transform:uppercase;color:var(--red,#b3372c)}
+.sp-offg{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:14px}
+.sp-offg>div{border-top:1.5px solid #f0d2ce;padding-top:11px}
+.sp-offg b{display:block;font-family:var(--serif);font-size:17px;font-weight:700;letter-spacing:-.015em}
+.sp-offg span{display:block;font-size:13px;line-height:1.45;color:var(--mid);margin-top:4px}
+.sp-give{font-size:14px;color:var(--mid);margin-top:20px}
+.sp-give a{font-weight:650;text-decoration:none}
+@media(max-width:860px){
+ .sp-plot{height:244px;margin:22px 4px 0}
+ .sp-mark.hi .sp-v{font-size:26px}
+ .sp-mark .sp-v,.sp-ask .sp-v{font-size:18px}
+ .sp-mark{top:74px}
+ .sp-note{margin-top:22px;font-size:14.5px}
+ .sp-offg{grid-template-columns:1fr 1fr;gap:14px}
+}
+@media(max-width:520px){
+ /* a 50k axis in 330px puts three labels on top of each other. The scale is
+    the point, so it survives; the labels stack under their own ticks and the
+    two lower marks trade their names for their numbers. */
+ .sp-plot{height:238px}
+ .sp-mark .sp-nm,.sp-ask .sp-nm{font-size:8.5px;letter-spacing:.1em}
+ .sp-mark .sp-v,.sp-ask .sp-v{font-size:15px}
+ .sp-mark.hi .sp-v{font-size:22px}
+ .sp-mark{top:88px}
+ .sp-gap b{font-size:18px}.sp-gap span{font-size:12px}
+ .sp-note{margin-top:20px}
+ .sp-offg{grid-template-columns:1fr}
+}
 /* who it is for — four jobs, four answers */
 .who{border-radius:var(--r-card);overflow:hidden;
  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;
@@ -791,40 +866,60 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
         people's numbers are dressed up, it is that there is no single number
         to dress up in the first place. -->
    <h2>There is no single right price.</h2>
-   <p>The exit you pick changes the price by tens of thousands on the same house — so a single
-      "max offer" is hiding the only decision that actually matters. The sheet prices every exit,
-      ranks them against the seller's situation, and never rounds a hole in your data into a
-      number.</p>
+   <p>One house, priced under each way out of it. <b>The gap between the best way out and the
+      worst is the whole margin</b> — and four of the eight cannot be priced at all until the
+      sheet is given a figure it does not have.</p>
   </div>
-  <div class="three">
-   <div>
-    <div class="n">01</div>
-    <!-- This used to re-list all seven names — "Wholesale, flip, wholetail,
-         buy-and-hold, BRRRR, subject-to, novation" — which was the page's
-         densest burst of jargon and sat in position two. The glossary that
-         defines every one of those words is now the section directly above,
-         so repeating them here says nothing new and costs a paragraph. It
-         makes the point with the money instead: the number IS the argument,
-         and it is a number from the sheet at the top of this same page. -->
-    <h3>The gap is the margin</h3>
-    <p>On the house at the top of this page the best exit pays <b>$23,280</b> and the one under it
-       pays <b>$14,000</b> — same house, same day, same numbers. That nine thousand dollars is not
-       a rounding difference. It is the whole reason to price all of them before you decide which
-       one you are doing.</p>
+
+  <!-- ══ THE SPREAD ══════════════════════════════════════════════════════
+       199 words of argument became 61 and a drawing. Claude Design's answer
+       to "which sections earn a picture": the ones whose claim has a SHAPE.
+       This one's shape is a spread — three ceilings and an asking price on a
+       single scale — and no paragraph can do what one axis does.
+
+       EVERY FIGURE IS THE ENGINE'S. The design arrived with numbers from the
+       70% rule for the second time, and for the second time they could not be
+       used: on this sheet the rule says $162,400 and the desk says $191,140,
+       and the desk prints the difference as "your margin for being wrong".
+
+       The real numbers also tell a better story than the invented ones. The
+       flip can pay SIX THOUSAND MORE than the seller is asking, and the
+       wholesale is thirty thousand short — on the same house, on the same
+       afternoon. Pick the wrong way out and you walk away from a deal that
+       was there. That is the entire product in one picture. ═══════════ -->
+  <div class="spread" aria-label="Three exits priced against the asking price, on one scale">
+   <div class="sp-k">The spread · 1128 Marrow Lane</div>
+   <div class="sp-plot">
+    <div class="sp-mark hi" style="left:82.28%">
+     <span class="sp-nm">Fix and flip</span><span class="sp-v">$191,140</span></div>
+    <div class="sp-mark" style="left:39.90%">
+     <span class="sp-nm">BRRRR</span><span class="sp-v">$169,950</span></div>
+    <div class="sp-mark lo" style="left:8.80%">
+     <span class="sp-nm">Wholesale</span><span class="sp-v">$154,400</span></div>
+    <div class="sp-ask" style="left:69.00%">
+     <span class="sp-nm">Asking</span><span class="sp-v">$184,500</span></div>
+    <div class="sp-axis"></div>
+    <div class="sp-tick" style="left:8.80%"></div>
+    <div class="sp-tick" style="left:39.90%"></div>
+    <div class="sp-tick tall" style="left:82.28%"></div>
+    <div class="sp-brace" style="left:8.80%;width:73.48%"></div>
+    <div class="sp-gap" style="left:8.80%;width:73.48%">
+     <b>$36,740</b><span>between the best way out of this house and the worst</span></div>
+    <div class="sp-end l">$150,000</div><div class="sp-end r">$200,000</div>
    </div>
-   <div>
-    <div class="n">02</div>
-    <h3>The seller is an input</h3>
-    <p>An estate wants certainty and a date. Somebody behind on payments wants the loan to
-       stop. The sheet re-ranks on what you know about the person, not just the property —
-       because that is what actually decides which exit closes.</p>
-   </div>
-   <div>
-    <div class="n">03</div>
-    <h3>It refuses to guess</h3>
-    <p>Every figure is marked <b>entered</b>, <b>estimated</b>, or <b>needed</b>. Estimates
-       visibly widen the range they feed. Exits missing a number refuse to price and say
-       which number they want.</p>
+   <div class="sp-note"><b>The flip clears the asking price by $6,640.</b> The wholesale is
+    $30,100 short of it. Same house, same afternoon, same four numbers typed in — and one of
+    those two is a deal you walk away from for no reason.</div>
+   <div class="sp-off">
+    <div class="sp-offk">No position on this scale &mdash; four of the eight</div>
+    <div class="sp-offg">
+     <div><b>Buy and hold</b><span>Needs a monthly rent.</span></div>
+     <div><b>Subject-to</b><span>Needs the payment on the existing loan.</span></div>
+     <div><b>Wholetail</b><span>Repairs are 14% of ARV. Not this house.</span></div>
+     <div><b>Novation</b><span>Same 14%. Not retail yet.</span></div>
+    </div>
+    <div class="sp-give">Give it any one of those figures and the exit takes its place on the
+     scale. <a href="desk.html#new">Price your own &rarr;</a></div>
    </div>
   </div>
  </div>
