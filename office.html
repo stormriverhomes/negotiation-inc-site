@@ -420,6 +420,47 @@ input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blu
 .herofine a{color:#cfe0f8;font-weight:650}
 @media(max-width:560px){ .heroask{flex-direction:column} .heroask .btn.p{width:100%;justify-content:center} }
 .hero-act{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+/* ── THE ARCADE CABINET, DRAWN IN PIXELS ──────────────────────────────────
+   The arcade is the one room in this product that is a GAME, and it was
+   advertised by a text link the same weight as "Terms". Elijah asked for a
+   shiny pixel-art button and he is right about why: the cabinet is the only
+   picture we can put on this page that tells you what is behind the door
+   without a word of copy.
+
+   It is drawn as SVG rects on a 16×20 grid from a map in the source — no
+   image request, no CDN, sharp at any size and on any display, and editable
+   by anyone who can read a picture made of letters. shape-rendering keeps the
+   pixels square; without it the browser antialiases the grid into mush at
+   fractional scales, which is the one thing pixel art cannot survive.
+
+   The shine is a single diagonal highlight that crosses on hover — the glass
+   of a cabinet catching the room light, not a loading shimmer. It never runs
+   on its own, because a thing that glints at you forever is an advertisement
+   and a thing that glints when you reach for it is a surface. */
+.pixgo{display:inline-flex;align-items:center;gap:12px;position:relative;overflow:hidden;
+ border:1px solid var(--line);border-radius:12px;background:#101928;color:#e9edf5;
+ padding:10px 16px 10px 12px;text-decoration:none;font-weight:650;font-size:13.5px;
+ transition:border-color .16s,transform .16s}
+.pixgo:hover{border-color:#e8cf72;transform:translateY(-1px)}
+.pixgo .cab{width:36px;height:45px;flex:0 0 auto;display:block;image-rendering:pixelated}
+.pixgo .pt{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.pixgo .pt b{color:#fff;font-weight:700}
+.pixgo .pt span{font-size:11.5px;font-weight:600;color:#8ea3c4}
+.pixgo:hover .pt span{color:#cfe0f8}
+.pixgo .glint{position:absolute;top:-60%;left:-70%;width:36%;height:220%;pointer-events:none;
+ background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.34) 50%,rgba(255,255,255,0) 100%);
+ transform:rotate(9deg);opacity:0}
+.pixgo:hover .glint,.pixgo:focus-visible .glint{opacity:1;animation:pixglint .62s ease-out}
+@keyframes pixglint{from{left:-70%}to{left:135%}}
+/* a person who has asked for less motion gets the border and the lift, which
+   are the parts that say "this is pressable", and none of the sweep */
+@media (prefers-reduced-motion:reduce){
+ .pixgo{transition:border-color .16s}
+ .pixgo:hover{transform:none}
+ .pixgo:hover .glint,.pixgo:focus-visible .glint{animation:none;opacity:0} }
+/* on the navy hero the card is already dark, so it wears the hero's own edge */
+.hero .pixgo{background:rgba(255,255,255,.05);border-color:rgba(233,237,245,.3)}
+.hero .pixgo:hover{background:rgba(255,255,255,.09);border-color:#e8cf72}
 .hero .btn{background:transparent;border-color:rgba(233,237,245,.3);color:#dbe3ef;
  padding:9px 15px;font-size:13.5px}
 .hero .btn:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.07)}
@@ -745,6 +786,8 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    <!-- On desktop the rail hides this; on a phone it is the only route, so it
         stays — but it says what it is, because "The arcade" alone means
         nothing until you have been inside one. -->
+   <!-- the cabinet is drawn by boot(); this is the empty frame it lands in,
+        so a page with script off still shows a working link to the room -->
    <div class="hero-act" id="hero-arcade">
     <a class="btn" href="arcade.html">Practice games</a>
    </div>
@@ -811,6 +854,66 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
    always done it correctly, so the file disagreed with itself. */
 const money = v => { const n = Math.round(v); return (n < 0 ? '−$' : '$') + Math.abs(n).toLocaleString('en-US'); };
 const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch(e){ return null; } };
+/* ── THE CABINET ──────────────────────────────────────────────────────────
+   A picture, written as letters, expanded into square SVG rects. One row of
+   the map is one row of pixels; a run of the same letter becomes ONE rect,
+   which takes the 320 cells down to about 60 shapes — small enough to inline
+   on every render without thinking about it.
+
+   The palette is the product's own: the marquee is the same gold that means
+   premium everywhere else, the body is the masthead navy, and the screen is
+   the pays-green. Nothing here is a new colour. */
+const CAB_ART = [
+  '..kkkkkkkkkkkk..',
+  '.kmmmmmmmmmmmmk.',
+  '.knnnnnnnnnnnnk.',
+  '.kcccccccccccck.',
+  '.kckkkkkkkkkkck.',
+  '.kckttttttttkck.',
+  '.kcktsswwsstkck.',   /* the screen is playing the product: a roof, */
+  '.kcktswwwwstkck.',   /* then a house under it. Eight pixels wide is */
+  '.kcktswwwwstkck.',   /* enough for a house and nothing else, which is */
+  '.kckttttttttkck.',   /* the correct amount of game to promise here. */
+  '.kckkkkkkkkkkck.',
+  '.kcccccccccccck.',
+  '.kccyccccbcbcck.',
+  '.kcccccccccccck.',
+  '.kdddddddddddck.',
+  '.kdddddddddddck.',
+  '.kdddddddddddck.',
+  '.kdddddddddddck.',
+  '.kkkkkkkkkkkkkk.',
+  '..kk........kk..',
+];
+const CAB_PAL = { k:'#080d15', c:'#243149', d:'#18202f', m:'#e8cf72', n:'#a9873a',
+                  s:'#3fae76', t:'#1d5f42', w:'#d8f5e6', y:'#e8cf72', b:'#e0574a' };
+function cabinetSVG(){
+  let out = '';
+  for (let y = 0; y < CAB_ART.length; y++){
+    const row = CAB_ART[y];
+    let x = 0;
+    while (x < row.length){
+      const ch = row[x];
+      let run = 1;
+      while (x + run < row.length && row[x + run] === ch) run++;
+      const fill = CAB_PAL[ch];
+      if (fill) out += '<rect x="' + x + '" y="' + y + '" width="' + run + '" height="1" fill="' + fill + '"/>';
+      x += run;
+    }
+  }
+  /* shape-rendering, not just image-rendering: the rects must not be
+     antialiased into each other at fractional scale */
+  return '<svg class="cab" viewBox="0 0 16 20" shape-rendering="crispEdges" aria-hidden="true">'
+    + out + '</svg>';
+}
+/* one component, two homes — the hero on a phone and the workspace panel */
+function pixGo(href, title, sub){
+  return '<a class="pixgo" href="' + href + '">' + cabinetSVG()
+    + '<span class="pt"><b>' + esc(title) + '</b><span>' + esc(sub) + '</span></span>'
+    + '<span class="glint" aria-hidden="true"></span></a>';
+}
+window.__cabinetSVG = cabinetSVG;
+
 const LS_get = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
 const LS_set = (k,v) => { try { localStorage.setItem(k,v); } catch(e){} };
 const ACC = 'ni-account-v1';
@@ -2045,6 +2148,12 @@ function boot(){
      gimmick. Somebody who has played gets their figures back. Somebody who
      has not gets one plain sentence saying what it is and why it exists, at
      the size an optional thing deserves. */
+  /* the hero's arcade slot is desktop-hidden (the rail carries it there), so
+     this is the phone's route in and it gets the cabinet too */
+  { const ha = $('hero-arcade');
+    if (ha) ha.innerHTML = pixGo('portfolio.html',
+      G ? 'Back to the arcade' : 'The arcade',
+      G ? 'your cabinet is where you left it' : 'three practice games, free'); }
   $('a-state').textContent = G ? 'saved' : 'optional';
   $('arcade').innerHTML = G
     ? `<div class="rowline"><span>Cash</span><span class="v">${money(+G.cash||0)}</span></div>
@@ -2052,8 +2161,9 @@ function boot(){
        <div class="rowline"><span>Best read</span><span class="v">${+G.bestPct||0}%</span></div>`
     : `<p class="empty">Three practice games that run this same arithmetic against a clock &mdash;
        a house at a time, sixty seconds each. Free, and nothing you do in there touches your properties.</p>`;
-  $('arcade-foot').innerHTML = `<a class="btn sm" href="arcade.html">${
-    G ? 'Back to the games \u2192' : 'Take a look \u2192'}</a>`;
+  $('arcade-foot').innerHTML = pixGo('portfolio.html',
+    G ? 'Back to the games' : 'Enter the arcade',
+    G ? 'your cabinet is where you left it' : 'three games \u00b7 sixty seconds each');
 }
 
 /* the priors file is optional and lazy everywhere else; the hub asks for it
