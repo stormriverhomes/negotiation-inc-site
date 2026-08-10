@@ -892,9 +892,17 @@ function standing(bank){
 const BANK = {
   /** { bank, why } — why is 'ok' | 'new' | 'unreadable' | 'nostore' */
   readState(){
-    if (typeof localStorage === 'undefined') return { bank: fresh(), why:'nostore' };
+    /* `typeof localStorage` is not a guard — when a browser BLOCKS site data
+       the property access itself throws SecurityError, and typeof performs
+       the access. This was the audit's daily-street finding: the whole game
+       booted to a blank page for anyone with storage blocked, because the
+       gate meant to detect that state was the line that died of it. Probe
+       inside a try; there is no storage state that can reach past it. */
+    let store = null;
+    try { store = window.localStorage; } catch(e){ return { bank: fresh(), why:'nostore' }; }
+    if (!store) return { bank: fresh(), why:'nostore' };
     let raw = null;
-    try { raw = localStorage.getItem(BANK_KEY); } catch(e){ return { bank: fresh(), why:'nostore' }; }
+    try { raw = store.getItem(BANK_KEY); } catch(e){ return { bank: fresh(), why:'nostore' }; }
     if (!raw) return { bank: fresh(), why:'new' };
     try { return { bank: clean(JSON.parse(raw)), why:'ok' }; }
     catch(e){ return { bank: fresh(), why:'unreadable' }; }
@@ -902,8 +910,7 @@ const BANK = {
   read(){ return this.readState().bank; },
   /** true when it is actually on disk. Callers that move money must check. */
   write(b){
-    if (typeof localStorage === 'undefined') return false;
-    try { localStorage.setItem(BANK_KEY, JSON.stringify(b)); return true; }
+    try { window.localStorage.setItem(BANK_KEY, JSON.stringify(b)); return true; }
     catch(e){ return false; }
   },
   /** Move the money and persist it. Returns the same shape settle() does, plus
