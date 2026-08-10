@@ -568,8 +568,10 @@ footer a{color:var(--mid);text-decoration:none;margin-right:16px}
 <meta name="twitter:image" content="https://negotiationinc.com/og/page-site.png">
 <meta property="og:url" content="https://negotiationinc.com/office">
 <link rel="canonical" href="https://negotiationinc.com/office">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23101a2c'/%3E%3Cpath%20fill='%23f4efe2'%20d='M15%2015h9.5l14%2021.5V15H47v2.6h-3.4v27.1h-7.9L20.3%2021.1v21h3.6V45H15v-2.6h3.5V17.6H15Z'/%3E%3Crect%20x='15'%20y='50.2'%20width='34'%20height='2.6'%20rx='1.3'%20fill='%23c9a227'/%3E%3Crect%20x='15'%20y='55.4'%20width='34'%20height='2.6'%20rx='1.3'%20fill='%23c9a227'/%3E%3C/svg%3E" type="image/svg+xml">
-<link rel="icon" href="favicon.ico" sizes="16x16 24x24 32x32 48x48 64x64">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23101a2c'/%3E%3Cpath%20fill='%23f4efe2'%20d='M15%2015h9.5l14%2021.5V15H47v2.6h-3.4v27.1h-7.9L20.3%2021.1v21h3.6V45H15v-2.6h3.5V17.6H15Z'/%3E%3C/svg%3E" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" sizes="16x16" href="art/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="art/favicon-32.png">
 <link rel="apple-touch-icon" href="art/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <meta name="theme-color" content="#101a2c">
@@ -1783,9 +1785,19 @@ function boot(){
          So: dismissible, and dismissing it means fourteen days of silence.
          The ask still arrives at the moments that earn it — the fourth comp,
          a locked slider, the end of a finished sheet — which is where an
-         offer is an answer to something rather than an interruption. */
+         offer is an answer to something rather than an interruption.
+
+         AND THE HUSH MUST NOT RETURN. This branch once ended in a bare
+         `return`, which does not skip the offer — it exits boot(). Everything
+         drawn after this block (the strip, the eight cards, the address box,
+         the property deck, the whole right column) simply never ran, for
+         fourteen days, for exactly the people who pressed "Not now" — a
+         button we OFFERED them. The rail survived because renderShell runs
+         above. Elijah's own dashboard was the screenshot of it. In a function
+         this long a branch may only ever decline to draw its own panel. */
       const hid = +(LS_get('ni-trial-hushed') || 0);
-      if (Date.now() - hid < 14*86400000){ pb.innerHTML = ''; return; }
+      if (Date.now() - hid < 14*86400000){ pb.innerHTML = ''; }
+      else {
       pb.innerHTML = `<div class="offer" id="offerbox">
         <div class="ob-t">
          <div class="eyebrow" style="color:var(--blue)">Card on file · nothing charged for fourteen days</div>
@@ -1806,6 +1818,7 @@ function boot(){
          six times better than one that does not, and this is the moment to ask
          for it: they have registered, they have priced something, and they are
          looking at the one panel on the page that says what they are missing. */
+      }
     } else if (!onPlan && left === 0 && a.trial){
       pb.innerHTML = `<div class="panel" style="margin-top:20px">
         <div class="pb" style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:space-between">
