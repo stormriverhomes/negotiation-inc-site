@@ -2240,6 +2240,22 @@ app.get('/api/config', (_req, res) => {
 app.get('/api/health', (_req, res) => {
   rollDay();
   checkGrants();                      // refreshes in the background; never blocks
+  /* ── READABLE FROM ANYWHERE, ON PURPOSE ─────────────────────────────────
+     This endpoint is already public: every field in it can be had by anyone
+     with curl and has been since the day it shipped. Withholding the CORS
+     header therefore protects nothing — it only stops BROWSERS doing what
+     every other client can already do, which in practice means it stops the
+     owner of the site building a dashboard against his own status page.
+
+     So the header goes on, and the reasoning is worth writing down because
+     the instinct that put it off is a good instinct pointed at the wrong
+     door: `*` here is not a decision to publish this data, it is an
+     acknowledgement that it is already published. The line that actually
+     guards anything is the one above /api/ops, which holds the private
+     numbers — accounts, MRR, spend — behind a token and answers 404 rather
+     than 403, and which does NOT get this header. */
+  res.set('access-control-allow-origin', '*');
+  res.set('cache-control', 'no-store');
   res.json({ ok:true, service:'negotiation-inc', mock:MOCK, build:BUILD,
     read:    ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
     compare: ((ACCESS || ACCOUNTS_ON()) && (KEY || MOCK)) ? 'on' : 'off',
