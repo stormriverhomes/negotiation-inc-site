@@ -120,6 +120,66 @@ const page = async () => { const p = await b0.newPage();
   p.on('pageerror', e => { out.errs = out.errs || []; out.errs.push(e.message); });
   return p; };
 
+/* ══ B2 · THE CUSTOMER WHO ALREADY HAS AN ACCOUNT ════════════════════════
+   Section B tested the person who signs up ON THE WAY to a plan, and it passed
+   for months while the commonest buyer of all could not check out at all.
+
+   Elijah, from inside his own live product: "when I click on the free trial
+   when I'm logged in it just takes me to my account rather than directing me
+   to pay."
+
+   The cause was a name. The block that turns ?join=<plan> into a checkout is
+   injected into both the desk and the office; it asked whether a function
+   called signedIn() existed, which is the DESK's name for it — the office
+   calls the identical function account(). So on the office, which is where
+   every "Start 14 days free" link points, the answer was always no, every
+   buyer was treated as signed out, and the plan was parked in a sessionStorage
+   key that only the sign-in door ever read. A person already signed in does
+   not walk through that door. The plan sat there forever.
+
+   The lesson is bigger than the fix: section B only ever exercised the path
+   where a stranger becomes a customer, so the assertion set had a hole shaped
+   exactly like a returning customer. This is that hole, closed. */
+{
+  PLAN = null;
+  const p = await page();
+  /* ── A RETURNING CUSTOMER HAS A SESSION, NOT JUST A RECORD ─────────────
+     The first draft of this section planted ni-account-v1 and nothing else,
+     and it failed — correctly, and for the wrong reason. The workspace record
+     is what the PAGE reads to know who you are; the Supabase session is what
+     the SERVER reads to know you may spend. Checkout refused for want of a
+     token, which is exactly what it should do, and told me nothing about the
+     bug I was chasing. So the session is made the way a real one is: through
+     the door, with the stub answering. */
+  await p.goto(BASE + '/office.html');
+  await p.fill('#g-name','Returning'); await p.fill('#g-email','back@x.com');
+  await p.fill('#g-pw','sixchars');
+  await p.click('#g-go'); await p.waitForTimeout(1400);
+  /* and nothing may be parked before the real test begins */
+  await p.evaluate(() => { try { sessionStorage.removeItem('ni-join'); } catch(e){} });
+  LASTCHECKOUT = null;
+  await p.goto(BASE + '/office.html?join=underwriter');
+  await p.waitForTimeout(1500);
+  out.B2_checkout = LASTCHECKOUT;
+  out.B2_parked   = await p.evaluate(() => sessionStorage.getItem('ni-join'));
+  if (!LASTCHECKOUT || LASTCHECKOUT.plan !== 'underwriter')
+    bad.push('B2: a signed-in customer clicking a plan did NOT reach checkout — '
+           + 'this is the path from the plans page to money');
+  if (out.B2_parked)
+    bad.push('B2: the plan was parked in sessionStorage instead of being spent');
+
+  /* and the sweep: a plan parked by an interrupted attempt is picked up on the
+     next load rather than stranding somebody who already decided to pay */
+  LASTCHECKOUT = null;
+  await p.evaluate(() => sessionStorage.setItem('ni-join', 'solo'));
+  await p.goto(BASE + '/office.html');
+  await p.waitForTimeout(1500);
+  out.B2_swept = LASTCHECKOUT;
+  if (!LASTCHECKOUT || LASTCHECKOUT.plan !== 'solo')
+    bad.push('B2: an interrupted checkout was never resumed — the parked plan is a dead end');
+  await p.close();
+}
+
 /* ══ B · a tier clicked on the plans page survives the door ══════════════ */
 {
   PLAN = null;

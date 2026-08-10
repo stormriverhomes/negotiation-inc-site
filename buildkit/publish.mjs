@@ -1348,6 +1348,37 @@ for (const must of ['desk.html#new', 'class="spot"',
    and in a product whose entire pitch is "it shows its working" that is the
    most expensive kind of small lie. Same for "unlimited" properties against a
    hard cap of forty — forty is plenty, so say forty. */
+/* ── THE PLANS PAGE MAY NOT NAME A FEATURE THAT DOES NOT EXIST ────────────
+   The comparison table already had four "in build" rows cut for exactly this
+   reason — seats, a shared assumption set, a pipeline board, an API, none of
+   which existed. One line survived the cull, in the CARD rather than the
+   table: "Three seats included, $29 each after — with roles, an audit trail,
+   API access and webhooks." Five named features, zero code, on the tier that
+   costs $249 and on the page where the decision is made.
+
+   The locked shelf in the desk has carried the rule for months — if a card
+   names something, grep has to find the code that does it — and nobody ever
+   pointed it at the pricing page, which is the one place where naming a thing
+   that does not exist is not merely embarrassing but is taking money for it.
+
+   So: these words may not appear in the plans page's prose until something
+   answers to them. When seats ship, delete the word from this list and the
+   guard lets it through — that is the whole handshake. */
+{
+  const body = plans.replace(/<!--[\s\S]*?-->/g, ' ');
+  for (const [re, what] of [
+    [/\bseats? included\b/i,      'seats'],
+    [/\bwith roles\b/i,           'roles'],
+    [/\baudit trail\b/i,          'an audit trail'],
+    [/\bAPI access\b/i,           'API access'],
+    [/\bwebhooks\b/i,             'webhooks'],
+  ]){
+    const m = body.match(re);
+    if (m) throw new Error(`plans.html sells ${what} (${m[0]}) and nothing in the product `
+      + `answers to it. Either build it or take the word off the page — this is the pricing `
+      + `page, so the gap between the two is money taken for something that is not there.`);
+  }
+}
 if (/All eight exits priced/.test(plans))
   throw new Error('plans.html claims eight priced exits; the desk prices seven and says so');
 if (/>Unlimited</.test(plans))
@@ -2596,15 +2627,49 @@ async function afterStripe(){
    The plans page cannot start a checkout: nobody is signed in on it. So it
    sends people here with the plan they clicked, and this picks it up once
    there is a session to attach it to. */
+/* ── THE ACCOUNT, READ THE ONLY WAY THAT WORKS ON BOTH PAGES ───────────────
+   This block is injected into the desk AND the office, and it used to ask
+   whether a function named signedIn existed. The desk calls it signedIn().
+   The office calls the identical function account(). So on the office — the
+   page every single "Start 14 days free" link on the plans page points at —
+   the test was always false, every buyer was treated as signed out, the plan
+   was parked in sessionStorage, and the person landed on their account
+   wondering where the checkout went.
+
+   That parked plan was then only ever picked up by the sign-in door, which a
+   person who was ALREADY SIGNED IN never walks through. So the exact customer
+   most likely to buy — one who already has an account and came back to pay —
+   was the one customer who could not.
+
+   The fix is to stop asking the page for its local name for a thing and read
+   the RECORD, which is one key, identical on both pages, and cannot be renamed
+   out from under this block by an edit to either of them. */
+const joinAccount = () => {
+  try {
+    const a = JSON.parse(localStorage.getItem('ni-account-v1'));
+    return (a && typeof a === 'object' && typeof a.name === 'string' && a.name) ? a : null;
+  } catch(e){ return null; }
+};
+
 async function joinFromQuery(){
   if (!PAY_ON()) return;
   const q = new URLSearchParams(location.search);
   const plan = (q.get('join') || '').trim().toLowerCase();
-  if (!plan) return;
-  try { history.replaceState(null, '', location.pathname); } catch(e){}
-  const a = (typeof signedIn === 'function') ? signedIn() : null;
-  if (!a) { try { sessionStorage.setItem('ni-join', plan); } catch(e){} return; }
-  const r = await startCheckout(plan);
+  /* ── AND A PARKED PLAN IS PICKED UP HERE TOO ────────────────────────────
+     Not only at the door. Anyone whose checkout was interrupted — the old bug,
+     a closed tab, a refresh mid-flow — has a plan sitting in sessionStorage
+     with nothing left to consume it. This is the sweep: if there is a session
+     and something parked, finish what they started. */
+  const held = (() => { try { return sessionStorage.getItem('ni-join'); } catch(e){ return null; } })();
+  const want = plan || (held || '').trim().toLowerCase();
+  if (!want) return;
+  if (plan) try { history.replaceState(null, '', location.pathname); } catch(e){}
+  if (!joinAccount()){
+    try { sessionStorage.setItem('ni-join', want); } catch(e){}
+    return;
+  }
+  try { sessionStorage.removeItem('ni-join'); } catch(e){}
+  const r = await startCheckout(want);
   if (!r.ok) payNote(r.error, 'bad', r.portal ? PORTAL_ACTION : null);
 }
 /* and the same thing again for somebody who had to sign up on the way */
@@ -2612,6 +2677,7 @@ async function joinAfterDoor(){
   if (!PAY_ON()) return;
   let plan = null; try { plan = sessionStorage.getItem('ni-join'); } catch(e){}
   if (!plan) return;
+  if (!joinAccount()) return;        // the door fired before the session landed
   try { sessionStorage.removeItem('ni-join'); } catch(e){}
   const r = await startCheckout(plan);
   if (!r.ok) payNote(r.error, 'bad', r.portal ? PORTAL_ACTION : null);
