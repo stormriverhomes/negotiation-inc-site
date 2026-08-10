@@ -11623,7 +11623,23 @@ if ((location.hash||'').toLowerCase() === '#compare'){
 } else if ((location.hash||'').toLowerCase() === '#new'){
   newSheet();
   showStep('property', {scroll:false});
-  const a = $('addr'); if (a) setTimeout(()=>{ try { a.focus(); } catch(e){} }, 60);
+  /* ── AN ADDRESS TYPED ON THE HUB ARRIVES WITH THE SHEET ──────────────────
+     The dashboard's hero takes the first address itself, which is the whole
+     reason its first action is at depth zero. It hands it over in one key
+     rather than in the URL: an address in a hash is an address in every
+     browser history, every shared link and every screenshot, and this one is
+     a house somebody is deciding what to pay for.
+     Read once and deleted, so a reload does not resurrect it and the next
+     blank sheet is blank. */
+  const seed = (() => { try { const v = localStorage.getItem('ni-new-addr');
+    localStorage.removeItem('ni-new-addr'); return v; } catch(e){ return null; } })();
+  const a = $('addr');
+  if (a && seed && seed.trim()){
+    a.value = seed.trim().slice(0, 120);
+    a.dispatchEvent(new Event('input', { bubbles:true }));
+    a.dispatchEvent(new Event('change', { bubbles:true }));
+  }
+  if (a) setTimeout(()=>{ try { a.focus(); } catch(e){} }, 60);
 } else if ((location.hash||'').toLowerCase() === '#condition'){
   /* "Read the condition" and "Price a property" both pointed at desk.html#new,
      so two tiles promising different things opened the same blank first step

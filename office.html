@@ -398,6 +398,27 @@ input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blu
  box-shadow:0 22px 48px -24px rgba(13,20,32,.6)}
 .hero .eyebrow{color:#8298bb}
 .hero .sub{color:#a9b7cd}
+/* ── THE ADDRESS BOX IN THE HERO ───────────────────────────────────────────
+   White field on the dark slab, because the one thing on this panel you are
+   meant to touch should be the one thing that is not the panel's colour. The
+   input is 16px on purpose and it is not a style choice: anything under it and
+   iOS Safari zooms the page on focus, which reads as the layout breaking. */
+.heroask{display:flex;gap:9px;margin-top:16px;max-width:560px}
+.heroask[hidden]{display:none}
+.heroask input{flex:1 1 auto;min-width:0;font:inherit;font-size:16px;
+ padding:12px 15px;border-radius:12px;border:1px solid rgba(255,255,255,.18);
+ background:#fff;color:var(--ink);box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.heroask input::placeholder{color:#8a94a6}
+.heroask input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(31,95,208,.35)}
+/* the hero's other buttons are ghosts on the dark; this one is the primary
+   action of the whole screen and is allowed to be solid */
+.hero .heroask .btn.p{background:var(--blue);border-color:var(--blue);color:#fff;
+ font-size:15px;padding:12px 18px;white-space:nowrap}
+.hero .heroask .btn.p:hover{background:#3b78e0;border-color:#3b78e0;color:#fff}
+.herofine{font-size:13px;color:#a9b7cd;margin-top:10px}
+.herofine[hidden]{display:none}
+.herofine a{color:#cfe0f8;font-weight:650}
+@media(max-width:560px){ .heroask{flex-direction:column} .heroask .btn.p{width:100%;justify-content:center} }
 .hero-act{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
 .hero .btn{background:transparent;border-color:rgba(233,237,245,.3);color:#dbe3ef;
  padding:9px 15px;font-size:13.5px}
@@ -703,9 +724,22 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 <div class="wrap">
  <div class="hero">
   <div>
-   <div class="eyebrow">Your desk</div>
+   <div class="eyebrow" id="hi-eyebrow">Your desk</div>
    <h1 class="big" id="hi">Good to see you.</h1>
    <p class="sub" id="hisub">Here is everything you have open.</p>
+   <!-- ── THE FIRST ACTION, AT DEPTH ZERO ────────────────────────────────
+        The hero was a greeting and two gauges, and on an empty account the
+        first thing a person could DO was a screen and a half down. It takes
+        the address itself now: the sheet this opens is the product, and the
+        shortest path to it is a box in the first thing you see. Hidden the
+        moment there is anything on the desk — then the properties are the
+        point and this is clutter. -->
+   <form class="heroask" id="heroask" hidden>
+    <input id="hero-addr" type="text" autocomplete="street-address"
+      placeholder="Type an address, or just a ZIP" aria-label="Address or ZIP to price">
+    <button class="btn p" type="submit">Open a sheet →</button>
+   </form>
+   <p class="herofine" id="herofine" hidden></p>
    <!-- On desktop the rail hides this; on a phone it is the only route, so it
         stays — but it says what it is, because "The arcade" alone means
         nothing until you have been inside one. -->
@@ -778,6 +812,51 @@ const read = k => { try { return JSON.parse(localStorage.getItem(k)); } catch(e)
 const LS_get = k => { try { return localStorage.getItem(k); } catch(e){ return null; } };
 const LS_set = (k,v) => { try { localStorage.setItem(k,v); } catch(e){} };
 const ACC = 'ni-account-v1';
+
+/* ── WHAT TO SAY, GIVEN THE HOUR ───────────────────────────────────────────
+   Five bands. The late-night and early-morning ones are deliberately not
+   cute about it: somebody underwriting at one in the morning is working, and
+   the right tone is recognition, not a joke at their expense. Exported so the
+   greeting can be tested rather than eyeballed. */
+function greetFor(h){
+  if (!Number.isFinite(h)) return 'Good to see you';
+  if (h < 5)  return 'Still up';
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  if (h < 22) return 'Good evening';
+  return 'Still at it';
+}
+window.__greetFor = greetFor;
+
+/* ── THE HERO'S ADDRESS BOX ────────────────────────────────────────────────
+   Shown only on an empty desk. Typing an address here and pressing the button
+   lands on a blank sheet with the address already in it — the address rides in
+   localStorage rather than in the hash, because a hash is in every history
+   entry, every shared link and every screenshot, and this one is a house
+   somebody is deciding what to pay for. The desk reads that key once, on
+   #new, and deletes it. */
+function heroAsk(on){
+  const f = document.getElementById('heroask'), fine = document.getElementById('herofine');
+  if (!f) return;
+  f.hidden = !on;
+  if (fine){
+    fine.hidden = !on;
+    fine.innerHTML = 'One number — an asking price — is enough to open the first exits. '
+      + 'Or <a href="demo.html">open a worked example</a>.';
+  }
+  if (!on || f.dataset.wired) return;
+  f.dataset.wired = '1';
+  f.onsubmit = ev => {
+    ev.preventDefault();
+    const el = document.getElementById('hero-addr');
+    const v = (el && el.value || '').trim().slice(0, 120);
+    /* an empty box still opens the sheet — the button says "open a sheet" and
+       refusing to do the thing it says because a field is blank is the kind of
+       small dishonesty this product does not do anywhere else */
+    try { if (v) localStorage.setItem('ni-new-addr', v); else localStorage.removeItem('ni-new-addr'); } catch(e){}
+    location.href = 'desk.html#new';
+  };
+}
 
 /* ── the account ──────────────────────────────────────────────────────── */
 function account(){ const a = read(ACC);
@@ -1601,7 +1680,17 @@ function boot(){
   const first = a.name.split(/\s+/)[0];
   $('av').textContent = first[0].toUpperCase();
   $('whoname').textContent = first;
-  $('hi').textContent = 'Good to see you, ' + first + '.';
+  /* ── THE GREETING KNOWS WHAT TIME IT IS ────────────────────────────────
+     Elijah asked for this. It is the cheapest warmth in the product and the
+     only thing on the page that changes without you doing anything, which is
+     most of why it reads as alive rather than as a template with your name
+     poured into it.
+     Rules it keeps: the product's voice is unhurried and specific, so these
+     are greetings a person would actually say and not a mood generator — no
+     exclamation marks, no jokes at 3am, no "Rise and shine". The hour is the
+     BROWSER's, which is the only clock that knows where the person is. And
+     it is chosen once per load, so it cannot flicker between renders. */
+  $('hi').textContent = greetFor(new Date().getHours()) + ', ' + first + '.';
 
   /* the portfolio */
   const FIELDS = ['asking','arv','repairs','rent','balance','piti','arrears'];
@@ -1817,8 +1906,13 @@ function boot(){
        this — offering them a pretend property is answering a question they
        stopped asking when they registered. The demo lives on the way IN. */
     $('props-foot').innerHTML = `<a class="btn p sm" href="desk.html#new">Start a sheet</a>`;
+    /* the hero takes the address on an empty desk — see the note on .heroask */
+    heroAsk(true);
   } else {
     $('p-count').textContent = live.length + (live.length === 1 ? ' open' : ' open');
+    /* something is on the desk, so the properties are the point and the
+       address box is clutter — the rail's "+ New sheet" is one click away */
+    heroAsk(false);
     /* The same card the comparison deals, for the same reason: a property is an
        OBJECT you pick up, not a row in a report. One aesthetic across both
        screens means learning it once. */
