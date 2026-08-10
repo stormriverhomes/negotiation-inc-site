@@ -1361,8 +1361,13 @@ for (const must of ['desk.html#new', 'class="spot"',
                        founding twenty-five and its gold went out with the
                        Stripe seat count that priced them */
                     'class="offercard"', '>Solo<', '$39', '$129', '$249',
-                    '<th>Solo</th>', 'Two months free on annual',
-                    '$1,290 a year'])
+                    '<th>Solo</th>',
+                    /* 'Two months free on annual' and '$1,290 a year' were on this
+                       must-list, so the build ENFORCED copy for an interval the
+                       checkout cannot issue — one price id per plan, no interval
+                       control anywhere. A guard that requires a false claim is
+                       worse than no guard. Put them back the day annual ships. */
+                    'Cancel in one click'])
   if (!plans.includes(must)) throw new Error('plans.html lost: ' + must);
 /* The desk prices SEVEN exits and tells you on the sheet that the eighth needs
    land. A plans page claiming eight is the marketing contradicting the product,
@@ -1398,6 +1403,43 @@ for (const must of ['desk.html#new', 'class="spot"',
     if (m) throw new Error(`plans.html sells ${what} (${m[0]}) and nothing in the product `
       + `answers to it. Either build it or take the word off the page — this is the pricing `
       + `page, so the gap between the two is money taken for something that is not there.`);
+  }
+}
+/* ── AND NEITHER MAY THE PAGES THAT ARE CONTRACTS ─────────────────────────
+   The guard above points at plans.html only, and the production audit found
+   four things sold on the LEGAL pages that the product cannot deliver — which
+   is worse, because terms.html and refunds.html are the documents that say
+   "this is not just a marketing line":
+
+     · terms §04 promised every new account "fourteen days of the full
+       product". A new account gets the free desk: the signup trigger leaves
+       plan and trial null and NI_TRIAL_TIER is 0. The fourteen days are
+       Stripe's, they start at checkout and they take a card.
+     · refunds §06 promised a $49 founding rate that billing.js hard-codes off
+       (FOUNDING_ON = false), so no configuration can issue it.
+     · refunds §07 sold seats, pro-rated per day. No seat exists anywhere.
+     · all three pages sold annual billing. One price id per plan, no interval
+       control in the checkout.
+
+   There WAS a guard meant to catch the first one — it scans six pages for
+   "fourteen days" and throws when a no-card phrase sits within 80 characters
+   — but its NEAR list is /no card|without a card|card is not|never asks for a
+   card/ and the terms said "you are not charged", so the one page still
+   selling a free fortnight was the one page it waved through. */
+for (const file of ['terms.html', 'refunds.html']){
+  /* read from source: these pages are copied through by a later loop, so there
+     is no variable holding them at this point in the build */
+  const visible = fs.readFileSync(file, 'utf8').replace(/<!--[\s\S]*?-->/g, ' ');
+  for (const [re, what] of [
+    [/fourteen days of the full product/i, 'a fourteen-day trial that starts at registration'],
+    [/\$49 a month/,                       'the retired $49 founding rate'],
+    [/seats? included|adding a seat|removing (a |one )seat/i, 'seats'],
+    [/monthly or annually|monthly or yearly|a year\b(?![^<]*\$249)/i, 'annual billing'],
+  ]){
+    const m = visible.match(re);
+    if (m) throw new Error(`${file} promises ${what} ("${m[0]}") and the product does not do it. `
+      + `This is a page people are told is contractual — either build it or take the words off. `
+      + `When it ships, delete the line from this guard; that is the whole handshake.`);
   }
 }
 if (/All eight exits priced/.test(plans))
@@ -2395,11 +2437,26 @@ async function syncSheets(){
            desk is already holding it. */
         if (m.adv) Object.assign(P.adv, m.adv);
         P.active = Math.max(0, Math.min(P.active, P.props.length - 1));
+        /* the sheets in hand are now the merged set, some of them straight off
+           the server. save() decides whether to re-stamp the updated field by
+           comparing a content hash against what it last saw — and against the PRE-merge
+           baseline every pulled sheet looks like a local edit, which would
+           re-stamp somebody else's work with this device's clock. Dropping the
+           baseline makes the next save treat them as a first sight, which is
+           what they are. */
+        if (typeof window.__sigReset === 'function') window.__sigReset();
         loadInto(P.active); save();
         if (typeof window.__render === 'function') window.__render();
       }
+      /* ── AND THE PUSH ONLY HAPPENS IF THE PULL WORKED ────────────────────
+         This sat outside the block, so one 500 on the sheets GET let a browser
+         holding a stale workspace upsert all of it over newer server rows —
+         with Prefer: resolution=merge-duplicates and no timestamp check
+         anywhere on the far side. pullSheets() returns null on any failure and
+         an array on success, so an empty workspace still pushes; only a pull
+         that genuinely failed now suppresses it. */
+      await pushLocal();
     }
-    await pushLocal();
   } finally { SYNCING = false; }
 }
 async function pushLocal(){

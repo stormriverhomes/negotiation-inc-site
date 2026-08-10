@@ -196,9 +196,18 @@ footer a:hover{color:var(--ink)}
 <h2><span class="n">04</span>Plans, trials and payment</h2>
 <p>The desk is free forever with no card and no expiry. Paid plans are set out on the <a href="plans.html">plans page</a>, and the price shown there when you subscribe is the price you pay.</p>
 <h3>The trial</h3>
-<p>New accounts get fourteen days of the full product. When it ends, you are not charged and nothing is deleted &mdash; the account drops to the free desk and your sheets stay where they are, with the paid features closed until you subscribe.</p>
+<!-- This said "New accounts get fourteen days of the full product", which is
+     not what a new account gets: the signup trigger leaves the plan and the
+     trial column null, so a fresh account is on the free desk until it
+     subscribes. The fourteen days are STRIPE's, they start at checkout, and
+     they take a card. Two different offers were being described as one, and
+     the one written here was the one the product does not make. -->
+<p>The fourteen days start when you subscribe, not when you register. Checkout puts a card on file and charges nothing until day fifteen; cancel before then and you are not charged at all. Nothing is deleted when a trial or a subscription ends &mdash; the account drops to the free desk and your sheets stay where they are, with the paid features closed until you subscribe.</p>
 <h3>Billing</h3>
-<p>Subscriptions run monthly or annually, in advance, and renew automatically until cancelled. Payments are handled by Stripe; we never see or hold your card number. Prices are exclusive of sales tax and VAT, which are added where the law requires it.</p>
+<!-- "monthly or annually" — there is one price id per plan and no interval
+     control anywhere in the product. Nobody was overcharged; the option simply
+     does not exist, and a contract is the wrong place to offer one. -->
+<p>Subscriptions run monthly, in advance, and renew automatically until cancelled. Payments are handled by Stripe; we never see or hold your card number. Prices are exclusive of sales tax and VAT, which are added where the law requires it.</p>
 <h3>If a price changes</h3>
 <p>We will tell you by email at least 30 days before a price change affects you, and you can cancel before it takes effect. Where we have published a promise that a price is locked for existing subscribers &mdash; as we have for the Underwriter plan &mdash; we keep it.</p>
 <p>Cancellation, refunds and what happens to unpaid invoices are set out on the <a href="refunds.html">billing and refunds page</a>, which is part of this agreement.</p>

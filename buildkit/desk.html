@@ -3737,6 +3737,11 @@ try {
   }
 } catch(e){}
 let TROUBLE = null;              // null | 'quota' | 'blocked' | 'render'
+/* pid -> the content hash last observed for it. See the long note in save().
+   Reset wholesale by the sync after a merge, because a sheet that just arrived
+   from the server is a first sight too, not something this device edited. */
+const SIG = new Map();
+window.__sigReset = () => { try { SIG.clear(); } catch(e){} };
 const save = () => {
   /* A demo is a showroom, not a sheet. It used to load straight over whatever
      property was open and then persist — so clicking a scenario from inside an
@@ -3746,16 +3751,46 @@ const save = () => {
   if (DEMO) return true;
   try {
   const p = P.props[P.active];
-  /* the timestamp the sync merges on. Stamped on the sheet being edited and
-     nowhere else, so opening a property does not make it look newer than the
-     copy on another device. */
-  if (p) { p.updated = Date.now();
-           p.name=S.name; p.addr=S.addr; p.raw=S.raw; p.est=S.est; p.prov=S.prov;
+  /* ── THE TIMESTAMP THE SYNC MERGES ON, AND IT DECIDES WHOSE WORK SURVIVES ─
+     The comment that used to sit here said this was "stamped on the sheet
+     being edited and nowhere else, so opening a property does not make it look
+     newer than the copy on another device." That was the intent and it was not
+     what the code did: the stamp was unconditional, renderCore() ends in
+     save(), and boot() reaches renderCore() on both branches — so merely
+     LOADING THE PAGE re-stamped the active sheet to now.
+
+     mergeSheets() keeps the remote row only `if (!cur || at > cur.at)`, and
+     "now" is always larger. So: spend forty minutes on a sheet on the laptop;
+     open the desk on the phone the next day and touch nothing; the phone's
+     boot re-stamps its month-old copy with a fresh timestamp, the merge
+     discards the laptop's work as older, and pushLocal() writes the stale copy
+     over the server row. Nothing is shown. Every device that pulls after that
+     gets the stale one. Reproduced end to end through the real UI.
+
+     Trusting the 66 call sites to pass an "is this an edit" flag would fix
+     today's path and break the first time somebody adds a 67th. So the stamp
+     is decided by the CONTENT instead: the fields below are assigned first,
+     then hashed, and `updated` moves only when the hash does. The first time a
+     property is seen in a session the hash is recorded WITHOUT stamping —
+     that first sight is whatever was loaded from disk or pulled from the
+     server, which is by definition not an edit somebody just made. */
+  if (p) { p.name=S.name; p.addr=S.addr; p.raw=S.raw; p.est=S.est; p.prov=S.prov;
            p.unc=S.unc; p.sit=S.sit; p.sitPc=S.sitPc; p.sys=S.sys; p.noAsk=S.noAsk; p.sample=S.sample||null;
            p.caseLabel=S.caseLabel||null;
            p.offerExit=S.offerExit||null; p.toName=S.toName||''; p.fin=S.fin||null; p.read=S.read||null;
            p.comps=S.comps; p.subj=S.subj; p.compAdj=S.compAdj; p.repairsOwn=S.repairsOwn;
-           p.src=S.src; p.intake=S.intake; }
+           p.src=S.src; p.intake=S.intake;
+           /* everything above, and nothing else — `updated` itself is excluded
+              or the hash would change every time it was stamped */
+           const sig = JSON.stringify([p.name,p.addr,p.raw,p.est,p.prov,p.unc,p.sit,p.sitPc,
+             p.sys,p.noAsk,p.sample,p.caseLabel,p.offerExit,p.toName,p.fin,p.read,
+             p.comps,p.subj,p.compAdj,p.repairsOwn,p.src,p.intake]);
+           const key = p.id || ('#' + P.active);
+           if (!SIG.has(key)) SIG.set(key, sig);              // first sight: not an edit
+           else if (SIG.get(key) !== sig){ p.updated = Date.now(); SIG.set(key, sig); }
+           /* a sheet that has never carried a timestamp at all still needs one,
+              or it sorts to the bottom of the merge forever */
+           if (!p.updated) p.updated = Date.now(); }
   P.mode = S.mode; P.adv = S.adv;
   localStorage.setItem(PKEY, JSON.stringify({ active:P.active, mode:P.mode, adv:P.adv, box:P.box,
     props: P.props.map(propWire) }));

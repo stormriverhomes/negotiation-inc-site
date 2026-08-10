@@ -499,7 +499,14 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
  </div>
  </div>
 
- <div class="billing"><b>Monthly or yearly</b><span class="save">Two months free on annual</span>
+ <!-- "Monthly or yearly · two months free on annual" and the three "Or $X a
+      year" lines below sold an annual interval that does not exist: there is
+      one Stripe price id per plan and no interval control anywhere in the
+      product or the checkout. Nobody was ever overcharged — the option simply
+      was not there to take — but this is the page where the price is agreed,
+      and it was also written into terms.html as policy. Annual is worth
+      building; until it is, the page says what the checkout does. -->
+ <div class="billing"><b>Monthly, cancel any time</b>
   <span class="sep" aria-hidden="true">·</span><span>Cancel in one click — no contract, no call</span></div>
 </div>
 
@@ -590,7 +597,6 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    <div class="tagline">Your analysis, unlocked</div>
    <h2>Solo</h2>
    <div class="price">$39 <small>/ month</small></div>
-   <div class="note">Or $390 a year — two months back</div>
    <p class="who">For the person doing two to six deals a year who wants the model to be
     <b>theirs</b>, and the file still there on Friday.</p>
   </div>
@@ -618,7 +624,6 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    <div class="tagline">The typing, done for you</div>
    <h2>Underwriter</h2>
    <div class="price">$129 <small>/ month</small></div>
-   <div class="note">Or $1,290 a year — two months back</div>
    <p class="who">For somebody underwriting weekly, who wants the forty minutes to be eight —
     and does not want to go and find the data first.</p>
   </div>
@@ -664,7 +669,6 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    <div class="tagline">For a shop, not a person</div>
    <h2>The Office</h2>
    <div class="price">$249 <small>/ month</small></div>
-   <div class="note">Or $2,490 a year — two months back</div>
    <p class="who">For a small operation where more than one person prices, and the number has to
     mean the same thing whoever ran it.</p>
   </div>
