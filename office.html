@@ -261,7 +261,11 @@ body.railtight .rn-btn::before{content:attr(data-i);font-size:15px;line-height:1
 .rn-tool .ti{flex:none;width:27px;height:27px;border-radius:8px;display:flex;align-items:center;justify-content:center;
  font-size:14px;line-height:1;background:rgba(143,180,255,.15);color:#bcd3f7;
  box-shadow:inset 0 0 0 1px rgba(143,180,255,.20);transition:transform .16s cubic-bezier(.22,.9,.26,1)}
-.rn-tool.lk .ti{background:rgba(232,207,114,.13);color:#e8cf72;box-shadow:inset 0 0 0 1px rgba(232,207,114,.26)}
+.rn-tool.lk .ti{background:linear-gradient(160deg,rgba(232,207,114,.3),rgba(202,168,63,.14));
+ color:#f4df94;box-shadow:inset 0 0 0 1px rgba(232,207,114,.42),0 0 12px -3px rgba(232,207,114,.35)}
+.rn-tool.lk:hover .ti{box-shadow:inset 0 0 0 1px rgba(232,207,114,.6),0 0 16px -2px rgba(232,207,114,.5)}
+.rn-tool .lc{transition:box-shadow .15s}
+.rn-tool.lk:hover .lc{box-shadow:0 0 10px -1px rgba(232,207,114,.55)}
 .rn-tool:hover .ti{transform:scale(1.07)}
 .rn-tool .tl{min-width:0;flex:1;display:grid}
 .rn-tool .tl b{font-size:12.5px;font-weight:640;color:#e7eefb;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -365,6 +369,11 @@ header{background:#fff;border-bottom:1px solid var(--line)}
 .gate.staged #g-fine{display:none}
 .gate.staged.b4 #g-fine{display:block}
 .bnav{display:flex;align-items:center;gap:13px;margin-top:15px}
+/* the beat navigation belongs to the staged register walk and to nothing
+   else — in every flat mode the form's own submit is the only verb. Without
+   this, sign-in wore three Next buttons from a walk it is not on. */
+.gate:not(.staged) .bnav{display:none}
+.gate.ret .zipans,.gate.ret .rk-slot,.gate.ret .rk-say{display:none}
 .bthen{font-size:12px;color:var(--soft)}
 .bskip{font-size:13px;font-weight:650}
 .lvl button i{font-style:normal;display:inline-flex;width:26px;height:26px;border-radius:7px;
@@ -465,12 +474,35 @@ input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blu
 .gate .fine{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--wash);
  font-size:12.5px;color:var(--soft);line-height:1.5}
 .gate .fine b{color:var(--mid)}
+/* ── the way back in: mode heads, tap-height rescues, the red pair ─────── */
+#g-modehead{margin:2px 0 4px}
+#g-modehead .mh-k{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.16em;
+ text-transform:uppercase;color:var(--soft)}
+#g-modehead h2{font-family:var(--serif);font-size:26px;font-weight:700;letter-spacing:-.02em;
+ line-height:1.15;margin:6px 0 5px}
+#g-modehead p{font-size:13.5px;color:var(--mid);line-height:1.5;margin:0}
+.haveacc a{display:inline-block;padding:11px 0}
+/* THIRD occurrence of this exact trap (land invite, the ladder, now here):
+   a display rule silently beats the hidden ATTRIBUTE. Never again unstated. */
+.haveacc a[hidden]{display:none}
+@media (max-width:700px){
+ .haveacc{display:grid;border-top:1px solid var(--line);margin-top:4px}
+ .haveacc a{display:flex;align-items:center;justify-content:center;min-height:48px;
+  border-top:1px solid var(--wash);margin:0}
+}
+/* the refusal names the pair, never the half — and paints the pair, so the
+   eye lands on both fields without the sentence having to say "or" */
+.sin-bad #g-email,.sin-bad #g-pw{border-color:#b3372c;
+ box-shadow:0 0 0 3px rgba(179,55,44,.10)}
 .err{color:#b3372c;font-size:13px;margin-top:9px;display:none}
 /* red is a refusal with a reason and nothing else. "Check your email" is the
    opposite of a refusal — it is the signup working — so it cannot borrow the
    colour that means it failed. `.ok` is the same line in the green that means
    money that pays: 7.49:1 on the card, 7.04:1 on the wash. */
-.err.ok{color:#2a5f3e}
+/* a good answer is a card, not a coloured sentence — "the link is on its
+   way" is the one thing on this screen the person must not scroll past */
+.err.ok{color:#2a5f3e;border:1px solid #bfe0cd;background:#eaf6f0;border-radius:12px;
+ padding:11px 14px;line-height:1.55}
 
 /* ── the hub ── */
 /* ── the instrument panel ───────────────────────────────────────────────
@@ -585,16 +617,29 @@ h1.big{font-size:38px;color:#fff}
 .act:active{transform:translateY(-1px);box-shadow:0 5px 13px rgba(13,20,32,.15);transition-duration:.06s}
 .act:focus-visible{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
 .act:hover .a-i{transform:scale(1.07) rotate(-3deg)}
-.act.lk:hover{border-color:var(--gold-line,#e8dcb8)}
+/* ── LOCKED IS TREASURE, NOT DUST (design doc Q2, finally honoured) ──────
+   The locked tiles wore a flat khaki — #e7dcbb — which reads as "disabled",
+   the exact opposite of what a paid instrument should feel like. Brass now:
+   a real gradient with a warm glow, the same metal the arcade's marquee and
+   the desk's glass rows already taught. The hue does not move to blue —
+   blue is the ACTION colour on every button and open tool, and a lock
+   painted in it would stop reading as a lock at all. Gold stays the paid
+   ceiling; it just finally shines like one. */
+.act.lk{background:linear-gradient(180deg,#fffdf2,#fff 55%)}
+.act.lk:hover{border-color:#d9bf62;box-shadow:0 16px 36px rgba(160,124,22,.18)}
+.act.lk:hover .a-go{color:#a8842a}
+.act.lk:focus-visible{border-color:#d9bf62;box-shadow:0 0 0 3px #f2e8cd}
 .act.p{background:linear-gradient(180deg,var(--blue-soft),#fff);border-color:var(--blue-line)}
 .act .a-i{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;
  border-radius:12px;background:var(--blue);color:#fff;font-size:18px;line-height:1;
  box-shadow:0 4px 12px -3px rgba(31,95,208,.55);transition:transform .16s cubic-bezier(.22,.9,.26,1)}
-.act.lk .a-i{background:#e7dcbb;color:#6c541a}
+.act.lk .a-i{background:linear-gradient(160deg,#f9ecbe,#e5cb6e 55%,#cda942);color:#54400a;
+ box-shadow:0 4px 14px -3px rgba(202,168,63,.6),inset 0 1px 0 rgba(255,255,255,.65)}
 .act .a-t{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.01em;
  margin-top:9px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .act .a-t em{font-style:normal;font-family:var(--sans);font-size:9px;font-weight:800;letter-spacing:.13em;
- text-transform:uppercase;color:#6c541a;background:#f2e8cd;border-radius:999px;padding:3px 8px}
+ text-transform:uppercase;color:#54400a;background:linear-gradient(160deg,#f6e7ae,#e9d488);
+ border-radius:999px;padding:3px 8px;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 1px 3px rgba(160,124,22,.25)}
 .act .a-d{font-size:13px;color:var(--mid);line-height:1.45}
 .act .a-go{position:absolute;top:18px;right:18px;color:var(--line-2);font-size:17px;transition:transform .15s,color .15s}
 .act:hover .a-go{color:var(--blue);transform:translateX(3px)}
@@ -822,6 +867,12 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    <button type="button" role="tab" data-mode="up" aria-selected="true">Create an account</button>
    <button type="button" role="tab" data-mode="in" aria-selected="false">Sign in</button>
   </div>
+  <!-- ── THE MODE SPEAKS FIRST (design pass: The Way Back In) ──────────────
+       Sign-in and its branches each open with their own sentence — an
+       eyebrow naming the branch, a serif heading, one line of what happens.
+       Register does not use this (its beats carry their own heads); setMode
+       fills it for every other mode, so the flat form is never headless. -->
+  <div id="g-modehead" hidden></div>
   <!-- ── FOUR BEATS, ONE FORM (design pass: The Door) ──────────────────────
        One question per beat when registering; every other mode (sign in,
        recover, reset) shows the form FLAT, exactly as before — the beats are
@@ -1275,6 +1326,33 @@ function showBeat(n){
   try { const f = document.querySelector('#gate-form .beat.on input:not([type=hidden])');
     if (f && BEAT < 4) f.focus({ preventScroll:true }); } catch(e){}
 }
+/* ── the returning mood (design pass: The Way Back In) ─────────────────────
+   Every mode that is not registering opens with its own sentence, and the
+   left column stops selling: a returning customer's desk is already theirs,
+   so the headline holds state instead of making a case. Nothing invented —
+   if gateHave found work in this browser, its better headline stands. */
+function doorMood(m){
+  /* returning modes retire the register-only furniture: the beat slots on
+     the rack, the zip answer, and (via CSS above) the beat navigation */
+  try { gateEl().classList.toggle('ret', m !== 'up'); } catch(e){}
+  const ns = document.getElementById('rk-names');
+  if (ns) ns.textContent = m === 'up'
+    ? 'engraved as you type — twelve instruments, four open free'
+    : 'remembered at return — never guessed from an email address';
+  const H = document.getElementById('g-modehead');
+  if (H){
+    const say = {
+      in:      ['Returning', 'Welcome back.', 'Your email and your password.'],
+      recover: ['I forgot my password', 'Where should the reset link go?',
+                'Your address, and a link comes to it.'],
+      reset:   ['Choose a new password', 'You arrived from the email link.',
+                'Choose a new password and you are back in.'],
+    }[m];
+    H.hidden = !say;
+    if (say) H.innerHTML = '<span class="mh-k">' + say[0] + '</span>'
+      + '<h2>' + say[1] + '</h2><p>' + say[2] + '</p>';
+  }
+}
 (function wireDoor(){
   const g = gateEl(); if (!g || !document.getElementById('g-n1')) return;
   g.classList.add('staged');
@@ -1292,6 +1370,9 @@ function showBeat(n){
   document.getElementById('g-n3').onclick = () => showBeat(4);
   $('g-name').addEventListener('input', doorName);
   $('g-market').addEventListener('input', doorZip);
+  for (const id of ['g-email','g-pw']){ const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () =>
+      document.getElementById('gate-form').classList.remove('sin-bad')); }
   showBeat(1);
 })();
 /* ── THE DOOR, WITH A SERVER BEHIND IT ─────────────────────────────────────
@@ -1353,6 +1434,7 @@ window.__authDoorInit = function(on){
     try {
       if (m === 'up'){ gateEl().classList.add('staged'); showBeat(BEAT); }
       else window.__doorFlat();
+      doorMood(m);
     } catch(e){}
     const nm = document.getElementById('g-name'), lv = document.getElementById('g-lvl'),
           mk = document.getElementById('g-market'), pw = document.getElementById('g-pw'),
@@ -1421,11 +1503,18 @@ window.__authDoorInit = function(on){
     /* and the promise at the top of the page changes with it: a returning
        customer met a heading that said "open your workspace", which is what
        you say to somebody who does not have one */
+    /* the FORM side now opens with the mode's own head (doorMood), so the
+       left column stops echoing it and holds the returning promise instead —
+       unless gateHave already put the person's own sheet in the headline,
+       which outranks anything we could write. */
     const gh = document.getElementById('gate-h'), gk = document.getElementById('gate-k');
-    if (gh) gh.textContent = m === 'up' ? 'Open your workspace.'
-                           : m === 'in' ? 'Welcome back.'
-                           : m === 'recover' ? 'Get back into your workspace.'
-                           : 'Choose a new password.';
+    if (gh && !window.__gateWork)
+      gh.textContent = m === 'up' ? 'Open your workspace.'
+                     : 'Everything is where you left it.';
+    const gp = document.getElementById('gate-p');
+    if (gp && !window.__gateWork && m !== 'up')
+      gp.textContent = 'The sheets, the markets, the bankroll in the arcade — '
+        + 'the desk holds its state between visits.';
     if (gk) gk.textContent = m === 'in' ? 'Sign in' : 'Your desk';
   };
   window.__setGateMode = setMode;
@@ -1514,7 +1603,10 @@ $('gate-form').onsubmit = async e => {
   const name = $('g-name').value.trim().slice(0,60);
   const email = $('g-email').value.trim().slice(0,120);
   const err = $('g-err');
-  const bad = t => { err.classList.remove('ok'); err.textContent = t; err.style.display = 'block'; };
+  const bad = t => { err.classList.remove('ok'); err.textContent = t; err.style.display = 'block';
+    /* sign-in refusals paint the PAIR — never one half, which would be a
+       free membership check — and any keystroke in either field lifts it */
+    if (GMODE === 'in') $('gate-form').classList.add('sin-bad'); };
   const fine = t => { err.classList.add('ok'); err.textContent = t; err.style.display = 'block'; };
   /* ── THE TWO NEW MODES ARE HANDLED FIRST AND RETURN ─────────────────────
      Both of them end here: neither creates a local workspace record, because
@@ -2087,6 +2179,7 @@ function gateHave(){
      about THIS sheet — the heading names the act, and beat one says what an
      account does for it. Nothing is invented: the card below carries the real
      figures from this browser. */
+  window.__gateWork = true;   // doorMood defers to this headline in every mode
   try {
     const h = document.getElementById('gate-h'), p = document.getElementById('gate-p');
     if (h) h.textContent = 'Keep the sheet you just built.';
