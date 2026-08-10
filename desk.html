@@ -1321,6 +1321,20 @@ body.traytight .tray{padding-bottom:11px}
  background:#fff;padding:7px 8px;font-family:var(--sans);font-size:13.5px;font-variant-numeric:tabular-nums;
  color:var(--ink);outline:none}
 .comp .cb input:focus,.comp .cb select:focus{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-soft)}
+/* ── iOS ZOOM, THE LAST HOLDOUT ───────────────────────────────────────────
+   Safari on iOS zooms the whole page when focus lands in any input under
+   16px, and the comp workbench was the one panel still under it: the address
+   line at 14.5 and the detail grid at 13.5. The zoom reads as the layout
+   breaking, on the exact screen where an Underwriter does their most
+   deliberate work. 16px on touch screens only — the desktop density these
+   were chosen for is real and stays. */
+@media (max-width:700px), (pointer:coarse){
+ .comp .ca input{font-size:16px}
+ .comp .cb input,.comp .cb select{font-size:16px;min-height:40px}
+ /* the sweep found four more under the line — the deck filter, the shape
+    fields, the AI note and the buy-box row. Same rule, same reason. */
+ .deckfilter input,.shape input,.ainote input,.aicode input,.bxrow input[type=text]{font-size:16px}
+}
 .comp .cf{padding:9px 13px;border-top:1px solid var(--line);background:#fcfdfe;
  display:flex;gap:6px 14px;flex-wrap:wrap;font-size:11.5px;color:var(--soft)}
 .comp .cf b{color:var(--mid);font-weight:650;font-variant-numeric:tabular-nums}
