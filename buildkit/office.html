@@ -225,15 +225,51 @@ body.railtight .rn-nm,body.railtight .rn-tier,
 body.railtight .rn-h,body.railtight .rn-list,body.railtight .rn-empty,
 body.railtight .rn-foot,body.railtight .rn-up,body.railtight .rn-btn span,
 body.railtight .rn-pro,body.railtight .rn-mark .nm,body.railtight .rn-mark .inc{display:none}
-body.railtight .rn-top{padding:14px 8px 12px;text-align:center}
-body.railtight .rn-mark{justify-content:center}
+/* Collapsed, the top is one centred column — mark, toggle, avatar — on the
+   64px axis. It used to be `text-align:center` on a non-flex box with the
+   wordmark left as a block-level flex child, so the 'N' hugged the top-left
+   corner while everything under it centred: the one misaligned thing on the
+   rail, and the first thing the eye catches. A flex column with a single
+   centre axis cannot drift. */
+body.railtight .rn-top{display:flex;flex-direction:column;align-items:center;gap:9px;padding:14px 8px 12px}
+body.railtight .rn-mark{justify-content:center;width:100%;gap:0}
 body.railtight .rn-mark::after{content:'N';font-family:var(--serif);font-size:20px;font-weight:700;color:#fff}
-body.railtight .rn-toggle{position:static;margin:10px auto 0}
-body.railtight .rn-who{justify-content:center;margin-top:10px}
+body.railtight .rn-toggle{position:static;margin:0}
+body.railtight .rn-who{justify-content:center;margin:0;width:auto;padding:5px}
 body.railtight .rn-act{padding:10px 8px}
 body.railtight .rn-btn{justify-content:center;padding:10px 0}
 body.railtight .rn-btn::before{content:attr(data-i);font-size:15px;line-height:1}
 .rn-btn::before{content:none}
+
+/* ── THE ARSENAL ───────────────────────────────────────────────────────────
+   The dashboard is the room you close deals out of, so the rail is a wall of
+   instruments rather than a table of contents. Every tool here is real. The
+   ones a plan has not opened yet wear a gold tier chip and lead to the page
+   that opens them — so the SHAPE of everything the product can do is visible
+   from the first minute, which is the whole feeling of standing in a
+   well-equipped room. The icon tiles are the body cards' tiles at rail scale,
+   so the two halves of the page read as one instrument. */
+.rn-sec{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+ color:#6f86a8;padding:14px 16px 5px}
+.rn-tools{padding:0 10px 2px}
+.rn-tool{display:flex;align-items:center;gap:10px;padding:7px 8px;margin-bottom:2px;border-radius:9px;
+ text-decoration:none;border:1px solid transparent;transition:background .12s,border-color .12s,transform .12s}
+.rn-tool:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.10);transform:translateX(1px)}
+.rn-tool .ti{flex:none;width:27px;height:27px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+ font-size:14px;line-height:1;background:rgba(143,180,255,.15);color:#bcd3f7;
+ box-shadow:inset 0 0 0 1px rgba(143,180,255,.20);transition:transform .16s cubic-bezier(.22,.9,.26,1)}
+.rn-tool.lk .ti{background:rgba(232,207,114,.13);color:#e8cf72;box-shadow:inset 0 0 0 1px rgba(232,207,114,.26)}
+.rn-tool:hover .ti{transform:scale(1.07)}
+.rn-tool .tl{min-width:0;flex:1;display:grid}
+.rn-tool .tl b{font-size:12.5px;font-weight:640;color:#e7eefb;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rn-tool .tl span{font-size:10px;color:#7f96b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rn-tool .lc{flex:none;font-family:var(--mono);font-size:7.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+ color:#0f1d33;background:#e8cf72;border-radius:4px;padding:2px 4px}
+/* collapsed: the wall becomes a column of lit tiles, gold for locked, and the
+   label rides in the tooltip. This is the view that reads most like a console. */
+body.railtight .rn-sec,body.railtight .rn-tool .tl,body.railtight .rn-tool .lc{display:none}
+body.railtight .rn-tools{padding:6px 8px}
+body.railtight .rn-tool{justify-content:center;padding:5px 0;margin-bottom:5px}
 /* With the rail up, the masthead and the hero's arcade button are both second
    copies of links standing two inches to the left. They go. */
 @media (min-width:1081px){ body.hasrail > header{display:none}
@@ -1101,6 +1137,47 @@ function renderShell(a, props, active, nameOf, spreadOf, filledOf, onPlan, left)
 
  const first = esc(a.name.split(/\s+/)[0] || 'You');
  const tier = onPlan ? esc(a.plan || PREVIEW_NAME[previewTier() || 0] || '') : left > 0 ? left + ' days left' : 'Free tier';
+
+ /* ── THE ARSENAL, PARTLY UNLOCKED ────────────────────────────────────────
+    One tier number decides which instruments are lit and which wear a chip.
+    Trial reads as the top tier (everything open for the fortnight); otherwise
+    the pre-launch preview if one is set, else the real plan. Every entry
+    points somewhere real: an open tool opens the desk where it lives, a locked
+    one opens the plans page anchored to the spotlight that sells it. */
+ const tv = left > 0 ? 3
+   : (previewTier() !== null ? previewTier()
+   : (a.plan ? (TR_[String(a.plan).trim().toLowerCase()] || 1) : 0));
+ const TIER_ABBR = ['Free','Solo','UW','Office'];
+ const TIER_FULL = ['Free','Solo','Underwriter','The Office'];
+ const KIT = [
+   /* the second string is a caption on a 232px rail — it is ellipsised at
+      roughly 27 characters, so every one of these is written to land under it */
+   ['sec','Underwrite'],
+   ['◎','Read the condition','photos → seventeen lines',2,'#photos','#condition'],
+   ['▦','Pull the comps','scored for your address',2,'#comps',''],
+   ['⚑','Walk the street','the block, on Street View',2,'#street',''],
+   ['◇','The land desk','raw ground, to the foot',0,'','','land.html'],
+   ['sec','Close the deal'],
+   ['▤','Lender packet','one PDF, your name on it',1,'#packet',''],
+   ['✎','Offer letters','from the winning exit',2,'#letters',''],
+   ['⊟','Read their bid','against your own figure',2,'#bid','#bid'],
+   ['❝','Handle objections','answered before they ask',2,'#objections',''],
+   ['sec','The Office'],
+   ['≣','A week of leads','the whole list at once',3,'#office',''],
+   ['⊞','Buy-box rules','flag the fit, refuse the rest',3,'#office',''],
+ ];
+ const tools = KIT.map(row => {
+   if (row[0] === 'sec') return `<div class="rn-sec">${row[1]}</div>`;
+   const glyph = row[0], name = row[1], desc = row[2], need = row[3];
+   const plansAt = row[4] || '', deskAt = row[5] || '#new', ext = row[6] || '';
+   const open = tv >= need;
+   const href = open ? (ext || ('desk.html' + deskAt)) : ('plans.html' + plansAt);
+   const chip = open ? '' : `<span class="lc">${TIER_ABBR[need]}</span>`;
+   const tip = open ? name : `${name} — ${TIER_FULL[need]}`;
+   return `<a class="rn-tool${open ? '' : ' lk'}" href="${href}" title="${esc(tip)}">
+     <span class="ti" aria-hidden="true">${glyph}</span>
+     <span class="tl"><b>${esc(name)}</b><span>${esc(desc)}</span></span>${chip}</a>`;
+ }).join('');
  const rows = props.map((p,i) => {
    const sp = spreadOf(p), n = filledOf(p).length;
    return `<a class="rn-p${i===active?' on':''}" href="desk.html#open=${i}">
@@ -1130,6 +1207,14 @@ function renderShell(a, props, active, nameOf, spreadOf, filledOf, onPlan, left)
   <div class="rn-h">Your properties</div>
   ${rows ? `<div class="rn-list">${rows}</div>`
          : `<div class="rn-empty">Nothing priced yet. The first sheet lands here.</div>`}
+
+  <!-- ── THE WALL OF INSTRUMENTS ─────────────────────────────────────────
+       What filled the dead middle of the rail: every real tool the product
+       has, grouped by the job it does, the locked ones wearing a tier chip
+       and leading to the page that opens them. This is the difference between
+       a nav and a cockpit. -->
+  <div class="rn-tools">${tools}</div>
+
 
   <!-- ── THE ARCADE IS A SIDE DOOR ──────────────────────────────────────
        Elijah: to somebody who has never opened it, "the arcade" is a word
@@ -1613,11 +1698,20 @@ function boot(){
      does rather than what it is called — and making every other thing on the
      page a target too. Density is fine; density of INSTRUMENTS is the feeling
      we want. Density of captions is what we had. */
-  const t = tierOf(a);
+  /* preview-aware, so the pre-launch switcher lights the same tools the rail
+     lights — otherwise the two halves of the page disagree about what you own.
+     At launch previewTier() is null and this is exactly tierOf(a). */
+  const t = (typeof previewTier === 'function' && previewTier() !== null) ? previewTier() : tierOf(a);
+  /* ── THE INSTRUMENTS, AT FULL SIZE ───────────────────────────────────────
+     Eight, not four. The rail is the wall; this is the same arsenal laid out
+     where a phone can reach it, since the rail is desktop-only. Price a
+     property leads, at the primary weight; everything past it is a real tool,
+     and the ones a plan has not opened wear their tier so the ceiling is
+     something you can see rather than something you hit. */
   const ACTS = [
     { i:'✎', t:'Price a property', d:'Three steps, all eight exits, the working shown',
       href:'desk.html#new', p:1 },
-    { i:'⇄', t:'Compare deals', d: t>=1 ? 'Two, three or four side by side, one engine, and where the winner flips'
+    { i:'⇄', t:'Compare deals', d: t>=1 ? 'Two, three or four side by side, and where the winner flips'
         : 'Both sheets side by side — on Solo',
       href: t>=1 ? 'desk.html#compare' : 'plans.html#compare', lock: t<1 ? 'Solo' : null },
     /* this used to point at desk.html#new — the same place as the tile above
@@ -1626,6 +1720,18 @@ function boot(){
     { i:'◎', t:'Read the condition', d: t>=2 ? 'Drop the walk-through photos, get the lines back'
         : 'From your photos, seventeen lines — on Underwriter',
       href: t>=2 ? 'desk.html#condition' : 'plans.html#photos', lock: t<2 ? 'Underwriter' : null },
+    { i:'▦', t:'Pull the comps', d: t>=2 ? 'Recent sales for the address, pulled and scored'
+        : 'Comps pulled on our key, scored — on Underwriter',
+      href: t>=2 ? 'desk.html' : 'plans.html#comps', lock: t<2 ? 'Underwriter' : null },
+    { i:'✎', t:'Offer letters', d: t>=2 ? 'The letter and the text, from the winning exit'
+        : 'Written from the winning exit — on Underwriter',
+      href: t>=2 ? 'desk.html' : 'plans.html#letters', lock: t<2 ? 'Underwriter' : null },
+    { i:'▤', t:'The lender packet', d: t>=1 ? 'One PDF — your comps, your read, your name'
+        : 'One PDF with your name on it — on Solo',
+      href: t>=1 ? 'desk.html' : 'plans.html#packet', lock: t<1 ? 'Solo' : null },
+    { i:'≣', t:'A week of leads', d: t>=3 ? 'Paste the list; every one priced at once'
+        : 'Price a whole week at once — on The Office',
+      href: t>=3 ? 'desk.html' : 'plans.html#office', lock: t<3 ? 'The Office' : null },
     { i:'▤', t:'The eight ways out', d:'What an exit is, and the one number that decides each',
       href:'the-eight-exits.html' },
   ];

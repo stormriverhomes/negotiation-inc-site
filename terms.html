@@ -390,7 +390,15 @@ Privacy, exports and deletion &mdash; <a href="mailto:privacy@negotiationinc.com
   if(t==='sign in'||t==='your desk'||t==='open a workspace'){
    ls[i].textContent=first+' \u2192'; ls[i].className+=' whoami'; got=true; }
  }
- if(!got){
+ /* ── UNLESS THE PAGE ALREADY KNOWS YOUR NAME ────────────────────────────
+    This block is appended to EVERY page, and its fallback branch adds a
+    "Elijah \u2192" pill when it cannot find a "Sign in" link to rewrite. The
+    office masthead has no such link — it carries its own chip, with the
+    avatar, the name and Sign out — so the fallback fired and the phone
+    header read "E  Elijah  (Elijah \u2192)  Sign out": the name three times
+    in four controls, on the one page where the account is the whole point.
+    A page that already introduces you does not need introducing. */
+ if(!got && !hdr.querySelector('#who,.who')){
   var nav=hdr.querySelector('.masknav')||hdr.querySelector('nav');
   if(nav){ var l=document.createElement('a'); l.href='office.html';
    l.className='whoami'; l.textContent=first+' \u2192';
