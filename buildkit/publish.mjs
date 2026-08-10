@@ -2168,8 +2168,31 @@ async function token(){
   if (!SESS.refresh_token) { saveSess(null); return null; }
   try {
     const r = await fetch(\`\${SB.url}/auth/v1/token?grant_type=refresh_token\`, {
-      method:'POST', headers: sbHead(), body: JSON.stringify({ refresh_token: SESS.refresh_token }) });
-    if (!r.ok){ saveSess(null); return null; }
+      method:'POST', headers: sbHead(), body: JSON.stringify({ refresh_token: SESS.refresh_token }),
+      /* an auth call that hangs holds the whole desk in "signing you in" — the
+         only bound on it otherwise is the browser's own, which is minutes */
+      signal: (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? AbortSignal.timeout(8000) : undefined });
+    /* ── A RATE LIMIT IS NOT A DEAD SESSION ────────────────────────────────
+       Any non-2xx used to delete ni-session-v1 — INCLUDING THE REFRESH TOKEN,
+       which was the only thing that could have recovered it. Supabase rate
+       limits /auth/v1/token per IP, so an office or a household behind one NAT
+       shares that bucket, and this runs on every visit after the first because
+       the access token has aged past its hour.
+
+       And ni-account-v1 was NOT cleared, so the rail kept drawing the name and
+       "underwriter" and the body kept its signed-in class while every paid
+       button answered "needs an account" — a sentence that flatly contradicts
+       the rail two inches to its left, with nothing on screen suggesting the
+       cure (sign out, sign back in).
+
+       400 and 401 are Supabase saying the refresh token is genuinely dead, and
+       only those clear it. A 429, a 5xx, a timeout or an offline moment leave
+       the session alone to be retried on the next call. */
+    if (!r.ok){
+      if (r.status === 400 || r.status === 401) saveSess(null);
+      else try { console.warn('auth refresh deferred', r.status); } catch(e){}
+      return null;
+    }
     const j = await r.json();
     saveSess({ access_token:j.access_token, refresh_token:j.refresh_token,
                expires_at: Date.now() + (j.expires_in || 3600) * 1000, user: j.user });

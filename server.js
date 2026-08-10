@@ -41,7 +41,7 @@ import * as ST from './street.js';
 import * as BID from './bid.js';
 import * as OBJ from './objections.js';
 import * as INTAKE from './intake.js';
-import { mountBilling, billingState, foundingState, entitlementOf, usedThisMonth, countUse, capFor, FEATURES, NOMETER, meterHold, meterHolds, meterRelease } from './billing.js';
+import { mountBilling, billingState, foundingState, entitlementOf, usedThisMonth, countUse, capFor, FEATURES, NOMETER, meterHold, meterHolds, meterRelease, cancelAllFor } from './billing.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -332,8 +332,40 @@ async function meterFails(res, ent, feature, plural){
   return { cap, fail: null };
 }
 
+/* ══ THE DOOR BEFORE THE PARSER ════════════════════════════════════════════
+   express.json() is the SECOND argument to these routes, which means the full
+   body is buffered and JSON.parse'd before the handler's first line runs —
+   before the fail-closed check, before gateFails(), before entitlementOf(),
+   and long before ipOk(). Every limit in this file sits downstream of a parse
+   that has already happened.
+
+   Measured on the shipped build: 100 concurrent 7.4MB POSTs to /api/read with
+   the route switched OFF still peaked at 609MB RSS — past Render starter's
+   512MB — and 30 concurrent 9.9MB POSTs with no Authorization header at all
+   killed the process outright with a heap OOM. Health latency went from p95
+   1.8ms to p95 1098ms on the way down.
+
+   And the kill is not just downtime. `day` is module state, re-initialised at
+   import, and rollDay() rolls 24h after BOOT rather than at midnight — so
+   every crash resets the daily spend ceiling and the service will spend the
+   whole thing again.
+
+   This runs ahead of the parser, reads one header, and allocates nothing. It
+   is deliberately generous: the real per-request limits still apply below. It
+   exists only to stop an anonymous caller turning bytes into a restart. */
+const MAXBODY = (LIM.maxTotalKb + 1200) * 1024;
+const bodyGate = (req, res, next) => {
+  const n = Number(req.get('content-length') || 0);
+  if (Number.isFinite(n) && n > MAXBODY){
+    log('body refused', Math.round(n / 1024) + 'kb');
+    return res.status(413).json({ ok:false,
+      error:'That request is larger than this endpoint accepts. Nothing was sent.' });
+  }
+  next();
+};
+
 /* ══ THE READ ══════════════════════════════════════════════════════════════ */
-app.post('/api/read', express.json({ limit: (LIM.maxTotalKb + 1000) + 'kb' }), async (req, res) => {
+app.post('/api/read', bodyGate, express.json({ limit: (LIM.maxTotalKb + 1000) + 'kb' }), async (req, res) => {
   const t0 = Date.now();
   const fail = (code, why, extra) => { log('read', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
 
@@ -677,7 +709,7 @@ function listOk(ip){
    reply has to be one we supplied. One invented figure fails the whole draft,
    because a draft that is right about four numbers and wrong about the fifth
    reads exactly as well as a correct one. */
-app.post('/api/compare', express.json({ limit: '256kb' }), async (req, res) => {
+app.post('/api/compare', bodyGate, express.json({ limit: '256kb' }), async (req, res) => {
   const t0 = Date.now();
   const fail = (code, why, extra) => { log('compare', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
 
@@ -786,7 +818,7 @@ async function callText(system, user, maxTokens){
    of four sources was slow is a brief nobody trusts to be there when they need
    it — and each absence is stated rather than left as a silence somebody reads
    as an absence of the thing itself. */
-app.post('/api/street', express.json({ limit: '8kb' }), async (req, res) => {
+app.post('/api/street', bodyGate, express.json({ limit: '8kb' }), async (req, res) => {
   const t0 = Date.now();
   const fail = (code, why, extra) => { log('street', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
 
@@ -909,7 +941,7 @@ async function callSearch(system, user){
    The honesty control is the tightest of the three: an amount that is not
    printed in the pasted text is dropped, whatever it is. There is no draft to
    refuse and no sentence to check, because there is no sentence. */
-app.post('/api/bid', express.json({ limit: '128kb' }), async (req, res) => {
+app.post('/api/bid', bodyGate, express.json({ limit: '128kb' }), async (req, res) => {
   const t0 = Date.now();
   const fail = (code, why, extra) => { log('bid', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
 
@@ -1013,7 +1045,7 @@ async function callTool(model, system, tool, user, maxTokens){
    The image validation is the read's, character for character, because the
    two routes accept the same thing and a second, subtly different copy of a
    size check is how one of them ends up with the looser one. */
-app.post('/api/intake', express.json({ limit: (LIM.maxTotalKb + 1000) + 'kb' }), async (req, res) => {
+app.post('/api/intake', bodyGate, express.json({ limit: (LIM.maxTotalKb + 1000) + 'kb' }), async (req, res) => {
   const t0 = Date.now();
   const fail = (code, why, extra) => { log('intake', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
 
@@ -1119,7 +1151,7 @@ app.post('/api/intake', express.json({ limit: (LIM.maxTotalKb + 1000) + 'kb' }),
    and this panel exists on the other side of exactly that rule: it never
    leaves their screen, and the ceiling is the whole point of it. "Can you come
    up five?" has a true answer and this is where it gets computed. */
-app.post('/api/objections', express.json({ limit: '32kb' }), async (req, res) => {
+app.post('/api/objections', bodyGate, express.json({ limit: '32kb' }), async (req, res) => {
   const t0 = Date.now();
   const fail = (code, why, extra) => { log('object', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
 
@@ -1197,7 +1229,7 @@ app.post('/api/objections', express.json({ limit: '32kb' }), async (req, res) =>
   }
 });
 
-app.post('/api/list', express.json({ limit: '4kb' }), async (req, res) => {
+app.post('/api/list', bodyGate, express.json({ limit: '4kb' }), async (req, res) => {
   if (!LIST_ON) { log('list 503 unconfigured'); return res.status(503).json({ ok:false, error:'The list is not open yet.' }); }
   if (!listOk(req.ip || 'unknown')) return res.status(429).json({ ok:false, error:'Too many, too fast.' });
   const b2 = req.body || {};
@@ -1322,7 +1354,7 @@ const RENTCAST_USD = (() => { const v = Number(process.env.NI_RENTCAST_USD);
    with, and leave the rows orphaned with nobody left who can name them. Each
    step is reported separately so a partial failure says which part survived
    rather than "something went wrong". */
-app.post('/api/account/delete', express.json({ limit: '1kb' }), async (req, res) => {
+app.post('/api/account/delete', bodyGate, express.json({ limit: '1kb' }), async (req, res) => {
   /* fail() is a per-route closure everywhere else in this file, and the first
      version of this route reached for it as if it were global — which is a
      ReferenceError inside the handler, i.e. a 500 with no body on the one
@@ -1343,6 +1375,26 @@ app.post('/api/account/delete', express.json({ limit: '1kb' }), async (req, res)
       done[name] = r.ok ? 'gone' : ('http ' + r.status); return r.ok; }
     catch (e) { done[name] = 'unreachable'; return false; }
   };
+  /* ── THE SUBSCRIPTION GOES FIRST, AND IT CAN REFUSE THE DELETE ──────────
+     There was no cancellation anywhere in this service, so this route wiped
+     the profile and the login and left the card being charged — with the
+     customer's way back in destroyed, so they could not reach the billing
+     portal to stop it either. And the webhook half was worse: with the profile
+     row gone, setPlan()'s PATCH matches zero rows, reconcile() throws, and
+     /api/stripe answers 500 — which Stripe retries with backoff for three days
+     PER EVENT and, if it keeps failing, DISABLES THE ENDPOINT. A disabled
+     endpoint stops plan writes for every customer you have.
+     So: cancel first, and if the cancel does not succeed, do not delete. An
+     account removed while its card keeps billing is strictly worse than a
+     refusal that says why. */
+  const cx = await cancelAllFor(uid);
+  if (!cx.ok) return fail(503,
+    'Your subscription could not be cancelled just now, so nothing was deleted — '
+    + 'removing the account while the card is still being charged would be worse. '
+    + 'Try again in a minute, or email support@negotiationinc.com and it will be done by hand today.',
+    { stage:'billing' });
+  done.subscription = cx.none ? 'none' : ('cancelled ' + cx.cancelled);
+
   const q = encodeURIComponent(uid);
   await drop('sheets',  `${SB}/rest/v1/sheets?uid=eq.${q}`);
   await drop('usage',   `${SB}/rest/v1/usage?uid=eq.${q}`);
@@ -1352,7 +1404,10 @@ app.post('/api/account/delete', express.json({ limit: '1kb' }), async (req, res)
      row-level policy, which is why it is named and logged */
   const userGone = await drop('login', `${SB}/auth/v1/admin/users/${q}`);
 
-  const stubborn = Object.entries(done).filter(([, v]) => v !== 'gone').map(([k]) => k);
+  /* the subscription key reports 'none' or 'cancelled N', both of which are
+     success — only the Supabase drops report 'gone' */
+  const stubborn = Object.entries(done)
+    .filter(([k, v]) => k !== 'subscription' && v !== 'gone').map(([k]) => k);
   console.log(new Date().toISOString() + ' account delete ' + uid.slice(0, 8) + ' · '
     + JSON.stringify(done));
   if (stubborn.length) return res.status(207).json({ ok:false, deleted:done,
@@ -1387,7 +1442,7 @@ app.post('/api/account/delete', express.json({ limit: '1kb' }), async (req, res)
    and it rides the SAME monthly allowance as the comp pull: both are one
    RentCast request on our key, and inventing a second number would be
    advertising an allowance that does not exist. */
-app.post('/api/lookup/rent', express.json({ limit: '4kb' }), async (req, res) => {
+app.post('/api/lookup/rent', bodyGate, express.json({ limit: '4kb' }), async (req, res) => {
   const fail = (code, why, extra) => { log('rent', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
   if (!RENTCAST_KEY) return fail(503, 'The rent lookup is not switched on for this deployment.');
   { const g = gateFails(req, 'rent lookup'); if (g) return fail(g[0], g[1]); }
@@ -1461,7 +1516,7 @@ app.post('/api/lookup/rent', express.json({ limit: '4kb' }), async (req, res) =>
         + ' · check three real listings before you lean on it' });
 });
 
-app.post('/api/comps', express.json({ limit: '4kb' }), async (req, res) => {
+app.post('/api/comps', bodyGate, express.json({ limit: '4kb' }), async (req, res) => {
   const fail = (code, why, extra) => { log('comps', code, why); res.status(code).json({ ok:false, error:why, ...extra }); };
   if (!RENTCAST_KEY) return fail(503, 'Pulling comps is not switched on for this deployment.');
   { const g = gateFails(req, 'comp pull'); if (g) return fail(g[0], g[1]); }

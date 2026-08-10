@@ -358,10 +358,31 @@ const call = async (p, o = {}) => {
   /* PATCH matched no rows. `Prefer: return=minimal` rendered this as 204 and
      it was logged as "plan set" — a write that wrote nothing, reported as a
      success, on the event that has no follow-up. */
+  /* ── AND THE TWO DIRECTIONS OF A MISSING ROW ──────────────────────────
+     This asserted that ANY no-row PATCH answers non-200. That protected the
+     right thing in one direction and created a fleet-wide hazard in the other:
+     an account deleted on purpose keeps generating events, every one 500s,
+     Stripe retries each for three days and DISABLES an endpoint that keeps
+     failing — and a disabled endpoint stops plan writes for every customer.
+     So the rule is now directional. A cancellation with no row has nothing to
+     clear and nobody to protect (a missing row grants no tier — entitlementOf
+     refuses on 'noprofile'), and is acknowledged. An UPGRADE with no row means
+     somebody is paying and has no profile, which is the fault the original
+     assertion was written for, and still retries. */
   NO_ROW = true; WROTE = [];
-  out.I_norow = (await post(CANCEL)).s;
+  out.I_norow_cancel = (await post(CANCEL)).s;
+  SUBS = [sub('sub_live','active','the office','price_office_now')];
+  out.I_norow_paying = (await post({ type:'customer.subscription.updated',
+    data:{ object:{ id:'sub_live', customer:'cus_1', metadata:{ uid:'u-1' } } } })).s;
+  SUBS = [ sub('a','canceled','the office','price_office_now') ];
   NO_ROW = false;
-  if (out.I_norow === 200)
+  if (out.I_norow_cancel !== 200)
+    bad.push(`I: a cancellation for a deleted profile answered ${out.I_norow_cancel}, not 200 — `
+      + 'Stripe retries that for three days per event and disables endpoints that keep failing');
+  if (out.I_norow_paying !== 500)
+    bad.push(`I: a PAYING customer with no profile row answered ${out.I_norow_paying}, not 500 — `
+      + 'that is a write that wrote nothing, reported as success, while the money moves');
+  if (false)
     bad.push('I: a PATCH that matched no rows was reported as a successful plan write');
 
   /* and an event this service does not care about still answers 200, or

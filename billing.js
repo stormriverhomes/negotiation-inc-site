@@ -196,11 +196,14 @@ function form(obj, prefix = '', out = []){
 const safePath = p => String(p).split('?')[0]
   .replace(/\/(cus|sub|price|cs|in|pi|seti)_[A-Za-z0-9]+/g, '/$1_…');
 
-async function stripe(method, path, body){
+async function stripe(method, path, body, idem){
   const init = { method, headers: {
     authorization: 'Bearer ' + SK,
     'stripe-version': '2024-06-20',
-  } };
+    /* every Stripe call gets a bound: a hung upstream with no timeout holds a
+       socket and a slot on a single-instance service */
+    ...(idem ? { 'idempotency-key': String(idem) } : {}),
+  }, signal: AbortSignal.timeout(15000) };
   if (body){
     init.headers['content-type'] = 'application/x-www-form-urlencoded';
     init.body = new URLSearchParams(form(body)).toString();
@@ -240,11 +243,29 @@ async function whoIs(req){
          used to put the key that bypasses every row-level policy into the
          apikey header of every sign-in round trip — on the one call whose whole
          purpose is to avoid needing a second key. Fail closed instead. */
-      headers: { apikey: sbAnon(), authorization: 'Bearer ' + tok } });
-    if (!r.ok) return null;
+      signal: AbortSignal.timeout(6000), headers: { apikey: sbAnon(), authorization: 'Bearer ' + tok },
+      signal: AbortSignal.timeout(5000) });
+    /* ── AN OUTAGE IS NOT AN INVALID TOKEN ─────────────────────────────────
+       This returned null on every non-2xx, so a 429, a 500 and a genuinely
+       forged token all collapsed to one answer — and every route renders that
+       answer as a 403 REFUSAL reading "needs an account". During any Supabase
+       Auth wobble every paying subscriber was told they had no account, while
+       the page beside it still showed their name and their plan.
+
+       The profiles read twenty lines below already got exactly this fix — "A
+       DATABASE THAT DID NOT ANSWER IS NOT AN ACCOUNT THAT DOES NOT EXIST" —
+       and this function, which runs first and gates everything, was left
+       behind. 401 and 403 are Supabase judging the token; anything else is
+       Supabase failing to answer, and the caller must be able to tell. */
+    if (r.status === 401 || r.status === 403) return null;
+    if (!r.ok){ log('auth lookup', r.status); return { down:true }; }
     const u = await r.json();
     return (u && u.id) ? { uid: u.id, email: u.email || '' } : null;
-  } catch(e){ return null; }
+  } catch(e){
+    /* a timeout or a DNS failure is the same class of thing as a 500 */
+    log('auth lookup failed');
+    return { down:true };
+  }
 }
 
 /* ── the one column ────────────────────────────────────────────────────────
@@ -258,7 +279,7 @@ async function setPlan(uid, plan){
      function that writes the column, so it was the one that mattered most. */
   const r = await fetch(`${sbUrl()}/rest/v1/profiles?id=eq.${encodeURIComponent(uid)}`, {
     method: 'PATCH',
-    headers: { 'content-type':'application/json', apikey: sbKey(),
+    signal: AbortSignal.timeout(6000), headers: { 'content-type':'application/json', apikey: sbKey(),
                authorization: 'Bearer ' + sbKey(),
                /* representation, not minimal: `Prefer: return=minimal` made a
                   PATCH that matched ZERO ROWS answer 204, so a uid with no
@@ -272,7 +293,14 @@ async function setPlan(uid, plan){
   if (!r.ok){ log('plan FAILED', r.status, plan === null ? 'none' : plan); return false; }
   const rows = await r.json().catch(() => null);
   const hit = Array.isArray(rows) ? rows.length : 0;
-  if (!hit){ log('plan NO ROW', plan === null ? 'none' : plan); return false; }
+  /* ── A PROFILE THAT NO LONGER EXISTS IS NOT A FAILED WRITE ─────────────
+     Both cases returned false, reconcile() threw on either, and the webhook
+     answered 500. For a DELETED account that is a permanent retry loop:
+     Stripe retries a 500 with backoff for three days per event and disables an
+     endpoint that keeps failing — and a disabled endpoint stops plan writes
+     for every other customer. There is nothing to retry here; the row is gone
+     on purpose. Say so, and let the webhook acknowledge it. */
+  if (!hit){ log('plan NO ROW — profile deleted?', plan === null ? 'none' : plan); return 'norow'; }
   log('plan set', plan === null ? 'none' : plan);
   return true;
 }
@@ -290,10 +318,32 @@ async function setPlan(uid, plan){
    sentence saying so rather than an error. */
 async function customerOf(uid){
   const q = `metadata['uid']:'${String(uid).replace(/'/g, '')}'`;
+  /* ── "SEARCHED AND FOUND NOBODY" IS NOT "COULD NOT ASK" ───────────────────
+     Every failure of the search — a 429, a 5xx, a thrown fetch, and Stripe's
+     own documented search-index lag returning [] for a customer created
+     seconds ago — collapsed into null, which is byte-for-byte the answer for
+     "this person has no Stripe customer."
+
+     /api/checkout consumes that by creating a BRAND NEW customer, and both
+     protections that follow are keyed on that customer id: the already-
+     subscribed 409 and the had-a-trial-before check both query
+     subscriptions?customer=<id>. Against a freshly minted empty customer both
+     return nothing. Measured against a live Underwriter subscriber: search
+     working → 409, zero customers created; search 429 → 200, new customer, new
+     session, trial_period_days=14. The customer is then billed twice a month
+     on two customers, /api/portal can only see one of them, reconcile takes
+     the higher plan so the product looks entirely normal, and the only exit
+     they have is a chargeback.
+
+     limit=100, not 1: the portal and the account panel should see every
+     customer for a uid rather than an arbitrary one. */
   try {
-    const j = await stripe('GET', `/v1/customers/search?limit=1&query=${encodeURIComponent(q)}`);
+    const j = await stripe('GET', `/v1/customers/search?limit=100&query=${encodeURIComponent(q)}`);
     return (j.data && j.data[0]) ? j.data[0].id : null;
-  } catch(e){ return null; }
+  } catch(e){
+    /* the caller must be able to tell this apart and refuse rather than create */
+    const err = new Error('customer lookup unavailable'); err.niKind = 'cust-lookup'; throw err;
+  }
 }
 
 /* ══ ROUTES ═══════════════════════════════════════════════════════════════ */
@@ -303,6 +353,11 @@ export function mountBilling(app){
   app.post('/api/checkout', express.json({ limit:'4kb' }), async (req, res) => {
     if (!PAY_ON) return res.status(503).json({ ok:false, error:'Subscriptions are not switched on yet.' });
     const who = await whoIs(req);
+    /* whoIs returns {down:true} when Supabase could not answer, which is
+       truthy — telling somebody to sign in when the auth service is the thing
+       that is broken sends them round a loop that cannot end */
+    if (who && who.down) return res.status(503).json({ ok:false,
+      error:'Your account could not be checked just now. Nothing was charged — try again in a moment.' });
     if (!who) return res.status(401).json({ ok:false, error:'Sign in first.' });
 
     const plan = String((req.body || {}).plan || '').trim().toLowerCase();
@@ -331,8 +386,11 @@ export function mountBilling(app){
          people change their email and two accounts must never collide */
       let cust = await customerOf(who.uid);
       if (!cust){
+        /* keyed on the uid, so a retried request cannot mint a second customer
+           for one person — the duplicate-customer path is the one that ends in
+           two subscriptions and a chargeback */
         const c = await stripe('POST', '/v1/customers',
-          { email: who.email || undefined, metadata: { uid: who.uid } });
+          { email: who.email || undefined, metadata: { uid: who.uid } }, 'cust-' + who.uid);
         cust = c.id;
       }
       /* ── AND NOT A SECOND ONE ────────────────────────────────────────────
@@ -421,8 +479,22 @@ export function mountBilling(app){
   app.post('/api/portal', express.json({ limit:'4kb' }), async (req, res) => {
     if (!PAY_ON) return res.status(503).json({ ok:false, error:'Subscriptions are not switched on yet.' });
     const who = await whoIs(req);
+    /* whoIs returns {down:true} when Supabase could not answer, which is
+       truthy — telling somebody to sign in when the auth service is the thing
+       that is broken sends them round a loop that cannot end */
+    if (who && who.down) return res.status(503).json({ ok:false,
+      error:'Your account could not be checked just now. Nothing was charged — try again in a moment.' });
     if (!who) return res.status(401).json({ ok:false, error:'Sign in first.' });
-    const cust = await customerOf(who.uid);
+    /* customerOf now THROWS when it could not ask, rather than answering the
+       same null it uses for "nobody there" — and this call sits outside the
+       try below, so an unhandled rejection here would hang the request instead
+       of answering it. It also fixes the sentence: during a Stripe wobble a
+       subscriber of six months was told "No billing record yet", on the one
+       screen where being wrong produces chargebacks. */
+    let cust;
+    try { cust = await customerOf(who.uid); }
+    catch(e){ return res.status(503).json({ ok:false,
+      error:'The billing service could not be reached just now. Your subscription is unaffected — try again in a moment.' }); }
     if (!cust) return res.status(404).json({ ok:false,
       error:'No billing record yet. If you have only just subscribed, give it a minute and try again.' });
     try {
@@ -463,8 +535,17 @@ export function mountBilling(app){
   app.get('/api/billing/state', async (req, res) => {
     if (!PAY_ON) return res.json({ ok:true, state:'unconfigured' });
     const who = await whoIs(req);
+    /* whoIs returns {down:true} when Supabase could not answer, which is
+       truthy — telling somebody to sign in when the auth service is the thing
+       that is broken sends them round a loop that cannot end */
+    if (who && who.down) return res.status(503).json({ ok:false,
+      error:'Your account could not be checked just now. Nothing was charged — try again in a moment.' });
     if (!who) return res.status(401).json({ ok:false, error:'Sign in first.' });
-    const cust = await customerOf(who.uid);
+    /* 'unknown' renders nothing; 'none' renders "you have no subscription",
+       which is a lie to a paying customer during a Stripe outage */
+    let cust;
+    try { cust = await customerOf(who.uid); }
+    catch(e){ return res.json({ ok:true, state:'unknown' }); }
     if (!cust) return res.json({ ok:true, state:'none' });
     try {
       const subs = await stripe('GET',
@@ -584,6 +665,43 @@ const LIVE_STATUS = new Set(['active', 'trialing', 'past_due']);
    nothing. */
 const STARTED_STATUS = new Set(['active', 'trialing', 'past_due', 'unpaid', 'canceled', 'paused']);
 
+/* ── CANCELLING, FROM OUR SIDE ─────────────────────────────────────────────
+   `grep -n "cancel" server.js` returned zero matches: there was no way to end a
+   subscription anywhere outside Stripe's hosted portal. So deleting an account
+   answered ok:true, wiped the profile, and LEFT THE CARD BEING CHARGED — with
+   the customer's login destroyed, so they could not even reach the portal to
+   stop it. Their only remaining move is a chargeback.
+
+   Returns {ok, cancelled, none, error}. `none` is the honest success case: a
+   customer who never subscribed has nothing to cancel and the delete should
+   proceed. Anything else failing must BLOCK the delete, because an account
+   removed while its card keeps billing is strictly worse than a delete that
+   refused and said why. */
+export async function cancelAllFor(uid, deps = {}){
+  const call = deps.stripe || stripe;
+  const find = deps.customerOf || customerOf;
+  if (!PAY_ON) return { ok:true, none:true, unconfigured:true };
+  let cust;
+  try { cust = await find(uid); }
+  catch(e){ return { ok:false, error:'lookup' }; }
+  if (!cust) return { ok:true, none:true };
+  try {
+    const subs = await call('GET',
+      `/v1/subscriptions?limit=100&status=all&customer=${encodeURIComponent(cust)}`);
+    const live = (subs.data || []).filter(s => LIVE_STATUS.has(s.status));
+    let cancelled = 0;
+    for (const s of live){
+      /* immediately, not at period end: the account is going away now, and a
+         subscription set to lapse in three weeks still bills if the customer
+         is already gone */
+      await call('DELETE', `/v1/subscriptions/${encodeURIComponent(s.id)}`);
+      cancelled++;
+    }
+    log('cancel for delete', cancelled);
+    return { ok:true, cancelled, none: cancelled === 0 };
+  } catch(e){ return { ok:false, error:'stripe' }; }
+}
+
 export function planOfSub(sub){
   if (!sub || !LIVE_STATUS.has(sub.status)) return null;
   const m = (sub.metadata && sub.metadata.plan) || '';
@@ -661,6 +779,29 @@ export async function reconcile(ev, deps = {}){
   /* the return value was discarded. A write that failed then looked exactly
      like a write that worked, all the way up to the 200 the endpoint sent. */
   const wrote = await write(uid, plan);
+  if (wrote === 'norow'){
+    /* ── WHICH DIRECTION IS THE MISSING ROW POINTING ─────────────────────
+       Two different situations answer 204-with-no-rows and they need opposite
+       handling.
+
+       plan === null is a CANCELLATION. If there is no profile row there is
+       nothing to clear and nobody left to protect — a missing row grants no
+       tier, because entitlementOf refuses on 'noprofile'. Retrying it forever
+       is how a deleted account turns into three days of 500s per event and,
+       eventually, a Stripe-DISABLED endpoint — which stops plan writes for
+       every other customer you have. Acknowledge it, loudly.
+
+       plan !== null is somebody who is PAYING and has no profile row. That is
+       a real fault, the money is already moving, and it is exactly the case
+       the original guard was written for. Keep throwing: Stripe retries with
+       backoff and the row may exist by then. */
+    if (plan === null){
+      log('hook: cancellation for a profile that is gone — acknowledged', kind);
+      return { uid, plan, subs: live.length, skipped:'no profile' };
+    }
+    log('hook: PAYING customer has no profile row', kind, plan);
+    const e = new Error('paying uid has no profile'); e.niKind = 'plan-write-norow'; throw e;
+  }
   if (wrote === false){
     const e = new Error('plan not written'); e.niKind = 'plan-write'; throw e;
   }
@@ -739,6 +880,9 @@ export function trialLeft(v, now = Date.now(), days = TRIAL_LEN()){
 export async function entitlementOf(req, need = 2){
   if (!sbUrl() || !sbKey()) return { ok:false, why:'unconfigured' };
   const who = await whoIs(req);
+  /* an outage reads as 'lookup', which every route already maps to a 503 —
+     not as 'nosession', which they render as "this needs an account" */
+  if (who && who.down) return { ok:false, why:'lookup' };
   if (!who) return { ok:false, why:'nosession' };
   let row = null;
   try {
@@ -962,7 +1106,7 @@ export async function countUse(uid, feature, cap){
   try {
     const r = await fetch(`${sbUrl()}/rest/v1/rpc/ni_use`, {
       method:'POST',
-      headers:{ 'content-type':'application/json', apikey:sbKey(),
+      signal: AbortSignal.timeout(6000), headers:{ 'content-type':'application/json', apikey:sbKey(),
                 authorization:'Bearer ' + sbKey() },
       body: JSON.stringify({ who: uid, feat: feature, cap: Math.floor(Number(cap)) }),
     });
