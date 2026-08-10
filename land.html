@@ -1181,12 +1181,27 @@ function payNote(msg, kind, action){
   return n;
 }
 async function afterStripe(){
-  if (!PAY_ON()) return;
   const q = new URLSearchParams(location.search);
   if (!q.get('paid')) return;
   /* take it out of the address bar immediately: a refresh, a back button or a
      shared link must not re-enter this */
   try { history.replaceState(null, '', location.pathname); } catch(e){}
+  /* ── A PAYMENT IS NEVER MET WITH SILENCE ──────────────────────────────────
+     This function used to OPEN with the PAY_ON() test, and PAY_ON() reads a
+     value that arrives from /api/config a moment AFTER this runs. On the live
+     site — where the Supabase settings are not baked into the page and must be
+     fetched — it was therefore false every single time, and somebody who had
+     just been charged came back to a page that said nothing whatsoever.
+
+     The readiness wait at the bottom of this file fixes the timing. This
+     ordering fixes the consequence: the query says a card was charged, so from
+     here on every path ends in a sentence, even the path where the answer
+     never arrives at all. */
+  if (!PAY_ON()){
+    payNote('Your payment went through. This page cannot reach the account service just now — '
+          + 'reload in a minute, and email support@negotiationinc.com if it is still not here.', 'bad');
+    return;
+  }
 
   payNote('Payment taken. Putting your subscription in place…');
   const t0 = Date.now();
@@ -1236,8 +1251,20 @@ const joinAccount = () => {
   } catch(e){ return null; }
 };
 
+/* ── AND WHETHER THERE IS A SESSION, NOT WHETHER A CACHE IS WARM ───────────
+   The record above is written by the boot pass, which is asynchronous. A
+   person who signed in on another device, or cleared site data, or simply
+   arrived faster than their profile did, has a perfectly good session and no
+   record — and reading only the record calls them a stranger and parks their
+   money. Asking for a token asks the one question that decides anything: the
+   checkout call is going to need exactly this and nothing else. The record
+   stays as the fallback, because a build with a stubbed auth layer has one. */
+async function joinSignedIn(){
+  try { if (window.__authToken){ const t = await window.__authToken(); if (t) return true; } } catch(e){}
+  return !!joinAccount();
+}
+
 async function joinFromQuery(){
-  if (!PAY_ON()) return;
   const q = new URLSearchParams(location.search);
   const plan = (q.get('join') || '').trim().toLowerCase();
   /* ── AND A PARKED PLAN IS PICKED UP HERE TOO ────────────────────────────
@@ -1249,24 +1276,72 @@ async function joinFromQuery(){
   const want = plan || (held || '').trim().toLowerCase();
   if (!want) return;
   if (plan) try { history.replaceState(null, '', location.pathname); } catch(e){}
-  if (!joinAccount()){
-    try { sessionStorage.setItem('ni-join', want); } catch(e){}
+  const park = () => { try { sessionStorage.setItem('ni-join', want); } catch(e){} };
+  /* ── AND THE ASKING IS NEVER MET WITH SILENCE EITHER ─────────────────────
+     PAY_ON() was the first line of this function, and it is false until the
+     answer from /api/config lands. So the sequence that every single "Start 14
+     days free" button on the plans page produces — signed-in person arrives at
+     office.html?join=underwriter — returned here, one line in, having done
+     nothing and said nothing. They landed on their account and wondered where
+     the checkout went. That is the whole bug, and it survived the previous fix
+     because the previous fix was to a line this one never reached.
+
+     Keep the shout for people who arrived ASKING to pay. A parked plan swept
+     on an ordinary visit is housekeeping, not news. */
+  if (!PAY_ON()){
+    park();
+    if (plan) payNote('Subscriptions cannot be started from this page just now. '
+                    + 'Reload, and email support@negotiationinc.com if it happens twice.', 'bad');
     return;
   }
+  const signed = await joinSignedIn();
+  if (!signed){ park(); return; }
   try { sessionStorage.removeItem('ni-join'); } catch(e){}
+  /* Between the click and Stripe there is a page load, a config fetch, a token
+     and a round trip — about a second, spent looking at a dashboard that is
+     doing nothing visible. That second is where somebody clicks the button
+     again, or decides it did not work. One sentence, and it is replaced by
+     either Stripe or the reason there is no Stripe. */
+  payNote('Opening checkout…');
   const r = await startCheckout(want);
   if (!r.ok) payNote(r.error, 'bad', r.portal ? PORTAL_ACTION : null);
 }
 /* and the same thing again for somebody who had to sign up on the way */
 async function joinAfterDoor(){
+  try { if (typeof window.__authReady === 'function') await window.__authReady(); } catch(e){}
   if (!PAY_ON()) return;
   let plan = null; try { plan = sessionStorage.getItem('ni-join'); } catch(e){}
   if (!plan) return;
-  if (!joinAccount()) return;        // the door fired before the session landed
+  const signed = await joinSignedIn();
+  if (!signed) return;               // the door fired before the session landed
   try { sessionStorage.removeItem('ni-join'); } catch(e){}
   const r = await startCheckout(plan);
   if (!r.ok) payNote(r.error, 'bad', r.portal ? PORTAL_ACTION : null);
 }
+
+/* ── WHAT THE WORDMARK MEANS ONCE SOMEBODY HAS AN ACCOUNT ──────────────────
+   Signed out it is the sales page, which is right. Signed in it is a trapdoor:
+   the largest, most-clicked control on the screen throws a customer back to a
+   pitch they have already accepted, and they have to find their own way back
+   in. Both rails were fixed for this months ago; the masthead sitting above
+   them was not, on either page.
+
+   Only the wordmark moves. The footer still says Home and still means home —
+   a person who wants the sales page should be able to reach it. */
+function wordmarkHome(){
+  if (!joinAccount()) return;
+  const marks = document.querySelectorAll('a.marklink, a.mark, a.rn-mark');
+  for (let i = 0; i < marks.length; i++){
+    const el = marks[i];
+    /* no regex: this module is a template literal and a backslash does not
+       survive the trip, which has already eaten one escape in this file */
+    const h = (el.getAttribute('href') || '').split('#')[0].split('?')[0];
+    if (h !== 'index.html' && h !== '/index.html' && h !== '/') continue;
+    el.setAttribute('href', 'office.html');
+    el.setAttribute('title', 'Your desk');
+  }
+}
+window.__wordmarkHome = wordmarkHome;
 /* the one refusal that has somewhere for the person to go */
 const PORTAL_ACTION = { label: 'Manage your plan', fn: async () => {
   const p = await openPortal();
@@ -1279,11 +1354,35 @@ window.__joinAfterDoor = joinAfterDoor;
 window.__payNote    = payNote;
 window.__payOn      = PAY_ON;
 
-try{ authBoot(); }catch(e){ try{ console.warn('auth', e); }catch(_){} }
-/* the two moments that only exist once money is involved: coming back from
-   Stripe, and arriving from the plans page with a tier already chosen */
-try{ afterStripe(); }catch(e){}
-try{ joinFromQuery(); }catch(e){}
+/* ── NOTHING BELOW MAY BE ASKED BEFORE THE CONFIG ANSWER LANDS ─────────────
+   These three lines used to run synchronously, right here, and every one of
+   them opens by asking SB_ON() — which reads two values that arrive from
+   /api/config a fetch later. Baked into the page (a preview build, a file://
+   copy, every harness in this repo) the values are there at parse time and all
+   three worked, which is exactly why every test passed. On the LIVE site they
+   are deliberately not baked in, so all three ran a few milliseconds too early,
+   found the account layer switched off, and returned without a word:
+
+     authBoot        — no profile fetched, no plan, no sheet sync
+     afterStripe     — a customer back from a real charge, told nothing
+     joinFromQuery   — every "Start 14 days free" click, dropped in silence
+
+   The door survived because it is invoked BY the readiness promise rather than
+   before it, which is why signing in worked and paying never did.
+
+   One await, in front of all of it. */
+(async () => {
+  try { if (typeof window.__authReady === 'function') await window.__authReady(); } catch(e){}
+  try{ wordmarkHome(); }catch(e){}
+  try{ authBoot(); }catch(e){ try{ console.warn('auth', e); }catch(_){} }
+  /* the two moments that only exist once money is involved: coming back from
+     Stripe, and arriving from the plans page with a tier already chosen */
+  try{ await afterStripe(); }catch(e){}
+  try{ await joinFromQuery(); }catch(e){}
+})();
+/* the wordmark needs no server — it reads one key — so it is also done at once,
+   because a logo that changes meaning half a second late is a flicker */
+try{ wordmarkHome(); }catch(e){}
 })();
 </script>
 </body>

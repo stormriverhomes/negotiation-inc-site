@@ -67,6 +67,12 @@ const sb = http.createServer((req, res) => {
 });
 /* ══ stub site + stub /api/checkout|/api/portal ══════════════════════════ */
 let LASTCHECKOUT = null;
+/* ── AND THE SETTINGS THE LIVE SITE ACTUALLY HAS ──────────────────────────
+   Null means "answer the way section A needs" — accounts off. Section J sets
+   it to the real shape: the Supabase settings arriving from the SERVER, a
+   moment after the page has parsed, which is the only configuration the
+   production site has ever had and the one no section here ever built. */
+let CONFIG = null, CONFIG_DELAY = 0;
 const site = http.createServer((req,res)=>{
   let b=''; req.on('data',d=>b+=d); req.on('end',()=>{
     const u = new URL(req.url,'http://x');
@@ -79,6 +85,10 @@ const site = http.createServer((req,res)=>{
        is a console error the page cannot suppress, and section A asserts
        there are none, so this stub has to answer. Section B bakes the values
        in and never asks. */
+    if (u.pathname === '/api/config' && CONFIG){
+      const c = CONFIG, d = CONFIG_DELAY;
+      setTimeout(() => j(res,200,c), d); return;
+    }
     if (u.pathname.startsWith('/api/')) return j(res,200,{ ok:true, accounts:false });
     const p = u.pathname === '/' ? '/office.html' : u.pathname;
     const f = OUT_ABS + p;
@@ -359,6 +369,91 @@ const page = async () => { const p = await b0.newPage();
     !window.__payNote('Sign in first.', 'bad').querySelector('button'));
   if (!plain) bad.push('H: every refusal grew a portal button, including ones the portal cannot fix');
   await p.close();
+}
+
+/* ══ J · THE SHAPE THE LIVE SITE IS ACTUALLY IN ════════════════════════════
+   Every section above this one builds with the Supabase settings BAKED INTO
+   THE PAGE, because that is convenient and because the harness said so out
+   loud: "Section B bakes the values in and never asks."
+
+   The live site does not have them baked in. They are fetched from
+   /api/config, deliberately, so that a rebuild cannot strip the account layer
+   out of a page whose server still has it. That fetch takes a network hop.
+
+   Everything at the bottom of the billing module — authBoot, afterStripe,
+   joinFromQuery — opened by asking whether the account layer was on. Baked in,
+   the answer was yes at parse time and all three worked, which is why B2 went
+   green while Elijah, signed in to his own live product, clicked Start 14 days
+   free and landed on his account with nothing happening and nothing said. Not
+   fetched yet meant off, and off meant return quietly.
+
+   So this section builds the site the way the site is built, answers
+   /api/config three hundred milliseconds late the way a server does, and then
+   asserts the two things that spend or take money:
+
+     · a signed-in customer clicking a plan reaches a checkout
+     · somebody coming back from Stripe is TOLD something
+
+   Anything that only holds when the settings are already in the page is not a
+   test of this product. ════════════════════════════════════════════════════ */
+{
+  PLAN = null;
+  execFileSync('node', ['publish.mjs'], { cwd:'/home/claude', stdio:'ignore',
+    env: { ...process.env, OUT, NI_STAGE:'live' } });     // NOTHING baked in
+  CONFIG = { ok:true, accounts:true,
+             supabaseUrl:`http://127.0.0.1:${sbPort}`, supabaseAnon:SB_STUB_KEY };
+  CONFIG_DELAY = 300;
+
+  const p = await page();
+  await p.goto(BASE + '/office.html'); await p.waitForTimeout(1200);
+  out.J_authOn = await p.evaluate(() => !!(window.__authOn && window.__authOn()));
+  if (!out.J_authOn)
+    bad.push('J: the page never picked the account settings up from /api/config, '
+           + 'so nothing below this can mean anything');
+
+  /* a real session, made the way a real one is */
+  await p.fill('#g-name','Live'); await p.fill('#g-email','live@x.com');
+  await p.fill('#g-pw','sixchars');
+  await p.click('#g-go'); await p.waitForTimeout(1800);
+  await p.evaluate(() => { try { sessionStorage.removeItem('ni-join'); } catch(e){} });
+
+  /* ── the click that is the whole funnel ── */
+  LASTCHECKOUT = null;
+  await p.goto(BASE + '/office.html?join=underwriter'); await p.waitForTimeout(2600);
+  out.J_checkout = LASTCHECKOUT;
+  out.J_parked   = await p.evaluate(() => sessionStorage.getItem('ni-join'));
+  if (!LASTCHECKOUT || LASTCHECKOUT.plan !== 'underwriter')
+    bad.push('J: on the live configuration a signed-in customer clicking a plan did NOT '
+           + 'reach checkout — this is the exact failure a paying customer reported');
+  if (out.J_parked)
+    bad.push('J: the plan was parked instead of spent, on the live configuration');
+
+  /* ── and the wordmark stops throwing a customer back to the sales page ── */
+  out.J_mark = await p.evaluate(() => {
+    const el = document.querySelector('a.marklink, a.mark, a.rn-mark');
+    return el ? el.getAttribute('href') : null; });
+  if (out.J_mark && out.J_mark.indexOf('index.html') >= 0)
+    bad.push('J: signed in, the wordmark still points at the sales page — '
+           + 'the biggest control on the screen is a trapdoor out of the product');
+  await p.close();
+
+  /* ── the return from Stripe, on the same configuration ── */
+  {
+    PLAN = null;
+    const q = await page();
+    await q.goto(BASE + '/office.html'); await q.waitForTimeout(1200);
+    await q.evaluate(() => localStorage.setItem('ni-session-v1', JSON.stringify({
+      access_token:'at-live@x.com', refresh_token:'rt-live@x.com',
+      expires_at: Date.now()+3.6e6, user:{ id:'u-live@x.com', email:'live@x.com' } })));
+    await q.goto(BASE + '/office.html?paid=1'); await q.waitForTimeout(2200);
+    out.J_paidnote = await q.evaluate(() =>
+      (document.getElementById('paynote')||{}).textContent || null);
+    if (!out.J_paidnote)
+      bad.push('J: somebody back from a real charge was shown nothing at all — '
+             + 'silence after a payment is how you get a chargeback');
+    await q.close();
+  }
+  CONFIG = null; CONFIG_DELAY = 0;
 }
 
 await b0.close(); sb.close(); site.close();
