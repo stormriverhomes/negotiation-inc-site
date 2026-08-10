@@ -754,7 +754,12 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
         exactly the interval at which people forget passwords. -->
    <a href="#" id="g-forgot" hidden>I forgot my password &rarr;</a>
    <a href="#" id="g-resend" hidden>Send the confirmation again &rarr;</a></div>
-  <div class="err" id="g-err">A name and an email, and the desk is yours.</div>
+  <!-- aria-live: the refusal is written into this div by script, and a screen
+       reader that is not told to watch it announces nothing — the form just
+       fails silently for exactly the person who cannot glance at it. polite,
+       not assertive: it is one short sentence and it can wait for the reader
+       to finish the word it is on. -->
+  <div class="err" id="g-err" aria-live="polite">A name and an email, and the desk is yours.</div>
   <button class="btn p go" type="submit" id="g-go">Create my workspace &rarr;</button>
   <div class="fine" style="margin-top:12px" id="g-fine"><b>Where this lives:</b> on this device, in this
    browser. Nothing you type here is transmitted anywhere, and there is no password to lose.
@@ -2597,7 +2602,25 @@ function mergeSheets(local, remote){
        riding along — the assumptions — is stripped before it can be read */
     if (!cur || at > cur.at) by.set(r.pid, { p: cleanProp(r.blob), raw: r.blob, at, from:'remote' });
   }
-  const out = [...by.values()].sort((a,b) => b.at - a.at).slice(0, 40).map(x => x.p);
+  const ranked = [...by.values()].sort((a,b) => b.at - a.at);
+  const out = ranked.slice(0, 40).map(x => x.p);
+  /* ── A CAP THAT DROPS WORK MUST SAY SO ───────────────────────────────────
+     The forty-sheet cap is real and fine — the desk draws forty tabs, not
+     four hundred. And it is a WINDOW, not a deletion: pushLocal only upserts,
+     so a row past forty stays on the server and simply never appears on any
+     device again — sheet forty-one is not destroyed, it is disappeared, which
+     to the person who priced it is the same news delivered more confusingly.
+     Two changes. The overflow is NAMED — one line saying how many and which
+     one is oldest, so vanishing work is never a mystery. And the count rides
+     back in the result so the caller can put the sentence on the page, where
+     the person who owns the sheets is, rather than in a console only we
+     read. */
+  const dropped = ranked.length - out.length;
+  if (dropped > 0){
+    try { console.warn('sheets over the cap: ' + dropped + ' not shown, oldest is "'
+      + ((ranked[40].p && (ranked[40].p.name || ranked[40].p.addr)) || 'unnamed')
+      + '" — the desk keeps the 40 most recent'); } catch(e){}
+  }
   /* ── AND THE ASSUMPTIONS COME BACK WITH THE NEWEST SHEET ─────────────────
      They are workspace-level, not per-property, so "last write wins per
      property" does not answer the question on its own — the newest sheet
@@ -2609,7 +2632,8 @@ function mergeSheets(local, remote){
   const newest = [...by.values()].sort((a,b) => b.at - a.at)[0];
   if (newest && newest.from === 'remote' && typeof window.__advRead === 'function')
     adv = window.__advRead(newest.raw && newest.raw.adv);
-  return { props: out, adv, pulled: [...by.values()].filter(x => x.from === 'remote').length };
+  return { props: out, adv, dropped,
+           pulled: [...by.values()].filter(x => x.from === 'remote').length };
 }
 
 /* ── the boot pass ─────────────────────────────────────────────────────────
@@ -2681,6 +2705,13 @@ async function syncSheets(){
         loadInto(P.active); save();
         if (typeof window.__render === 'function') window.__render();
       }
+      /* the overflow sentence, on the page — payNote is the desk's one shared
+         mouth and it is already injected wherever this module is */
+      if (m.dropped > 0 && typeof payNote === 'function')
+        try { payNote('This account has ' + (m.props.length + m.dropped) + ' sheets and the desk '
+          + 'shows the 40 most recent. ' + m.dropped + ' older '
+          + (m.dropped === 1 ? 'sheet is' : 'sheets are') + ' not shown — finish or clear a few '
+          + 'before starting more, so nothing is lost.'); } catch(e){}
       /* ── AND THE PUSH ONLY HAPPENS IF THE PULL WORKED ────────────────────
          This sat outside the block, so one 500 on the sheets GET let a browser
          holding a stale workspace upsert all of it over newer server rows —
@@ -2928,6 +2959,14 @@ function payNote(msg, kind, action){
   let n = document.getElementById('paynote');
   if (!n){
     n = document.createElement('div'); n.id = 'paynote';
+    /* this strip is where checkout says "opening", "declined", "paid" — the
+       sentences a person most needs read aloud. aria-live watches the div for
+       every later message; role=status is its accessible name. Created empty
+       FIRST and filled on the next lines, because a live region only
+       announces CHANGES — text present at insertion is skipped by most
+       readers, which would swallow the first message exactly. */
+    n.setAttribute('role', 'status');
+    n.setAttribute('aria-live', 'polite');
     n.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:9999;'
       + 'max-width:min(560px,92vw);padding:12px 16px;border-radius:10px;font:15px/1.45 inherit;'
       + 'box-shadow:0 6px 28px rgba(0,0,0,.28)';

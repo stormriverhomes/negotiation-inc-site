@@ -58,6 +58,13 @@ const PORT   = process.env.PORT || 10000;
 const N = (k, d) => { const v = Number(process.env[k]); return Number.isFinite(v) && v >= 0 ? v : d; };
 const LIM = {
   perIpHour:  N('NI_PER_IP_HOUR', 20),
+  /* ── THE CEILING ACROSS ALL LANES ───────────────────────────────────────
+     perIpHour is now PER ROUTE (see ipOk), so nine routes at twenty would let
+     one address make 180 paid calls an hour if there were no total. This is
+     that total. Three lanes' worth: enough that somebody doing real work on
+     one property — read the photos, pull the comps, brief the street, check a
+     bid — never meets it, and far short of nine lanes run flat out. */
+  perIpAll:   N('NI_PER_IP_HOUR_ALL', 60),
   perDay:     N('NI_PER_DAY', 200),
   dailyUsd:   N('NI_DAILY_USD', 5),
   maxImages:  N('NI_MAX_IMAGES', 8),
@@ -232,14 +239,48 @@ setTimeout(() => {
     console.warn(`[budget] NI_DAILY_USD is $${LIM.dailyUsd} and one Office subscription's daily `
       + `share costs roughly $${(perDay * NOMINAL_USD).toFixed(2)}. Raise NI_DAILY_USD.`);
 }, 2000).unref?.();
-function ipOk(ip){
+/* ── ONE BUCKET PER LANE, PLUS A CEILING ACROSS THEM ───────────────────────
+   This was a single bucket keyed on the address alone, shared by nine
+   routes at twenty an hour. What that actually meant to a person: brief
+   twenty streets and the photo read stops working — a feature they are
+   paying for, refused because of a different feature they already used, with
+   a message that says "twenty requests in an hour" and names neither. The
+   opposite failure was live too: an attacker got twenty shots at the single
+   most expensive route rather than twenty spread across nine.
+
+   A lane is a route. Each lane gets perIpHour of its own, and every request
+   also spends one from a shared ceiling so nine lanes cannot be added up.
+   The lane is passed in by the caller rather than derived from req.path,
+   because two routes that spend the same upstream budget (the comp pull and
+   the rent lookup are both one RentCast request) belong in one lane and the
+   path cannot know that.
+
+   Returns null when allowed, and the name of the wall when not, so the 429
+   can say WHICH limit was met — a refusal a person cannot act on is a bug
+   even when the refusal itself is correct. */
+function ipOk(ip, lane){
   const now = Date.now(), win = now - 36e5;
-  const a = (hits.get(ip) || []).filter(t => t > win);
-  if (a.length >= LIM.perIpHour) { hits.set(ip, a); return false; }
-  a.push(now); hits.set(ip, a);
-  if (hits.size > 5000) for (const [k, v] of hits) if (!v.some(t => t > win)) hits.delete(k);
-  return true;
+  const keys = [ip + ' ' + (lane || 'all'), ip + ' *'];
+  const caps = [LIM.perIpHour, Math.max(LIM.perIpHour, LIM.perIpAll)];
+  const lists = keys.map(k => (hits.get(k) || []).filter(t => t > win));
+  for (let i = 0; i < keys.length; i++){
+    if (lists[i].length >= caps[i]){
+      /* write the pruned list back even on refusal, so a bucket that has
+         aged out cannot keep somebody locked on stale timestamps */
+      hits.set(keys[i], lists[i]);
+      return i === 0 ? 'lane' : 'all';
+    }
+  }
+  for (let i = 0; i < keys.length; i++){ lists[i].push(now); hits.set(keys[i], lists[i]); }
+  if (hits.size > 8000) for (const [k, v] of hits) if (!v.some(t => t > win)) hits.delete(k);
+  return null;
 }
+/* the sentence a person reads when they meet one of the two walls */
+const ipWall = (which, noun) => which === 'all'
+  ? `That is ${Math.max(LIM.perIpHour, LIM.perIpAll)} requests in an hour from one place, across `
+    + `everything. Try again shortly — nothing was spent.`
+  : `That is ${LIM.perIpHour} ${noun || 'requests'} in an hour from one place. Other tools still `
+    + `work; this one is back within the hour.`;
 
 /* ── logging that cannot leak ──────────────────────────────────────────────
    Counts, milliseconds and outcomes. Never a photograph, never the note,
@@ -422,7 +463,8 @@ app.post('/api/read', bodyGate, express.json({ limit: (LIM.maxTotalKb + 1000) + 
 
   { const b = budgetFails(ent.uid, 'The photo read'); if (b) return fail(b[0], b[1], b[2]); }
   const ip = req.ip || 'unknown';
-  if (!ipOk(ip)) return fail(429, `That is ${LIM.perIpHour} reads in an hour from one place. Try again shortly.`);
+  { const wall = ipOk(ip, 'read');
+    if (wall) return fail(429, ipWall(wall, 'photo reads')); }
 
   /* ── the request is a stranger, even when you wrote the page that sent it ── */
   const body = req.body;
@@ -735,8 +777,8 @@ app.post('/api/compare', bodyGate, express.json({ limit: '256kb' }), async (req,
   const cap = meter.cap;
 
   { const b = budgetFails(ent.uid); if (b) return fail(b[0], b[1], b[2]); }
-  if (!ipOk(req.ip || 'unknown'))
-    return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
+  { const wall = ipOk(req.ip || 'unknown', 'compare');
+    if (wall) return fail(429, ipWall(wall, 'written comparisons')); }
 
   /* the body is a stranger. Nothing here is a prompt: the facts are rebuilt
      from a fixed shape, so this endpoint cannot be turned into a general
@@ -844,8 +886,8 @@ app.post('/api/street', bodyGate, express.json({ limit: '8kb' }), async (req, re
   const cap = meter.cap;
 
   { const b = budgetFails(ent.uid); if (b) return fail(b[0], b[1], b[2]); }
-  if (!ipOk(req.ip || 'unknown'))
-    return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
+  { const wall = ipOk(req.ip || 'unknown', 'street');
+    if (wall) return fail(429, ipWall(wall, 'street briefs')); }
 
   /* an address is a string a stranger typed. It goes into a government URL and
      into a prompt, so it is capped and stripped of anything that is not part
@@ -967,8 +1009,8 @@ app.post('/api/bid', bodyGate, express.json({ limit: '128kb' }), async (req, res
   const cap = meter.cap;
 
   { const b = budgetFails(ent.uid); if (b) return fail(b[0], b[1], b[2]); }
-  if (!ipOk(req.ip || 'unknown'))
-    return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
+  { const wall = ipOk(req.ip || 'unknown', 'bid');
+    if (wall) return fail(429, ipWall(wall, 'bid checks')); }
 
   const text = String(req.body && req.body.bid || '').trim();
   if (text.length < 40)
@@ -1071,8 +1113,8 @@ app.post('/api/intake', bodyGate, express.json({ limit: (LIM.maxTotalKb + 1000) 
   const cap = meter.cap;
 
   { const b = budgetFails(ent.uid, 'The intake'); if (b) return fail(b[0], b[1], b[2]); }
-  if (!ipOk(req.ip || 'unknown'))
-    return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
+  { const wall = ipOk(req.ip || 'unknown', 'intake');
+    if (wall) return fail(429, ipWall(wall, 'listing reads')); }
 
   const body = req.body;
   if (!body || typeof body !== 'object') return fail(400, 'No request body.');
@@ -1177,8 +1219,8 @@ app.post('/api/objections', bodyGate, express.json({ limit: '32kb' }), async (re
   const cap = meter.cap;
 
   { const b = budgetFails(ent.uid); if (b) return fail(b[0], b[1], b[2]); }
-  if (!ipOk(req.ip || 'unknown'))
-    return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
+  { const wall = ipOk(req.ip || 'unknown', 'objections');
+    if (wall) return fail(429, ipWall(wall, 'objection reads')); }
 
   const facts = OBJ.factsFrom(req.body);
   if (!facts) return fail(400, 'This needs an offer and a ceiling — price the deal first.');
@@ -1465,8 +1507,8 @@ app.post('/api/lookup/rent', bodyGate, express.json({ limit: '4kb' }), async (re
   const meter = await meterFails(res, ent, 'aicomps', 'of these');
   if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
   { const b = budgetFails(ent.uid, 'The rent lookup'); if (b) return fail(b[0], b[1], b[2]); }
-  if (!ipOk(req.ip || 'unknown'))
-    return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
+  { const wall = ipOk(req.ip || 'unknown', 'lookup');
+    if (wall) return fail(429, ipWall(wall, 'property lookups')); }
 
   const addr = String((req.body && req.body.address) || '').trim().slice(0, 160);
   if (addr.length < 6) return fail(400, 'That is not enough address to look up. Street, city and ZIP work best.');
@@ -1539,8 +1581,8 @@ app.post('/api/comps', bodyGate, express.json({ limit: '4kb' }), async (req, res
   if (meter.fail) return fail(meter.fail[0], meter.fail[1], meter.fail[2]);
 
   { const b = budgetFails(ent.uid, 'The comp pull'); if (b) return fail(b[0], b[1], b[2]); }
-  if (!ipOk(req.ip || 'unknown'))
-    return fail(429, `That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.`);
+  { const wall = ipOk(req.ip || 'unknown', 'lookup');
+    if (wall) return fail(429, ipWall(wall, 'property lookups')); }
 
   const addr = String((req.body && req.body.address) || '').trim().slice(0, 160);
   if (addr.length < 6) return fail(400, 'That is not enough address to look up. Street, city and ZIP work best.');
@@ -1795,8 +1837,8 @@ app.get('/api/walk/config', async (req, res) => {
 });
 
 app.get('/api/land/geo', async (req, res) => {
-  if (!ipOk(req.ip || 'unknown'))
-    return res.status(429).json({ ok:false, error:`That is ${LIM.perIpHour} requests in an hour from one place. Try again shortly.` });
+  { const wall = ipOk(req.ip || 'unknown', 'geo');
+    if (wall) return res.status(429).json({ ok:false, error: ipWall(wall, 'address lookups') }); }
   const q = String(req.query.q || '').trim().slice(0, 160);
   if (q.length < 6) return res.status(400).json({ ok:false, error:'That is not enough address to place.' });
   /* "lat, lng" pasted straight in skips the geocoder — rural parcels are
