@@ -319,6 +319,96 @@ header{background:#fff;border-bottom:1px solid var(--line)}
 .gwhy li{font-size:13px;color:#a9b7cd;line-height:1.5;padding-left:16px;position:relative}
 .gwhy li::before{content:'+';position:absolute;left:0;color:#8fe0b4;font-weight:800}
 .gwhy li b{color:#fff;font-weight:650}
+/* ── the rack (The Door, left column) ──────────────────────────────────── */
+.rack{margin-top:18px;display:grid;gap:9px}
+.rk-plate{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+ border-radius:12px;padding:12px 15px}
+.rk-k{display:block;font-size:9.5px;font-weight:800;letter-spacing:.16em;
+ text-transform:uppercase;color:#8ea3c4}
+.rk-plate b{display:block;font-family:var(--serif);font-size:22px;font-weight:700;
+ color:#fff;min-height:28px;letter-spacing:-.01em}
+.rk-s{display:block;font-size:11px;color:#8ea3c4;margin-top:1px}
+.rk-tools{display:grid;gap:5px}
+.rk-t{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.04);
+ border:1px solid rgba(255,255,255,.09);border-radius:9px;padding:7px 11px;
+ font-size:12.5px;font-weight:650;color:#dbe3ef}
+.rk-t i{font-style:normal;width:22px;height:22px;border-radius:6px;background:var(--blue);
+ color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex:0 0 auto}
+.rk-t em{font-style:normal;margin-left:auto;font-size:9px;font-weight:800;letter-spacing:.1em;
+ text-transform:uppercase;color:#e8cf72}
+.rk-t em ~ i,.rk-t:has(em) i{background:rgba(232,207,114,.16);color:#e8cf72}
+.rk-more{font-size:11px;color:#8ea3c4;padding:1px 2px}
+.rk-slot{border:1px dashed rgba(255,255,255,.22);border-radius:9px;padding:8px 11px;
+ font-size:11.5px;color:#8ea3c4}
+.rk-slot b{color:#dbe3ef}
+.rk-slot.set{border-style:solid;border-color:rgba(232,207,114,.4);background:rgba(255,255,255,.05);
+ color:#dbe3ef}
+.rk-slot.set .rk-fig{font-family:var(--serif);font-size:15px;font-weight:700;color:#fff}
+.rk-slot.set .rk-cite{display:block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+ color:#8ea3c4;margin-top:2px}
+.rk-say{font-size:11px;color:#68789a;margin-top:2px}
+/* ── the beats ─────────────────────────────────────────────────────────── */
+.gate.staged .beat{display:none}
+.gate.staged .beat.on{display:block}
+.gate.staged .beat [data-bh]{display:block}
+.beat [data-bh]{display:none}
+.beat [data-bh] h2{font-family:var(--serif);font-size:24px;font-weight:700;margin:4px 0 6px;
+ letter-spacing:-.01em}
+.beat [data-bh] p{font-size:13.5px;color:var(--mid);line-height:1.5;margin:0 0 12px}
+.beyebrow{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+.gate.staged .beat [data-flatlvl]{display:none}
+.gate.staged .go{display:none}
+.gate.staged.b4 .go{display:inline-flex}
+.gate.staged #g-fine{display:none}
+.gate.staged.b4 #g-fine{display:block}
+.bnav{display:flex;align-items:center;gap:13px;margin-top:15px}
+.bthen{font-size:12px;color:var(--soft)}
+.bskip{font-size:13px;font-weight:650}
+.lvl button i{font-style:normal;display:inline-flex;width:26px;height:26px;border-radius:7px;
+ background:var(--blue-soft,#eaf0fc);color:var(--blue);align-items:center;justify-content:center;
+ font-size:12px;margin-right:9px;vertical-align:-7px}
+.gate:not(.staged) .lvl button i{display:none}
+.zipans{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:11px 13px;
+ background:var(--wash)}
+.zipans .zh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+ font-size:12.5px;font-weight:700}
+.zipans .zstamp{font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+ color:var(--gold);background:var(--gold-soft);border:1px solid var(--gold-line);
+ border-radius:5px;padding:2px 6px}
+.zipans .zr{display:flex;gap:22px;margin-top:6px}
+.zipans .zr b{font-family:var(--serif);font-size:17px}
+.zipans .zr span{display:block;font-size:10.5px;color:var(--soft)}
+.zipans .zsay{font-size:11px;color:var(--soft);margin-top:7px;line-height:1.45}
+.receipt{border:1px solid var(--line);border-radius:11px;margin:2px 0 13px;overflow:hidden}
+.receipt .rr{display:flex;align-items:center;gap:11px;padding:10px 13px;font-size:13.5px;
+ border-top:1px solid var(--line)}
+.receipt .rr:first-child{border-top:0}
+.receipt .rk{width:44px;flex:0 0 auto;font-size:9.5px;font-weight:800;letter-spacing:.14em;
+ text-transform:uppercase;color:var(--soft)}
+.receipt .rv{min-width:0;flex:1}
+.receipt .rv b{font-weight:700}
+.receipt .rv small{color:var(--soft)}
+.receipt .rr a{font-size:12.5px;font-weight:650;white-space:nowrap}
+.rstamp{font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+ color:var(--blue);background:var(--blue-soft);border:1px solid var(--blue-line);
+ border-radius:5px;padding:2px 6px;margin-left:auto}
+.receipt .carried{background:var(--gold-soft);border-top:1px solid var(--gold-line);
+ font-size:12.5px;color:var(--mid)}
+.receipt .carried .rk{color:var(--gold)}
+.ladder{display:flex;justify-content:space-between;align-items:center;gap:12px;
+ border-top:1px solid var(--line);margin-top:16px;padding-top:11px}
+/* display:flex silently beats the hidden attribute — the land invite walked
+   into this exact hole a batch ago. Said explicitly so it cannot. */
+.ladder[hidden]{display:none}
+.lback{font-size:11.5px;color:var(--soft)}
+.ldots{display:flex;gap:9px}
+.ldots span{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:800;
+ letter-spacing:.1em;color:var(--soft)}
+.ldots i{font-style:normal;width:18px;height:18px;border-radius:50%;border:1px solid var(--line-ink);
+ display:inline-flex;align-items:center;justify-content:center;font-size:9.5px}
+.ldots span.on i{background:var(--blue);border-color:var(--blue);color:#fff}
+.ldots span.done i{background:var(--blue-soft,#eaf0fc);border-color:var(--blue);color:var(--blue)}
+.bback{font-size:13px;font-weight:650;display:inline-block;margin-bottom:9px}
 /* their own sheet, named, with what happens to it said out loud */
 .ghave{margin-top:20px;padding:14px 15px;border-radius:13px;
  background:linear-gradient(180deg,rgba(63,160,106,.18),rgba(63,160,106,.06));
@@ -686,15 +776,31 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    where you left it &mdash; the sheet in progress, the market you are working, the properties
    you have priced.</p>
   <div id="gate-have"></div>
-  <ul class="gwhy">
-   <li><b>Free, and it stays free.</b> Pricing a property needs no account and never will
-     &mdash; what this adds is memory.</li>
-   <li><b>No card to open it.</b> Registering asks for a name and an email and nothing else.
-     The fourteen-day trial of the whole product is a separate step and it does put a card on
-     file &mdash; nothing is charged until day fifteen, and one click cancels.</li>
-   <li><b>Yours to take.</b> Export every sheet as a file whenever you like, and delete the lot
-     in one press.</li>
-  </ul>
+  <!-- ── THE RACK, ASSEMBLING (design pass: The Door) ──────────────────────
+       Ninety words of reassurance became the thing itself: the workspace the
+       answers are building, drawn from the same instrument set the rail uses,
+       with a nameplate that engraves as the name is typed and slots that say
+       what the next beats add. Every figure that lands on it is real and
+       cited or it is not there. The old bullets' load-bearing facts (free, no
+       card, yours to take) moved to the fine print under the one button that
+       needs them. -->
+  <div class="rack" id="rack">
+   <div class="rk-plate"><span class="rk-k">The rack &middot; yours</span>
+    <b id="rk-name">&nbsp;</b>
+    <span class="rk-s" id="rk-names">engraved as you type &mdash; twelve instruments, four open free</span></div>
+   <div class="rk-tools">
+    <span class="rk-t"><i>&#9998;</i>Price a property</span>
+    <span class="rk-t"><i>&#9636;</i>The eight ways out</span>
+    <span class="rk-t"><i>&#9670;</i>The land desk</span>
+    <span class="rk-t"><i>&#9654;</i>The arcade</span>
+    <span class="rk-t"><i>&#8644;</i>Compare deals<em>Solo</em></span>
+    <span class="rk-t"><i>&#9678;</i>Read the condition<em>Underwriter</em></span>
+    <span class="rk-more">+ six more, lit and under glass</span>
+   </div>
+   <div class="rk-slot" id="rk-market"><span>Your market and its medians &mdash; <b>beat 2</b></span></div>
+   <div class="rk-slot" id="rk-job"><span>Your first job on the desk &mdash; <b>beat 3</b></span></div>
+   <div class="rk-say" id="rk-say">The bench is being set from your answers. Nothing on it is decoration.</div>
+  </div>
  </div>
  <form id="gate-form" autocomplete="on">
   <!-- ── WHICH OF THE TWO THINGS AM I DOING ────────────────────────────────
@@ -713,6 +819,17 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    <button type="button" role="tab" data-mode="up" aria-selected="true">Create an account</button>
    <button type="button" role="tab" data-mode="in" aria-selected="false">Sign in</button>
   </div>
+  <!-- ── FOUR BEATS, ONE FORM (design pass: The Door) ──────────────────────
+       One question per beat when registering; every other mode (sign in,
+       recover, reset) shows the form FLAT, exactly as before — the beats are
+       a class on the gate, and everything below keeps its id, so the auth
+       wiring and the harnesses drive the same controls either way. Back
+       never loses a keystroke because back is display, not state. -->
+  <div class="beat on" data-beat="1" role="group" aria-label="Beat 1 of 4 — who">
+   <div class="bhead" data-bh><span class="beyebrow">Beat 1 of 4 &middot; who</span>
+    <h2>Who is this desk for?</h2>
+    <p>A name and an email, and the desk is yours. Free, and it stays
+     free &mdash; no card to open it.</p></div>
   <label for="g-name">Your name</label>
   <!-- The placeholder was the founder's own full name. Ghost text is read as a
        VALUE before it is read as an example, so every stranger who opened the
@@ -723,17 +840,45 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   <input id="g-name" type="text" placeholder="Dana Whitfield" autocomplete="name" required>
   <label for="g-email">Email</label>
   <input id="g-email" type="email" placeholder="you@example.com" autocomplete="email" required>
+   <div class="bnav"><button class="btn p" type="button" id="g-n1">Next &mdash; your market &rarr;</button>
+    <span class="bthen">then two more beats</span></div>
+  </div>
+  <div class="beat" data-beat="2" role="group" aria-label="Beat 2 of 4 — where">
+   <div class="bhead" data-bh><span class="beyebrow">Beat 2 of 4 &middot; where</span>
+    <h2>The market you work</h2>
+    <p>A city or a ZIP. The desk keeps that market&rsquo;s medians beside every
+     sheet you price in it.</p></div>
   <label for="g-market">The market you work <span style="color:var(--faint)">&mdash; optional</span></label>
   <input id="g-market" type="text" placeholder="Atlanta, GA 30310" autocomplete="off">
-  <label style="margin-top:16px">How much of this have you done before?</label>
-  <div class="lvl" id="g-lvl" role="radiogroup" aria-label="Experience">
-   <button type="button" data-lvl="new" role="radio" aria-checked="false">New to it<span>show me the walk-through first</span></button>
-   <button type="button" data-lvl="some" role="radio" aria-checked="false">A few deals<span>straight to the desk</span></button>
-   <button type="button" data-lvl="pro" role="radio" aria-checked="true">I do this<span>straight to the desk</span></button>
+  <div class="zipans" id="g-zipans" hidden></div>
+   <div class="bnav"><button class="btn p" type="button" id="g-n2">Next &mdash; how you work &rarr;</button>
+    <a href="#" class="bskip" id="g-skip2">Skip &mdash; add a market later &rarr;</a></div>
   </div>
+  <div class="beat" data-beat="3" role="group" aria-label="Beat 3 of 4 — how">
+   <div class="bhead" data-bh><span class="beyebrow">Beat 3 of 4 &middot; how</span>
+    <h2>How much of this have you done before?</h2>
+    <p>This only sets where the desk opens on your first visit. Every
+     instrument is on the rack either way.</p></div>
+  <label data-flatlvl style="margin-top:16px">How much of this have you done before?</label>
+  <div class="lvl" id="g-lvl" role="radiogroup" aria-label="Experience">
+   <button type="button" data-lvl="new" role="radio" aria-checked="false"><i>&#9998;</i>New to it<span>show me the walk-through first</span></button>
+   <button type="button" data-lvl="some" role="radio" aria-checked="false"><i>&#9636;</i>A few deals<span>straight to the desk</span></button>
+   <button type="button" data-lvl="pro" role="radio" aria-checked="true"><i>&#9670;</i>I do this<span>straight to the desk</span></button>
+  </div>
+   <div class="bnav"><button class="btn p" type="button" id="g-n3">Next &mdash; open it &rarr;</button></div>
+  </div>
+  <div class="beat" data-beat="4" role="group" aria-label="Beat 4 of 4 — open">
+   <div class="bhead" data-bh><span class="beyebrow">Beat 4 of 4 &middot; open</span>
+    <h2>Open your workspace.</h2></div>
+   <div class="receipt" id="g-receipt" hidden></div>
   <div id="g-pwwrap" hidden>
    <label for="g-pw">A password <span style="color:var(--faint)">&mdash; six characters or more</span></label>
    <input id="g-pw" type="password" placeholder="something you will remember" autocomplete="new-password" minlength="6">
+  </div>
+  </div>
+  <div class="ladder" id="g-ladder" hidden>
+   <span class="lback">Nothing you type is lost by stepping back.</span>
+   <span class="ldots" aria-hidden="true"></span>
   </div>
   <!-- ── THE WAY OUT LIVES OUTSIDE THE THING IT ESCAPES ────────────────────
        This row used to be INSIDE #g-pwwrap. The recover screen hides that
@@ -1009,7 +1154,142 @@ let LVL = 'pro';
   box.querySelectorAll('[data-lvl]').forEach(b => b.onclick = () => {
     LVL = b.dataset.lvl;
     box.querySelectorAll('[data-lvl]').forEach(x => x.setAttribute('aria-checked', x===b ? 'true':'false'));
+    doorJob();
   });
+})();
+
+/* ══ THE BEATS (design pass: The Door) ═════════════════════════════════════
+   Registering is four beats, one question each; every other mode is the flat
+   form it always was. The beats are DISPLAY — every field stays in the one
+   form with its one id, so the auth wiring, the join carry and the harnesses
+   drive the same controls, and stepping back cannot lose a keystroke because
+   nothing is ever unmounted. window.__doorFlat() drops to the flat form; the
+   harnesses use it to reach the fields directly, the same way a person with
+   CSS off would meet the page. */
+const BEATNAMES = ['who','where','how','open'];
+let BEAT = 1;
+const gateEl = () => document.getElementById('gate');
+function doorStaged(){ const g = gateEl(); return !!(g && g.classList.contains('staged')); }
+window.__doorFlat = () => { const g = gateEl(); if (!g) return;
+  g.classList.remove('staged','b4');
+  const L = document.getElementById('g-ladder'); if (L) L.hidden = true; };
+function ladderPaint(){
+  const L = document.getElementById('g-ladder'); if (!L) return;
+  L.hidden = !doorStaged();
+  L.querySelector('.ldots').innerHTML = BEATNAMES.map((n,i) =>
+    `<span class="${i+1===BEAT?'on':i+1<BEAT?'done':''}"><i>${i+1<BEAT?'✓':i+1}</i>${n.toUpperCase()}</span>`).join('');
+}
+function doorName(){ const el = document.getElementById('rk-name');
+  if (el) el.innerHTML = ($('g-name').value.trim().slice(0,40)) || '&nbsp;'; }
+function doorJob(){
+  const el = document.getElementById('rk-job'); if (!el) return;
+  const say = { new:['Show me the walk-through','the desk opens on the eight lessons'],
+                some:['Straight to the desk','a blank sheet, your address on it'],
+                pro:['Straight to the desk','a blank sheet, your address on it'] }[LVL];
+  if (BEAT < 3 && !el.classList.contains('set')) return;
+  el.classList.add('set');
+  el.innerHTML = `<span class="rk-cite">First job &middot; set by this answer</span>`
+    + `<span class="rk-fig" style="font-size:13.5px">${say[0]}</span>`
+    + `<span class="rk-cite" style="text-transform:none;letter-spacing:0">${say[1]}</span>`;
+}
+/* the beat-2 reward: a typed ZIP answers back with its real medians, cited.
+   NI_PRIORS ships beside the page and loads lazily; no account, no spend. */
+function doorZip(){
+  const box = document.getElementById('g-zipans'), slot = document.getElementById('rk-market');
+  if (!box) return;
+  const m = ($('g-market').value || '').match(/\b\d{5}\b/);
+  if (!m){ box.hidden = true;
+    if (slot){ slot.classList.remove('set');
+      slot.innerHTML = '<span>Your market and its medians &mdash; <b>beat 2</b></span>'; }
+    return; }
+  const zip = m[0];
+  if (typeof NI_PRIORS === 'undefined'){
+    if (!priorsAsked && typeof NI_PRIORS_URL !== 'undefined'){
+      priorsAsked = true;
+      const s = document.createElement('script');
+      s.src = NI_PRIORS_URL; s.onload = doorZip; s.onerror = () => {};
+      document.head.appendChild(s);
+    }
+    return;
+  }
+  const rec = NI_PRIORS.z && NI_PRIORS.z[zip];
+  if (!rec){ box.hidden = true; return; }
+  const sc = (NI_PRIORS.meta.scale || 1);
+  /* the scale applies to the VALUE alone — rent ships at its own unit, the
+     same way the hub's market panel reads it at line ~2340 (mv scaled, mr
+     raw). Scaling both showed a $109,900 median rent, which is the kind of
+     figure that unsells a product whose whole pitch is arithmetic. */
+  const val = '$' + Math.round(rec[0]*sc).toLocaleString('en-US');
+  const rent = '$' + Math.round(rec[1]||0).toLocaleString('en-US');
+  const cite = esc(NI_PRIORS.meta.source + ' · ' + NI_PRIORS.meta.vintage);
+  box.hidden = false;
+  box.innerHTML = `<div class="zh"><span>${zip} answers back</span>`
+    + `<span class="zstamp">Estimate on the sheet</span></div>`
+    + `<div class="zr"><div><b>${val}</b><span>Median value</span></div>`
+    + `<div><b>${rent}/mo</b><span>Median gross rent</span></div>`
+    + `<div style="margin-left:auto;align-self:end"><span style="font-size:9.5px;letter-spacing:.06em;text-transform:uppercase">${cite}</span></div></div>`
+    + `<div class="zsay">A ZIP median is not a house. On the sheet it arrives marked estimate and widens every band it feeds.</div>`;
+  if (slot){ slot.classList.add('set');
+    slot.innerHTML = `<span class="rk-cite">Your market &middot; ${zip}</span>`
+      + `<span class="rk-fig">${val} &middot; ${rent}/mo</span>`
+      + `<span class="rk-cite">${cite}</span>`; }
+}
+function doorReceipt(){
+  const r = document.getElementById('g-receipt'); if (!r) return;
+  const name = $('g-name').value.trim(), email = $('g-email').value.trim();
+  const mkt = $('g-market').value.trim();
+  const lvlSay = { new:'New to it — the walk-through first', some:'A few deals — straight to the desk',
+                   pro:'I do this — straight to the desk' }[LVL];
+  /* ENTERED is the desk's blue, never the gold — gold means premium/locked,
+     and a provenance stamp promoted to gold would be the colour law broken
+     on the very screen that teaches it */
+  const T = (k,t) => `<span class="rstamp">${t||'Entered'}</span>`;
+  let join = '';
+  try { const q = new URLSearchParams(location.search).get('join')
+      || JSON.parse(localStorage.getItem('ni-join-v1')||'null')?.plan;
+    if (join = (join || q)){ } } catch(e){}
+  r.hidden = false;
+  r.innerHTML =
+    `<div class="rr"><span class="rk">Who</span><div class="rv"><b>${esc(name)||'—'}</b>`
+      + ` <small>&middot; ${esc(email)||'no email yet'}</small></div>${T('who')}<a href="#" data-tobeat="1">change &rarr;</a></div>`
+    + `<div class="rr"><span class="rk">Where</span><div class="rv">${mkt?esc(mkt):'<small>no market — add one any time</small>'}</div>`
+      + (mkt?T('where'):'') + `<a href="#" data-tobeat="2">change &rarr;</a></div>`
+    + `<div class="rr"><span class="rk">How</span><div class="rv">${lvlSay}</div>${T('how')}<a href="#" data-tobeat="3">change &rarr;</a></div>`
+    + (join ? `<div class="rr carried"><span class="rk">Carried</span><div class="rv">Arrived with a plan chosen`
+      + ` — after the email confirms, this lands in checkout for <b>${esc(join)}</b>. Absent the chip, it lands on the desk.</div></div>` : '');
+  r.querySelectorAll('[data-tobeat]').forEach(a => a.onclick = ev => {
+    ev.preventDefault(); showBeat(+a.dataset.tobeat); });
+}
+function showBeat(n){
+  BEAT = Math.max(1, Math.min(4, n));
+  const g = gateEl(); if (!g || !doorStaged()) return;
+  g.classList.toggle('b4', BEAT === 4);
+  document.querySelectorAll('#gate-form .beat').forEach(b =>
+    b.classList.toggle('on', +b.dataset.beat === BEAT));
+  if (BEAT === 3) doorJob();
+  if (BEAT === 4) doorReceipt();
+  ladderPaint();
+  try { const f = document.querySelector('#gate-form .beat.on input:not([type=hidden])');
+    if (f && BEAT < 4) f.focus({ preventScroll:true }); } catch(e){}
+}
+(function wireDoor(){
+  const g = gateEl(); if (!g || !document.getElementById('g-n1')) return;
+  g.classList.add('staged');
+  const err = () => document.getElementById('g-err');
+  document.getElementById('g-n1').onclick = () => {
+    const name = $('g-name').value.trim(), email = $('g-email').value.trim();
+    if (!name){ err().textContent = 'The name is the half we engrave.'; return $('g-name').focus(); }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+      err().textContent = 'That email address is not valid.'; return $('g-email').focus(); }
+    err().textContent = ''; showBeat(2);
+  };
+  document.getElementById('g-n2').onclick = () => showBeat(3);
+  document.getElementById('g-skip2').onclick = ev => { ev.preventDefault();
+    $('g-market').value = ''; doorZip(); showBeat(3); };
+  document.getElementById('g-n3').onclick = () => showBeat(4);
+  $('g-name').addEventListener('input', doorName);
+  $('g-market').addEventListener('input', doorZip);
+  showBeat(1);
 })();
 /* ── THE DOOR, WITH A SERVER BEHIND IT ─────────────────────────────────────
    The password half only appears when there is somewhere to send it. With no
@@ -1062,6 +1342,15 @@ window.__authDoorInit = function(on){
      you arrive in it, from a link in an email, with a token in the fragment. */
   const setMode = m => {
     GMODE = m;
+    /* the beats belong to registering and to nothing else. A returning
+       customer is not answering four questions — they are getting back in —
+       so sign-in, recover and reset drop to the flat form, and coming back
+       to the register tab picks the beats up where they were left, values
+       intact, because the fields were never unmounted. */
+    try {
+      if (m === 'up'){ gateEl().classList.add('staged'); showBeat(BEAT); }
+      else window.__doorFlat();
+    } catch(e){}
     const nm = document.getElementById('g-name'), lv = document.getElementById('g-lvl'),
           mk = document.getElementById('g-market'), pw = document.getElementById('g-pw'),
           go = document.getElementById('g-go'), have = document.getElementById('g-have'),
@@ -1767,6 +2056,22 @@ function gateHave(){
   const nm = (cur.name && cur.name.trim()) || (cur.addr && cur.addr.trim()) || 'A sheet in progress';
   const a = numOf(cur,'arv'), r = numOf(cur,'repairs'), k = numOf(cur,'asking');
   const sp = (a===null||r===null||k===null) ? null : a - r - k;
+  /* ── THE SHEET IS THE HERO (design pass: The Door, §04) ──────────────────
+     The highest-intent arrival in the product: they priced this as a
+     stranger. The door stops being about workspaces in general and becomes
+     about THIS sheet — the heading names the act, and beat one says what an
+     account does for it. Nothing is invented: the card below carries the real
+     figures from this browser. */
+  try {
+    const h = document.getElementById('gate-h'), p = document.getElementById('gate-p');
+    if (h) h.textContent = 'Keep the sheet you just built.';
+    if (p) p.textContent = 'It is in this browser and nowhere else — a cleared history takes it '
+      + 'with it. A name and an email make it permanent, on every device you open.';
+    const b1 = document.querySelector('.beat[data-beat="1"] [data-bh]');
+    if (b1){ b1.querySelector('h2').textContent = 'Keep the sheet you just built.';
+      b1.querySelector('p').textContent = 'It lives in this browser only. A name and an email '
+        + 'make it permanent — free, no card, and declining costs nothing.'; }
+  } catch(e){}
   el.innerHTML = `<div class="ghave">
     <div class="k">Already in this browser</div>
     <div class="n">${esc(nm)}</div>
