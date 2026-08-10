@@ -110,6 +110,43 @@ for (const idx of [0, 1]){
   ok('a demo still cannot write to disk', wrote === true);
 }
 
+/* ── AND A DEMO CANNOT SPEND, BY ANY PAID ROUTE ────────────────────────────
+   The other half of the demo boundary. A demo is a showroom: it shows what a
+   paid feature's OUTPUT looks like, pre-baked, but the feature itself must not
+   run — otherwise the demo hands out for free the exact thing the tier sells.
+   entitled(n) returns false whenever DEMO is set, so every paid gate should be
+   shut; this proves it at the two layers that matter — the entitlement itself,
+   and any request actually leaving the page. */
+{
+  await seed();
+  await pg.evaluate(()=>{ loadDemo('flip'); });
+  await pg.waitForTimeout(200);
+
+  const ent = await pg.evaluate(()=>({
+    demo: DEMO,
+    e2: (typeof entitled==='function') ? entitled(2) : 'n/a',
+    e3: (typeof entitled==='function') ? entitled(3) : 'n/a',
+    photo: (typeof window.__photoEntitled==='function') ? window.__photoEntitled() : 'n/a',
+  }));
+  ok('a demo is entitled to nothing paid', ent.demo==='flip' && ent.e2===false && ent.e3===false && ent.photo===false, ent);
+
+  /* watch the wire: try to fire every paid feature and assert nothing reaches
+     a paid endpoint. The functions are reachable from window on purpose —
+     "the button is gone" is not a security boundary, the entitlement is. */
+  const paidHits = [];
+  await pg.route('**/api/**', route => { paidHits.push(new URL(route.request().url()).pathname); route.abort(); });
+  await pg.evaluate(async ()=>{
+    const tries = ['__runRead','__runStreet','__runComps','__runBid','__runObjections','__runLetters','__walkGo'];
+    for (const k of tries){ try { if (typeof window[k]==='function') await window[k](0); } catch(e){} }
+    /* and the direct payFetch path, if the page exposes it */
+    try { if (window.__payFetch) await window.__payFetch('/api/read', {}); } catch(e){}
+  });
+  await pg.waitForTimeout(400);
+  const paid = paidHits.filter(p => /\/api\/(read|comps|street|walk|bid|objections|lookup)/.test(p));
+  ok('a demo firing every paid feature reaches no paid endpoint', paid.length===0, paid);
+  await pg.unroute('**/api/**');
+}
+
 ok('no page errors through any route', errs.length===0, errs[0]);
 await b.close();
 console.log('\n'+(bad? '✗ '+bad+' of '+n+' failed' : '✓ all '+n+' hold'));

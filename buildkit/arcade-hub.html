@@ -40,7 +40,12 @@ a{color:#8fb4ff}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .wrap{max-width:1140px;margin:0 auto;padding:0 26px}
 .ftlegal{border-top:1px solid var(--edge);color:#8794aa;margin-top:34px;padding:18px 0 40px;
- font-size:12.5px;opacity:.72}
+ font-size:12.5px}
+/* The links to Terms, Privacy and BILLING — the route to cancelling — were the
+   least readable text on the page: #8794aa double-muted by opacity:.72 lands
+   at 3.69:1 against this navy, under the 4.5:1 AA floor. The colour the
+   designer chose already reads as muted at full strength (5.36:1); the
+   opacity was muting the mute. */
 .ftlegal a{color:inherit;text-decoration:none;margin-right:15px;border-bottom:1px solid transparent}
 .ftlegal a:hover{opacity:1;border-bottom-color:currentColor}
 

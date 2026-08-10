@@ -69,6 +69,16 @@ async function open(acct, demo){
   return p;
 }
 const card = p => p.evaluate(() => {
+  /* the locked brief is now the "under glass" row (gl-street); the working
+     brief is still .sbrief. A locked card is the glass row, and the door lives
+     inside it — reachable, but only in the expanded case, and it never carries
+     a control that spends the key. */
+  const glass = document.getElementById('gl-street');
+  if (glass){
+    const a = glass.querySelector('a.btn');
+    return { locked: true, done: false, go: false,
+      href: a ? a.getAttribute('href') : null };
+  }
   const e = document.querySelector('.sbrief');
   if (!e) return null;
   const a = e.querySelector('a.btn');

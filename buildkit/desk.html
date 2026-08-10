@@ -958,6 +958,47 @@ body.traytight .tray{padding-bottom:11px}
  aspect-ratio:16/9;min-height:230px}
 .wkframe iframe{display:block;width:100%;height:100%;border:0}
 .wknote{font-size:12px;color:var(--soft);padding:9px 16px 13px;line-height:1.55}
+/* ── UNDER GLASS, INLINE ───────────────────────────────────────────────────
+   The locked treatment the design pass chose (1d), replacing the two stacked
+   full-width Underwriter panels that put ~700px of pitch between the address
+   and the work. A locked instrument now occupies exactly the slot it would
+   work in, at the size its own header would be: a 56px row, gold the way the
+   product marks everything premium, opened BY THE USER, one at a time. The
+   expanded case shows a worked specimen — the instrument's real output shape
+   with real figures where we truly have them — because wanting the tool
+   should come from seeing the tool, not believing a pitch. One CTA, inside
+   the expanded case only. */
+.glass{margin-top:12px;border:1px solid #e6d9ae;border-radius:12px;overflow:hidden;
+ background:linear-gradient(180deg,#fffdf4,#fff)}
+.glass-h{display:flex;align-items:center;gap:10px;width:100%;min-height:54px;padding:9px 13px;
+ border:0;background:transparent;font:inherit;text-align:left;cursor:pointer}
+.glass-h:hover{background:rgba(232,207,114,.10)}
+.glass-h:focus-visible{outline:2px solid var(--blue);outline-offset:-2px}
+.glass-h .gi{flex:none;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;
+ justify-content:center;background:#f2e8cd;color:#6c541a;font-size:14px}
+.glass-h .gt{flex:1;min-width:0;display:grid}
+.glass-h .gt b{font-size:14px;font-weight:700;color:var(--ink);overflow:hidden;
+ text-overflow:ellipsis;white-space:nowrap}
+.glass-h .gt span{font-size:12.5px;color:var(--mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.glass-h .gk{flex:none;font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.13em;
+ text-transform:uppercase;color:#6c541a;background:#f2e8cd;border-radius:999px;padding:3px 8px}
+.glass-h .gsee{flex:none;font-size:12.5px;font-weight:700;color:#6c541a;white-space:nowrap}
+.glass-b{display:none;border-top:1px solid #efe4c0;padding:12px 14px 13px}
+.glass.open .glass-b{display:block}
+.spec-k{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.13em;
+ text-transform:uppercase;color:var(--soft);border:1px solid var(--line-ink);border-radius:5px;
+ padding:2px 7px;background:var(--wash)}
+.spec-k+span{font-size:12.5px;color:var(--mid);margin-left:7px}
+.spec-row{display:flex;align-items:baseline;gap:10px;padding:9px 0;border-bottom:1px solid #f0ead2}
+.spec-row:last-of-type{border-bottom:0}
+.spec-row .st{flex:1;min-width:0}
+.spec-row .st b{font-size:13.5px;color:var(--ink);font-weight:650}
+.spec-row .st span{display:block;font-size:12px;color:var(--soft);margin-top:1px}
+.spec-row .sv{flex:none;font-size:14px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.glass-f{display:flex;align-items:center;gap:12px;margin-top:11px;flex-wrap:wrap}
+.glass-f .fine{flex:1 1 260px;min-width:0;font-size:12px;color:var(--soft);line-height:1.45}
+.glass-f .btn{flex:none}
+@media(max-width:560px){ .glass-h .gt span{display:none} }
 .sbrief{margin-top:14px;padding:14px 16px 13px;border:1px solid var(--line-ink);
  border-radius:var(--r-card);background:#fff}
 .sbrief .k{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;
@@ -7451,29 +7492,26 @@ function renderWalk(){
      interrupting them, not a feature they can see the shape of. */
   if (!entitled(2)){
     if (!stops.length){ box.innerHTML = ''; return; }
-    const why = entitleWhy(2);
-    const L = { demo:['In the demo','office.html?want=save','Start free and walk your own →'],
-                signedout:['Underwriter','office.html?want=save','Create a free account →'],
-                free:['Underwriter','plans.html','Start the fourteen days →'],
-                lowtier:['Underwriter','plans.html','See what Underwriter adds →'] }[why]
-             || ['Underwriter','plans.html','See what opens it →'];
-    const n = stops.length - 1;
-    box.innerHTML = `<div class="walk locked" data-plans="1" role="link" tabindex="0"
-      aria-label="Walk the street — ${esc(L[2].replace(/\s*→$/,''))}">
-      <div class="wkh"><span class="k">${esc(L[0])}</span><b>Walk the street</b></div>
-      <p>Stand on the sidewalk outside this house and turn around. Then do the same
-       ${n > 0 ? `at ${n === 1 ? 'the comp' : `all ${n} comps`} you are scoring it against`
-               : 'outside every comp you score it against'} &mdash; because "comparable" is a
-       claim about a street, and no field on this workbench can tell you that the one three
-       roads over faces six lanes of traffic.</p>
-      <div class="wkart">
-       <span class="wksheen"></span>
-       <a class="wkgo" href="${esc(L[1])}">${esc(L[2].replace(/\s*\u2192\s*$/, ''))}
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-         <path d="M2 8h11"/><path d="M9 4l4 4-4 4"/></svg></a>
-      </div>
-     </div>`;
+    const D = glassDoor();
+    /* ── THE SPECIMEN IS THIS SHEET'S OWN ITINERARY ──────────────────────
+       The stops are computed from the sheet — the house, then every comp
+       being scored against it — so the expanded case lists the actual walk
+       THIS sheet would take, by address. Real data, zero spend: the Street
+       View key is never touched until the tier opens it. */
+    const rows = stops.slice(0, 4).map((st, i) =>
+      `<div class="spec-row"><span class="st"><b>${esc(st.label)}</b>
+         <span>${esc(st.addr)}</span></span>
+         <span class="sv">${i === 0 ? 'the house' : 'stop ' + (i + 1)}</span></div>`).join('');
+    const more = stops.length > 4
+      ? `<div class="spec-row"><span class="st"><span>&hellip;and ${stops.length - 4} more from this sheet's comps</span></span></div>` : '';
+    box.innerHTML = glassRow('gl-walk', '\u2691', 'Walk the street',
+      'the block on Street View \u2014 this house, then every comp',
+      `<span class="spec-k">Worked specimen</span><span>the walk this sheet would take</span>
+       ${rows}${more}
+       <div class="glass-f"><span class="fine">\u201cComparable\u201d is a claim about a street \u2014 no field on
+         this workbench can tell you the one three roads over faces six lanes of traffic.</span>
+        <a class="btn p sm" href="${esc(D[0])}">${esc(D[1])}</a></div>`);
+    wireGlass(box);
     return;
   }
 
@@ -7582,6 +7620,44 @@ function wireWalk(){
    ours, or whose web claim carries no citation, does not reach this code. */
 let STREET = { busy:false, data:null, err:null, forAddr:'', month:null };
 function streetKey(){ return String(S.addr || '').trim().toLowerCase(); }
+
+/* ── THE GLASS CASE ────────────────────────────────────────────────────────
+   One open at a time, remembered across renders — the whole sheet re-renders
+   on every keystroke, and a case that snapped shut each time you typed would
+   read as broken. The two builders below share this so opening one closes the
+   other, which is the point: it is a shelf, not an accordion of pitches. */
+let GLASS_OPEN = null;
+function glassRow(id, icon, name, cap, bodyHTML){
+  const open = GLASS_OPEN === id;
+  return `<div class="glass${open ? ' open' : ''}" id="${id}">
+    <button type="button" class="glass-h" data-glass="${id}"
+      aria-expanded="${open ? 'true' : 'false'}" aria-controls="${id}-b">
+      <span class="gi" aria-hidden="true">${icon}</span>
+      <span class="gt"><b>${name}</b><span>${cap}</span></span>
+      <span class="gk">Underwriter</span>
+      <span class="gsee">${open ? 'Close ▴' : 'See it work ▾'}</span>
+    </button>
+    <div class="glass-b" id="${id}-b">${bodyHTML}</div>
+  </div>`;
+}
+function wireGlass(box){
+  if (!box) return;
+  box.querySelectorAll('[data-glass]').forEach(h => h.onclick = () => {
+    const id = h.dataset.glass;
+    GLASS_OPEN = GLASS_OPEN === id ? null : id;
+    renderStreet(); renderWalk();
+  });
+}
+/* the door each teaser offers, by who is standing at it — shared so the two
+   rows cannot drift into different answers for the same person */
+function glassDoor(){
+  const why = entitleWhy(2);
+  return { demo:['office.html?want=save','Start free and run your own →'],
+           signedout:['office.html?want=save','Create a free account →'],
+           free:['plans.html#photos','Start the fourteen days →'],
+           lowtier:['plans.html#photos','See what Underwriter adds →'] }[why]
+      || ['plans.html', 'See what opens it →'];
+}
 function renderStreet(){
   const box = $('streetbrief'); if (!box) return;
   const addr = String(S.addr || '').trim();
@@ -7591,18 +7667,41 @@ function renderStreet(){
        empty field is an advertisement interrupting somebody who has not
        started yet */
     if (addr.length < 8) { box.innerHTML = ''; return; }
-    const why = entitleWhy(2);
-    const L = { demo:['In the demo','office.html?want=save','Start free and brief your own →'],
-                signedout:['Underwriter','office.html?want=save','Create a free account →'],
-                free:['Underwriter','plans.html','Start the fourteen days →'],
-                lowtier:['Underwriter','plans.html','See what Underwriter adds →'] }[why]
-             || ['Underwriter','plans.html','See what opens it →'];
-    box.innerHTML = `<div class="sbrief locked" data-plans="1"><span class="k">${esc(L[0])}</span>
-      <b>What this block is actually doing</b>
-      <p>Tract-level income, tenure and vacancy from the census, the FEMA flood zone at these exact
-       coordinates, and what has been permitted or planned nearby &mdash; each with the page it came
-       from. The forty minutes of tabs, in about fifteen seconds.</p>
-      <a class="btn p sm" href="${esc(L[1])}">${esc(L[2])}</a></div>`;
+    const D = glassDoor();
+    /* ── THE SPECIMEN IS ONLY WHAT WE TRULY HAVE ─────────────────────────
+       The ZIP medians ship with the page, with their source and vintage, so
+       those two lines carry REAL figures for THIS sheet's own ZIP. The rest
+       of the brief — the flood zone at the exact coordinates, the permits —
+       is fetched per address on our key, so those lines name what arrives
+       rather than inventing a value. A specimen with a made-up flood zone
+       would sell the tool by breaking the one rule the tool exists for. */
+    let specimen = '';
+    try {
+      ensurePriors();
+      const zip = zipOf(S.addr) || marketZip();
+      if (zip && typeof NI_PRIORS !== 'undefined' && NI_PRIORS.z[zip]){
+        const rec = NI_PRIORS.z[zip], meta = NI_PRIORS.meta;
+        const mv = (rec[0]||0) * (meta.scale||1), mr = rec[1]||0;
+        if (mv) specimen += `<div class="spec-row"><span class="st"><b>Median value, ZIP ${esc(zip)}</b>
+          <span>${esc(meta.source)} ${esc(meta.vintage)} &middot; arrives marked Estimate</span></span>
+          <span class="sv">${fmt(mv)}</span></div>`;
+        if (mr) specimen += `<div class="spec-row"><span class="st"><b>Median rent, ZIP ${esc(zip)}</b>
+          <span>${esc(meta.source)} ${esc(meta.vintage)}</span></span>
+          <span class="sv">${fmt(mr)}/mo</span></div>`;
+      }
+    } catch(e){}
+    specimen += `<div class="spec-row"><span class="st"><b>Flood zone, at these exact coordinates</b>
+        <span>FEMA &middot; fetched for this address, with the map page it came from</span></span></div>
+      <div class="spec-row"><span class="st"><b>Permits and plans nearby</b>
+        <span>each with the page it came from &middot; the forty minutes of tabs, in about fifteen seconds</span></span></div>`;
+    box.innerHTML = glassRow('gl-street', '▤', 'Brief this street',
+      'census, flood zone, permits — each with its source',
+      `<span class="spec-k">Worked specimen</span><span>what arrives, for this sheet's own market</span>
+       ${specimen}
+       <div class="glass-f"><span class="fine">Your fourteen days include this. Nothing runs down
+         until you start them.</span>
+        <a class="btn p sm" href="${esc(D[0])}">${esc(D[1])}</a></div>`);
+    wireGlass(box);
     return;
   }
   if (addr.length < 8){ box.innerHTML = ''; return; }
@@ -7726,7 +7825,7 @@ function renderBid(){
        somebody who has not started. */
     if (!lines){ box.innerHTML = ''; return; }
     const why = entitleWhy(2);
-    const L = { demo:['In the demo','office.html?want=save','Start free and check your own →'],
+    const L = { demo:['Underwriter','office.html?want=save','Start free and check your own →'],
                 signedout:['Underwriter','office.html?want=save','Create a free account →'],
                 free:['Underwriter','plans.html','Start the fourteen days →'],
                 lowtier:['Underwriter','plans.html','See what Underwriter adds →'] }[why]
@@ -8007,7 +8106,7 @@ function renderObj(){
 
   if (!entitled(2)){
     const why = entitleWhy(2);
-    const L = { demo:['In the demo','office.html?want=save','Start free and run your own →'],
+    const L = { demo:['Underwriter','office.html?want=save','Start free and run your own →'],
                 signedout:['Underwriter','office.html?want=save','Create a free account →'],
                 free:['Underwriter','plans.html','Start the fourteen days →'],
                 lowtier:['Underwriter','plans.html','See what Underwriter adds →'] }[why]
@@ -8731,7 +8830,7 @@ function photoReport(R){
    "see the plan it comes with" sent all four to a price list, which is the
    wrong ask for three of them. */
 const PHOTO_LOCK = {
-  demo:     { k:'In the demo',  cta:'Start free, then read your own photos →', href:'office.html?want=save',
+  demo:     { k:'Underwriter',  cta:'Start free, then read your own photos →', href:'office.html?want=save',
               why:'This is a worked example, so the photographs are already read. On your own sheet the read comes with Underwriter — and the trial opens it for fourteen days without a card.' },
   signedout:{ k:'Underwriter',  cta:'Create a free account →', href:'office.html?want=save',
               why:'The read runs on our key against your pictures, so it needs an account behind it. The account is free, the trial is fourteen days, and neither asks for a card.' },
@@ -9367,7 +9466,7 @@ const cmpNum = v => (typeof v === 'number' && Number.isFinite(v)) ? Math.round(v
 function cmpWriteHTML(win){
   if (!entitled(2)){
     const why = entitleWhy(2);
-    const L = { demo:['In the demo','office.html?want=save','Start free and write it on your own sheets →'],
+    const L = { demo:['Underwriter','office.html?want=save','Start free and write it on your own sheets →'],
                 signedout:['Underwriter','office.html?want=save','Create a free account →'],
                 free:['Underwriter','plans.html','Start the fourteen days →'],
                 lowtier:['Underwriter','plans.html','See what Underwriter adds →'] }[why]

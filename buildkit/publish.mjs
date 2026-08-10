@@ -2451,6 +2451,9 @@ async function syncSheets(){
   try {
     const remote = await pullSheets();
     if (remote){
+      /* a successful read — even of an empty server — is what earns this device
+         the right to write. See pushLocal. */
+      RECONCILED = true;
       const m = mergeSheets(P.props, remote);
       if (m.pulled){
         P.props = m.props;
@@ -2482,8 +2485,23 @@ async function syncSheets(){
     }
   } finally { SYNCING = false; }
 }
+/* ── A DEVICE DOES NOT WRITE THE SERVER UNTIL IT HAS READ IT ───────────────
+   The push happens on two paths: after a merge inside syncSheets (guarded by
+   the remote check, so a failed pull already suppresses it there) AND on the
+   debounced timer in syncSoon, which fires on every save and knew nothing
+   about whether a pull had ever worked. So a device that is holding a stale
+   workspace and cannot reach the server to pull — offline, or during a
+   Supabase blip — would still, four seconds after any keystroke or boot-time
+   save(), upsert its whole stale workspace over newer server rows.
+
+   RECONCILED is set the first time a pull SUCCEEDS this session — an empty
+   array counts, a brand-new account has genuinely reconciled with an empty
+   server. Until then, this device has not seen the server's truth and has no
+   business overwriting it. */
+let RECONCILED = false;
 async function pushLocal(){
   if (!SB_ON() || typeof P === 'undefined' || !SESS) return;
+  if (!RECONCILED) return;
   /* ── THROUGH THE DESK'S OWN SERIALISER ───────────────────────────────────
      This sent \`blob: p\` — the raw in-memory prop — while the loader on the
      other end restored figures only from the \`f\` map that save() builds. The
