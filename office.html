@@ -198,6 +198,9 @@ body.railtight .rn-lnk em{display:none}
 .rn-p.on{background:rgba(31,95,208,.26);border-color:rgba(143,180,255,.42)}
 .rn-p .t{font-size:12.5px;font-weight:650;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rn-p .s{font-size:10.5px;color:#8ba3c4;margin-top:1px;font-variant-numeric:tabular-nums}
+.rn-allp{border-style:dashed;border-color:rgba(255,255,255,.18)}
+.rn-allp .t{color:#c9d8ee}
+.rn-allp:hover{border-style:solid}
 /* ── A NEGATIVE NUMBER IS NEVER THE AFFIRMATIVE COLOUR ─────────────────────
    This was mint green whatever the sign, so a property whose spread is
    MINUS $102,000 — the one demo built specifically to be the deal you walk
@@ -1704,12 +1707,34 @@ function renderShell(a, props, active, nameOf, spreadOf, filledOf, onPlan, left)
      <span class="ti" aria-hidden="true">${glyph}</span>
      <span class="tl"><b>${esc(name)}</b><span>${esc(desc)}</span></span>${chip}</a>`;
  }).join('');
- const rows = props.map((p,i) => {
+ /* ── THE RAIL IS A SHORTLIST, NOT AN ARCHIVE ─────────────────────────────
+    Every property used to render here, so an account with thirty sheets got
+    a sidebar that was mostly sidebar — the arsenal pushed below the fold by
+    the very list it exists to serve. Seven now: the most recently touched,
+    with the active sheet always among them, in the stable order the person
+    knows. The rest are one press away in the properties panel, and the row
+    that takes you there SAYS THE COUNT, so nothing reads as missing — the
+    same rule the forty-sheet merge cap learned a batch ago. */
+ const MAXR = 7;
+ let show = props.map((_, i) => i);
+ if (props.length > MAXR){
+   show.sort((a, b) => (+(props[b].updated || 0)) - (+(props[a].updated || 0)));
+   show = show.slice(0, MAXR);
+   if (!show.includes(active)) show[MAXR - 1] = active;
+   show.sort((a, b) => a - b);
+ }
+ const rows = show.map(i => {
+   const p = props[i];
    const sp = spreadOf(p), n = filledOf(p).length;
    return `<a class="rn-p${i===active?' on':''}" href="desk.html#open=${i}">
      <div class="t">${smp(p)}${esc(nameOf(p,i))}</div>
      <div class="s">${sp!==null?`<b class="${sp<0?'dn':''}">${money(sp)}</b> spread`:(n?`${n} figure${n>1?'s':''}`:'empty')}</div></a>`;
- }).join('');
+ }).join('')
+ + (props.length > MAXR
+    ? `<a class="rn-p rn-allp" href="#props" title="Every property, on the desk below">
+        <div class="t">All ${props.length} properties</div>
+        <div class="s">${props.length - MAXR} more than the rail shows &rarr;</div></a>`
+    : '');
 
  const html = `
   <div class="rn-top">
