@@ -22,6 +22,7 @@
 */
 import http from 'node:http';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
 
 const P = (n, f) => ({ n, f });
 const out = {}; const bad = [];
@@ -33,6 +34,10 @@ let WROTE = [];                                 // every plan write, in order
 let NO_ROW = false;                             // the PATCH matches nothing
 let WRITE_FAILS = false;                        // Supabase answers 5xx
 let SESSIONS = [];                              // the raw body of each checkout session
+let PROFILE = { plan:null, trial:null };        // what entitlementOf reads
+let PROFILE_STATUS = 200;                       // ...or fails to
+let RPC = [];                                   // every ni_use body, in order
+let USED = 0;                                   // what the meter has counted
 
 const stripeStub = http.createServer((req, res) => {
   let b = ''; req.on('data', d => b += d); req.on('end', () => {
@@ -62,8 +67,29 @@ const sbStub = http.createServer((req, res) => {
         return res.end(JSON.stringify({ id:'u-1', email:'e@x.com' })); }
       res.writeHead(401); return res.end('{}');
     }
+    /* the meter's write half. It answers the way PostgREST does when the
+       argument list does not match a function: 404, and no row. That is the
+       shape countUse used to swallow in silence. */
+    if (u.pathname === '/rest/v1/rpc/ni_use'){
+      const body = (() => { try { return JSON.parse(b || '{}'); } catch(e){ return {}; } })();
+      RPC.push(body);
+      if (!Object.prototype.hasOwnProperty.call(body, 'cap')){
+        res.writeHead(404, {'content-type':'application/json'});
+        return res.end(JSON.stringify({ code:'PGRST202', message:'no function matches' }));
+      }
+      USED += 1;
+      res.writeHead(200, {'content-type':'application/json'});
+      return res.end(JSON.stringify([{ used: USED, remaining: Math.max(0, (body.cap|0) - USED) }]));
+    }
     if (u.pathname === '/rest/v1/profiles'){
       const who = String(u.searchParams.get('id') || '').replace(/^eq\./, '');
+      /* entitlementOf READS this table. Everything else here writes it, so the
+         two have to be told apart before the write log gets a phantom entry. */
+      if (req.method === 'GET'){
+        if (PROFILE_STATUS !== 200){ res.writeHead(PROFILE_STATUS); return res.end('{}'); }
+        res.writeHead(200, {'content-type':'application/json'});
+        return res.end(JSON.stringify(PROFILE ? [{ id: who, ...PROFILE }] : []));
+      }
       WROTE.push({ who: u.searchParams.get('id'), body: JSON.parse(b || '{}') });
       /* PostgREST with `Prefer: return=representation` answers 200 and the rows
          it actually changed. NO_ROW makes it answer with none, which is what a
@@ -447,6 +473,165 @@ const call = async (p, o = {}) => {
   /* the clock still runs — the mechanism is intact for support to use */
   if (out.L_nocard.days !== 9)
     bad.push('L: the no-card trial mechanism was removed rather than switched off');
+}
+
+/* ══ M · A TRIAL IS A TIER, AND A TIER IS COMPARED AGAINST WHAT IS NEEDED ══
+   entitlementOf returned ok:true from inside the trial branch without ever
+   looking at `need`. NI_TRIAL_TIER defaults to 0 — chosen deliberately as the
+   value that "grants nothing" — so a row with a trial date and no plan came
+   back {ok:true, tier:0} and every route that asks for tier 2 took it. And
+   capFor(feature, 0) is the FULL Underwriter allowance, so it was not even a
+   smaller grant: it was the paid product, free, on our model key.
+
+   Nothing in this repo writes `trial`, which is the only reason it has not
+   cost money. The two ways it becomes real are both ordinary: support comping
+   a fortnight by hand, and the browser — the row-level policy pins `plan` in
+   its WITH CHECK and does not pin `trial`. */
+{
+  const req = { get: () => 'Bearer good' };
+  const day = 86400000;
+  const yesterday = new Date(Date.now() - day).toISOString();
+  PROFILE_STATUS = 200;
+
+  PROFILE = { plan:null, trial:yesterday };
+  out.M_free_trial   = await B.entitlementOf(req, 2);
+  PROFILE = { plan:'solo', trial:yesterday };
+  out.M_solo_trial   = await B.entitlementOf(req, 2);
+  PROFILE = { plan:'underwriter', trial:yesterday };
+  out.M_paid_trial   = await B.entitlementOf(req, 2);
+  PROFILE = { plan:null, trial:yesterday };
+  out.M_need0        = await B.entitlementOf(req, 0);
+  PROFILE = { plan:null, trial:null };
+  out.M_free_notrial = await B.entitlementOf(req, 2);
+
+  if (out.M_free_trial.ok)
+    bad.push('M: A FREE ACCOUNT WITH A TRIAL DATE WAS GIVEN AN UNDERWRITER FEATURE — '
+           + 'that is the paid product, free, on our model key');
+  if (out.M_solo_trial.ok)
+    bad.push('M: a Solo subscriber with a trial date reached an Underwriter feature');
+  if (!out.M_paid_trial.ok || out.M_paid_trial.tier !== 2)
+    bad.push('M: a real Underwriter subscriber was refused because they also had a trial date');
+  if (!out.M_need0.ok)
+    bad.push('M: the "any account at all" routes stopped accepting an account');
+  if (out.M_free_notrial.ok || out.M_free_notrial.why !== 'free')
+    bad.push('M: the ordinary free refusal changed shape');
+
+  /* and the mechanism still works when it is deliberately switched on */
+  process.env.NI_TRIAL_TIER = '2';
+  const B3 = await import('./billing.js?tt=' + Math.random());
+  PROFILE = { plan:null, trial:yesterday };
+  out.M_granted = await B3.entitlementOf(req, 2);
+  delete process.env.NI_TRIAL_TIER;
+  if (!out.M_granted.ok || out.M_granted.tier !== 2)
+    bad.push('M: NI_TRIAL_TIER=2 no longer grants the trial it is there to grant');
+
+  /* a database that did not answer is an outage, not a missing account */
+  PROFILE_STATUS = 502; PROFILE = { plan:'underwriter', trial:null };
+  out.M_outage = await B.entitlementOf(req, 2);
+  PROFILE_STATUS = 200;
+  if (out.M_outage.ok || out.M_outage.why !== 'lookup')
+    bad.push('M: a Supabase outage told a paying subscriber they had no account, in a 403');
+}
+
+/* ══ N · THE PORTAL CHANGES A PRICE, NOT A METADATA STAMP ═════════════════
+   Stripe's customer portal has no way to write subscription metadata. So the
+   moment plan switching is enabled on the portal configuration — and the 409
+   this service returns sends customers there for exactly that — a subscriber
+   who moves from The Office to Solo pays $39 and keeps a stamp reading "the
+   office", forever. The reverse pays $249 and is served Solo.
+
+   A grandfathered price is by definition one that is NOT in the current price
+   map. So a price we still sell is the plan they are on; a price we do not is
+   where the lock lives and the metadata is the only honest answer. Section C
+   above holds the second half; this one holds the first. */
+{
+  out.N_downgraded = B.planOfSub(sub('sub_d','active','the office','price_solo_now'));
+  out.N_upgraded   = B.planOfSub(sub('sub_u','active','solo','price_office_now'));
+  out.N_locked     = B.planOfSub(sub('sub_l','active','underwriter','price_uw_founding'));
+  if (out.N_downgraded !== 'solo')
+    bad.push('N: SOMEBODY PAYING $39 KEPT THE $249 TIER — a portal downgrade never reached the plan column');
+  if (out.N_upgraded !== 'the office')
+    bad.push('N: somebody paying $249 was served Solo, which is the direction of this mistake that is theft');
+  if (out.N_locked !== 'underwriter')
+    bad.push('N: fixing the portal broke the price lock — a grandfathered subscriber lost their plan');
+}
+
+/* ══ O · FOURTEEN DAYS FREE, ONCE ═════════════════════════════════════════
+   The refusal that stops a second concurrent subscription reads status=all
+   and then discards everything not currently live — right for "are you
+   already subscribed", wrong for "have you had the free fortnight". Subscribe,
+   use The Office free for thirteen days, cancel, subscribe again. Forever, on
+   one account and one card. The rows were already in hand. */
+{
+  const hdr = t => ({ 'content-type':'application/json', authorization:'Bearer ' + t });
+  const trialOf = () => /trial_period_days\]?=(\d+)/.exec(
+    decodeURIComponent(SESSIONS[SESSIONS.length - 1] || ''))?.[1] || null;
+
+  SUBS = []; SESSIONS.length = 0;
+  await call('/api/checkout', { method:'POST', headers:hdr('good'), body:JSON.stringify({plan:'underwriter'}) });
+  out.O_first = trialOf();
+
+  SUBS = [sub('sub_gone','canceled','underwriter','price_uw_now')];
+  await call('/api/checkout', { method:'POST', headers:hdr('good'), body:JSON.stringify({plan:'underwriter'}) });
+  out.O_again = trialOf();
+
+  /* a card that failed at the checkout screen is not a trial anybody had */
+  SUBS = [sub('sub_dead','incomplete_expired','underwriter','price_uw_now')];
+  await call('/api/checkout', { method:'POST', headers:hdr('good'), body:JSON.stringify({plan:'underwriter'}) });
+  out.O_declined = trialOf();
+  SUBS = [];
+
+  if (out.O_first !== '14')
+    bad.push('O: a first-time customer was not given the fourteen days the page sells');
+  if (out.O_again !== null)
+    bad.push('O: A CANCELLED CUSTOMER WAS GIVEN A SECOND FREE FORTNIGHT — subscribe, cancel on day 13, repeat, forever');
+  if (out.O_declined !== '14')
+    bad.push('O: somebody whose card was declined at checkout lost the trial they never had');
+}
+
+/* ══ P · A METER THAT CANNOT COUNT MUST NOT SAY IT COUNTED ════════════════
+   ni_use(who, feat, cap) has three required arguments and no default, and
+   JSON.stringify drops an undefined one. So a caller that forgot the cap sent
+   {who, feat}, PostgREST could not resolve the overload, and countUse returned
+   null — which every route reads as "no figure to report" and answers 200
+   anyway. /api/comps and /api/lookup/rent both did exactly this, so the one
+   cap whose job is to bound a bill somebody ELSE sends us has never once
+   incremented, while /api/health went on printing 40. */
+{
+  RPC.length = 0; USED = 0;
+  out.P_nocap = await B.countUse('u-1', 'aicomps');
+  out.P_sent_nocap = RPC.length;
+  out.P_withcap = await B.countUse('u-1', 'aicomps', 40);
+  out.P_body = RPC[RPC.length - 1] || null;
+
+  if (out.P_sent_nocap !== 0)
+    bad.push('P: a count with no cap was still sent to the database, where it cannot resolve');
+  if (!out.P_withcap || out.P_withcap.used !== 1)
+    bad.push('P: a count WITH a cap did not reach the meter');
+  if (!out.P_body || out.P_body.cap !== 40)
+    bad.push('P: the cap did not arrive as the third argument');
+
+  /* and the routes that were missing it now pass it. Read from the source
+     rather than exercised end to end, because reaching /api/comps needs a
+     RentCast key — a grep is the honest test of "is the argument there". */
+  const src = fs.readFileSync(new URL('./server.js', import.meta.url), 'utf8');
+  /* `await countUse(`, not `countUse(` — this file talks ABOUT countUse() in
+     four comments, and a prose mention with no arguments is not a call site */
+  const naked = [...src.matchAll(/await countUse\(([^)]*)\)/g)]
+    .map(m => m[1].split(',').length).filter(n => n < 3).length;
+  out.P_naked_callsites = naked;
+  if (naked)
+    bad.push(`P: ${naked} countUse call site(s) still pass no cap, so those meters never count`);
+
+  /* exactly one hand puts a hold down. countUse retires it when the database
+     holds the count; a second release eats another request's slot. */
+  B.meterHold('u-9','aicomps'); B.meterHold('u-9','aicomps');
+  USED = 0; await B.countUse('u-9','aicomps', 40);
+  out.P_holds_after = B.meterHolds('u-9','aicomps');
+  if (out.P_holds_after !== 1)
+    bad.push(`P: a successful count left ${out.P_holds_after} holds, not 1 — a double release reopens the race`);
+  const dbl = /await countUse\(ent\.uid, 'aicomps', meter\.cap\);\s*\n\s*const used = await usedThisMonth\(ent\.uid, 'aicomps'\);\s*\n\s*meterRelease\(/.test(src);
+  if (dbl) bad.push('P: /api/comps still releases the hold a second time after countUse already did');
 }
 
 srv.close(); stripeStub.close(); sbStub.close();

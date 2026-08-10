@@ -2058,9 +2058,29 @@ const authBack = (page) => {
 async function authSignUp(email, password, name){
   if (!SB_ON()) return { ok:false, offline:true };
   try {
+    /* ── THE PLAN TRAVELS IN THE CONFIRMATION LINK ────────────────────────
+       Somebody who clicked "Start 14 days free" and had to make an account
+       first goes to their inbox — and opens the mail on their PHONE about half
+       the time. A different device has none of this browser's storage, so
+       whatever we parked here is unreachable, and they arrive, confirm, sign
+       in, and land on a free account with nothing anywhere remembering that
+       they came here to pay.
+       The link is the one thing that reaches the other device. So the chosen
+       plan rides in it, and joinFromQuery picks it up on arrival exactly as if
+       they had clicked the button there. Read inline rather than through
+       joinHeld(), which lives in the billing block appended after this one.
+       (The address must still be on Supabase's Redirect URLs allowlist —
+       query strings are matched by prefix, so office.html?confirmed=1 covers
+       it and no dashboard change is needed.) */
+    const want = (() => {
+      try { const o = JSON.parse(localStorage.getItem('ni-join-v1') || 'null');
+            if (o && typeof o.plan === 'string' && o.plan) return o.plan; } catch(e){}
+      try { return sessionStorage.getItem('ni-join') || ''; } catch(e){ return ''; }
+    })();
+    const back = 'office.html?confirmed=1' + (want ? '&join=' + encodeURIComponent(want) : '');
     const r = await fetch(`${SB.url}/auth/v1/signup`, { method:'POST', headers: sbHead(),
       body: JSON.stringify({ email, password, data:{ name },
-                             options:{ emailRedirectTo: authBack('office.html?confirmed=1') },
+                             options:{ emailRedirectTo: authBack(back) },
                              gotrue_meta_security:{} }) });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) return { ok:false, error: authSay(j) };
@@ -2558,6 +2578,21 @@ async function afterStripe(){
     return;
   }
 
+  /* ── AND IF THE SESSION DIED WHILE THEY WERE ON STRIPE'S PAGE ─────────────
+     A checkout can take a while — a card fetched from another room, a 3-D
+     Secure step on a phone — and the token behind this page expires. They come
+     back charged, with no session, and the poll below asks the server twenty
+     times with nothing to ask WITH, then reports a confirmation that "has not
+     reached us", which is both wrong and alarming. The account is fine and the
+     subscription is fine; the only thing missing is a sign-in. Say that. */
+  const signedNow = await (async () => {
+    try { return !!(window.__authToken && await window.__authToken()); } catch(e){ return false; }
+  })();
+  if (!signedNow){
+    payNote('Payment taken, and your subscription is being set up. '
+          + 'Sign in again and everything it opens is open.');
+    return;
+  }
   payNote('Payment taken. Putting your subscription in place…');
   const t0 = Date.now();
   while (Date.now() - t0 < 20000){
@@ -2619,6 +2654,61 @@ async function joinSignedIn(){
   return !!joinAccount();
 }
 
+/* ── WHERE A CHOSEN PLAN WAITS WHILE SOMEBODY MAKES AN ACCOUNT ─────────────
+   It waited in sessionStorage, which is per TAB. And the account-first flow —
+   which is the flow, because the server will not start a checkout without a
+   session — runs like this:
+
+     click Start 14 days free  →  the office parks the plan, shows the door
+     sign up                   →  "check your email"
+     open the email            →  A NEW TAB, usually, often another device
+     confirm, sign in          →  sessionStorage is empty. The plan is gone.
+
+   So every customer who did not already have an account — the majority of
+   them, on a product that launched yesterday — signed up because they wanted
+   to pay, confirmed their address, and landed on a free account with nothing
+   to tell them or us what they had come for. They have to find the plans page
+   again and know to click the same button twice.
+
+   localStorage survives the new tab. It also survives for a month, which is
+   why the intent carries the moment it was made: inside a day it is the same
+   journey and it continues by itself; older than that and it is OFFERED, with
+   a button, because a page that redirects somebody to a payment screen for
+   something they half-decided last week is worse than one that asks. */
+const JOINSESS = 'ni-join';            // this tab, unchanged, still read first
+const JOINLOCAL = 'ni-join-v1';        // this browser: { plan, at }
+const JOIN_FRESH = 86400000;           // a day: still the same journey
+const JOIN_KEEP  = 7 * 86400000;       // a week: after that it is not an intent
+function joinPark(plan){
+  try { sessionStorage.setItem(JOINSESS, plan); } catch(e){}
+  try { localStorage.setItem(JOINLOCAL, JSON.stringify({ plan, at: Date.now() })); } catch(e){}
+}
+function joinForget(){
+  try { sessionStorage.removeItem(JOINSESS); } catch(e){}
+  try { localStorage.removeItem(JOINLOCAL); } catch(e){}
+}
+function joinHeld(){
+  let s = null; try { s = sessionStorage.getItem(JOINSESS); } catch(e){}
+  if (s && String(s).trim()) return { plan: String(s).trim().toLowerCase(), fresh: true };
+  let o = null; try { o = JSON.parse(localStorage.getItem(JOINLOCAL) || 'null'); } catch(e){}
+  if (!o || typeof o.plan !== 'string' || typeof o.at !== 'number') return null;
+  const age = Date.now() - o.at;
+  /* a clock that moved backwards is not a fresh intent */
+  if (age < 0 || age > JOIN_KEEP){ joinForget(); return null; }
+  return { plan: o.plan.trim().toLowerCase(), fresh: age < JOIN_FRESH };
+}
+/* the older intent, offered rather than acted on */
+function joinOffer(plan){
+  const say = plan === 'the office' ? 'The Office'
+            : plan.charAt(0).toUpperCase() + plan.slice(1);
+  payNote('You were starting ' + say + ' before you made your account.', null,
+    { label: 'Pick up where I left off', fn: async () => {
+        joinForget();
+        const r = await startCheckout(plan);
+        if (!r.ok) payNote(r.error, 'bad', r.portal ? PORTAL_ACTION : null);
+      } });
+}
+
 async function joinFromQuery(){
   const q = new URLSearchParams(location.search);
   const plan = (q.get('join') || '').trim().toLowerCase();
@@ -2627,11 +2717,13 @@ async function joinFromQuery(){
      a closed tab, a refresh mid-flow — has a plan sitting in sessionStorage
      with nothing left to consume it. This is the sweep: if there is a session
      and something parked, finish what they started. */
-  const held = (() => { try { return sessionStorage.getItem('ni-join'); } catch(e){ return null; } })();
-  const want = plan || (held || '').trim().toLowerCase();
+  const held = joinHeld();
+  const want = plan || (held ? held.plan : '');
+  /* an intent that arrived in this URL is as fresh as an intent gets */
+  const fresh = !!plan || !!(held && held.fresh);
   if (!want) return;
   if (plan) try { history.replaceState(null, '', location.pathname); } catch(e){}
-  const park = () => { try { sessionStorage.setItem('ni-join', want); } catch(e){} };
+  const park = () => joinPark(want);
   /* ── AND THE ASKING IS NEVER MET WITH SILENCE EITHER ─────────────────────
      PAY_ON() was the first line of this function, and it is false until the
      answer from /api/config lands. So the sequence that every single "Start 14
@@ -2651,7 +2743,9 @@ async function joinFromQuery(){
   }
   const signed = await joinSignedIn();
   if (!signed){ park(); return; }
-  try { sessionStorage.removeItem('ni-join'); } catch(e){}
+  /* older than a day: ask, do not act. See the note above joinPark. */
+  if (!fresh){ joinOffer(want); return; }
+  joinForget();
   /* Between the click and Stripe there is a page load, a config fetch, a token
      and a round trip — about a second, spent looking at a dashboard that is
      doing nothing visible. That second is where somebody clicks the button
@@ -2665,12 +2759,14 @@ async function joinFromQuery(){
 async function joinAfterDoor(){
   try { if (typeof window.__authReady === 'function') await window.__authReady(); } catch(e){}
   if (!PAY_ON()) return;
-  let plan = null; try { plan = sessionStorage.getItem('ni-join'); } catch(e){}
-  if (!plan) return;
+  const held = joinHeld();
+  if (!held) return;
   const signed = await joinSignedIn();
   if (!signed) return;               // the door fired before the session landed
-  try { sessionStorage.removeItem('ni-join'); } catch(e){}
-  const r = await startCheckout(plan);
+  if (!held.fresh){ joinOffer(held.plan); return; }
+  joinForget();
+  payNote('Opening checkout…');
+  const r = await startCheckout(held.plan);
   if (!r.ok) payNote(r.error, 'bad', r.portal ? PORTAL_ACTION : null);
 }
 
@@ -2738,6 +2834,20 @@ window.__payOn      = PAY_ON;
 /* the wordmark needs no server — it reads one key — so it is also done at once,
    because a logo that changes meaning half a second late is a flicker */
 try{ wordmarkHome(); }catch(e){}
+/* ── AND THE SECOND BETWEEN THE CLICK AND STRIPE IS NOT DEAD AIR ───────────
+   Arriving at office.html?join=underwriter, a customer watches their whole
+   dashboard paint, sits looking at it for about a second while the config
+   fetch and the token round trip finish, and is then thrown to Stripe. Nothing
+   in that second says a thing, so it reads as a page that loaded the wrong
+   screen and then twitched — which is exactly what "it takes me to the page
+   but it's a little buggy" describes.
+   The note needs no server: it is one localStorage read, so it lands with the
+   first paint. Only for somebody who HAS an account, because for anybody else
+   the honest next screen is the door, and promising a checkout in front of a
+   sign-up form is the same lie in the other direction. */
+try {
+  if (location.search.indexOf('join=') >= 0 && joinAccount()) payNote('Opening checkout…');
+} catch(e){}
 })();
 </script>
 </body></html>

@@ -481,7 +481,7 @@ const OK = { 'x-ni-access':'letmein', ...PAID };
    Six callers, one correct access code between them. The code is not the
    entitlement; the account is. */
 {
-  const s = await boot({ ...ACC, NI_MOCK:'1', NI_ACCESS_CODE:'letmein', NI_PER_IP_HOUR:'99', NI_PER_DAY:'99' });
+  let s = await boot({ ...ACC, NI_MOCK:"1", NI_ACCESS_CODE:"letmein", NI_PER_IP_HOUR:"99", NI_PER_DAY:"99" });
   const one = async tok => {
     const h = { 'x-ni-access':'letmein', ...(tok ? AS(tok) : {}) };
     const r = await post({ images: img() }, h);
@@ -496,7 +496,23 @@ const OK = { 'x-ni-access':'letmein', ...PAID };
     ['a Solo account',      'tok-solo',        403],
     ['an expired trial',    'tok-stale',       403],
     ['an account with no profile row', 'tok-noprofile', 403],
-    ['a live trial',        'tok-trial',       200],
+    /* ── AND A LIVE `trial` COLUMN IS NOT A LICENCE BY ITSELF ──────────────
+       This expected 200 and got it, for months, for the wrong reason.
+       `profiles.trial` is the NO-CARD grant — a fortnight support can hand
+       somebody by editing a row — and it is switched OFF by default:
+       NI_TRIAL_TIER is 0, chosen deliberately as the value the comment beside
+       it calls "grants nothing", because the fourteen days this product sells
+       are Stripe's and come with a card on file. Those set `plan` through the
+       webhook, so a real trialling subscriber is tier 2 here and is unaffected
+       by any of this.
+       What actually happened is that entitlementOf returned ok:true from
+       inside the trial branch without ever comparing against `need`. So a row
+       with a trial date and no plan was tier 0 AND allowed — the paid product,
+       free, on our model key, at the full Underwriter cap. This line was the
+       assertion that should have caught it and instead certified it.
+       Off by default is now off, and the switch is tested below rather than
+       assumed. */
+    ['a live trial with the grant off', 'tok-trial', 403],
     ['an Underwriter',      'tok-underwriter', 200],
     ['The Office',          'tok-office',      200],
   ]){
@@ -511,6 +527,23 @@ const OK = { 'x-ni-access':'letmein', ...PAID };
     'F: a free account was refused for the wrong stated reason — the page cannot tell it what to do next');
   check(/Underwriter/.test(out.F['a free account'].err || ''),
     'F: the refusal does not name the plan that opens it');
+
+  /* ── AND THE COURTESY FORTNIGHT STILL WORKS WHEN IT IS TURNED ON ─────────
+     The mechanism is there for support to comp somebody, and switching it off
+     by default is only defensible if switching it ON still does something. One
+     variable, no deploy, and the same token that was refused above. */
+  {
+    await new Promise(d => s.close(d));
+    const sT = await boot({ ...ACC, NI_MOCK:'1', NI_ACCESS_CODE:'letmein',
+                            NI_PER_IP_HOUR:'99', NI_PER_DAY:'99', NI_TRIAL_TIER:'2' });
+    const r = await post({ images: img() }, { 'x-ni-access':'letmein', ...AS('tok-trial') });
+    out.F_granted = r.status;
+    check(r.status === 200, `F: NI_TRIAL_TIER=2 did not grant the courtesy trial (${r.status})`);
+    /* and it is a TIER, so it still cannot reach past what it grants */
+    await new Promise(d => sT.close(d));
+    s = await boot({ ...ACC, NI_MOCK:'1', NI_ACCESS_CODE:'letmein',
+                     NI_PER_IP_HOUR:'99', NI_PER_DAY:'99' });
+  }
 
   /* the whole route is off when there is no account layer at all, EVEN with a
      correct access code — because with no account layer there is no such thing

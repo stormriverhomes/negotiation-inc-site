@@ -352,6 +352,9 @@ export function mountBilling(app){
       const have = await stripe('GET',
         `/v1/subscriptions?limit=20&status=all&customer=${encodeURIComponent(cust)}`);
       const live = (have.data || []).filter(s => LIVE_STATUS.has(s.status));
+      /* every subscription that ever actually STARTED for this customer — see
+         the note on trial_period_days below */
+      const hadTrial = (have.data || []).some(s => STARTED_STATUS.has(s.status));
       if (live.length){
         const now = live.map(planOfSub).filter(Boolean);
         log('checkout refused: already subscribed', live.length);
@@ -376,7 +379,20 @@ export function mountBilling(app){
           /* `founding` is stamped so a place can be recognised later without
              re-deriving it from a price id that may be archived by then */
           metadata: { uid: who.uid, plan, ...(founding ? { founding: '1' } : {}) },
-          ...(TRIAL_DAYS > 0 ? { trial_period_days: TRIAL_DAYS } : {}),
+          /* ── FOURTEEN DAYS FREE, ONCE ─────────────────────────────────────
+             The refusal above discards everything that is not currently live,
+             which is right for "are you already subscribed" and wrong for
+             "have you had the free fortnight". `trialing` is in LIVE_STATUS,
+             so reconcile writes the full plan the moment a trial starts and
+             before a cent is charged — so subscribe, use The Office free for
+             thirteen days, cancel, subscribe again, forever, on one account
+             and one card. The rows needed to see it were already in hand and
+             were being thrown away.
+             `incomplete` and `incomplete_expired` are deliberately NOT here: a
+             card that failed at the checkout screen is somebody who never got
+             the trial, and charging them for their own declined card the
+             second time is punishing the wrong person. */
+          ...(TRIAL_DAYS > 0 && !hadTrial ? { trial_period_days: TRIAL_DAYS } : {}),
         },
         /* ── THE TRIAL PUTS A CARD ON FILE ─────────────────────────────────
            Stripe collects one by default for a subscription, so this was
@@ -560,17 +576,49 @@ export function verify(raw, sig, secret = WHSEC, nowMs = Date.now()){
    run out, and that is where access ends. */
 const LIVE_STATUS = new Set(['active', 'trialing', 'past_due']);
 
+/* ── AND WHAT COUNTS AS "HAS BEEN A SUBSCRIBER BEFORE" ────────────────────
+   A wider set than LIVE_STATUS and used for exactly one decision: whether the
+   fourteen free days have already been spent. Everything that ever billed or
+   ever ran a trial is in it. `incomplete` and `incomplete_expired` are not —
+   those are checkouts that died at the card screen, and their owner has had
+   nothing. */
+const STARTED_STATUS = new Set(['active', 'trialing', 'past_due', 'unpaid', 'canceled', 'paused']);
+
 export function planOfSub(sub){
   if (!sub || !LIVE_STATUS.has(sub.status)) return null;
   const m = (sub.metadata && sub.metadata.plan) || '';
   const k = String(m).trim().toLowerCase();
-  if (k && PRICE.hasOwnProperty(k)) return k;
-  /* A subscription created by hand in the Stripe dashboard has no metadata.
-     Falling back to the price map is right for exactly that case, and it is a
-     fallback rather than the rule for the reason at the top of this file. */
   const pid = sub.items && sub.items.data && sub.items.data[0] && sub.items.data[0].price
             && sub.items.data[0].price.id;
-  for (const [name, id] of Object.entries(PRICE)) if (id && id === pid) return name;
+  /* ── WHAT THE PRICE SAYS, WHEN THE PRICE IS ONE WE STILL SELL ─────────────
+     Trap 1 at the top of this file says the plan must not be derived from the
+     price id, and that is right — for a GRANDFATHERED price. It is exactly
+     wrong for a current one, and the difference is the whole fix.
+
+     Stripe's customer portal changes a subscription's PRICE. It has no way to
+     write subscription metadata. So if plan switching is ever enabled on the
+     portal configuration — and the 409 this file returns tells customers to go
+     there for exactly that: "changing plan is done in the billing portal" —
+     then a subscriber who moves from The Office to Solo pays $39 and keeps a
+     metadata stamp that says "the office", forever. The reverse pays $249 and
+     is served Solo, which the comment in reconcile() calls, correctly, theft.
+
+     The disambiguation is already in the data. A grandfathered price is by
+     definition one that is NOT in the current price map — that is what makes
+     it grandfathered. So: if the price they are paying today is one we still
+     sell, that is the plan they are on, whatever the metadata remembers about
+     the day they joined. If it is not in the map, the price lock is in play
+     and the metadata is the only honest answer. Both traps closed, and neither
+     at the other's expense. */
+  if (pid) for (const [name, id] of Object.entries(PRICE)){
+    if (!id || id !== pid) continue;
+    if (k && k !== name && PRICE.hasOwnProperty(k))
+      log('sub price and metadata disagree — price wins');
+    return name;
+  }
+  if (k && PRICE.hasOwnProperty(k)) return k;
+  /* A subscription created by hand in the Stripe dashboard has no metadata and
+     may be on a price we do not sell. Nothing left to read. */
   log('sub with no plan');
   return null;
 }
@@ -658,7 +706,15 @@ const TIER = { 'solo':1, 'underwriter':2, 'the office':3 };
    Takes a date or a timestamp, in either shape, and refuses anything else. */
 const NUMENV = (k, d) => { const v = Number(process.env[k]);
   return Number.isFinite(v) && v >= 0 ? v : d; };
-const TRIAL_LEN  = NUMENV('NI_TRIAL_DAYS', 14);
+/* ── READ AT CALL TIME, LIKE EVERY OTHER SETTING IN THIS FILE ─────────────
+   Captured at import, both of these were unreachable to anything that boots
+   the service twice — Node caches a module by URL, so the second boot got the
+   first boot's numbers. Which made the claim three lines above ("NI_TRIAL_TIER
+   can move it without a deploy") false, and, worse, made the switch untestable:
+   the harness set it to 2, imported, and got 0. An untested switch on the one
+   grant that hands out the paid product for free is the kind that turns out to
+   have been stuck in the wrong position all along. */
+const TRIAL_LEN  = () => NUMENV('NI_TRIAL_DAYS', 14);
 /* ── AND NO CARD MEANS NO PRODUCT ──────────────────────────────────────────
    The fourteen days are sold as "card on file, nothing charged" — that is what
    the plans page says and what the workspace door now says. This column is the
@@ -669,8 +725,8 @@ const TRIAL_LEN  = NUMENV('NI_TRIAL_DAYS', 14);
    comping somebody a fortnight is a real thing to want, and NI_TRIAL_TIER=2
    turns it on deliberately for as long as that is the intention. What it will
    not do is be the default and disagree with the price list. */
-const TRIAL_TIER = NUMENV('NI_TRIAL_TIER', 0);
-export function trialLeft(v, now = Date.now(), days = TRIAL_LEN){
+const TRIAL_TIER = () => NUMENV('NI_TRIAL_TIER', 0);
+export function trialLeft(v, now = Date.now(), days = TRIAL_LEN()){
   if (!v) return 0;
   const s = String(v).trim();
   /* a bare date is midnight UTC; anything with a time in it already says so */
@@ -688,15 +744,45 @@ export async function entitlementOf(req, need = 2){
   try {
     const r = await fetch(`${sbUrl()}/rest/v1/profiles?id=eq.${encodeURIComponent(who.uid)}`
       + '&select=plan,trial', { headers:{ apikey:sbKey(), authorization:'Bearer ' + sbKey() } });
-    if (r.ok){ const j = await r.json(); row = Array.isArray(j) ? j[0] : null; }
+    /* ── A DATABASE THAT DID NOT ANSWER IS NOT AN ACCOUNT THAT DOES NOT EXIST ─
+       Anything other than a 2xx fell through to 'noprofile', and every route
+       maps that to a 403 reading "needs an account". So a rotated service key
+       or a statement timeout told PAYING SUBSCRIBERS they had no account, in
+       the tone of a refusal rather than an outage — and left a log trail that
+       looks like a gate working correctly. 'lookup' is the same fail-closed
+       answer said honestly, and the routes already map it to a 503. */
+    if (!r.ok){ log('profile lookup', r.status); return { ok:false, why:'lookup' }; }
+    const j = await r.json(); row = Array.isArray(j) ? j[0] : null;
   } catch(e){ return { ok:false, why:'lookup' }; }
   if (!row) return { ok:false, why:'noprofile' };
 
   const trialDaysLeft = trialLeft(row.trial);
   const tier = TIER[String(row.plan || '').trim().toLowerCase()] || 0;
 
-  if (trialDaysLeft > 0) return { ok:true, uid:who.uid, tier:Math.max(tier, TRIAL_TIER), trial:trialDaysLeft };
-  if (tier >= need)      return { ok:true, uid:who.uid, tier, trial:0 };
+  /* ── AND THE TRIAL BRANCH HAS TO CLEAR THE SAME BAR ────────────────────────
+     This returned ok:true from inside the trial branch without ever looking at
+     `need`. TRIAL_TIER defaults to 0 — the comment above it says so, out loud,
+     as the safe default that "grants nothing" — so a row with a trial date and
+     no plan came back {ok:true, tier:0} and EVERY route that asks for tier 2
+     accepted it. Not a reduced grant either: capFor(feature, 0) hands back the
+     full Underwriter allowance, so it was the paid product, free, for fourteen
+     days, on our model key and our RentCast bill.
+
+     Nothing in this repo writes `trial` and the signup trigger leaves it null,
+     which is the only reason this has not already cost money. But the two ways
+     it becomes real are both ordinary: support comping somebody a fortnight —
+     the exact case the comment above calls "a real thing to want" — and the
+     browser, because the row-level policy pins `plan` in its WITH CHECK and
+     does NOT pin `trial`; only the column grant in 004 stands in the way, and
+     005 exists precisely because that grant is easy to lose.
+
+     A trial is a TIER, and a tier is compared against what the route needs.
+     Same rule as every other path, and it keeps working when a future feature
+     asks for 3. */
+  const trialTier = Math.max(tier, TRIAL_TIER());
+  if (trialDaysLeft > 0 && trialTier >= need)
+    return { ok:true, uid:who.uid, tier:trialTier, trial:trialDaysLeft };
+  if (tier >= need) return { ok:true, uid:who.uid, tier, trial:0 };
   return { ok:false, why: tier === 0 ? 'free' : 'lowtier', uid:who.uid, tier };
 }
 
@@ -860,14 +946,33 @@ export async function usedThisMonth(uid, feature){
 /* spend one, and say what is left */
 export async function countUse(uid, feature, cap){
   if (!sbUrl() || !sbKey() || !uid) return null;
+  /* ── A CAP THAT IS NOT A NUMBER IS A METER THAT NEVER COUNTS ──────────────
+     ni_use(who uuid, feat text, cap int) has three required arguments and no
+     default. JSON.stringify DROPS an undefined value, so a caller that forgot
+     the third argument sent {who, feat}, PostgREST could not resolve the
+     overload, answered 404, and this function returned null — which every
+     caller reads as "no figure to report" and answers 200 anyway. The meter
+     read stayed at zero forever and the cap was never once enforced.
+     That is how /api/comps and /api/lookup/rent spent an uncapped RentCast
+     bill for weeks while /api/health said the cap was 40. */
+  if (!Number.isFinite(Number(cap))){
+    log('usage NOT COUNTED — no cap passed', feature);
+    return null;
+  }
   try {
     const r = await fetch(`${sbUrl()}/rest/v1/rpc/ni_use`, {
       method:'POST',
       headers:{ 'content-type':'application/json', apikey:sbKey(),
                 authorization:'Bearer ' + sbKey() },
-      body: JSON.stringify({ who: uid, feat: feature, cap }),
+      body: JSON.stringify({ who: uid, feat: feature, cap: Math.floor(Number(cap)) }),
     });
-    if (!r.ok) return null;
+    /* ── AND A WRITE THAT FAILED IS NOT A WRITE ──────────────────────────────
+       The read half was hardened so that only a 404 means "no meter" and
+       anything else refuses. The write half returned null on every failure and
+       said NOTHING — no log line, nothing on /api/health — so a renamed
+       function or a changed grant uncaps every metered feature for every
+       account, permanently, and the first sign of it is the bill. */
+    if (!r.ok){ log('usage write', r.status, feature); return null; }
     const j = await r.json();
     const row = Array.isArray(j) ? j[0] : j;
     /* the database holds the count now, so the in-flight hold that was
@@ -878,7 +983,7 @@ export async function countUse(uid, feature, cap){
     meterDrop(uid, feature);
     return (row && typeof row.remaining === 'number')
       ? { used: row.used|0, remaining: row.remaining|0, cap } : null;
-  } catch(e){ return null; }
+  } catch(e){ log('usage write failed', feature); return null; }
 }
 
 /* ── WHICH MONEY IS THIS ───────────────────────────────────────────────────

@@ -42,6 +42,7 @@ const bad = [], out = {};
 /* ══ stub Supabase ═══════════════════════════════════════════════════════ */
 let PLAN = null;                                   // what the server says, now
 let USERS = {};
+let CONFIRM_MODE = false;                          // signup returns no session
 const j = (res, code, o) => { res.writeHead(code, {'content-type':'application/json',
   'access-control-allow-origin':'*', 'access-control-allow-headers':'*',
   'access-control-allow-methods':'*'}); res.end(JSON.stringify(o)); };
@@ -52,6 +53,15 @@ const sb = http.createServer((req, res) => {
     const sess = (email,name) => ({ access_token:'at-'+email, refresh_token:'rt-'+email,
       expires_in:3600, user:{ id:'u-'+email, email, user_metadata:{name} } });
     if (u.pathname === '/auth/v1/signup'){ USERS[body.email]={pw:body.password,name:(body.data||{}).name||''};
+      /* ── CONFIRMATIONS ON, WHICH IS HOW THE LIVE PROJECT IS SET UP ────────
+         Supabase answers a signup with a USER AND NO SESSION when the address
+         has to be confirmed first. The page reads that as "check your email"
+         and the person leaves for their inbox. Every section written before
+         this one had the stub hand back a session immediately, so the whole
+         confirmation detour — the part where the browser tab changes — was
+         never once exercised. */
+      if (CONFIRM_MODE) return j(res,200,{ id:'u-'+body.email, email:body.email,
+        identities:[{ id:'i-'+body.email }], user_metadata:{ name:(body.data||{}).name||'' } });
       return j(res,200,sess(body.email,(body.data||{}).name)); }
     if (u.pathname === '/auth/v1/token'){ const e=body.email||'';
       if (u.searchParams.get('grant_type')==='refresh_token') return j(res,200,sess((body.refresh_token||'').slice(3),''));
@@ -453,6 +463,143 @@ const page = async () => { const p = await b0.newPage();
              + 'silence after a payment is how you get a chargeback');
     await q.close();
   }
+
+  /* ══ K · THE PLAN SURVIVES THE EMAIL ══════════════════════════════════════
+     The server will not start a checkout without a session — by design, and it
+     is the guarantee the whole funnel rests on: you have an account before you
+     have a bill. Which means the commonest path to a first payment is:
+
+       click Start 14 days free  →  the office parks the plan, shows the door
+       sign up                   →  "check your email"
+       open the email            →  A NEW TAB
+       confirm, sign in          →  and the plan had better still be there
+
+     It was parked in sessionStorage, which is per TAB. So it was not there.
+     Every customer who did not already have an account signed up BECAUSE they
+     wanted to pay, confirmed their address, and landed on a free account with
+     nothing anywhere recording what they came for.
+
+     Playwright models this exactly: one context is one browser profile, and
+     context.newPage() is a new tab — same localStorage, fresh sessionStorage.
+     That distinction IS the bug, so the test has to be built on it. */
+  {
+    PLAN = null; CONFIRM_MODE = true;
+    const ctx = await b0.newContext();
+    const tab1 = await ctx.newPage();
+    await tab1.goto(BASE + '/office.html?join=underwriter'); await tab1.waitForTimeout(2000);
+    out.K_parked_session = await tab1.evaluate(() => sessionStorage.getItem('ni-join'));
+    out.K_parked_local   = await tab1.evaluate(() => localStorage.getItem('ni-join-v1'));
+    if (!out.K_parked_local)
+      bad.push('K: the chosen plan was not written anywhere that survives the tab, '
+             + 'so confirming by email loses it');
+    /* they sign up here, and Supabase sends them to their inbox */
+    LASTCHECKOUT = null;
+    await tab1.fill('#g-name','Confirmed'); await tab1.fill('#g-email','conf@x.com');
+    await tab1.fill('#g-pw','sixchars');
+    await tab1.click('#g-go'); await tab1.waitForTimeout(1600);
+    out.K_told_to_check = await tab1.evaluate(() => {
+      const e = document.getElementById('g-err'); return e ? e.textContent : null; });
+    if (LASTCHECKOUT)
+      bad.push('K: a checkout was started for somebody who has not confirmed their address yet');
+    if (!out.K_told_to_check || !/email/i.test(out.K_told_to_check))
+      bad.push('K: signing up with confirmations on did not tell anybody to check their email');
+    await tab1.close();
+
+    /* the link in the email, opened in a NEW TAB — same browser, same
+       localStorage, fresh sessionStorage. That difference is the bug. */
+    CONFIRM_MODE = false;
+    const tab2 = await ctx.newPage();
+    await tab2.goto(BASE + '/office.html?confirmed=1');
+    /* Chromium hands a programmatically-opened tab the opener's sessionStorage,
+       so the real new-tab condition is made explicit rather than left to the
+       browser: wipe it, reload, and see what comes back. If the plan reappears
+       it can only have come from localStorage, which is the whole fix — the
+       per-tab store is no longer the thing the funnel rests on.
+       (Wiping and reading in the SAME load proves nothing: joinFromQuery finds
+       the intent in localStorage, sees no session, and correctly parks it
+       again a moment later. That is the product working, and the first draft
+       of this assertion read it as the test failing.) */
+    await tab2.evaluate(() => { try { sessionStorage.clear(); } catch(e){} });
+    await tab2.goto(BASE + '/office.html?confirmed=1');
+    await tab2.waitForTimeout(1600);
+    out.K_fresh_session = await tab2.evaluate(() => sessionStorage.getItem('ni-join'));
+    if (out.K_fresh_session !== 'underwriter')
+      bad.push('K: a tab with no sessionStorage could not recover the chosen plan, '
+             + 'so the confirmation detour still loses it');
+
+    LASTCHECKOUT = null;
+    /* ?confirmed=1 puts the door in SIGN IN mode, so there is no name field —
+       which is right, and is why the first draft of this section timed out on
+       one. They type the password they just chose. */
+    await tab2.fill('#g-email','conf@x.com'); await tab2.fill('#g-pw','sixchars');
+    await tab2.click('#g-go'); await tab2.waitForTimeout(2600);
+    out.K_checkout = LASTCHECKOUT;
+    if (!LASTCHECKOUT || LASTCHECKOUT.plan !== 'underwriter')
+      bad.push('K: SIGNING UP TO PAY AND CONFIRMING BY EMAIL ENDED ON A FREE ACCOUNT — '
+             + 'the plan was lost between the tab that chose it and the tab that made the account');
+    await tab2.close();
+
+    /* ── AND THE HALF WHO OPEN THE EMAIL ON THEIR PHONE ────────────────────
+       A different device has none of this browser's storage. Nothing parked
+       anywhere can reach it — so the plan rides in the confirmation link
+       itself, which is the one thing that does. A fresh context is a fresh
+       device: no localStorage, no session, nothing but the URL. */
+    {
+      const phone = await b0.newContext();
+      const p2 = await phone.newPage();
+      LASTCHECKOUT = null;
+      await p2.goto(BASE + '/office.html?confirmed=1&join=underwriter');
+      await p2.waitForTimeout(1600);
+      out.K_phone_parked = await p2.evaluate(() => {
+        try { return sessionStorage.getItem('ni-join'); } catch(e){ return 'ERR'; } });
+      out.K_phone_says = await p2.evaluate(() => {
+        const e = document.getElementById('g-err'); return e ? e.textContent : null; });
+      if (out.K_phone_parked !== 'underwriter')
+        bad.push('K: the confirmation link did not carry the plan to a device that had never seen it');
+      if (!out.K_phone_says || !/confirmed/i.test(out.K_phone_says))
+        bad.push('K: the confirmation link stopped saying the address was confirmed once it carried a plan');
+      await p2.fill('#g-email','conf@x.com'); await p2.fill('#g-pw','sixchars');
+      await p2.click('#g-go'); await p2.waitForTimeout(2600);
+      out.K_phone_checkout = LASTCHECKOUT;
+      if (!LASTCHECKOUT || LASTCHECKOUT.plan !== 'underwriter')
+        bad.push('K: confirming on a phone and signing in there ended on a free account');
+      await p2.close(); await phone.close();
+    }
+
+    /* ── and a week-old intent is OFFERED, not acted on ────────────────────
+       localStorage keeps things for a month. A page that redirects somebody to
+       a payment screen for something they half-decided last Tuesday is worse
+       than one that asks, so past a day it becomes a button. */
+    const ctx2 = await b0.newContext();
+    const tab3 = await ctx2.newPage();
+    await tab3.goto(BASE + '/office.html'); await tab3.waitForTimeout(1200);
+    await tab3.fill('#g-name','Stale'); await tab3.fill('#g-email','stale@x.com');
+    await tab3.fill('#g-pw','sixchars');
+    await tab3.click('#g-go'); await tab3.waitForTimeout(1800);
+    LASTCHECKOUT = null;
+    await tab3.evaluate(() => {
+      try { sessionStorage.removeItem('ni-join'); } catch(e){}
+      localStorage.setItem('ni-join-v1', JSON.stringify({
+        plan:'underwriter', at: Date.now() - 3 * 86400000 }));
+    });
+    await tab3.goto(BASE + '/office.html'); await tab3.waitForTimeout(2400);
+    out.K_stale_checkout = LASTCHECKOUT;
+    out.K_stale_note = await tab3.evaluate(() =>
+      (document.getElementById('paynote')||{}).textContent || null);
+    if (LASTCHECKOUT)
+      bad.push('K: a three-day-old intent sent somebody to a payment screen without asking');
+    if (!out.K_stale_note || !/pick up where i left off/i.test(out.K_stale_note))
+      bad.push('K: a three-day-old intent was silently dropped instead of being offered');
+    /* and the button spends it */
+    await tab3.evaluate(() => { const b = document.querySelector('#paynote button'); if (b) b.click(); });
+    await tab3.waitForTimeout(1800);
+    out.K_stale_taken = LASTCHECKOUT;
+    if (!LASTCHECKOUT || LASTCHECKOUT.plan !== 'underwriter')
+      bad.push('K: the offer button did not start the checkout it offered');
+    await tab3.close();
+    await ctx.close(); await ctx2.close();
+  }
+
   CONFIG = null; CONFIG_DELAY = 0;
 }
 

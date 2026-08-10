@@ -1447,7 +1447,10 @@ app.post('/api/lookup/rent', express.json({ limit: '4kb' }), async (req, res) =>
   if (rent === null) return fail(404, 'No rent came back for that address. Type it instead.');
 
   const n = Array.isArray(j.comparables) ? j.comparables.length : 0;
-  const month = await countUse(ent.uid, 'aicomps');
+  /* the cap, which was missing. ni_use takes three arguments and JSON.stringify
+     drops an undefined one, so this call has been resolving to nothing and the
+     RentCast meter has never once incremented — see the note in countUse. */
+  const month = await countUse(ent.uid, 'aicomps', meter.cap);
   res.json({ ok:true, rent, lo, hi, comps: n,
     ...(month ? { month: { used: month.used, cap: month.cap, left: month.remaining } } : {}),
     /* the sentence the sheet will print beside the figure. It says where the
@@ -1541,9 +1544,16 @@ app.post('/api/comps', express.json({ limit: '4kb' }), async (req, res) => {
   })).filter(c => c.price && c.sqft);
   if (!rows.length) return fail(404, 'The sales that came back had no price or floor area on them.');
 
-  await countUse(ent.uid, 'aicomps');
+  await countUse(ent.uid, 'aicomps', meter.cap);
   const used = await usedThisMonth(ent.uid, 'aicomps');
-  meterRelease(ent.uid, 'aicomps');
+  /* ── AND EXACTLY ONE HAND PUTS THE HOLD DOWN ──────────────────────────────
+     countUse() retires the hold itself once the database holds the count. This
+     line dropped a SECOND one — and holds are a fungible count, so the extra
+     drop ate another in-flight request's slot and reopened the very race the
+     hold exists to close. It was invisible only because the call above was
+     failing: with no cap passed it returned before ever reaching meterDrop, so
+     this line was doing the one drop. Fixing that made this line a bug in the
+     same instant. The close hook in meterFails covers every non-200 path. */
   res.json({ ok:true, rows, month: { used: used === NOMETER ? null : used, cap: meter.cap,
     left: (used === NOMETER || meter.cap <= 0) ? null : Math.max(0, meter.cap - used) } });
 });
