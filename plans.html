@@ -259,6 +259,16 @@ h1 em{font-style:normal;color:var(--blue)}
 .spot .saves{margin-top:13px;padding-top:12px;border-top:1px dashed var(--line-2);
  font-size:12.5px;color:var(--soft)}
 .spot .saves b{color:var(--green);font-weight:700}
+/* nine cards stack on a phone, so each card's fixed costs are paid nine
+   times: the art band alone was more than a whole screen across the gallery.
+   Slimmer, not gone — the art is what makes the row scannable. */
+@media(max-width:640px){
+ .spot .art{height:76px}
+ .spot .art svg{transform:translateY(-14px)}
+ .spot .sb{padding:14px 16px 16px}
+ .spot h3{font-size:19px;margin-top:8px}
+ .spot .saves{margin-top:10px;padding-top:9px}
+ .spots{gap:14px;margin-top:20px}}
 
 /* ── the matrix ── */
 /* ── THE COLUMN NOBODY ON A PHONE COULD SEE ────────────────────────────────
@@ -309,6 +319,17 @@ td .n{color:var(--faint)}
    colour lifted off --soft so it stops reading as a footnote to itself. */
 td small{display:block;font-size:13.5px;color:var(--mid);margin-top:5px;font-weight:400;
  line-height:1.58;max-width:56ch}
+/* ── ON A PHONE THE TABLE IS A TABLE ──────────────────────────────────────
+   Thirty-nine rows each carrying a paragraph made the comparison 6.8 phone
+   screens — a fifth of the whole page — and a grid you swipe sideways while
+   reading running prose is neither a table nor an article. The labels, the
+   ticks and the numbers keep every decision the matrix makes; the sentences
+   stay on desktop, where the reader who wants them is. Everything they say is
+   also said above, in the cards and the nine spotlights, at full size. */
+@media(max-width:700px){
+ td small{display:none}
+ th,td{padding:10px 12px}
+}
 .sec td{background:var(--wash);font-weight:700;font-family:var(--serif);font-size:16.5px;text-align:left;
  letter-spacing:-.01em}
 .sec:hover td{background:var(--wash)}

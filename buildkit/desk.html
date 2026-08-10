@@ -534,7 +534,14 @@ h1{font-family:var(--serif);font-size:34px;font-weight:700;letter-spacing:-.015e
    somebody press the wrong thing. Below the fold of a phone the mode group
    takes its own row. */
 .rail .railmodes{margin-left:auto;display:flex;align-items:center}
-@media(max-width:560px){ .rail .railmodes{margin-left:0;width:100%;margin-top:8px} }
+@media(max-width:560px){ .rail .railmodes{margin-left:0;width:100%;margin-top:8px}
+ /* and the three steps hold ONE row. "2 The condition" used to wrap the rail
+    into two rows of steps plus a modes row — 190px of navigation before any
+    navigating could happen, on the screen size with the least to spare. Three
+    steps that fit side by side read as one control, which they are. */
+ .rail{gap:4px;margin-bottom:12px}
+ .rail button{font-size:12px;padding:5px 9px 5px 6px;gap:6px}
+ .rail button .i{width:18px;height:18px;font-size:10px} }
 
 .step{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);
  padding:30px 32px 32px;box-shadow:0 1px 2px rgba(16,23,37,.05)}
@@ -2132,6 +2139,20 @@ details.loan .grid{margin-top:11px}
  .coach .cx{padding:11px 13px;font-size:19px}
  .coach .cskip{padding:11px 6px}
  .coach .cgo{padding:11px 16px}}
+/* ── THE FIRST SCREEN OF A PHONE MUST CONTAIN THE TOOL ─────────────────────
+   Header, standfirst, a 314px coach, the step rail and a four-line essay put
+   the first input at 1.3 screens on an iPhone and 1.7 on a small one. Every
+   block was defensible; the SUM was a tool whose opening screen had nothing
+   to type in. On a phone the coach keeps its title, its "show me" door and
+   its dismissals — the elaboration is desktop's — and the step explainer
+   keeps its first sentence and its promise. Nothing is hidden that decides
+   anything; what is hidden is repeated where the deciding happens. */
+@media(max-width:560px){
+ .coach{margin-bottom:10px}
+ .coach .cm{display:none}
+ .coach .cacts{margin-top:6px}
+ .stepmore{display:none}
+ .steph{margin-bottom:14px}}
 .coach .cx:hover{color:var(--mid)}
 .bkgate{margin-bottom:18px;padding:16px 20px;border-radius:18px;
  border:1.5px solid var(--gold-line,#e8dcb8);background:var(--gold-soft,#fbf6e9)}
@@ -2545,9 +2566,14 @@ body.hasrail.railtight .trouble{left:64px}
  <section class="step" data-step="property" hidden>
   <div class="steph">
    <h2>The value</h2>
+   <!-- The elaboration folds away on a phone: with the coach above it, this
+        paragraph was one of the two blocks pushing the FIRST INPUT to 1.3
+        screens down — an underwriting tool whose opening screen contained no
+        underwriting. The first sentence and the promise stay everywhere;
+        the middle is desktop's. -->
    <p>ARV is the hardest number in underwriting, so this screen builds it rather than asking
-    for it. Put in the sales you found; the sheet scores each one, adjusts it to your house
-    and lays out the range. <b>You set the number at the end.</b></p>
+    for it.<span class="stepmore"> Put in the sales you found; the sheet scores each one, adjusts it to your house
+    and lays out the range.</span> <b>You set the number at the end.</b></p>
   </div>
   <div class="addr">
    <label for="addr">Address <span class="opt">optional</span></label>

@@ -675,6 +675,21 @@ street = street.replace('</head>', FONTS + ARCADE + '</head>');
 street = await minifyInline(street, 'street');
 street = bankInto(street, 'daily-street.html');
 fs.writeFileSync(path.join(out, 'daily-street.html'), street);
+/* ── THE END SCREEN'S DOOR MUST BE A DOOR ─────────────────────────────────
+   Both games close their run screen with "Run a real address →", which is the
+   single highest-intent click either page will ever be shown: somebody who
+   just finished playing, being offered the real product. It shipped as
+   href="#" onclick="return false" — a door painted on the wall — and sat that
+   way through launch. The sentence may change; what may not come back is the
+   stub. */
+for (const [f, s] of [['comp-run.html', html], ['daily-street.html', street]]){
+  if (/onclick="return false"[^>]*>Run a real address/.test(s)
+      || /href="#"[^>]*>Run a real address/.test(s))
+    throw new Error(f + ': "Run a real address" is a dead link again — the one click that '
+      + 'converts a player into a user goes nowhere');
+  if (s.includes('Run a real address') && !/href="desk\.html[^"]*"[^>]*>Run a real address/.test(s))
+    throw new Error(f + ': "Run a real address" no longer points at the desk');
+}
 
 // ── the course ─────────────────────────────────────────────────────────────
 // The Eight Exits ships beside the game. In the built copy its arcade link
@@ -1600,6 +1615,12 @@ fs.writeFileSync(path.join(out, 'plans.html'), plans);
   let office = fs.readFileSync('office.html', 'utf8');
   office = office.replace(/href="portfolio\.html"/g, 'href="arcade.html"');
   office = office.replace(/the-eight-exits\.html/g, 'exits.html');
+  /* the one entry page with no card. Every "Start 14 days free" link points at
+     office.html?join=…, and a link somebody pastes into a chat renders a blank
+     grey rectangle where every other page on the site shows its card. */
+  office = office.replace('</head>', OG('Your desk · Negotiation Inc',
+    'Sign in to your underwriting desk — every sheet, every exit, every number with its working shown.',
+    'office') + '</head>');
   office = office.replace('</head>', ICONS() + '</head>');
   office = office.replace('</head>', FONTS + '</head>');
   /* the same ZIP priors the desk uses — the office prices sheets too */

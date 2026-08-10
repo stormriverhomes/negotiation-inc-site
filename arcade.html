@@ -72,6 +72,7 @@ h1{font-size:46px}
 
 .floor{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin:34px 0 20px}
 .cab{background:#141c2b;border:1px solid #223047;display:flex;flex-direction:column;overflow:hidden;border-radius:10px}
+.shotlink{display:block;line-height:0}
 .cab .shot{display:block;width:100%;height:186px;object-fit:cover;object-position:50% 62%;
  image-rendering:pixelated;border-bottom:1px solid #223047;background:#0f1622}
 .cab .body{padding:16px 18px;flex:1}
@@ -302,7 +303,11 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
       If those ever come out, this order becomes the wrong one. ═════════ -->
 
  <div class="cab">
-  <img class="shot" src="art/world-now.png" alt="A pixel-art street of houses" width="960" height="540" fetchpriority="high" decoding="sync">
+  <!-- The picture of a game is a door, not a poster. On a phone the art
+      fills the first screen while the Play button sits under the fold — so
+      the one thing a thumb naturally taps did nothing. Same href as the
+      button below; the button stays for the person who reads first. -->
+ <a class="shotlink" href="comp-run.html" title="Play Comp Run" aria-label="Play Comp Run"><img class="shot" src="art/world-now.png" alt="A pixel-art street of houses" width="960" height="540" fetchpriority="high" decoding="sync"></a>
   <div class="body">
    <div class="marquee">Cabinet 01 · the long game</div>
    <h2>Comp Run</h2>
@@ -315,7 +320,11 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
  </div>
 
  <div class="cab">
-  <img class="shot" src="art/door-future.png" alt="A pixel-art door from a later era" width="540" height="450" fetchpriority="high" decoding="sync">
+  <!-- The picture of a game is a door, not a poster. On a phone the art
+      fills the first screen while the Play button sits under the fold — so
+      the one thing a thumb naturally taps did nothing. Same href as the
+      button below; the button stays for the person who reads first. -->
+ <a class="shotlink" href="exit-drill.html" title="Run the Exit Drill" aria-label="Run the Exit Drill"><img class="shot" src="art/door-future.png" alt="A pixel-art door from a later era" width="540" height="450" fetchpriority="high" decoding="sync"></a>
   <div class="body">
    <div class="marquee">Cabinet 02 · sixty seconds a house</div>
    <h2>Exit Drill</h2>
@@ -330,7 +339,11 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
  </div>
 
  <div class="cab">
-  <img class="shot" src="art/door-now.png" alt="A pixel-art front door" width="540" height="450" fetchpriority="high" decoding="sync">
+  <!-- The picture of a game is a door, not a poster. On a phone the art
+      fills the first screen while the Play button sits under the fold — so
+      the one thing a thumb naturally taps did nothing. Same href as the
+      button below; the button stays for the person who reads first. -->
+ <a class="shotlink" href="daily-street.html" title="Work today’s street" aria-label="Work today’s street"><img class="shot" src="art/door-now.png" alt="A pixel-art front door" width="540" height="450" fetchpriority="high" decoding="sync"></a>
   <div class="body">
    <div class="marquee">Cabinet 03 · three streets, three minutes</div>
    <h2>The Daily Street</h2>
