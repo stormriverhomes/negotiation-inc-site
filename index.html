@@ -834,7 +834,14 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
         first, then hands over the word, because every other section on this
         page is built out of it and there is nowhere else it gets taught. -->
    <h2>Eight ways to make money on one house.</h2>
-   <p>These are the only ones there are. The trade calls them <b>exits</b> — the way you get your
+   <!-- This used to read "These are the only ones there are." It is an
+        absolute claim the argument never needed, and real estate has enough
+        variations — lease options, wraps, seller-finance hybrids — that it
+        invites a reply arguing about the list instead of reading it. What
+        actually matters is that these eight are the ones this desk PRICES,
+        and that the choice between them moves the number. Both survive
+        without the absolute. -->
+   <p>These are the eight this desk prices. The trade calls them <b>exits</b> — the way you get your
       money back out — and <b>each one can pay a completely different price for the same house</b>,
       often tens of thousands apart. Picking the wrong one is not a rounding error, it is the whole
       deal. The desk prices the seven a house can take and tells you which fits the person you are
@@ -1061,7 +1068,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
         (The retired phrasing is deliberately not quoted here — publish.mjs
         greps the SHIPPED pages for it, and a comment that quotes the thing
         being guarded against is a guard that fires on its own explanation.) -->
-   <a href="plans.html#comps"><span class="t">The comps pulled</span><span class="d">Type the address. Recent sales arrive scored and adjusted, on our key — forty a month.</span></a>
+   <a href="plans.html#comps"><span class="t">The comps pulled</span><span class="d">Type the address. Recent sales arrive on our key — the desk scores each against your house. Forty a month.</span></a>
    <a href="plans.html#bid"><span class="t">Their bid checked</span><span class="d">Paste what the contractor sent. It shows you what is on your sheet that the bid never mentions.</span></a>
    <!-- ── THREE THINGS THE PRODUCT DOES THAT THIS PAGE NEVER MENTIONED ─────
         Found by listing every feature the plans page sells and searching this
@@ -1350,4 +1357,15 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
  }catch(e){ try{ console.warn('account chrome', e); }catch(_){}}
 })();
 </script>
+<script>(function(){try{
+var A=function(){try{var a=JSON.parse(localStorage.getItem('ni-account-v1')||'null');
+return a&&typeof a==='object'&&a.email?a:null;}catch(e){return null;}};
+document.addEventListener('click',function(ev){try{
+if(ev.defaultPrevented||ev.metaKey||ev.ctrlKey||ev.shiftKey||ev.altKey||ev.button)return;
+var t=ev.target;if(!t||!t.closest)return;
+var el=t.closest('a.marklink, a.mark, a.rn-mark');if(!el)return;
+var h=(el.getAttribute('href')||'').split('#')[0].split('?')[0];
+if(h!=='index.html'&&h!=='/index.html'&&h!=='/')return;
+if(!A())return;ev.preventDefault();location.href='office.html';
+}catch(e){}},true);}catch(e){}})();</script>
 </body></html>

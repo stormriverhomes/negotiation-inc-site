@@ -2368,5 +2368,16 @@ function copyShare(){
 
 newRun();
 </script>
+<script>(function(){try{
+var A=function(){try{var a=JSON.parse(localStorage.getItem('ni-account-v1')||'null');
+return a&&typeof a==='object'&&a.email?a:null;}catch(e){return null;}};
+document.addEventListener('click',function(ev){try{
+if(ev.defaultPrevented||ev.metaKey||ev.ctrlKey||ev.shiftKey||ev.altKey||ev.button)return;
+var t=ev.target;if(!t||!t.closest)return;
+var el=t.closest('a.marklink, a.mark, a.rn-mark');if(!el)return;
+var h=(el.getAttribute('href')||'').split('#')[0].split('?')[0];
+if(h!=='index.html'&&h!=='/index.html'&&h!=='/')return;
+if(!A())return;ev.preventDefault();location.href='office.html';
+}catch(e){}},true);}catch(e){}})();</script>
 </body>
 </html>

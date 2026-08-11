@@ -1627,6 +1627,28 @@ function wordmarkHome(){
   }
 }
 window.__wordmarkHome = wordmarkHome;
+/* ── AND IT HAS TO RUN AFTER THE ACCOUNT IS KNOWN ─────────────────────────
+   wordmarkHome returns immediately when nobody is signed in — correct — but
+   the account arrives from the auth layer AFTER first paint, and this only
+   ran at boot. So on a real session the masthead wordmark kept pointing at
+   the landing page: the most-pressed link in the product, sending a paying
+   customer out of their desk and onto the sales page. Elijah found it.
+
+   The click is the honest moment to decide, because by then the answer
+   cannot still be loading. Delegated, so it holds for a mark drawn later by
+   any render, and it only ever REDIRECTS a home link — anything else on the
+   page is untouched, and a signed-out visitor still gets the landing page. */
+document.addEventListener('click', function(ev){
+  try {
+    const el = ev.target && ev.target.closest && ev.target.closest('a.marklink, a.mark, a.rn-mark');
+    if (!el || ev.defaultPrevented || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button) return;
+    if (!joinAccount()) return;
+    const h = (el.getAttribute('href') || '').split('#')[0].split('?')[0];
+    if (h !== 'index.html' && h !== '/index.html' && h !== '/') return;
+    ev.preventDefault();
+    location.href = 'office.html';
+  } catch(e){}
+}, true);
 /* the one refusal that has somewhere for the person to go */
 const PORTAL_ACTION = { label: 'Manage your plan', fn: async () => {
   const p = await openPortal();
@@ -1684,5 +1706,16 @@ try {
 } catch(e){}
 })();
 </script>
+<script>(function(){try{
+var A=function(){try{var a=JSON.parse(localStorage.getItem('ni-account-v1')||'null');
+return a&&typeof a==='object'&&a.email?a:null;}catch(e){return null;}};
+document.addEventListener('click',function(ev){try{
+if(ev.defaultPrevented||ev.metaKey||ev.ctrlKey||ev.shiftKey||ev.altKey||ev.button)return;
+var t=ev.target;if(!t||!t.closest)return;
+var el=t.closest('a.marklink, a.mark, a.rn-mark');if(!el)return;
+var h=(el.getAttribute('href')||'').split('#')[0].split('?')[0];
+if(h!=='index.html'&&h!=='/index.html'&&h!=='/')return;
+if(!A())return;ev.preventDefault();location.href='office.html';
+}catch(e){}},true);}catch(e){}})();</script>
 </body>
 </html>

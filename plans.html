@@ -449,13 +449,13 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Negotiation Inc">
 <meta property="og:title" content="Plans · Negotiation Inc">
-<meta property="og:description" content="Pricing a property is free forever. A plan buys back the half hour: the photo condition read, comps pulled and scored, the lender packet, and a portfolio that remembers.">
+<meta property="og:description" content="Pricing a property is free forever. A plan buys back the half hour: the photo condition read, comps pulled on our key and scored against your house, the lender packet, and a portfolio that remembers.">
 <meta property="og:image" content="https://negotiationinc.com/og/page-plans.png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Plans · Negotiation Inc">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Plans · Negotiation Inc">
-<meta name="twitter:description" content="Pricing a property is free forever. A plan buys back the half hour: the photo condition read, comps pulled and scored, the lender packet, and a portfolio that remembers.">
+<meta name="twitter:description" content="Pricing a property is free forever. A plan buys back the half hour: the photo condition read, comps pulled on our key and scored against your house, the lender packet, and a portfolio that remembers.">
 <meta name="twitter:image" content="https://negotiationinc.com/og/page-plans.png">
 <meta property="og:url" content="https://negotiationinc.com/plans">
 <link rel="canonical" href="https://negotiationinc.com/plans">
@@ -501,7 +501,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   <div>
    <div class="k">Underwriter</div>
    <h3>$129 a month. The typing, done for you.</h3>
-   <p>The condition read off your photographs, comps pulled and scored on our key, the street
+   <p>The condition read off your photographs, comps pulled on our key and scored against your house, the street
     read, the letters and the lender packet. Fourteen days free with nothing charged until day
     fifteen, and cancelling is one click.</p>
   </div>
@@ -615,7 +615,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    <div class="pbh">Everything free, plus</div>
    <ul>
     <li><i>✓</i><span><b>Every condition line on its own slider</b> — roof, panel, each bath, priced separately</span></li>
-    <li><i>✓</i><span>Comps without a cap, scored and adjusted the way an appraiser would</span></li>
+    <li><i>✓</i><span>Comps without a cap, scored against your house and adjusted the way an appraiser would</span></li>
     <li><i>✓</i><span>The seven assumptions, and the grid showing what your profit does when you are wrong</span></li>
     <li><i>✓</i><span><b>Compare two deals</b> — both sheets, one engine, and where the winner changes</span></li>
     <li><i>✓</i><span><b>The lender packet</b> — one PDF with your name on it, the working shown</span></li>
@@ -642,7 +642,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    <div class="pbh">Everything in Solo, plus</div>
    <ul>
     <li><i>✓</i><span><b>The photo condition read</b> — drop the walk-through pictures, get seventeen line items back with a number on each</span></li>
-    <li><i>✓</i><span><b>Comps pulled for the address</b> in one click, already adjusted for size, beds, baths, time and condition — <b>on our key</b>, no vendor account to open. Forty a month on Underwriter, a hundred and twenty on The Office. They arrive <b>unscored</b>: the comparability score and the ARV stay yours</span></li>
+    <li><i>✓</i><span><b>Comps pulled for the address</b> in one click — <b>on our key</b>, no vendor account to open. Forty a month on Underwriter, a hundred and twenty on The Office. The vendor scores nothing; <b>the desk</b> scores each sale against your house and adjusts it, the same way it treats a row you type. The ARV is the one you set</span></li>
     <!-- ── THIS BULLET SOLD AN AVM ─────────────────────────────────────────
          It read "Address-level values and rents". The table was corrected
          weeks ago and this was not, because the harness that enforces the
@@ -768,13 +768,33 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   </div>
   <div class="sb">
    <span class="tier">Underwriter</span>
-   <h3>Comps pulled, scored and adjusted</h3>
-   <p>Type the address; recent sales arrive on the workbench already adjusted for size, beds, baths,
-    time and condition, each with a comparability score and the reasons for it. It runs on
-    <b>our key</b>, so there is no vendor account to open and nothing to paste — forty pulls a month
-    on Underwriter, a hundred and twenty on The Office, counted and shown.
-    It is still not an AVM: the sales arrive <b>unscored</b>, the range is drawn from the
-    ones you keep, and the ARV is the one you set.</p>
+   <!-- ── WHO IS SCORING THESE ──────────────────────────────────────────────
+        This section said "already adjusted … each with a comparability score"
+        and, four lines later, "the sales arrive unscored" — a contradiction
+        inside one paragraph, on the page people pay from, about the feature
+        that carries the tier. Both halves were reaching for something true
+        and neither said it.
+
+        The actual behaviour, from the server: RentCast returns the sales
+        themselves — address, price, floor area, beds, baths, distance, months
+        since sale — and its own value estimate is DISCARDED on arrival. The
+        vendor scores nothing. The desk scores every row against your subject
+        on recency, distance, size and rooms, and adjusts each to your house,
+        by identical arithmetic whether you typed it or pulled it. You keep or
+        drop rows and you set the ARV.
+
+        So the honest sentence is not "scored" or "unscored" — it is WHO. That
+        is also the better pitch, because the buyer's real question is whether
+        a black box is deciding comp quality for them. It is not. -->
+   <h3>Comps pulled — and scored against your house</h3>
+   <p>Type the address; up to ten recent sales land on the workbench. The vendor scores
+    nothing and its own value estimate is discarded on arrival — <b>the desk</b> does the
+    scoring, rating each sale for comparability on recency, distance, size and rooms and
+    adjusting it to your house, with the reasons shown. Identical arithmetic whether you
+    typed the row or pulled it. It runs on <b>our key</b>, so there is no vendor account to
+    open and nothing to paste — forty pulls a month on Underwriter, a hundred and twenty on
+    The Office, counted and shown. It is still not an AVM: you keep or drop every row, and
+    <b>the ARV is the one you set</b>.</p>
    <a class="spotgo" href="office.html?join=underwriter">Start 14 days free →</a><div class="saves"><b>Saves ~10 minutes</b>, and the band gets narrower with every comp</div>
   </div>
  </div>
@@ -1106,7 +1126,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">60</td><td>180</td></tr>
    <tr><td><b>Reading the paperwork, a month</b><small>drop the listing screenshots — the sheet fills itself, and every figure quotes the line it came from</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">80</td><td>240</td></tr>
-   <tr><td><b>Property lookups a month</b><small>one allowance, shared by the comp pull and the rent lookup — each is one request to RentCast, <b>on our key</b>. No vendor account, nothing to paste. Comps land <b>unscored</b>: the comparability score and the ARV stay yours. The free desk types its comps in, and a row you type is scored and weighted exactly like a row that arrives</small></td>
+   <tr><td><b>Property lookups a month</b><small>one allowance, shared by the comp pull and the rent lookup — each is one request to RentCast, <b>on our key</b>. No vendor account, nothing to paste. The vendor scores nothing and its value estimate is discarded — <b>the desk</b> rates each sale against your house, and the ARV is the one you set. The free desk types its comps in, and a row you type is scored and weighted exactly like a row that arrives</small></td>
      <td><span class="n">—</span><small>you type them</small></td><td><span class="n">—</span><small>you type them</small></td><td class="hi">40</td><td>120</td></tr>
    <tr class="sec"><td colspan="5">The walk-through and the arcade</td></tr>
    <tr><td><b>The eight lessons, with live controls</b><small>free forever, no account</small></td>
@@ -1135,7 +1155,8 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   <h4>Why $129 when there are $20 deal calculators?</h4>
   <p>Because they are calculators and you type into them. Solo, at $39, is the honest comparison —
    and it does more than any of them. What $129 buys is the part that is not arithmetic: the comps
-   arrive already scored, the condition comes off your photographs, and the letter writes itself.
+   arrive on our key already scored against your house, the condition comes off your photographs,
+   and the letter writes itself.
    That is a data-and-AI product, and every other one of those in this category starts at $99 and
    only gives you leads.</p>
  </div>
@@ -1160,8 +1181,8 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    version of this where you hold the credential: an API key does not belong in a browser, and a
    product that tells you to hold information carefully should not be the thing asking you to do
    it. On Free and Solo you type your comps in — and a row you type is scored, adjusted and
-   weighted by the same arithmetic as a row that arrives. Either way they arrive
-   <b>unscored</b>: the comparability score and the ARV stay yours.</p>
+   weighted by exactly the same arithmetic as a row that arrives. Either way the vendor scores
+   nothing: <b>the desk</b> rates every sale against your house, and the ARV is the one you set.</p>
  </div>
  <div class="q">
   <h4>What happens when the trial ends?</h4>
@@ -1297,4 +1318,15 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
  }catch(e){ try{ console.warn('account chrome', e); }catch(_){}}
 })();
 </script>
+<script>(function(){try{
+var A=function(){try{var a=JSON.parse(localStorage.getItem('ni-account-v1')||'null');
+return a&&typeof a==='object'&&a.email?a:null;}catch(e){return null;}};
+document.addEventListener('click',function(ev){try{
+if(ev.defaultPrevented||ev.metaKey||ev.ctrlKey||ev.shiftKey||ev.altKey||ev.button)return;
+var t=ev.target;if(!t||!t.closest)return;
+var el=t.closest('a.marklink, a.mark, a.rn-mark');if(!el)return;
+var h=(el.getAttribute('href')||'').split('#')[0].split('?')[0];
+if(h!=='index.html'&&h!=='/index.html'&&h!=='/')return;
+if(!A())return;ev.preventDefault();location.href='office.html';
+}catch(e){}},true);}catch(e){}})();</script>
 </body></html>

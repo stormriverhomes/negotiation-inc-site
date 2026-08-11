@@ -2447,6 +2447,50 @@ const NEVER = /^package(-lock)?\.json$|^render\.yaml$|^(publish|suite2?|harness-
    once per link per browser and internal navigation costs nothing thereafter.
    The query string is carried across — the arcade hands the desk a whole
    house in one, and a redirect that drops it loses the handoff. */
+/* ══ ONE HOST, OR THE WORKSPACE IS ON THE WRONG SIDE OF THE ORIGIN ═════════
+   Elijah, signed in, pressed the wordmark and got "a blank screen". The page
+   was not blank — it was the landing page served from
+   negotiation-inc-srv.onrender.com, and that is worse than blank. Every sheet
+   this product keeps lives in localStorage, which is scoped to the ORIGIN, so
+   on the Render hostname a signed-in customer is a stranger: no account, no
+   properties, no bankroll. Anything they then type is written to a workspace
+   they will never find again from their own domain.
+
+   The platform host answers on purpose — Render needs it — and any stale
+   link, cached redirect, old bookmark or crawler can land somebody there. So
+   the app itself names its canonical host and bounces every other one to it,
+   path and query intact, before any page or API route runs. NI_CANON, or the
+   first entry of NI_ALLOW_ORIGIN, which is already the list of hosts this
+   deployment says it serves.
+
+   HEAD and GET only: a redirected POST loses its body, and the one thing
+   worse than the wrong host is a payment webhook bounced into a 301. */
+const CANON = (() => {
+  const pick = [process.env.NI_CANON, ...ALLOW_ORIGIN]
+    .map(x => String(x || '').trim().replace(/\/+$/, '')).filter(Boolean);
+  for (const raw of pick){
+    let h = null;
+    try { h = new URL(raw.includes('://') ? raw : 'https://' + raw).host; } catch(e){ continue; }
+    /* never canonicalise ONTO the platform host. If the allow-list happens to
+       name it first, using it would redirect the custom domain to Render —
+       the exact bug this exists to stop, pointed the wrong way, and cached
+       by every browser for as long as a 301 lives. */
+    if (/\.onrender\.com$/i.test(h) || /^localhost/i.test(h)) continue;
+    return h;
+  }
+  return null;
+})();
+app.use((req, res, next) => {
+  if (!CANON) return next();
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  const host = String(req.headers.host || '').toLowerCase();
+  if (!host || host === CANON.toLowerCase()) return next();
+  /* localhost and the private network stay reachable — a canonical redirect
+     that breaks the harnesses and the health probe is a self-inflicted outage */
+  if (/^(localhost|127\.|0\.0\.0\.0|\[?::1)/.test(host)) return next();
+  log('canon redirect from', host.slice(0, 60));
+  return res.redirect(301, 'https://' + CANON + req.originalUrl);
+});
 app.use((req, res, next) => {
   if (req.method !== 'GET' && req.method !== 'HEAD') return next();
   const m = /^(\/.*)\.html$/i.exec(decodeURIComponent(req.path));
