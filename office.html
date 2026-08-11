@@ -239,6 +239,9 @@ body.railtight .rn-mark{justify-content:center;width:100%;gap:0}
 body.railtight .rn-mark::after{content:'N';font-family:var(--serif);font-size:20px;font-weight:700;color:#fff}
 body.railtight .rn-toggle{position:static;margin:0}
 body.railtight .rn-who{justify-content:center;margin:0;width:auto;padding:5px}
+/* the name's grid container keeps flex:1 after its text hides — an empty
+   spring pushing the avatar off the icon column's axis. Same fix as desk. */
+body.railtight .rn-whotx{display:none}
 body.railtight .rn-act{padding:10px 8px}
 body.railtight .rn-btn{justify-content:center;padding:10px 0}
 body.railtight .rn-btn::before{content:attr(data-i);font-size:15px;line-height:1}
@@ -1111,6 +1114,19 @@ function cabinetSVG(){
     + out + '</svg>';
 }
 /* one component, two homes — the hero on a phone and the workspace panel */
+/* ── WHY THIS IS A CONSTANT AND NOT A LITERAL ──────────────────────────────
+   The build rewrites the arcade's address for the shipped site — the source
+   calls it portfolio.html, the site serves arcade.html — with a regex that
+   matches href="arcade.html". That is every STATIC link on this page and
+   not one link built in JavaScript, so the two pixel cabinets below shipped
+   pointing at a page that does not exist on the live site: the shiniest
+   button on the dashboard was the only one that went nowhere.
+
+   A literal that has to agree with a build rule, in a language the build
+   rule cannot see, will drift again. The name cannot: publish.mjs rewrites
+   this one line, and both call sites follow. A guard in the build now fails
+   if a page ships with portfolio.html still in it. */
+const ARCADE_HREF = 'arcade.html';
 function pixGo(href, title, sub){
   return '<a class="pixgo" href="' + href + '">' + cabinetSVG()
     + '<span class="pt"><b>' + esc(title) + '</b><span>' + esc(sub) + '</span></span>'
@@ -2080,6 +2096,13 @@ async function wipeAll(say){
    teaches people to ignore the one visit it matters. */
 async function billingBanner(){
   const box = document.getElementById('ac-billstate'); if (!box) return;
+  /* off the network entirely, a relative /api fetch is a guaranteed console
+     error before the catch can eat it — file:// cannot carry the scheme.
+     The harnesses run the page from disk; a clean console is part of what
+     they hold, and it should be. But a harness that STUBS fetch (_tdunning
+     scripts every billing state through here) must still get the call — so
+     the skip applies only when fetch is the browser's own. */
+  if (location.protocol === 'file:' && /\[native code\]/.test(String(window.fetch))) return;
   let d = null;
   try {
     const t = (typeof window.__authToken === 'function') ? await window.__authToken() : null;
@@ -2579,7 +2602,7 @@ function boot(){
   /* the hero's arcade slot is desktop-hidden (the rail carries it there), so
      this is the phone's route in and it gets the cabinet too */
   { const ha = $('hero-arcade');
-    if (ha) ha.innerHTML = pixGo('portfolio.html',
+    if (ha) ha.innerHTML = pixGo(ARCADE_HREF,
       G ? 'Back to the arcade' : 'The arcade',
       G ? 'your cabinet is where you left it' : 'three practice games, free'); }
   $('a-state').textContent = G ? 'saved' : 'optional';
@@ -2589,7 +2612,7 @@ function boot(){
        <div class="rowline"><span>Best read</span><span class="v">${+G.bestPct||0}%</span></div>`
     : `<p class="empty">Three practice games that run this same arithmetic against a clock &mdash;
        a house at a time, sixty seconds each. Free, and nothing you do in there touches your properties.</p>`;
-  $('arcade-foot').innerHTML = pixGo('portfolio.html',
+  $('arcade-foot').innerHTML = pixGo(ARCADE_HREF,
     G ? 'Back to the games' : 'Enter the arcade',
     G ? 'your cabinet is where you left it' : 'three games \u00b7 sixty seconds each');
 }
