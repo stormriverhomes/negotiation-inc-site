@@ -301,6 +301,11 @@
   .keepbig .v.est{color:var(--carbon-soft);font-size:26px}
   .heat .askl{top:-15px}
   .keepbig .n{font-size:14px;color:var(--carbon-soft);margin-top:4px}
+  /* a band that crosses zero is a warning, not a footnote — but it is
+     not a REFUSAL either, so it takes the amber of an unchecked figure
+     rather than the red this product reserves for a decline. */
+  .keepbig .n.warn{color:var(--gold);font-weight:650}
+  .keepbig .v.est.straddle{color:var(--gold)}
   input[type=range]{width:100%;accent-color:var(--carbon);margin:16px 0 0}
   .offerrow{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--carbon-faint);margin-top:2px}
   .offerrow b{color:var(--carbon);font-size:17px}
@@ -1220,13 +1225,36 @@ function paintDeal(){
        this product means money that pays and a number you have not earned the
        right to is not that. */
     if (hb && !hb.sure){
-      kv.textContent = M(Math.round(hb.keepLo/100)*100) + '–' + M(Math.round(hb.keepHi/100)*100);
-      kv.className = 'v est'; kv.__v = null;
-    } else { setKeep(kv, d.keep); kv.className='v'+(d.keep>=0?'':' bad'); }
+      /* ── AND THE SIGN SURVIVES THE RANGE ─────────────────────────────────
+         M() is '$' + Math.abs(n) — it strips the minus — so a band whose low
+         end is a LOSS printed as "$7,200–$22,400", which reads as a range of
+         gains, with the dash doing the work the minus should have done. The
+         most-played screen in the product was showing a possible loss in the
+         grammar of a profit, in a product whose whole law is that a negative
+         number never wears the affirmative colour. Found by the Claude Design
+         pass on this screen.
+         When the band straddles zero it is said out loud: the loss keeps its
+         minus, the gain takes an explicit plus, and the separator becomes an
+         ellipsis so no dash can be mistaken for a sign. */
+      const lo = Math.round(hb.keepLo/100)*100, hi = Math.round(hb.keepHi/100)*100;
+      kv.textContent = lo < 0 ? '\u2212' + M(lo) + ' \u2026 +' + M(hi)
+                              : M(lo) + '\u2013' + M(hi);
+      kv.className = 'v est' + (lo < 0 ? ' straddle' : ''); kv.__v = null;
+      kv.__lo = lo;
+    } else { setKeep(kv, d.keep); kv.className='v'+(d.keep>=0?'':' bad'); kv.__lo = d.keep; }
   }
   const kn=document.getElementById('keepn');
-  if (kn) kn.textContent = d.keep>=0 ? (d.sure ? 'if you win it, before the work you choose' : 'but you have not checked what it needs')
-                                     : 'you would lose money on this';
+  if (kn){
+    const kvv = document.getElementById('keepv');
+    const straddles = kvv && typeof kvv.__lo === 'number' && kvv.__lo < 0 && !(hb && hb.sure);
+    kn.textContent = straddles
+      /* the band crossing zero is the single most useful sentence this screen
+         can say, and it was being hidden behind the softer "not checked" */
+      ? 'at this price it can still LOSE money — the spread is the repair bill you have not checked'
+      : d.keep>=0 ? (d.sure ? 'if you win it, before the work you choose' : 'but you have not checked what it needs')
+                  : 'you would lose money on this';
+    kn.className = 'n' + (straddles ? ' warn' : '');
+  }
   const ov=document.getElementById('offerv'); if (ov) ov.innerHTML='<b>'+M(state.price)+'</b>';
 }
 
