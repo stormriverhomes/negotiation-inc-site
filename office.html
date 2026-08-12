@@ -2275,8 +2275,27 @@ function boot(){
   const seen = (m && Array.isArray(m.seen) ? m.seen : []).filter(i => i >= 0 && i < 8);
   const at = m && Number.isInteger(m.ex) ? Math.min(m.ex, 8) : 0;
 
-  /* the arcade */
-  const w = read('ni-portfolio-v2'), G = (w && typeof w === 'object' && w.S) || null;
+  /* ── the arcade — THE SHARED BANKROLL, not Comp Run's empire ────────────
+     This card read Comp Run's own save (ni-portfolio-v2), so a player deep
+     into the eras saw their empire total — millions — printed on the
+     dashboard as "Cash", while the floor's actual economy is the $150,000
+     bankroll that Daily Street and the drill spend from. Two different
+     currencies were sharing one label; Elijah caught it. The card reads the
+     bank's record now (ni.bank.v1, the same blob arcade/bank.mjs owns) and
+     says which number it is. Comp Run's empire total stays inside Comp Run,
+     where its own ledger explains it. */
+  const w = read('ni-portfolio-v2'), CR = (w && typeof w === 'object' && w.S) || null;
+  const G = (() => {
+    const b = read('ni.bank.v1');
+    if (b && typeof b === 'object' && Number.isFinite(+b.cash))
+      return { cash: +b.cash, best: Number.isFinite(+b.best) ? +b.best : +b.cash,
+               runs: b.runs && typeof b.runs === 'object'
+                 ? (+b.runs.street||0) + (+b.runs.drill||0) + (+b.runs.comprun||0) : 0,
+               started: true };
+    /* no bank record yet — but an old Comp Run save still proves they have
+       played, so the card can say so without inventing a cash figure */
+    return CR ? { cash: null, best: null, runs: 0, started: true } : null;
+  })();
 
   /* ── which tier this workspace is on ──────────────────────────────────
      Read the same way the desk reads it, from the same record, so the two
@@ -2607,9 +2626,12 @@ function boot(){
       G ? 'your cabinet is where you left it' : 'three practice games, free'); }
   $('a-state').textContent = G ? 'saved' : 'optional';
   $('arcade').innerHTML = G
-    ? `<div class="rowline"><span>Cash</span><span class="v">${money(+G.cash||0)}</span></div>
-       <div class="rowline"><span>Streets settled</span><span class="v">${+G.streets||0}</span></div>
-       <div class="rowline"><span>Best read</span><span class="v">${+G.bestPct||0}%</span></div>`
+    ? (G.cash !== null
+      ? `<div class="rowline"><span>Bankroll <small style="color:var(--soft)">the floor's $150k</small></span><span class="v">${money(G.cash)}</span></div>
+       <div class="rowline"><span>Best it has been</span><span class="v">${money(G.best)}</span></div>
+       <div class="rowline"><span>Runs</span><span class="v">${G.runs}</span></div>`
+      : `<p class="empty">Your cabinet is saved. The floor deals one bankroll across all three
+       games &mdash; open the arcade and it picks up where you left it.</p>`)
     : `<p class="empty">Three practice games that run this same arithmetic against a clock &mdash;
        a house at a time, sixty seconds each. Free, and nothing you do in there touches your properties.</p>`;
   $('arcade-foot').innerHTML = pixGo(ARCADE_HREF,

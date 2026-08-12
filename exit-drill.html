@@ -137,7 +137,11 @@ h1{font-size:40px}
 .verdict .vh{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px}
 .verdict.right .vh{color:var(--green)} .verdict.wrong .vh{color:var(--red)}
 .verdict b{color:var(--txt);font-weight:650}
-.verdict .go{margin-top:8px;font-size:12.5px;color:var(--faint)}
+.verdict .go{margin-top:10px;display:flex;align-items:center;gap:12px}
+.verdict .gonext{font:inherit;font-size:14.5px;font-weight:700;color:#fff;background:var(--blue,#1f5fd0);
+ border:0;border-radius:10px;padding:11px 20px;min-height:44px;cursor:pointer}
+.verdict .gonext:hover{filter:brightness(1.12)}
+.verdict .gokey{font-size:12px;color:var(--faint)}
 /* the fee rides in the verdict header, beside the points, because points are
    a game and the fee is the part that follows you out of the cabinet */
 .feetag{float:right;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:none;
@@ -1139,7 +1143,7 @@ function answer(a){
       <span class="feetag">${mv.applied > 0 ? 'finder’s fee ' + fmt(mv.applied)
         : mv.capped ? 'day’s fees are capped' : 'no fee'}</span></div>
       ${correct==='walk' ? '<div class="lnone">Nothing on this house pays at what they are asking. Walking away IS the read.</div>' : ''}
-      ${working(G.cur, a, correct)}<div class="go">Space or click for the next house.</div>`;
+      ${working(G.cur, a, correct)}<div class="go"><button type="button" class="gonext" data-go-next>Next house \u2192</button><span class="gokey">or press Space</span></div>`;
   } else {
     G.streak=0; G.t=Math.max(0,G.t-5);
     v.className='verdict wrong';
@@ -1148,7 +1152,7 @@ function answer(a){
         : 'nothing left to take'}</span></div>
       ${correct==='walk' ? '<div class="lnone">Nothing on this house pays at what they are asking.</div>' : ''}
       ${working(G.cur, a, correct)}
-      <div class="go">Space or click for the next house.</div>`;
+      <div class="go"><button type="button" class="gonext" data-go-next>Next house \u2192</button><span class="gokey">or press Space</span></div>`;
   }
   G.last=G.cur;
   $('score').textContent=G.score; $('streak').textContent=G.streak;
@@ -1170,6 +1174,16 @@ document.addEventListener('keydown',e=>{
   else if (!G.open && (e.key===' '||e.key==='Enter')){ e.preventDefault(); advance(); }
 });
 $('deck').addEventListener('click',e=>{ if(!G.open && !e.target.closest('.ans')) advance(); });
+/* THE NEXT HOUSE IS A BUTTON NOW. Elijah, twice: after a right answer there
+   is no clear way forward. The way forward was a sentence — "Space or click"
+   — set in the faintest text on the panel, describing a spacebar phones do
+   not have and a click target nothing outlined. The verdict ends in a real
+   button; the delegated listener below survives every re-render because the
+   verdict is rebuilt per house. Space still works, and the button says so. */
+document.addEventListener('click', e => {
+  const b = e.target && e.target.closest && e.target.closest('[data-go-next]');
+  if (b) advance();
+});
 
 let lastTick=performance.now();
 function tick(now){
