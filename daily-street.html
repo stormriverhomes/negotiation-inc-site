@@ -404,6 +404,11 @@
     .i-edge b{font-size:11.5px} .i-edge span{font-size:9.5px}
     .i-tick b{font-size:9.5px}
   }
+  /* the LOOKS counter, at the moment one is spent */
+  .bar .m.spent{color:var(--amber);animation:lookspend .58s ease-out}
+  @keyframes lookspend{
+    0%{transform:scale(1)} 22%{transform:scale(1.42)} 100%{transform:scale(1)} }
+  .bar .m{display:inline-block;transition:color .3s}
   .keepbig{text-align:center;margin-top:14px}
   .keepbig .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--carbon-faint)}
   .keepbig .v{font-family:var(--mono);font-size:36px;font-variant-numeric:tabular-nums;line-height:1.05;color:var(--green)}
@@ -1224,7 +1229,24 @@ function jump(i){ if (state.phase==='play' && state.mode!=='offer'){ state.at=i;
 function doLook(kind){
   const i = state.at;
   if (state.phase!=='play' || state.seen[i][kind] || state.looksLeft<=0) return;
-  state.seen[i][kind]=true; state.looks++; state.looksLeft--; render();
+  state.seen[i][kind]=true; state.looks++; state.looksLeft--;
+  render();
+  /* ── SPENDING SOMETHING SCARCE SHOULD FEEL LIKE SPENDING IT ─────────────
+     LOOKS is a currency in the HUD and this was the only place it is ever
+     spent — silently, inside a full re-render, so the only way to notice was
+     to happen to be watching the corner. The counter counts DOWN through the
+     value it just left, and the whole figure takes the warning colour for
+     the length of the count. Nothing else moves; the band tightening is the
+     reward and it must stay the loudest thing on the screen.
+     Respects prefers-reduced-motion, like every other animation here. */
+  const el = document.getElementById('lookn');
+  if (!el) return;
+  const to = state.looksLeft, from = to + 1;
+  if (matchMedia('(prefers-reduced-motion:reduce)').matches){ el.textContent = to; return; }
+  el.classList.add('spent');
+  el.textContent = from;
+  setTimeout(() => { el.textContent = to;
+    setTimeout(() => el.classList.remove('spent'), 420); }, 190);
 }
 function toOffer(){
   if (state.phase!=='play' || state.bid) return;
@@ -1681,7 +1703,7 @@ function statusBar(){
   return '<div class="bar">' +
     '<span>Street <span class="m">'+(run.round+1)+'/'+B.ROUNDS+'</span></span>' +
     '<span>Cash <span class="m">'+M(run.capital)+'</span></span>' +
-    '<span>Looks <span class="m">'+(state?state.looksLeft:p.looks)+'</span></span>' +
+    '<span>Looks <span class="m" id="lookn">'+(state?state.looksLeft:p.looks)+'</span></span>' +
     (timed ? '<span class="t" id="clk">'+clockStr(state?state.clock:p.clock)+'</span>' : '<span>no clock</span>') + '</div>';
 }
 
