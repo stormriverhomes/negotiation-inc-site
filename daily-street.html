@@ -294,6 +294,116 @@
   .sw{width:13px;height:13px;border:1px solid var(--carbon);flex:none}
   .sw.pay{background:var(--carbon)} .sw.keep{background:var(--green)} .sw.over{background:var(--red)}
   .sw.fix{background:repeating-linear-gradient(45deg,var(--rule) 0 4px,var(--stock-3) 4px 8px)}
+  /* ══ THE RANGE INSTRUMENT ════════════════════════════════════════════════
+     Claude Design's pass on this screen, implemented. The offer step told the
+     same fact three times in three grammars — a stacked composition bar, a
+     headline range, and a slider track with four unlabelled colour zones and
+     no key — and the sentence that carried the whole lesson ("you have not
+     checked what it needs") was set as the smallest text in the group.
+
+     One axis now. Every mark on it is a price and every distance is money:
+     the band is what the sales say the house is worth TO YOU, its WIDTH is
+     the repair bill you have not checked, and the button that narrows it
+     sits inside the readout — so the lesson is the control rather than a
+     caveat. The walk-away line is not drawn until a look has been spent,
+     because before that you do not have one.
+
+     The native range input is still the input: it is kept, transparent, and
+     laid over the axis at full tap height, so drag, touch, keyboard and
+     every harness that drives #pricer keep working exactly as before. What
+     the player SEES is the marker drawn under it. */
+  .inst{margin-top:14px;border:1px solid var(--carbon);background:var(--stock)}
+  .inst-h{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:9px 12px;border-bottom:1px solid var(--rule);background:var(--stock-2)}
+  .inst-h .ik{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--carbon-soft)}
+  .istamp{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+    border:1px solid var(--gold);color:var(--gold);padding:3px 7px;white-space:nowrap}
+  .istamp.sure{border-color:var(--green);color:var(--green)}
+  .iwalked{padding:9px 12px;border-bottom:1px solid var(--rule);font-size:13.5px;
+    line-height:1.5;color:var(--carbon-soft);background:var(--stock-2)}
+  .iwalked b{color:var(--carbon)}
+  /* the axis. 78px of headroom for the two tick labels, 66 below for the
+     offer marker and its keep bar — the numbers need the air or they stack */
+  .axis{position:relative;height:196px;margin:0;padding:0 14px}
+  .ax-line{position:absolute;left:14px;right:14px;top:78px;height:2px;background:var(--carbon)}
+  .ax-end{position:absolute;top:62px;font-family:var(--mono);font-size:10px;color:var(--carbon-faint)}
+  .ax-end.lo{left:14px} .ax-end.hi{right:14px}
+  .i-band{position:absolute;top:68px;height:22px;border:1px solid rgba(34,32,28,.5);
+    background:repeating-linear-gradient(45deg,rgba(34,32,28,.26) 0 4px,rgba(34,32,28,0) 4px 8px);
+    transition:left .22s cubic-bezier(.22,.9,.26,1),width .22s cubic-bezier(.22,.9,.26,1)}
+  .i-band.sure{background:repeating-linear-gradient(45deg,rgba(34,32,28,.16) 0 4px,rgba(34,32,28,0) 4px 8px)}
+  .i-edge{position:absolute;top:92px;transform:translateX(-50%);text-align:center;white-space:nowrap;
+    transition:left .22s cubic-bezier(.22,.9,.26,1)}
+  /* a band can get NARROW — that is the whole point of spending a look — and
+     two centred captions under two close edges land on top of each other.
+     When they are within a fifth of the axis they splay outward instead: the
+     low one hangs off its edge to the left, the high one to the right, each
+     still pointing at the mark it belongs to. */
+  .i-edge.out-lo{transform:translateX(-100%);text-align:right;padding-right:5px}
+  .i-edge.out-hi{transform:translateX(0);text-align:left;padding-left:5px}
+  .i-edge b{display:block;font-family:var(--mono);font-size:12.5px;color:var(--carbon)}
+  .i-edge span{display:block;font-size:10.5px;color:var(--carbon-faint)}
+  .i-tick{position:absolute;top:44px;height:38px;width:2px;background:var(--carbon-soft);
+    transform:translateX(-50%)}
+  .i-tick b{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);white-space:nowrap;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--carbon)}
+  .i-tick.walk{background:var(--carbon);top:34px;height:48px}
+  .i-tick.walk b{bottom:50px}
+  /* what you keep, drawn as the distance it is: from your offer to the near
+     edge of the band. Green only once the band is a figure you checked. */
+  /* ── THE OFFER LANE ──────────────────────────────────────────────────
+     Everything the hand controls lives BELOW the band's own labels, in its
+     own horizontal lane. The first build stacked the marker, the keep bar
+     and the price on top of the edge captions and they collided at every
+     position the player actually cares about — which is most of them. The
+     marker keeps a faint leader up to the axis so the connection still
+     reads without anything sitting on anything. */
+  .i-keep{position:absolute;top:140px;height:10px;
+    background:repeating-linear-gradient(45deg,rgba(34,32,28,.3) 0 4px,rgba(34,32,28,.06) 4px 8px);
+    border:1px solid rgba(34,32,28,.35);
+    transition:left .1s linear,width .1s linear}
+  .i-keep.sure{background:var(--green);border-color:var(--green)}
+  .i-keep.neg{background:var(--red);border-color:var(--red)}
+  .i-mark{position:absolute;top:90px;width:1px;height:76px;
+    background:linear-gradient(180deg,rgba(34,32,28,.28) 0 46px,var(--carbon) 46px 100%);
+    transform:translateX(-50%);pointer-events:none}
+  .i-mark i{position:absolute;top:46px;left:50%;transform:translateX(-50%);
+    width:18px;height:26px;border:1px solid var(--carbon);
+    background:linear-gradient(180deg,var(--stock) 0 55%,var(--stock-3) 55% 100%);
+    box-shadow:0 1px 0 rgba(0,0,0,.25)}
+  .i-you{position:absolute;top:170px;transform:translateX(-50%);white-space:nowrap;
+    font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--carbon);pointer-events:none}
+  /* the real control, invisible and on top: full width of the axis, 44px of
+     thumb so a thumb can find it, and every native behaviour intact */
+  .axis input[type=range]{-webkit-appearance:none;appearance:none;position:absolute;
+    left:14px;right:14px;width:calc(100% - 28px);top:126px;height:48px;margin:0;
+    background:none;opacity:0;cursor:grab;z-index:3}
+  .axis input[type=range]:active{cursor:grabbing}
+  .axis input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:34px;height:44px}
+  .axis input[type=range]::-moz-range-thumb{width:34px;height:44px;border:0;border-radius:0}
+  /* focus has to be visible even though the control is not — the ring goes on
+     the axis, because that is the thing the keyboard is moving */
+  .axis:has(input[type=range]:focus-visible){outline:2px solid var(--carbon);outline-offset:3px}
+  .readout{border-top:1px solid var(--rule);padding:13px 14px 14px;text-align:center;
+    background:var(--stock-2)}
+  .lookbtn{font:inherit;font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+    text-transform:uppercase;width:100%;min-height:46px;margin-top:11px;cursor:pointer;
+    background:var(--stock);border:1px dashed var(--carbon);color:var(--carbon);
+    display:flex;align-items:center;justify-content:center;gap:10px}
+  .lookbtn:hover{background:var(--stock-3)}
+  .lookbtn[disabled]{opacity:.5;cursor:default}
+  .lookbtn em{font-style:normal;border:1px solid var(--gold);color:var(--gold);
+    padding:2px 6px;font-size:10.5px}
+  @media(max-width:520px){
+    /* the head wrapped to three lines beside the stamp and squeezed both.
+       Stacked, each gets its own line and neither has to hyphenate. */
+    .inst-h{flex-direction:column;align-items:flex-start;gap:7px}
+    .axis{height:204px}
+    .i-edge b{font-size:11.5px} .i-edge span{font-size:9.5px}
+    .i-tick b{font-size:9.5px}
+  }
   .keepbig{text-align:center;margin-top:14px}
   .keepbig .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--carbon-faint)}
   .keepbig .v{font-family:var(--mono);font-size:36px;font-variant-numeric:tabular-nums;line-height:1.05;color:var(--green)}
@@ -1134,7 +1244,7 @@ function dealParts(i){
    and the asking price, which is printed on the card. Nothing consults the
    truth. A heat scale that knew the answer would be the answer. */
 function paintHeat(){
-  const el = document.getElementById('heat'); if (!el) return;
+  const ax = document.getElementById('i-axis'); if (!ax) return;
   const i = state.at, c = board.cards[i], r = read(i), p = run.plan.rounds[run.round];
   const rg = sliderRange(i), span = rg[1] - rg[0];
   const pos = v => Math.max(0, Math.min(100, ((v - rg[0]) / span) * 100));
@@ -1156,28 +1266,80 @@ function paintHeat(){
      break-even arrives earlier. Solved rather than approximated. */
   const be = wMid <= run.capital ? wMid
            : (wMid + run.capital * p.financeRate) / (1 + p.financeRate);
-  const a = Math.max(0, pos(wLo) - 6), b = pos(be), cEnd = Math.min(100, pos(wHi) + 6);
-  el.style.setProperty('--h1', 'var(--green-bg)');
-  el.style.setProperty('--h2', 'rgba(154,107,31,.30)');
-  el.style.setProperty('--h3', 'rgba(179,55,44,.34)');
-  el.style.setProperty('--gA', a.toFixed(1) + '%');
-  el.style.setProperty('--gB', b.toFixed(1) + '%');
-  el.style.setProperty('--gC', cEnd.toFixed(1) + '%');
-  const band = document.getElementById('hband');
-  if (band){ const l = pos(wLo), w = Math.max(1.2, pos(wHi) - l);
-    band.style.left = l + '%'; band.style.width = w + '%';
-    /* a look does not narrow the comps, it removes the repair guess — so the
-       band stays and the LINE inside it becomes something you can trust */
-    band.style.opacity = r.sure ? '.45' : '1'; }
-  const line = document.getElementById('hline');
-  if (line){ line.style.left = 'calc(' + b.toFixed(1) + '% - 1px)';
-    line.style.display = r.sure ? 'block' : 'none'; }
-  const at = document.getElementById('haskt'), al = document.getElementById('haskl');
-  if (at) at.style.left = pos(c.asking) + '%';
-  if (al) al.style.left = pos(c.asking) + '%';
-  /* the floating price label under the thumb is gone: it collided with the
-     handle at every position and it was printing, one line lower and larger,
-     the number "your offer" already prints. */
+  /* ── AND NOW IT IS ONE INSTRUMENT ─────────────────────────────────────
+     Every figure below is the same arithmetic the three old bars ran; what
+     changed is that it is drawn once, on one axis, where a distance is
+     money. `be` (the borrow-adjusted break-even) is still the walk-away, and
+     it is still only drawn when a look has been spent. */
+  /* the break-even's position on the axis — the old code computed this as
+     part of a three-stop gradient that no longer exists */
+  const b = pos(be);
+  const pts0 = Math.round(Math.max(0, state.price - run.capital) * p.financeRate);
+  const K = v => '$' + Math.round(v/1000) + 'K';
+  const put = (id, fn) => { const e = document.getElementById(id); if (e) fn(e); };
+
+  put('i-axlo', e => e.textContent = K(rg[0]));
+  put('i-axhi', e => e.textContent = K(rg[1]));
+
+  put('i-stamp', e => {
+    e.textContent = board.looks[i].comps.length + ' sales \u00b7 '
+      + (r.sure ? 'repairs walked' : 'repairs unchecked');
+    e.className = 'istamp' + (r.sure ? ' sure' : '');
+  });
+  put('i-walked', e => {
+    const L = board.looks[i];
+    e.hidden = !r.sure;
+    if (r.sure) e.innerHTML = 'Walked it: <b>' + M(L.walkthrough[0]) + '\u2013' + M(L.walkthrough[1])
+      + '</b>, call it <b>\u2212' + M(r.repairs) + '</b>';
+  });
+
+  const lo = pos(wLo), hi = pos(wHi);
+  put('i-band', e => { e.style.left = lo + '%'; e.style.width = Math.max(1.2, hi - lo) + '%';
+    e.className = 'i-band' + (r.sure ? ' sure' : ''); });
+  /* NAME THE SALE THAT MADE THE EDGE. The band's two ends are not abstract —
+     each is one real comp's price-per-foot scaled to this house, and saying
+     which one turns "a range" into "these two sales disagree, and here is
+     which said what". Both edges reading "repairs off" told the player
+     nothing twice. */
+  const cmp = board.looks[i].comps;
+  const short = a => String(a || '').replace(/^\d+\s+/, '').split(/\s+/)[0];
+  const byPpsf = cmp.map((x, k) => ({ n: short(x.address), v: r.each[k] }))
+                    .sort((x, y) => x.v - y.v);
+  const loName = byPpsf.length ? byPpsf[0].n : '';
+  const hiName = byPpsf.length ? byPpsf[byPpsf.length - 1].n : '';
+  const tight = (hi - lo) < 20;
+  put('i-elo', e => { e.style.left = lo + '%';
+    e.className = 'i-edge' + (tight ? ' out-lo' : '');
+    e.innerHTML = '<b>' + M(Math.round(wLo/100)*100) + '</b><span>' + esc(loName) + '</span>'; });
+  put('i-ehi', e => { e.style.left = hi + '%';
+    e.className = 'i-edge' + (tight ? ' out-hi' : '');
+    e.innerHTML = '<b>' + M(Math.round(wHi/100)*100) + '</b><span>' + esc(hiName) + '</span>'; });
+
+  put('i-ask', e => { e.style.left = pos(c.asking) + '%';
+    e.querySelector('b').textContent = 'asking ' + M(c.asking); });
+  put('i-walk', e => { e.hidden = !r.sure; e.style.left = b + '%';
+    if (r.sure) e.querySelector('b').textContent = 'walk-away ' + M(Math.round(be/100)*100); });
+
+  /* the keep bar IS the distance from your offer to the near edge of what it
+     is worth — the same subtraction the readout prints, drawn to scale */
+  const you = pos(state.price);
+  put('i-keep', e => {
+    /* the bar runs from your offer to the line you are measured against —
+       the walk-away once you have looked, the near edge of the band until
+       then. Its COLOUR obeys the same law the readout does: green only when
+       the figure has been earned (repairs walked AND the outcome positive),
+       red only when the whole band is a loss, and hatched neutral while it
+       is still a range — because a number you have not checked is not money
+       that pays and must not wear the colour of one. */
+    const edge = r.sure ? b : lo;
+    const l = Math.min(you, edge), w = Math.abs(edge - you);
+    e.style.left = l + '%'; e.style.width = Math.max(0.4, w) + '%';
+    const allLoss = (wHi - state.price - pts0) < 0;
+    e.className = 'i-keep' + (allLoss ? ' neg' : (r.sure && you <= edge) ? ' sure' : '');
+  });
+  put('i-mark', e => e.style.left = you + '%');
+  put('i-you', e => { e.style.left = you + '%'; e.textContent = M(state.price); });
+
   const borrowed = Math.max(0, state.price - run.capital);
   const pts = Math.round(borrowed * p.financeRate);
   return { sure:r.sure, keepLo: wLo - state.price - pts, keepHi: wHi - state.price - pts };
@@ -1205,15 +1367,7 @@ function setKeep(el, target){
 }
 
 function paintDeal(){
-  const d = dealParts(state.at), pctOf = v => Math.max(0,(v/d.total)*100);
-  const bar = document.getElementById('dealbar');
-  if (bar){
-    const pay = Math.min(100, pctOf(d.pay));
-    bar.innerHTML = d.keep >= 0
-      ? '<i class="pay" style="width:'+pay+'%"></i><i class="keep" style="width:'+Math.min(100-pay,pctOf(d.keep))+'%"></i>' +
-        '<i class="fix" style="width:'+Math.max(0,100-pay-pctOf(d.keep))+'%"></i>'
-      : '<i class="pay" style="width:'+Math.max(0,100-Math.min(40,pctOf(-d.keep)))+'%"></i><i class="over" style="width:'+Math.min(40,pctOf(-d.keep))+'%"></i>';
-  }
+  const d = dealParts(state.at);
   const hb = paintHeat();
   const kv=document.getElementById('keepv');
   if (kv){
@@ -1881,6 +2035,17 @@ function browseHTML(){
   '</div>';
 }
 
+/* THE LESSON IS THE CONTROL. The one act that narrows the band is offered
+   inside the readout the band is confusing, not three screens away in an
+   accordion — and once it is spent the button is replaced by what it bought. */
+function lookBtnHTML(){
+  const i = state.at, s = state.seen[i];
+  if (s.walk) return '';
+  const out = state.looksLeft <= 0;
+  return '<button class="lookbtn" type="button" ' + (out ? 'disabled ' : '') +
+    'onclick="doLook(\'walk\')">Check what it needs' +
+    '<em>' + (out ? 'no looks left' : '\u22121 look') + '</em></button>';
+}
 function offerHTML(){
   const i=state.at, c=board.cards[i], range=sliderRange(i), n=c.interest;
   const hint = n===0 ? ['','Nobody else has offered here. Only the seller is in your way.']
@@ -1888,14 +2053,28 @@ function offerHTML(){
     : ['bad', n+' other buyers are already in. This one goes to whoever leaves the least on the table.'];
   return '<div class="house"><div class="hname">'+esc(c.address)+'</div>' +
     '<div class="hmeta">Your one offer. Sealed until the street closes.</div>' +
-    '<div class="deal"><div class="dealbar" id="dealbar"></div>' +
-      '<div class="dealkey"><span><i class="sw pay"></i>you pay</span><span><i class="sw keep"></i>you keep</span><span><i class="sw fix"></i>repairs</span></div>' +
-      '<div class="keepbig"><div class="k">You keep</div><div class="v" id="keepv"></div><div class="n" id="keepn"></div></div>' +
-      '<div class="heat" id="heat"><div class="band" id="hband"></div><div class="line" id="hline"></div>' +
-        '<div class="askt" id="haskt"></div><div class="askl" id="haskl">asking</div></div>' +
-      '<input type="range" id="pricer" min="'+range[0]+'" max="'+range[1]+'" step="500" value="'+state.price+'" '+
-        'aria-label="your offer" oninput="setPrice(this.value)">' +
-      '<div class="offerrow"><span>your offer <span id="offerv"></span></span><span>asking '+M(c.asking)+'</span></div>' +
+    '<div class="deal"><div class="inst">' +
+      '<div class="inst-h"><span class="ik">What it is worth to you</span>' +
+        '<span class="istamp" id="i-stamp"></span></div>' +
+      '<div class="iwalked" id="i-walked" hidden></div>' +
+      '<div class="axis" id="i-axis">' +
+        '<div class="ax-line"></div>' +
+        '<div class="ax-end lo" id="i-axlo"></div><div class="ax-end hi" id="i-axhi"></div>' +
+        '<div class="i-band" id="i-band"></div>' +
+        '<div class="i-edge" id="i-elo"></div><div class="i-edge" id="i-ehi"></div>' +
+        '<div class="i-tick" id="i-ask"><b></b></div>' +
+        '<div class="i-tick walk" id="i-walk" hidden><b></b></div>' +
+        '<div class="i-keep" id="i-keep"></div>' +
+        '<div class="i-mark" id="i-mark"><i></i></div>' +
+        '<div class="i-you" id="i-you"></div>' +
+        '<input type="range" id="pricer" min="'+range[0]+'" max="'+range[1]+'" step="500" value="'+state.price+'" '+
+          'aria-label="your offer" oninput="setPrice(this.value)">' +
+      '</div>' +
+      '<div class="readout"><div class="keepbig"><div class="k">If you are right, you keep</div>' +
+        '<div class="v" id="keepv"></div><div class="n" id="keepn"></div></div>' +
+        lookBtnHTML() + '</div>' +
+      '</div>' +
+      '<div class="offerrow" style="margin-top:11px"><span>your offer <span id="offerv"></span></span><span>asking '+M(c.asking)+'</span></div>' +
       '<div class="rival '+hint[0]+'">'+hint[1]+'</div>' +
       '<button class="btn go" onclick="sealOffer()">Seal this offer</button>' +
       '<button class="btn ghost" onclick="backToBrowse()">Back</button></div></div>';
