@@ -69,6 +69,7 @@ h1{font-size:40px}
 .lede{font-size:15.5px;color:var(--dim);margin-top:8px;max-width:52ch}
 .tally{display:flex;gap:22px;text-align:right}
 .tally .t{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#6f7d94}
+.tally .t em{font-style:normal;display:block;font-size:8px;letter-spacing:.06em;opacity:.72;text-transform:none}
 .tally .v{font-family:var(--serif);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
 
 .stage{margin:22px 0 60px;background:var(--panel);border:1px solid var(--edge);border-radius:12px;overflow:hidden}
@@ -361,7 +362,10 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   <div><div class="t">Score</div><div class="v" id="score">0</div></div>
   <div><div class="t">Streak</div><div class="v" id="streak">0</div></div>
   <div><div class="t">Best</div><div class="v" id="best">—</div></div>
-  <div><div class="t">Bankroll</div><div class="v m" id="bank">—</div></div>
+  <!-- the bankroll is the FLOOR's, not this cabinet's: the same money the
+       street and Comp Run spend from. Saying so here is what stops a player
+       wondering why the drill's number moved when they were not playing it. -->
+  <div><div class="t" title="One bankroll across all three games">Bankroll <em>the floor's</em></div><div class="v m" id="bank">—</div></div>
  </div>
 </div>
 

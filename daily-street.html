@@ -318,7 +318,7 @@
   .inst-h .ik{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
     text-transform:uppercase;color:var(--carbon-soft)}
   .istamp{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
-    border:1px solid var(--gold);color:var(--gold);padding:3px 7px;white-space:nowrap}
+    border:1px solid var(--amber);color:var(--amber);padding:3px 7px;white-space:nowrap}
   .istamp.sure{border-color:var(--green);color:var(--green)}
   .iwalked{padding:9px 12px;border-bottom:1px solid var(--rule);font-size:13.5px;
     line-height:1.5;color:var(--carbon-soft);background:var(--stock-2)}
@@ -394,7 +394,7 @@
     display:flex;align-items:center;justify-content:center;gap:10px}
   .lookbtn:hover{background:var(--stock-3)}
   .lookbtn[disabled]{opacity:.5;cursor:default}
-  .lookbtn em{font-style:normal;border:1px solid var(--gold);color:var(--gold);
+  .lookbtn em{font-style:normal;border:1px solid var(--amber);color:var(--amber);
     padding:2px 6px;font-size:10.5px}
   @media(max-width:520px){
     /* the head wrapped to three lines beside the stamp and squeezed both.
@@ -414,8 +414,8 @@
   /* a band that crosses zero is a warning, not a footnote — but it is
      not a REFUSAL either, so it takes the amber of an unchecked figure
      rather than the red this product reserves for a decline. */
-  .keepbig .n.warn{color:var(--gold);font-weight:650}
-  .keepbig .v.est.straddle{color:var(--gold)}
+  .keepbig .n.warn{color:var(--amber);font-weight:650}
+  .keepbig .v.est.straddle{color:var(--amber)}
   input[type=range]{width:100%;accent-color:var(--carbon);margin:16px 0 0}
   .offerrow{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--carbon-faint);margin-top:2px}
   .offerrow b{color:var(--carbon);font-size:17px}
@@ -1200,7 +1200,16 @@ function coach(){
   }
   if (state.phase !== 'play') return null;
   if (state.bid) return 'Offer sealed. <b>Close the street</b> to see how everyone did.';
-  if (state.mode === 'offer') return 'Drag the handle. <b>Green is your profit</b> — make it as big as you dare.';
+  if (state.mode === 'offer'){
+    /* the coach names what the instrument is actually doing right now. It used
+       to say "green is your profit" on a screen where, until a look is spent,
+       nothing is green and nothing is a single figure — the sentence was
+       describing the bar the range instrument replaced. */
+    const r0 = read(state.at);
+    return r0.sure
+      ? 'Drag the marker. The <b>band</b> is what it is worth — stay under the walk-away line.'
+      : 'Drag the marker. The band is <b>as wide as the repairs you have not checked</b> — narrow it first.';
+  }
   const s = state.seen[state.at];
   if (state.looksLeft <= 0) return 'No looks left. Pick a house and <b>make your offer</b>.';
   if (!s.walk) return 'The sales tell you what it is worth. Now check <b>what it needs</b>.';
@@ -1342,7 +1351,14 @@ function paintHeat(){
 
   const borrowed = Math.max(0, state.price - run.capital);
   const pts = Math.round(borrowed * p.financeRate);
-  return { sure:r.sure, keepLo: wLo - state.price - pts, keepHi: wHi - state.price - pts };
+  const band = { sure:r.sure, keepLo: wLo - state.price - pts, keepHi: wHi - state.price - pts };
+  /* a test seam, and a narrow one: the arithmetic the readout is ABOUT to be
+     printed from, so a harness can hold the CHARACTERS to it. _tsign watches
+     colour, and this screen's worst bug was in the characters — a loss whose
+     minus had been stripped, printed in the grammar of a gain. Colour alone
+     could not see it. */
+  window.__lastBand = band;
+  return band;
 }
 /* THE NUMBER MOVES, BECAUSE THE NUMBER IS THE POINT. A figure that snaps has
    no weight; one that runs to its new value reads as a consequence of the hand
@@ -1630,7 +1646,12 @@ function heroHTML(){
       ? 'Nothing. Every house on the street is borrowed money now, and the points come off the top. The drill pays a fee for a right read — that is the way back.'
       : bk.thin
       ? 'Thin. You can still bid above it, but the borrowed part costs you points, so the margins get tight.'
-      : 'Three streets. What you make is yours and what you lose is gone.')+'</span></div>';
+      /* NAME THE FLOOR. One bankroll runs across all three cabinets — that is
+         the design, and until now only the hub said so, which is how the same
+         confusion reached the dashboard card. The entry screen is where a
+         player forms their idea of what the money IS. */
+      : 'Three streets. What you make is yours and what you lose is gone \u2014 '
+        + 'and it is the same bankroll in all three games on the floor.')+'</span></div>';
   /* THE TITLE SCREEN SHOWS THE STREET IT IS THE TITLE OF. It used to be 61
      words, a button, and 890 pixels of empty desk under it — the only page in
      the arcade with no picture of any kind, promising houses and showing none.
