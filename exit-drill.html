@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Exit Drill · The Arcade · Negotiation Inc</title><script>window.NI_LIVE=true;</script>
+<title>Exit Drill · The Arcade · Negotiation Inc</title><script>window.NI_LIVE=false;</script>
 <meta name="description" content="Sixty seconds, one house at a time: flip it, hold it, take the payments, run the listing, or walk. The desk's own arithmetic, played as a reflex.">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -73,6 +73,37 @@ h1{font-size:40px}
 .tally .v{font-family:var(--serif);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
 
 .stage{margin:22px 0 60px;background:var(--panel);border:1px solid var(--edge);border-radius:12px;overflow:hidden}
+/* THE RIBBON. A machine strip on the dark plate, the same family as the
+   clock rail it sits on top of — not a banner, not a modal, not a briefing.
+   It is one row high on a phone too, which is why the sentence wraps out
+   rather than the button dropping below the fold. */
+.ribbon{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+ padding:11px 15px;background:var(--well);border-bottom:1px solid var(--edge);
+ font-size:13.5px;line-height:1.45}
+.ribbon:empty{display:none}
+.ribbon .rb-n{font-weight:800;letter-spacing:.03em;color:var(--gold);white-space:nowrap}
+.ribbon .rb-t{flex:1 1 220px;color:var(--ink-2,#c9c9c9)}
+.ribbon .rb-t b{color:#fff}
+.ribbon .rb-s{font-weight:700;color:var(--gold);white-space:nowrap}
+.ribbon .rb-go{font:inherit;font-weight:700;color:#fff;background:var(--blue,#1f5fd0);
+ border:0;border-radius:8px;padding:9px 14px;min-height:40px;cursor:pointer;white-space:nowrap}
+.ribbon .rb-go:hover{filter:brightness(1.12)}
+.ribbon .rb-go:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media(max-width:620px){
+ .ribbon{padding:10px 13px;gap:9px 10px}
+ .ribbon .rb-n{order:1}
+ .ribbon .rb-go{order:2;margin-left:auto}
+ .ribbon .rb-t{order:3;flex-basis:100%;font-size:13px}
+ .ribbon .rb-s{order:4}
+}
+/* THE GRID IS ONE ROW OR IT IS NOT A PICTURE. Ten glyphs that wrap 9-and-1
+   read as a mistake, so the type scales to the viewport rather than the line
+   breaking — 390px is the width this clamp was set against. */
+.sharebox{font-size:clamp(17px,6vw,28px);line-height:1.2;letter-spacing:.05em;
+ white-space:nowrap;max-width:100%}
+.sharekey{display:flex;flex-wrap:wrap;gap:6px 15px;justify-content:center;
+ font-size:12.5px;color:var(--ink-2,#c9c9c9);max-width:44ch}
+.sharekey b{font-style:normal;margin-right:4px}
 .clockrail{height:10px;background:var(--well);position:relative;overflow:hidden}
 .clockrail i{position:absolute;inset:0;transform-origin:left;background:var(--gold);transition:none}
 .clockrail.low i{background:var(--red)}
@@ -353,7 +384,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 
 <div class="wrap top">
  <div>
-  <div class="eyebrow">Cabinet 03 · sixty seconds</div>
+  <div class="eyebrow">Cabinet 03 · sixty seconds, or today's ten</div>
   <h1>Exit Drill</h1>
   <p class="lede">Five doors at first, eight by the end — and a line about <b>your</b> position
    that closes some of them.</p>
@@ -361,7 +392,8 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
  <div class="tally">
   <div><div class="t">Score</div><div class="v" id="score">0</div></div>
   <div><div class="t">Streak</div><div class="v" id="streak">0</div></div>
-  <div><div class="t">Best</div><div class="v" id="best">—</div></div>
+  <!-- two modes, two bests, and never one label doing both jobs -->
+  <div><div class="t" id="bestlab">Best</div><div class="v" id="best">—</div></div>
   <!-- the bankroll is the FLOOR's, not this cabinet's: the same money the
        street and Comp Run spend from. Saying so here is what stops a player
        wondering why the drill's number moved when they were not playing it. -->
@@ -371,6 +403,9 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 
 <div class="wrap">
  <div class="stage">
+  <!-- the daily lives here: one row, never a briefing. The first house is
+       live underneath it from the moment the page paints. -->
+  <div class="ribbon" id="ribbon"></div>
   <div class="clockrail hidden" id="rail"><i id="clock"></i></div>
 
 
@@ -478,6 +513,31 @@ function answerFor(d){
 let seed = (typeof window!=='undefined' && window.__seed) || (Date.now()>>>0);
 const rnd = () => { seed=Math.imul(seed^seed>>>16,0x45d9f3b); seed=Math.imul(seed^seed>>>16,0x45d9f3b);
   seed^=seed>>>16; return (seed>>>0)/4294967296; };
+
+/* ── THE FLOOR HAS ONE CALENDAR ─────────────────────────────────────────────
+   hashSeed and the day number are the street's, character for character, off
+   the same epoch — so Street 229 and Drill 229 are the same Thursday. Two
+   cabinets numbering their days differently would be the same defect as two
+   currencies sharing one label. */
+function hashSeed(str){
+  let h = 1779033703 ^ str.length;
+  for (let i=0;i<str.length;i++){ h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = h<<13 | h>>>19; }
+  h = Math.imul(h ^ h>>>16, 2246822507); h = Math.imul(h ^ h>>>13, 3266489909);
+  return (h ^= h>>>16) >>> 0;
+}
+function todayISO(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+const _jd = (yy,mm,dd) => { const a=Math.floor((14-mm)/12), yr=yy+4800-a, mo=mm+12*a-3;
+  return dd + Math.floor((153*mo+2)/5) + 365*yr + Math.floor(yr/4) - Math.floor(yr/100) + Math.floor(yr/400) - 32045; };
+function dayNumber(iso){ const [y,m,d]=iso.split('-').map(Number); return _jd(y,m,d) - _jd(2026,7,28) + 213; }
+function prevISO(iso){ const [y,m,d]=iso.split('-').map(Number);
+  const t=new Date(Date.UTC(y,m-1,d)-86400000);
+  return t.getUTCFullYear()+'-'+String(t.getUTCMonth()+1).padStart(2,'0')+'-'+String(t.getUTCDate()).padStart(2,'0'); }
+/* The Ten is the same ten houses for everybody, so it is seeded from the DATE
+   and from nothing else — not from the rank you hold, not from how you played
+   yesterday. That is why rankStep() below touches The Minute only: a ladder
+   that changed which houses you were dealt would make the day incomparable,
+   which is the one thing a daily cannot survive. */
+function reseed(mode){ seed = mode==='ten' ? hashSeed('drill-' + todayISO()) : (Date.now()>>>0); }
 const r500=v=>Math.round(v/500)*500, r25=v=>Math.round(v/25)*25;
 const SHAPES = ['flip','hold','subto','novation','walk'];
 const SHAPES_2 = SHAPES.concat(['wholetail']);
@@ -956,7 +1016,40 @@ const ANSWERS=[['wholesale','The wholesale','sell the contract, never own it'],
 const NAME=Object.fromEntries(ANSWERS.map(a=>[a[0],a[1]]));
 const HINT=Object.fromEntries(ANSWERS.map(a=>[a[0],a[2]]));
 const G={ t:60, score:0, streak:0, reads:0, right:0, cur:null, open:false, over:false, last:null,
-          askedAt:0, house:0, teaching:false, started:false };
+          askedAt:0, house:0, teaching:false, started:false, mode:'minute', grid:[], secs:0, iso:null };
+const HOUSE_CLOCK = 20;   // The Ten: the clock is on the HOUSE, not on the run
+const TEN_HOUSES  = 10;
+const fullClock = () => G.mode==='ten' ? HOUSE_CLOCK : 60;
+
+/* ── the day record ────────────────────────────────────────────────────────
+   Field for field the street's `ni.street.v1`. Not similar to it — the same,
+   so that one day, one streak and one word "best" mean one thing across the
+   floor. `ni-drill-best` stays exactly where it was and keeps meaning exactly
+   what it meant: the best MINUTE. The Ten's best is its own field, because
+   two modes borrowing one number is how a scoreboard starts lying. */
+const REC_KEY = 'ni.drill.v1';
+const FRESH_REC = () => ({ v:1, days:{}, streak:0, best:null, bestDay:null, played:0, last:null });
+function loadRec(){
+  try { const r = JSON.parse(localStorage.getItem(REC_KEY) || 'null');
+    if (!r || r.v !== 1 || typeof r.days !== 'object' || !r.days) return FRESH_REC();
+    return Object.assign(FRESH_REC(), r);
+  } catch(e){ return FRESH_REC(); }
+}
+function saveRec(r){ try { localStorage.setItem(REC_KEY, JSON.stringify(r)); } catch(e){} }
+/* The street's rule, unchanged: the FIRST finish of a day is the one that
+   counts. Replay as much as you like — the screen says so before you start,
+   not after you finish. */
+function recordDay(iso, score, right, secs){
+  const r = loadRec();
+  if (r.days[iso]) return { rec:r, first:false };
+  r.days[iso] = { score:Math.round(score), right, secs:Math.round(secs) };
+  r.played = Object.keys(r.days).length;
+  r.streak = r.last === prevISO(iso) ? (r.streak || 0) + 1 : 1;
+  r.last = iso;
+  if (r.best == null || score > r.best){ r.best = Math.round(score); r.bestDay = iso; }
+  saveRec(r);
+  return { rec:r, first:true };
+}
 const best0=+(LS.get('ni-drill-best')||0); if (best0) $('best').textContent=best0;
 
 /* ── the ladder ────────────────────────────────────────────────────────────
@@ -986,6 +1079,23 @@ const TIERS = [
    hints:false, pip:'All eight — and your position decides which are open' },
 ];
 const tierFor = n => TIERS.filter(t => n >= t.from).pop() || TIERS[0];
+
+/* THE LADDER WAS A PLAQUE. The comment above claimed "somebody on their
+   fortieth run never sees five" and that was simply not true: tierFor read
+   the house number and nothing else, so a Closer opened on five doors with
+   the hints on, every run, forever — the rank printed a nicer word and
+   changed nothing. It changes something now. An earned rank starts you
+   further up the same ramp; it never invents a ramp of its own.
+   THE MINUTE ONLY — see reseed(). */
+const RANK_STEP = { 'Door-knocker':0, 'Bird dog':0, 'Apprentice':3, 'Underwriter':3, 'Closer':6, 'The Desk':6 };
+function rankStep(){
+  if (G.mode === 'ten') return 0;
+  const best = Math.max(best0, +(LS.get('ni-drill-best')||0));
+  return RANK_STEP[rankFor(best).n] || 0;
+}
+/* The Ten's ramp is fixed and identical for everybody: three houses at five
+   doors, four at six, three at all eight. */
+const TEN_TIER = h => h <= 3 ? TIERS[0] : h <= 7 ? TIERS[1] : TIERS[2];
 
 /* ── the ledger ────────────────────────────────────────────────────────────
    This used to print "fit 78" — a unit that exists nowhere in real estate,
@@ -1074,7 +1184,9 @@ function working(d, chose, correct){
 }
 function next(){
   G.house++;
-  const T = tierFor(G.house);
+  if (G.mode === 'ten' && G.house > TEN_HOUSES){ end(); return; }
+  const T = G.mode === 'ten' ? TEN_TIER(G.house) : tierFor(G.house + rankStep());
+  if (G.mode === 'ten'){ G.t = HOUSE_CLOCK; $('clock').style.transform = 'scaleX(1)'; }
   G.cur = deal(T.shapes[Math.floor(rnd()*T.shapes.length)]);
   drawHouse($('px'),G.cur);
   const d=G.cur;
@@ -1093,8 +1205,11 @@ function next(){
       <span class="hint">${shut ? 'closed to you here' : (T.hints ? HINT[id] : '')}</span></button>`;
   }).join('');
   document.querySelectorAll('.ans:not([disabled])').forEach(b=>b.onclick=()=>answer(b.dataset.a));
-  $('prompt').innerHTML = `<b>Which exit fits?</b> ${FINEPOINTER ? `Keys 1–${T.answers.length} answer. ` : ''}Wrong costs five seconds.
-    <span class="tierpip"> · ${T.pip}</span>`;
+  $('prompt').innerHTML = G.mode === 'ten'
+    ? `<b>House ${G.house} of ${TEN_HOUSES}.</b> ${FINEPOINTER ? `Keys 1–${T.answers.length} answer. ` : ''}Twenty seconds on this house.
+       <span class="tierpip"> · ${T.pip}</span>`
+    : `<b>Which exit fits?</b> ${FINEPOINTER ? `Keys 1–${T.answers.length} answer. ` : ''}Wrong costs five seconds.
+       <span class="tierpip"> · ${T.pip}</span>`;
   $('verdict').className='verdict hidden';
   G.open=true; G.askedAt=G.t;
 }
@@ -1106,6 +1221,7 @@ function answer(a){
     lastTick=performance.now(); requestAnimationFrame(tick); }
   const correct = answerFor(G.cur); G.reads++;
   const took = G.askedAt-G.t;
+  G.secs += Math.max(0, took);
 
   /* ── THE MONEY MOVES ON EVERY ANSWER ────────────────────────────────────
      Not at the end of the run. If the drill settled up only when the clock
@@ -1140,6 +1256,10 @@ function answer(a){
   if (a===correct){
     G.right++; G.streak++;
     const bonus = Math.max(0, Math.round(40*(1 - Math.min(took,12)/12)));
+    /* 🟩 right and inside the bonus window · 🟨 right but slow. The share grid
+       carries speed AND accuracy in one row, which is one more fact than the
+       street's grid carries. */
+    G.grid.push(bonus > 0 ? '\u{1F7E9}' : '\u{1F7E8}');
     const chain = (G.streak>0 && G.streak%3===0) ? 50 : 0;
     G.score += 100+bonus+chain;
     v.className='verdict right';
@@ -1149,9 +1269,13 @@ function answer(a){
       ${correct==='walk' ? '<div class="lnone">Nothing on this house pays at what they are asking. Walking away IS the read.</div>' : ''}
       ${working(G.cur, a, correct)}<div class="go"><button type="button" class="gonext" data-go-next>Next house \u2192</button><span class="gokey">or press Space</span></div>`;
   } else {
-    G.streak=0; G.t=Math.max(0,G.t-5);
+    G.streak=0; G.grid.push('\u{1F7E5}');
+    /* THE MINUTE spends time on a wrong answer. THE TEN cannot: its clock is
+       on the house and that house is over, so five seconds off would either
+       do nothing or end a run that has houses left in it. */
+    if (G.mode !== 'ten') G.t=Math.max(0,G.t-5);
     v.className='verdict wrong';
-    v.innerHTML=`<div class="vh">The desk says ${NAME[correct]||'walk away'} · −5 seconds
+    v.innerHTML=`<div class="vh">The desk says ${NAME[correct]||'walk away'}${G.mode==='ten' ? '' : ' · −5 seconds'}
       <span class="feetag dn">${mv.applied < 0 ? fmt(-mv.applied) + ' out of your bankroll'
         : 'nothing left to take'}</span></div>
       ${correct==='walk' ? '<div class="lnone">Nothing on this house pays at what they are asking.</div>' : ''}
@@ -1160,7 +1284,53 @@ function answer(a){
   }
   G.last=G.cur;
   $('score').textContent=G.score; $('streak').textContent=G.streak;
-  if (G.t<=0) end();
+  if (G.mode !== 'ten' && G.t<=0) end();
+}
+
+/* ── TIME, IN THE TEN ───────────────────────────────────────────────────────
+   A house you did not call costs exactly what a house you called wrong costs.
+   That is not a punishment, it is the removal of an exploit: if freezing were
+   free and guessing cost money, the play when unsure would be to sit still,
+   and a drill that rewards not answering has stopped being a drill. The
+   teardown still runs in full — a player who freezes on house four is the one
+   with the most to learn from it. */
+function timeout(){
+  if (G.over) return;
+  const correct = answerFor(G.cur); G.reads++; G.streak=0;
+  G.secs += HOUSE_CLOCK; G.grid.push('\u2B1C');
+  const mv = BANK.move({ game:'drill', delta:-DRILL_MISS,
+    note:'let the clock run out on ' + (G.cur.addr || 'a house') });
+  G.take += mv.applied;
+  if (mv.stored === false) G.notStored = mv.why || 'nostore';
+  G.capped = G.capped || mv.capped;
+  paintBank();
+  document.querySelectorAll('.ans').forEach(b=>{ b.disabled=true;
+    if(b.dataset.a===correct) b.classList.add('right'); });
+  const v=$('verdict');
+  v.className='verdict wrong';
+  v.innerHTML=`<div class="vh">Time — the desk says ${NAME[correct]||'walk away'}
+    <span class="feetag dn">${mv.applied < 0 ? fmt(-mv.applied) + ' out of your bankroll'
+      : 'nothing left to take'}</span></div>
+    <div class="lnone">A house you did not call costs what a house you called wrong costs.</div>
+    ${working(G.cur, null, correct)}
+    <div class="go"><button type="button" class="gonext" data-go-next>Next house \u2192</button><span class="gokey">or press Space</span></div>`;
+  G.last=G.cur;
+  $('streak').textContent=G.streak;
+}
+/* THE BEST TILE TELLS YOU WHICH BEST. The Minute's best is a sixty-second
+   score; The Ten's is a ten-house score off a fixed set. They are not the
+   same number and they never share the word. */
+function paintBest(){
+  const lab = $('bestlab'), el = $('best'); if (!lab || !el) return;
+  if (G.mode === 'ten'){
+    const b = loadRec().best;
+    lab.textContent = 'Best ten';
+    el.textContent = b == null ? '\u2014' : b.toLocaleString('en-US');
+  } else {
+    const b = Math.max(best0, +(LS.get('ni-drill-best')||0));
+    lab.textContent = 'Best';
+    el.textContent = b > 0 ? b.toLocaleString('en-US') : '\u2014';
+  }
 }
 function paintBank(){
   const el = $('bank'); if (!el) return;
@@ -1170,7 +1340,8 @@ function paintBank(){
   const t = $('banktake');
   if (t) t.textContent = G.take === 0 ? '' : (G.take > 0 ? '+' : '−') + fmt(Math.abs(G.take)).replace('$','$');
 }
-function advance(){ if(G.over||G.teaching||!G.started) return; if(!G.open && G.t>0) next(); }
+function advance(){ if(G.over||G.teaching||!G.started) return;
+  if(!G.open && (G.mode==='ten' || G.t>0)) next(); }
 document.addEventListener('keydown',e=>{
   if (G.over || !G.started) return;
   if (G.open && e.key>='1' && e.key<='8'){ const b=document.querySelectorAll('.ans')[+e.key-1];
@@ -1194,9 +1365,9 @@ function tick(now){
   if (G.over || !G.started) return;
   const dt=(now-lastTick)/1000; lastTick=now;
   if (G.open && !G.teaching) G.t=Math.max(0,G.t-dt);
-  $('clock').style.transform=`scaleX(${G.t/60})`;
-  $('rail').classList.toggle('low',G.t<12);
-  if (G.t<=0 && G.open){ G.open=false; end(); }
+  $('clock').style.transform=`scaleX(${G.t/fullClock()})`;
+  $('rail').classList.toggle('low', G.t < (G.mode==='ten' ? 6 : 12));
+  if (G.t<=0 && G.open){ G.open=false; if (G.mode==='ten') timeout(); else end(); }
   requestAnimationFrame(tick);
 }
 /* ── the door ──────────────────────────────────────────────────────────────
@@ -1223,23 +1394,38 @@ function ladderHTML(best){
    who has already played one house can read them with a reason to care. */
 function renderBelow(){
   const best = Math.max(best0, +(LS.get('ni-drill-best')||0));
+  const rk = rankFor(best), step = RANK_STEP[rk.n] || 0;
+  const ten = G.mode === 'ten';
   $('below').innerHTML = `
    <div class="rules">
     <div class="rule"><div class="n">Scoring</div><div class="t">100 a house, plus speed</div>
      <div class="d">Up to 40 more for answering inside twelve seconds, and 50 every third right in a row.</div></div>
-    <div class="rule"><div class="n">Wrong</div><div class="t">Five seconds off the clock</div>
-     <div class="d">No score penalty. Time is the only currency here, which is also true on a Tuesday.</div></div>
+    ${ten
+      ? `<div class="rule"><div class="n">The clock</div><div class="t">Twenty seconds a house</div>
+     <div class="d">Running out is a miss, not the end — the run is always ten houses. A house you did not call costs what a house you called wrong costs.</div></div>`
+      : `<div class="rule"><div class="n">Wrong</div><div class="t">Five seconds off the clock</div>
+     <div class="d">No score penalty. Time is the only currency here, which is also true on a Tuesday.</div></div>`}
     <div class="rule"><div class="n">It gets harder</div><div class="t">Five doors, then six, then eight</div>
      <div class="d">By the eighth house every exit is open — and a line about <b>your</b> position closes some of them.</div></div>
+    <div class="rule"><div class="n">The Ten</div><div class="t">One set of houses a day, for everybody</div>
+     <div class="d">Ten houses seeded from the date, the same ten wherever you play them. The first finish of the day is the one the record keeps — replay as often as you like.</div></div>
    </div>
+   <div class="rule" style="margin-top:12px"><div class="n">What a rank opens</div>
+    <div class="t">${step ? 'The Minute now starts you at ' + (step >= 6 ? 'all eight doors, hints off' : 'six doors') : 'A rank starts you further up the ramp'}</div>
+    <div class="d">${step
+      ? 'You are a <b>' + rk.n + '</b>, so The Minute skips the first ' + step + ' houses of the ramp. The Ten never does — its ten houses are the same for a Door-knocker and for The Desk, or the day would not be comparable.'
+      : 'Reach <b>Apprentice</b> and The Minute opens on six doors; reach <b>Closer</b> and it opens on all eight with the hints off. The Ten never changes — its ten houses are the same for everybody, or the day would not be comparable.'}</div></div>
    ${ladderHTML(best)}
    <div class="btnrow" style="justify-content:flex-start">
     <a class="btn" href="exits.html">Learn the eight exits</a>
    </div>`;
 }
-function beginRun(){
-  Object.assign(G,{t:60,score:0,streak:0,reads:0,right:0,over:false,open:false,last:null,
-                   house:0,teaching:false,started:true,running:false,take:0,capped:false});
+function beginRun(mode){
+  const m = mode === 'ten' ? 'ten' : 'minute';
+  Object.assign(G,{t:m==='ten'?HOUSE_CLOCK:60,score:0,streak:0,reads:0,right:0,over:false,open:false,last:null,
+                   house:0,teaching:false,started:true,running:false,take:0,capped:false,
+                   mode:m,grid:[],secs:0,iso:m==='ten'?todayISO():null,notStored:null});
+  reseed(m);
   BANK.run('drill');
   paintBank();
   /* zeros before anybody has played are not a scoreboard, they are a shrug */
@@ -1247,13 +1433,102 @@ function beginRun(){
   $('card').classList.add('hidden');
   $('deck').classList.remove('hidden'); $('rail').classList.remove('hidden');
   $('clock').style.transform='scaleX(1)';
+  document.body.classList.toggle('ten', m==='ten');
+  paintBest();
   next();
-  $('prompt').innerHTML = `<b>Pick the exit that pays.</b> The clock starts with your first answer.`;
+  if (m === 'ten'){
+    /* THE TEN IS A CHOICE, so its clock may start on sight — the reason The
+       Minute waits for the first answer is that a stranger arrives inside it
+       without having asked for a countdown. Nobody arrives inside The Ten. */
+    G.running = true; lastTick = performance.now(); requestAnimationFrame(tick);
+    $('score').textContent = 0; $('streak').textContent = 0;
+  } else {
+    $('prompt').innerHTML = `<b>Pick the exit that pays.</b> The clock starts with your first answer.`;
+  }
+  paintRibbon();
+}
+
+/* ── the ribbon ────────────────────────────────────────────────────────────
+   The daily has to be visible without becoming a briefing. One row above the
+   deck: what day it is, whether today is already on the board, and a button.
+   The first house stays live underneath it, so PLAY FIRST, EXPLAIN NEVER
+   survives intact — a stranger who ignores this row is already playing. */
+function fmtSecs(x){ const t=Math.round(x); return t>=60 ? Math.floor(t/60)+'m '+String(t%60).padStart(2,'0')+'s' : t+'s'; }
+function paintRibbon(){
+  const el = $('ribbon'); if (!el) return;
+  const iso = todayISO(), n = dayNumber(iso), r = loadRec(), today = r.days[iso];
+  const streak = (r.streak && r.last === iso) ? r.streak : 0;
+  el.innerHTML =
+    `<span class="rb-n">Drill ${n}</span>` +
+    `<span class="rb-t">${today
+      ? 'Today is on the board at <b>' + today.score.toLocaleString('en-US') + '</b> \u00b7 ' + today.right + '/' + TEN_HOUSES
+      : 'Ten houses. The same ten for everybody, today only.'}</span>` +
+    (streak > 1 ? `<span class="rb-s">${streak} days running</span>` : '') +
+    `<button type="button" class="rb-go" id="goten">${today ? 'Play it again' : 'Play The Ten'} \u2192</button>` +
+    (G.mode === 'ten' ? '' : '');
+  const b = $('goten'); if (b) b.onclick = () => beginRun('ten');
+}
+/* The share line is the street's grammar, one family, one calendar.
+   \u{1F7E9} right and fast \u00b7 \u{1F7E8} right but slow \u00b7 \u{1F7E5} wrong \u00b7 \u2B1C the clock ran out. */
+function shareLine(rec){
+  const iso = G.iso || todayISO();
+  const streak = (rec && rec.last === iso && rec.streak > 1) ? ' \u00b7 day ' + rec.streak : '';
+  return 'Negotiation Inc \u2014 Drill ' + dayNumber(iso) + '\n' +
+    G.grid.join('') + '\n' +
+    G.right + '/' + TEN_HOUSES + ' \u00b7 ' + G.score.toLocaleString('en-US') +
+    ' \u00b7 ' + fmtSecs(G.secs) + streak;
+}
+window.__shareLine = () => shareLine(loadRec());
+function copyShare(){
+  const t = shareLine(loadRec()), b = $('cp');
+  const done = ok => { if (b){ b.textContent = ok ? 'Copied' : 'Copy failed'; setTimeout(()=>{ b.textContent='Copy result'; }, 1600); } };
+  try { navigator.clipboard.writeText(t).then(()=>done(true), ()=>done(false)); }
+  catch(e){ done(false); }
+}
+function tenCard(){
+  const iso = G.iso || todayISO();
+  const { rec, first } = recordDay(iso, G.score, G.right, G.secs);
+  const acc = G.reads ? Math.round(100*G.right/G.reads) : 0;
+  const y = rec.days[prevISO(iso)];
+  const bestTen = rec.best;
+  const head = G.right === TEN_HOUSES ? 'Ten for ten'
+             : G.right >= 8 ? 'A good day'
+             : G.right >= 5 ? 'Half the street' : 'A hard ten';
+  return `<div class="eyebrow">Drill ${dayNumber(iso)} \u00b7 the ten</div><h2>${head}</h2>
+   <div class="big">${G.score.toLocaleString('en-US')}</div>
+   <div class="statrow"><div class="s"><div class="t">Called right</div><div class="v">${G.right}/${TEN_HOUSES}</div></div>
+    <div class="s"><div class="t">Accuracy</div><div class="v">${acc}%</div></div>
+    <div class="s"><div class="t">Time</div><div class="v">${fmtSecs(G.secs)}</div></div>
+    <div class="s"><div class="t">Days running</div><div class="v">${rec.streak || 1}</div></div></div>
+   <div class="sharebox">${G.grid.join('')}</div>
+   <div class="sharekey"><span><b>\u{1F7E9}</b> right, and fast</span><span><b>\u{1F7E8}</b> right, but slow</span>
+    <span><b>\u{1F7E5}</b> wrong</span><span><b>\u2B1C</b> the clock ran out</span></div>
+   <div class="btnrow"><button class="btn p" id="cp">Copy result</button></div>
+   ${first ? '' : '<div class="grade">Today was already on the board at <b>' +
+       (rec.days[iso].score||0).toLocaleString('en-US') + '</b>. The record keeps the first finish of the day \u2014 this run still moved your bankroll.</div>'}
+   ${y ? '<div class="grade">Yesterday you scored <b>' + y.score.toLocaleString('en-US') + '</b> and called <b>' + y.right + '/' + TEN_HOUSES + '</b>.</div>' : ''}
+   ${bestTen != null && bestTen > G.score ? '<div class="grade">Your best ten is <b>' + bestTen.toLocaleString('en-US') + '</b>' + (rec.bestDay ? ' \u2014 drill ' + dayNumber(rec.bestDay) : '') + '.</div>' : ''}
+   ${G.notStored ? '<div class="grade" style="color:#e8cf72">' + troubleLine(G.notStored) + '</div>' : ''}
+   <div class="grade">Your bankroll is <b>${fmt(BANK.read().cash)}</b>. ${
+     G.capped ? 'You have taken the day\u2019s full fees out of the drill \u2014 it still plays, it stops paying until tomorrow.'
+     : 'Everybody who plays today reads these same ten houses. Tomorrow it is ten different ones.'}</div>
+   <div class="btnrow"><button class="btn p" id="again">Play the ten again</button>
+    <button class="btn" id="minute">The Minute \u2014 sixty seconds \u2192</button>
+    <a class="btn" href="arcade.html">Back to the floor</a></div>`;
 }
 function end(){
   G.over=true;
+  if (G.mode === 'ten'){
+    $('deck').classList.add('hidden'); $('rail').classList.add('hidden');
+    const c=$('card'); c.classList.remove('hidden'); c.innerHTML = tenCard();
+    $('again').onclick = () => beginRun('ten');
+    $('minute').onclick = () => beginRun('minute');
+    const cb = $('cp'); if (cb) cb.onclick = copyShare;
+    renderBelow(); paintRibbon(); paintBest();
+    return;
+  }
   const best=Math.max(best0,+(LS.get('ni-drill-best')||0),G.score);
-  LS.set('ni-drill-best',String(best)); $('best').textContent=best;
+  LS.set('ni-drill-best',String(best)); paintBest();
   const acc=G.reads?Math.round(100*G.right/G.reads):0;
   const rk = rankFor(G.score);
   const nextRk = RANKS[RANKS.indexOf(rk)+1];
@@ -1262,13 +1537,13 @@ function end(){
     ...(d.piti!=null?[`piti=${d.piti}`,`balance=${d.balance}`]:[]),
     `est=${['arv','repairs','rent',...(d.piti!=null?['piti']:[])].join(',')}`,
     `sit=${d.sit}`,'from=arcade',`title=${encodeURIComponent('Exit Drill — the last house')}`].join('&') : 'desk.html';
-  $('deck').classList.add('hidden');
+  $('deck').classList.add('hidden'); $('rail').classList.add('hidden');
   const c=$('card'); c.classList.remove('hidden');
   c.innerHTML=`<div class="eyebrow">Time</div><h2>${grade[0]}</h2>
-   <div class="big">${G.score}</div>
+   <div class="big">${G.score.toLocaleString('en-US')}</div>
    <div class="statrow"><div class="s"><div class="t">Houses read</div><div class="v">${G.reads}</div></div>
     <div class="s"><div class="t">Called right</div><div class="v">${acc}%</div></div>
-    <div class="s"><div class="t">Best</div><div class="v">${best}</div></div>
+    <div class="s"><div class="t">Best</div><div class="v">${best.toLocaleString('en-US')}</div></div>
     <div class="s"><div class="t">This run paid</div>
       <div class="v ${G.take>0?'up':G.take<0?'dn':''}">${(G.take>0?'+':G.take<0?'−':'')+fmt(Math.abs(G.take)).replace(/^−/,'')}</div></div></div>
    ${G.notStored ? '<div class="grade" style="color:#e8cf72">' + troubleLine(G.notStored) + '</div>' : ''}
@@ -1279,19 +1554,26 @@ function end(){
    <div class="grade">${grade[1]}</div>
    ${nextRk ? `<div class="grade" style="color:#e8cf72">
      <b>${(nextRk.at-G.score).toLocaleString('en-US')}</b> more and you are a ${nextRk.n}.</div>` : ''}
+   ${(() => { const r = loadRec(), iso = todayISO();
+     return r.days[iso]
+       ? '<div class="grade">Drill ' + dayNumber(iso) + ' is on your board at <b>' + r.days[iso].score.toLocaleString('en-US') + '</b>.</div>'
+       : '<div class="grade" style="color:#e8cf72">You have not played <b>Drill ' + dayNumber(iso) + '</b> yet \u2014 ten houses, the same ten everybody gets today.</div>'; })()}
    <div class="btnrow"><button class="btn p" id="again">Run it again</button>
+    <button class="btn" id="ten">Play The Ten →</button>
     ${d?`<a class="btn" href="${handoff}">Take the last house to the desk →</a>`:''}
     <button class="btn" id="ladder">The ladder</button>
     <a class="btn" href="arcade.html">Back to the floor</a></div>`;
   renderBelow();          // the ladder below now marks the new best
-  $('again').onclick=()=>beginRun();
+  $('again').onclick=()=>beginRun('minute');
+  const tn=$('ten'); if (tn) tn.onclick=()=>beginRun('ten');
+  paintRibbon();
   const lb=$('ladder'); if (lb) lb.onclick=()=>{ renderBelow();
     document.getElementById('below').scrollIntoView({behavior:'smooth',block:'start'}); };
 }
 renderBelow();
 { const b0 = Math.max(best0, +(LS.get('ni-drill-best')||0));
   $('best').textContent = b0 > 0 ? b0.toLocaleString('en-US') : '\u2014'; }
-beginRun();
+beginRun('minute');
 </script>
 
 <footer class="ftlegal"><div class="wrap" style="font-size:12.5px">
