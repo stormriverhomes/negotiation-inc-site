@@ -467,7 +467,7 @@ li+li{margin-top:.72em!important}
 h1,h2,h3,h4{max-width:34ch}
 h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 @media (max-width:520px){p,li,dd,blockquote{line-height:1.66!important}}
-</style></head>
+</style><!--ni:stage=live--></head>
 <body>
 
 <header>
@@ -491,10 +491,11 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
  <div>
  <div class="eyebrow">Plans</div>
  <h1>Pricing a property is free. A plan buys back <em>the half hour</em>.</h1>
- <p class="lede">Every exit, every band, every piece of the arithmetic — free, unlimited, no account.
-  What you pay for is the part of underwriting that is <b>typing rather than thinking</b>: reading the
-  condition off your photos, pulling the comps, formatting the packet, and remembering the eleven
-  deals you looked at last week.</p>
+ <!-- Fifty-five words, and the sentence a visitor came for — "the desk is
+      free forever" — was the subordinate clause of the first one. Twenty-two,
+      and the free part leads. -->
+ <p class="lede"><b>The desk is free forever</b>: every exit, every number, no account.
+  What a plan buys is <b>not typing it</b>.</p>
  </div>
 
  <div class="offercard">
@@ -567,20 +568,48 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   </div>
  </div>
 
- <div class="wsame">Both columns end on the same sheet. <b>1128 Marrow Lane</b> &mdash; asking
-  $184,500, worth $291,000 repaired, $41,300 of work &mdash; pays <b class="m">$23,280</b> as the fix
-  and flip and <b class="m">$14,000</b> as a wholesale you never own, and refuses the wholetail and
-  the novation outright rather than finding you a number.
-  <b>The nine thousand dollars between those two right answers is the entire reason to price it
-  properly.</b> Only one of the two columns took forty minutes to get there.</div>
+ <!-- Seventy words restating what the two columns already draw. The sheet
+      is the same one the front door prices, so the figures stay and the
+      argument goes. -->
+ <div class="wsame">Both columns end on the same sheet. <b>1128 Marrow Lane</b> pays
+  <b class="m">$23,280</b> as the fix and flip and <b class="m">$14,000</b> as a wholesale you
+  never own. <b>Only one of the two columns took forty minutes to get there.</b></div>
 </div>
 
+<!-- ── THE CARDS STOPPED REPRINTING THE TABLE ───────────────────────────────
+     Four cards, each carrying seven to nine checklist items of fifteen to
+     thirty words — and every one of those items is also a row in the
+     comparison table two screens down. A pricing page that says everything
+     twice is a page a buyer has to read twice to find out it said nothing
+     new. The cards answer "is this me and what does it cost"; the table
+     answers "what exactly do I get". Two questions, two places.
+
+     The free comp allowance stayed IN PROSE on purpose: _tfunnel reads it off
+     this page and holds it against what the desk actually enforces, so it is
+     a promise with a test on it, not a bullet. -->
+<style>
+.pbsum{font-size:14px;line-height:1.62;color:var(--mid);margin:2px 0 0}
+.pbsum b{color:var(--ink)}
+.plan .pb{padding-bottom:16px}
+</style>
+<!-- ── THE FREE TIER IS THE ARGUMENT, AND IT WAS THE QUIETEST CARD ──────────
+     "Pricing a property is free forever" is the strongest sentence this
+     company owns and the card that proves it sat third-from-loudest in a row
+     of four, drawn exactly like the ones asking for money. It keeps the ink
+     border now — anchored, not shouting — while Underwriter keeps the ribbon,
+     because "the one to have" and "the one that costs nothing" are two
+     different claims and the page is entitled to make both. -->
+<style>
+.plan.free{border-color:var(--ink);box-shadow:0 1px 0 rgba(13,20,32,.06)}
+.ribbon.isfree{background:var(--ink);color:#fff;visibility:visible}
+@media(max-width:1180px){ .ribbon.isfree{display:block} }
+.plan.free .price{color:var(--ink)}
+</style>
 <div class="cards">
 
  <div class="plan free">
-  <div class="ribbon ghost">·</div>
+  <div class="ribbon isfree">Free forever</div>
   <div class="ph">
-   <div class="tagline">Free forever</div>
    <h2>The Desk</h2>
    <div class="price">$0</div>
    <div class="note">No card. No account. No expiry.</div>
@@ -588,15 +617,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   </div>
   <div class="pb">
    <div class="pbh">What you get</div>
-   <ul>
-    <li><i>✓</i><span>Every exit a house can take &mdash; seven of them &mdash; priced and ranked against the seller</span></li>
-    <li><i>✓</i><span>The offer, with <b>the terms priced in dollars</b> and the words to say</span></li>
-    <li><i>✓</i><span>The comp workbench — score sales yourself. <b>Three in this browser, twelve a week with a free account</b></span></li>
-    <li><i>✓</i><span>Light, medium and heavy rehab profiles across seventeen line items</span></li>
-    <li><i>✓</i><span>Every number shows its arithmetic, and says when it is estimating</span></li>
-    <li><i>✓</i><span>Print the offer sheet, and the whole eight-lesson walk-through</span></li>
-    <li><i>✓</i><span>The arcade: Exit Drill, the Daily Street, and Comp Run</span></li>
-   </ul>
+   <p class="pbsum">The whole desk: every exit priced, every number showing its arithmetic, the offer sheet, the walk-through and the arcade. Score comps yourself: <b>three in this browser, twelve a week</b> with a free account.</p>
   </div>
   <div class="pf"><a class="btn" href="desk.html#new">Open the desk</a>
    <span class="under">Nothing leaves your browser</span></div>
@@ -613,17 +634,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   </div>
   <div class="pb">
    <div class="pbh">Everything free, plus</div>
-   <ul>
-    <li><i>✓</i><span><b>Every condition line on its own slider</b> — roof, panel, each bath, priced separately</span></li>
-    <li><i>✓</i><span>Comps without a cap, scored against your house and adjusted the way an appraiser would</span></li>
-    <li><i>✓</i><span>The seven assumptions, and the grid showing what your profit does when you are wrong</span></li>
-    <li><i>✓</i><span><b>Compare two deals</b> — both sheets, one engine, and where the winner changes</span></li>
-    <li><i>✓</i><span><b>The lender packet</b> — one PDF with your name on it, the working shown</span></li>
-    <li><i>✓</i><span>Up to forty properties, on every device, for as long as you keep them</span></li>
-    <li><i>✓</i><span>Your own market defaults, so the sheet stops asking what it can answer</span></li>
-   </ul>
-   <div class="fair">Everything here runs in your browser. No lookups, no AI, nothing metered —
-    which is why it costs what it costs.</div>
+   <p class="pbsum">The model becomes yours: every condition line on its own slider, comps without a cap, the lender packet, and forty properties still there on Friday.</p>
   </div>
   <div class="pf"><a class="btn" href="office.html?join=solo">Start 14 days free →</a>
    <span class="under">Card on file, nothing charged for 14 days</span></div>
@@ -640,35 +651,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   </div>
   <div class="pb">
    <div class="pbh">Everything in Solo, plus</div>
-   <ul>
-    <li><i>✓</i><span><b>The photo condition read</b> — drop the walk-through pictures, get seventeen line items back with a number on each</span></li>
-    <li><i>✓</i><span><b>Comps pulled for the address</b> in one click — <b>on our key</b>, no vendor account to open. Forty a month on Underwriter, a hundred and twenty on The Office. The vendor scores nothing; <b>the desk</b> scores each sale against your house and adjusts it, the same way it treats a row you type. The ARV is the one you set</span></li>
-    <!-- ── THIS BULLET SOLD AN AVM ─────────────────────────────────────────
-         It read "Address-level values and rents". The table was corrected
-         weeks ago and this was not, because the harness that enforces the
-         correction reads the TABLE ROWS — the right rule applied to the wrong
-         noun, which is how the packet gate broke too.
-
-         There is no address-level value and there is not going to be one: an
-         automated valuation model is the thing this product exists to be an
-         alternative to, and the lender packet states in writing that none was
-         used. Selling one on the pricing page while refusing to produce one in
-         the software is the worst version of that — the customer buys the row
-         and finds the refusal. The rent is a different claim, it is real, and
-         it lands as an ESTIMATE with its range. -->
-    <li id="rent"><i>✓</i><span><b>The rent for the address</b> — this address, not the ZIP median, with the range around it and the number of leases behind it. It comes on our key and counts against the same forty — no vendor account, nothing to paste. <b>No value estimate</b>: what it is worth is still the number you set, from comps you kept</span></li>
-    <li><i>✓</i><span><b>Offer letters and the text message</b>, written from the winning exit in the seller's language</span></li>
-    <li><i>✓</i><span><b>The written comparison</b> — the case for each deal in prose you can forward. Every figure in it is one from your own table; a draft carrying anything else is refused rather than shown to you</span></li>
-    <li id="street"><i>✓</i><span><b>The street brief</b> — what the block is actually doing. Tract-level income, tenure and vacancy from the census, the FEMA flood zone at the exact coordinates, and what has been permitted or planned nearby, <b>each claim carrying the page it came from</b>. The forty minutes of browser tabs, in about fifteen seconds</span></li>
-   </ul>
-   <!-- These were 200 lookups and 100 reads, invented before the meters existed
-        and never reconciled with them. The table below sells 40 and 100, the
-        server enforces 40 and 100, and a card promising 200 is a card writing
-        a cheque the software refuses. The numbers here are now the numbers. -->
-   <div class="fair">The month includes <b>40 property lookups</b> — the comp pull and the rent
-    lookup share them — plus <b>100 photo reads</b>, 40 street briefs, 30 written comparisons,
-    20 bid checks, 60 letters and 80 paperwork reads. Each is counted and shown to you before
-    you spend it. The Office is three times every one of them.</div>
+   <p class="pbsum">The typing goes away: your photos read the condition, comps arrive pulled on our key, and the rent is found for the address rather than the ZIP.</p>
   </div>
   <div class="pf"><a class="btn p" href="office.html?join=underwriter">Start 14 days free →</a>
    <span class="under">Card on file, nothing charged for 14 days, cancel in one click</span></div>
@@ -685,13 +668,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   </div>
   <div class="pb">
    <div class="pbh">Everything in Underwriter, plus</div>
-   <ul>
-    <li><i>✓</i><span><b>Bulk underwriting</b> — paste a whole week of leads and price every one of them at once</span></li>
-    <li><i>✓</i><span><b>Buy-box rules</b> that flag a deal the moment it fits, or refuse it before anyone drives out</span></li>
-    <li><i>✓</i><span><b>Four properties on the bench</b> at once in the comparison, not two</span></li>
-    <li><i>✓</i><span>Your branding on every packet and letter that leaves the office</span></li>
-    <li><i>✓</i><span>A hundred and twenty property lookups a month, three times Underwriter's</span></li>
-   </ul>
+   <p class="pbsum">Underwriter for a shop: paste a week of leads and price every one, buy-box rules that flag a fit, four deals on the bench, your branding on what leaves.</p>
   </div>
   <div class="pf"><a class="btn q" href="mailto:support@negotiationinc.com?subject=The%20Office">Talk to us</a>
    <span class="under">Migration, setup and onboarding included</span></div>
@@ -706,8 +683,8 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 <div class="sec-h">
  <div class="eyebrow">What the plan actually buys</div>
  <h2>Nine things that give you the afternoon back.</h2>
- <p>Underwriting a house takes about forty minutes, and roughly thirty-two of them are typing
-  things a computer already knows. These are the thirty-two.</p>
+ <p>Underwriting a house takes about forty minutes. Thirty-two of them are typing things a
+  computer already knows.</p>
 </div>
 
 <div class="spots">
@@ -734,9 +711,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   <div class="sb">
    <span class="tier">Underwriter</span>
    <h3>Read the condition from the photos</h3>
-   <p>Drop the forty pictures you took walking the house. Every line comes back filled in — roof,
-    mechanicals, each bath, the drive — <b>with a number on each and the photo it came from</b>.
-    You correct the three it read wrong instead of typing seventeen.</p>
+   <p>Drop the walk-through pictures. Seventeen lines come back with a number on each and the photo it came from &mdash; you correct three instead of typing seventeen.</p>
    <a class="spotgo" href="office.html?join=underwriter">Start 14 days free →</a><div class="saves"><b>Saves ~20 minutes</b> per property, and catches the line you forgot</div>
   </div>
  </div>
@@ -787,14 +762,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
         is also the better pitch, because the buyer's real question is whether
         a black box is deciding comp quality for them. It is not. -->
    <h3>Comps pulled — and scored against your house</h3>
-   <p>Type the address; up to ten recent sales land on the workbench. The vendor scores
-    nothing and its own value estimate is discarded on arrival — <b>the desk</b> does the
-    scoring, rating each sale for comparability on recency, distance, size and rooms and
-    adjusting it to your house, with the reasons shown. Identical arithmetic whether you
-    typed the row or pulled it. It runs on <b>our key</b>, so there is no vendor account to
-    open and nothing to paste — forty pulls a month on Underwriter, a hundred and twenty on
-    The Office, counted and shown. It is still not an AVM: you keep or drop every row, and
-    <b>the ARV is the one you set</b>.</p>
+   <p>Type the address and up to ten recent sales land on the workbench, pulled on our key. <b>The desk does the scoring</b>, rating each for recency, distance, size and rooms, and showing why.</p>
    <a class="spotgo" href="office.html?join=underwriter">Start 14 days free →</a><div class="saves"><b>Saves ~10 minutes</b>, and the band gets narrower with every comp</div>
   </div>
  </div>
@@ -821,10 +789,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   <div class="sb">
    <span class="tier">Solo</span>
    <h3>The lender packet, in one click</h3>
-   <p>One PDF with your name on it: the property, the comps you used, the condition read, every
-    exit priced, and the arithmetic behind the number you are asking them to fund.
-    <b>Nothing hand-assembled, nothing missing.</b> The same document works on a private lender,
-    a partner, or a seller who wants to know how you got there.</p>
+   <p>One PDF with your name on it: the property, the comps, the condition read, every exit priced, and the arithmetic behind the number you are asking them to fund.</p>
    <a class="spotgo" href="office.html?join=solo">Start 14 days free →</a><div class="saves"><b>Saves an hour</b> of spreadsheet-into-Word, per deal you fund</div>
   </div>
  </div>
@@ -855,10 +820,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   <div class="sb">
    <span class="tier">Solo</span>
    <h3>A portfolio that remembers</h3>
-   <p>Every property you priced, side by side, with its spread, its best exit and the day you ran
-    it. Open it on the phone in the driveway and on the laptop that evening and it is
-    <b>the same sheet</b>. The eleven deals you looked at last week stop being eleven browser tabs
-    you closed.</p>
+   <p>Every property you priced, with its spread and its best exit, on the phone in the driveway and the laptop that evening. Eleven deals stop being eleven closed tabs.</p>
    <a class="spotgo" href="office.html?join=solo">Start 14 days free →</a><div class="saves"><b>The one that compounds</b> — last month's comps are this month's context</div>
   </div>
  </div>
@@ -887,11 +849,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   <div class="sb">
    <span class="tier">Solo</span>
    <h3>Which of these two?</h3>
-   <p>Nobody has one house. Put two sheets side by side and the same engine prices both —
-    best exit, ceiling, room, spread, confidence — with <b>one set of assumptions driving
-    both</b>. Then the part nothing else does: move the rate, the hold, the target profit
-    across their whole range and it tells you <b>where the winner changes</b>. "This one, unless
-    rates pass 9.4%" is an answer. "Both look fine" is not.</p>
+   <p>Two sheets, one engine, and the part nothing else does: move the rate or the hold across its whole range and it tells you <b>where the winner changes</b>.</p>
    <a class="spotgo" href="office.html?join=solo">Start 14 days free →</a><div class="saves"><b>The Tuesday question</b> — not "is this a deal" but "is this the deal"</div>
   </div>
  </div>
@@ -911,10 +869,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   <div class="sb">
    <span class="tier">Underwriter</span>
    <h3>The letter, and the text message</h3>
-   <p>The sheet already knows which exit won, what the terms are worth in dollars, and what to
-    concede first. It writes the offer letter and the message that goes with it —
-    <b>in the seller's language, not yours</b> — with the number, the close date and the two
-    concessions that cost you least, ready to send or to edit.</p>
+   <p>It writes the offer letter and the message with it &mdash; in the seller&rsquo;s language &mdash; with the number, the close date and the two concessions that cost you least.</p>
    <a class="spotgo" href="office.html?join=underwriter">Start 14 days free →</a><div class="saves"><b>The gap most people lose the deal in</b>: knowing the number, fumbling the ask</div>
   </div>
  </div>
@@ -942,10 +897,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   <div class="sb">
    <span class="tier">Underwriter</span>
    <h3>Read the bid they sent you</h3>
-   <p>Paste the contractor&rsquo;s schedule of works. It comes back line by line against the estimate
-    you already built &mdash; and, the part worth having, <b>what is on your sheet that the bid never
-    mentions</b>, priced at your own figures. A bid that lands eleven thousand under because it does
-    not mention the panel is not eleven thousand cheaper; it is the same job with a change order in it.</p>
+   <p>Paste the contractor&rsquo;s schedule. It comes back line by line against your estimate, and names <b>what is on your sheet that the bid never mentions</b>, at your own figures.</p>
    <a class="spotgo" href="office.html?join=underwriter">Start 14 days free →</a><div class="saves"><b>The line that becomes a change order</b> &mdash; found before you own the house</div>
   </div>
  </div>
@@ -970,11 +922,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   <div class="sb">
    <span class="tier">Underwriter</span>
    <h3>What they say back</h3>
-   <p>The four or five things <b>this</b> seller is most likely to say when they hear your number,
-    what is actually being asked underneath each one, and the reply that is true on your own
-    arithmetic &mdash; each marked hold, trade or walk. It is the one thing here built on
-    <b>your ceiling</b>, so &ldquo;can you come up five?&rdquo; has an answer before you are asked it.
-    That is also why it never leaves your screen and never reaches the letter.</p>
+   <p>The four things this seller is most likely to say, what is being asked underneath each, and the reply that is true on your own arithmetic &mdash; hold, trade or walk.</p>
    <a class="spotgo" href="office.html?join=underwriter">Start 14 days free →</a><div class="saves"><b>The ninety seconds</b> where the deal is actually lost</div>
   </div>
  </div>
@@ -1004,10 +952,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   <div class="sb">
    <span class="tier">The Office</span>
    <h3>A week of leads, priced before Monday</h3>
-   <p>Paste the whole list. Every property is underwritten on the same engine, ranked by the room
-    between what it can carry and what they are asking, in one table. Buy-box rules flag a fit the
-    moment it appears — <b>and refuse the ones nobody should be driving out to see</b>. Your name and
-    your masthead on every packet and every letter that leaves.</p>
+   <p>Paste the whole list. Every property underwritten on the same engine and ranked by the room between what it can carry and what they are asking, in one table.</p>
    <p class="fine" style="margin-top:10px">Everything named on this page exists and works today.
     Nothing on it is a plan for later: a price with a roadmap attached is a price for something
     you cannot use yet.</p>
@@ -1021,17 +966,15 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 <div class="sec-h">
  <div class="eyebrow">Line by line</div>
  <h2>Everything, and which plan has it.</h2>
- <p>The free column is not a teaser. You can price a deal, make an offer and close it without ever
-  paying us — the paid columns buy speed and memory, not permission.</p>
+ <p>The free column is not a teaser: you can price a deal, make an offer and close it without
+  ever paying us.</p>
 </div>
 
 <div class="matrix">
  <div class="mh">
   <h2>The whole sheet</h2>
-  <p>Grouped the way the desk is: what it is worth, what it needs, what the deal is, and what
-   leaves the building. The line between Solo and Underwriter is not arbitrary — <b>Solo is
-   everything your browser can do on its own; Underwriter is everything that needs our data
-   or our AI.</b></p>
+  <p><b>Solo is everything your browser can do on its own. Underwriter is everything that needs
+   our data or our AI.</b></p>
  </div>
  <div class="mhint">Swipe the plans — the row names stay put.</div>
 <div class="mscroll"><table>
@@ -1111,7 +1054,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
         remove something material from a plan — so shipping them as ticks
         would have been a promise written next to the promise that undoes it.
         They are listed, marked, and dated to nothing. ─────────────────────-->
-   <tr><td><b>One assumption set for every deal</b><small>rate, refinance LTV, DSCR floor, selling costs, holding period, target profit and operating costs — set once, and every property on the desk reprices, including the ones you open next. With an account they follow you to the phone</small></td>
+   <tr><td><b>One assumption set for every deal</b><small>rate, LTV, DSCR floor, costs, hold, target profit — set once and every property reprices</small></td>
      <td><span class="n">—</span></td><td><span class="y">✓</span></td><td class="hi"><span class="y">✓</span></td><td><span class="y">✓</span></td></tr>
    <tr class="sec"><td colspan="5">What the data costs</td></tr>
    <tr><td><b>Photo condition reads a month</b><small>on our key, counted per account</small></td>
@@ -1126,7 +1069,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">60</td><td>180</td></tr>
    <tr><td><b>Reading the paperwork, a month</b><small>drop the listing screenshots — the sheet fills itself, and every figure quotes the line it came from</small></td>
      <td><span class="n">—</span></td><td><span class="n">—</span></td><td class="hi">80</td><td>240</td></tr>
-   <tr><td><b>Property lookups a month</b><small>one allowance, shared by the comp pull and the rent lookup — each is one request to RentCast, <b>on our key</b>. No vendor account, nothing to paste. The vendor scores nothing and its value estimate is discarded — <b>the desk</b> rates each sale against your house, and the ARV is the one you set. The free desk types its comps in, and a row you type is scored and weighted exactly like a row that arrives</small></td>
+   <tr><td><b>Property lookups a month</b><small>one allowance, shared by the comp pull and the rent lookup, <b>on our key</b> — no vendor account. <b>The desk</b> does the scoring, and a row you type is weighted exactly like a row that arrives</small></td>
      <td><span class="n">—</span><small>you type them</small></td><td><span class="n">—</span><small>you type them</small></td><td class="hi">40</td><td>120</td></tr>
    <tr class="sec"><td colspan="5">The walk-through and the arcade</td></tr>
    <tr><td><b>The eight lessons, with live controls</b><small>free forever, no account</small></td>
@@ -1144,38 +1087,60 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
  <h2>The things people ask us.</h2>
 </div>
 
-<div class="qs">
- <div class="q">
-  <h4>How much can I really do for free?</h4>
-  <p>Close a deal. Three comps draw a real range, the three rehab profiles price a rehab honestly,
+<!-- ══ THE QUESTIONS FOLD ═══════════════════════════════════════════════════
+     Eight questions and 515 words of answers, open, between the reader and
+     the button. Every one of them is worth having and not one of them is
+     worth READING unless it happens to be your question — which is exactly
+     what a disclosure is for. Closed, the section is eight headlines a buyer
+     scans in four seconds; open, it is the same eight answers, unabridged.
+     Nothing was cut here. It was folded. ═══════════════════════════════ -->
+<style>
+.qfold{display:block;max-width:56rem}
+.qfold .q{border-top:1px solid var(--line);padding:0}
+.qfold .q:last-child{border-bottom:1px solid var(--line)}
+.qfold summary{list-style:none;cursor:pointer;display:flex;align-items:center;
+ justify-content:space-between;gap:16px;padding:15px 2px}
+.qfold summary::-webkit-details-marker{display:none}
+.qfold summary h4{margin:0;font-size:16px;line-height:1.4}
+.qfold summary i{font-style:normal;font-size:19px;color:var(--soft);flex:0 0 auto;
+ transition:transform .16s ease}
+.qfold .q[open] summary i{transform:rotate(45deg)}
+.qfold summary:hover h4{color:var(--blue)}
+.qfold .q p{margin:0;padding:0 2px 18px;max-width:60ch}
+@media(prefers-reduced-motion:reduce){ .qfold summary i{transition:none} }
+</style>
+<div class="qs qfold">
+  <details class="q">
+   <summary><h4>How much can I really do for free?</h4><i aria-hidden="true">+</i></summary>
+   <p>Close a deal. Three comps draw a real range, the three rehab profiles price a rehab honestly,
    and every exit prices with its arithmetic shown. The free tier is narrower, not weaker — what a
    plan buys is precision and speed, never permission.</p>
- </div>
- <div class="q">
-  <h4>Why $129 when there are $20 deal calculators?</h4>
-  <p>Because they are calculators and you type into them. Solo, at $39, is the honest comparison —
+  </details>
+  <details class="q">
+   <summary><h4>Why $129 when there are $20 deal calculators?</h4><i aria-hidden="true">+</i></summary>
+   <p>Because they are calculators and you type into them. Solo, at $39, is the honest comparison —
    and it does more than any of them. What $129 buys is the part that is not arithmetic: the comps
    arrive on our key already scored against your house, the condition comes off your photographs,
    and the letter writes itself.
    That is a data-and-AI product, and every other one of those in this category starts at $99 and
    only gives you leads.</p>
- </div>
- <div class="q">
-  <h4>Which one should I be on?</h4>
-  <p>If you price a house every few months, <b>free</b> genuinely closes deals. If you have a model
+  </details>
+  <details class="q">
+   <summary><h4>Which one should I be on?</h4><i aria-hidden="true">+</i></summary>
+   <p>If you price a house every few months, <b>free</b> genuinely closes deals. If you have a model
    you argue with and files you come back to, <b>Solo</b>. If you are underwriting weekly and the
    forty minutes of typing is the actual cost, <b>Underwriter</b>. If two people price and the
    numbers have to agree, <b>The Office</b>. Move up when something annoys you, not before.</p>
- </div>
- <div class="q">
-  <h4>Do you sell my data?</h4>
-  <p>There is nothing to sell. The free desk never sends a property anywhere — the arithmetic runs
+  </details>
+  <details class="q">
+   <summary><h4>Do you sell my data?</h4><i aria-hidden="true">+</i></summary>
+   <p>There is nothing to sell. The free desk never sends a property anywhere — the arithmetic runs
    in your browser. A workspace stores your sheets so they follow you, and that is the only thing
    it stores.</p>
- </div>
- <div class="q">
-  <h4>Where do the comps come from?</h4>
-  <p>Public records and licensed feeds, never scraped from a portal that forbids it. On Underwriter
+  </details>
+  <details class="q">
+   <summary><h4>Where do the comps come from?</h4><i aria-hidden="true">+</i></summary>
+   <p>Public records and licensed feeds, never scraped from a portal that forbids it. On Underwriter
    and The Office the pull runs on <b>our</b> RentCast key and is metered — forty a month, or a
    hundred and twenty. There is no vendor account to open and nothing to paste, and there is no
    version of this where you hold the credential: an API key does not belong in a browser, and a
@@ -1183,29 +1148,29 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    it. On Free and Solo you type your comps in — and a row you type is scored, adjusted and
    weighted by exactly the same arithmetic as a row that arrives. Either way the vendor scores
    nothing: <b>the desk</b> rates every sale against your house, and the ARV is the one you set.</p>
- </div>
- <div class="q">
-  <h4>What happens when the trial ends?</h4>
-  <p>Day fifteen is the first charge, and we tell you on day eleven. Cancel before then and you
+  </details>
+  <details class="q">
+   <summary><h4>What happens when the trial ends?</h4><i aria-hidden="true">+</i></summary>
+   <p>Day fifteen is the first charge, and we tell you on day eleven. Cancel before then and you
    land on the free tier — nothing is deleted, no sheet is locked, and every number you already
    worked out stays readable. You lose the parts a professional keeps, not your work.</p>
- </div>
- <div class="q">
-  <h4>Can I cancel?</h4>
-  <p>In one click, from the workspace, without an email to anybody. The month you paid for finishes
+  </details>
+  <details class="q">
+   <summary><h4>Can I cancel?</h4><i aria-hidden="true">+</i></summary>
+   <p>In one click, from the workspace, without an email to anybody. The month you paid for finishes
    and then it stops.</p>
- </div>
- <div class="q">
-  <h4>Is this financial advice?</h4>
-  <p>No. It is arithmetic with its working shown, so you can check it. Every estimate is marked as
+  </details>
+  <details class="q">
+   <summary><h4>Is this financial advice?</h4><i aria-hidden="true">+</i></summary>
+   <p>No. It is arithmetic with its working shown, so you can check it. Every estimate is marked as
    one, and the sheet refuses to price an exit it cannot justify rather than guessing.</p>
- </div>
+  </details>
 </div>
 
 <div class="close">
  <h2>Price one, and decide after.</h2>
- <p>The desk is open, free, and needs nothing from you — no card, no account, no expiry. Price a
-  house on it first. If it gives you the afternoon back, the plans will still be here.</p>
+ <p>Price a house on the free desk first. If it gives you the afternoon back, the plans will
+  still be here.</p>
  <div class="ways">
   <a class="way" href="demo.html">
    <span class="wi"><svg viewBox="0 0 40 52" width="32" height="42" aria-hidden="true" focusable="false">

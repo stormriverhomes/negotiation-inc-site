@@ -81,17 +81,50 @@ header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba
 .btn.sm{font-size:13px;padding:7px 13px}
 
 /* ── hero ── */
-.hero{display:grid;grid-template-columns:1.02fr .98fr;gap:52px;align-items:start;
+/* align-items:center, not start: the readout is a tall object and the words
+   are a short one, so anchoring both to the top left ~200px of white under
+   the trust strip and made the hero read as two unrelated things. */
+.hero{display:grid;grid-template-columns:1.02fr .98fr;gap:52px;align-items:center;
  padding:52px 0 44px}
 h1{font-size:56px;max-width:15ch}
 h1 em{font-style:italic;color:var(--blue)}
 .lede{font-size:19px;line-height:1.5;color:var(--mid);margin-top:18px;max-width:46ch}
 .lede b{color:var(--ink);font-weight:650}
 .cta{display:flex;gap:11px;margin-top:24px;flex-wrap:wrap}
-.trust{display:flex;gap:18px;flex-wrap:wrap;margin-top:20px;padding-top:16px;
- border-top:1px solid var(--line)}
-.trust div{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
+/* ── FREE, NO ACCOUNT, NOTHING LEAVES YOUR BROWSER ─────────────────────────
+   This is the strongest fact the company has and it was set at 10px in
+   uppercase mono under a hairline — the typographic costume of a legal
+   footer, which is the one thing on a page a reader is trained to skip.
+   Same words, in a box, at a size a person reads. */
+.trust{display:flex;gap:10px 18px;flex-wrap:wrap;margin-top:22px;padding:11px 15px;
+ border:1px solid var(--line-2);align-items:center}
+.trust div{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mid)}
 .trust b{color:var(--ink);font-weight:700}
+
+/* ── THE MOMENT ───────────────────────────────────────────────────────────
+   Two rows and a rule. The only place on this page where a figure is allowed
+   to be the size of a headline, because it is the one number that makes a
+   stranger care: what picking wrong costs. --green only, because both rows
+   are money that pays; the difference is ink, because a gap is not income. */
+.twoans{max-width:34rem;margin:0 0 30px}
+/* the headline and the ledger are one statement, so they sit on one line —
+   the single-column version left half the band empty beside the claim */
+@media(min-width:901px){
+  .moment{display:grid;grid-template-columns:1fr 26rem;gap:56px;align-items:center;
+   margin-bottom:34px}
+  .moment .bandhead{margin:0;max-width:none}
+  .moment .twoans{margin:0}
+}
+.ta-r{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+ padding:13px 0;border-top:1px solid var(--line-2)}
+.ta-r:last-child{border-bottom:1px solid var(--line-2)}
+.ta-k{font-size:16px;color:var(--mid)}
+.ta-v{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--green);white-space:nowrap}
+.ta-sum .ta-k{font-weight:700;color:var(--ink)}
+.ta-sum .ta-v{font-size:32px;font-weight:800;color:var(--ink)}
+@media (max-width:560px){
+  .ta-k{font-size:14.5px} .ta-v{font-size:22px} .ta-sum .ta-v{font-size:26px}
+}
 
 /* the readout: the actual product surface, shown rather than described */
 .readout{border:1px solid var(--line-2);background:var(--card);box-shadow:0 1px 0 rgba(13,20,32,.04)}
@@ -155,7 +188,14 @@ h1 em{font-style:italic;color:var(--blue)}
 .vfoot{font-size:12.5px;color:var(--soft);margin-top:12px}
 .vfoot a{font-weight:650;text-decoration:none}
 @media(max-width:900px){
- .chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+ /* ── EIGHT EXITS, ALL EIGHT VISIBLE ────────────────────────────────────
+    These were a horizontal scroller on a phone, which saved sixty pixels and
+    cost the page its own headline: the eighth pill sat off-screen and the
+    fifth was sliced through the middle of the word "Buy", so the first thing
+    a stranger saw was something that looked broken. "Eight different ways" is
+    the claim; showing five and a half of them undercuts it in the one place
+    it is being made. They wrap. */
+ .chips{flex-wrap:wrap;overflow:visible}
  .chips button{flex:0 0 auto;white-space:nowrap;min-height:40px}
  .vpanel{min-height:212px}
  .vfig{font-size:40px}
@@ -262,6 +302,7 @@ h2{font-size:34px;margin-top:8px}
  background:#fff;padding:26px 30px 24px}
 .sp-k{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.18em;
  text-transform:uppercase;color:var(--soft)}
+.sp-k b{color:var(--ink)}
 .sp-plot{position:relative;height:196px;margin:26px 10px 0}
 .sp-mark,.sp-ask{position:absolute;transform:translateX(-50%);text-align:center;white-space:nowrap}
 .sp-mark .sp-nm,.sp-ask .sp-nm{display:block;font-family:var(--mono);font-size:10px;font-weight:700;
@@ -493,7 +534,25 @@ footer a:hover{color:var(--ink)}
      the words and the bezel. That is most of what "cramped and not readable"
      was — not the type, the gutter. The vertical rhythm is set on its own
      axis now so the horizontal one survives. */
-  .hero{grid-template-columns:1fr;gap:34px;padding-top:36px;padding-bottom:36px}
+  .hero{grid-template-columns:1fr;gap:34px;padding-top:26px;padding-bottom:36px}
+  /* ── SAY IT, SHOW IT, THEN OFFER THE DOOR ──────────────────────────────
+     Measured before it was changed: the first screenful at 390px was 124
+     words and not one pressable thing, with the live readout — the whole
+     argument, running — a full screen below the fold. A stranger's first
+     contact with a product that DOES something was an essay about it.
+
+     Card-first was the redesign's answer and it overcorrected: it opened on
+     a form for a company the reader could not yet name. The order that beats
+     both puts the SENTENCE first (seven words of headline, twenty of lede),
+     the running product second, and the buttons under it — so one screen
+     answers what is this and shows it working, and the press comes after
+     both. Source order is untouched; only the paint order moves, and only
+     where there is a single column to move it in. */
+  .hero{display:flex;flex-direction:column}
+  .hero-words{display:contents}
+  .hero-say{order:1}
+  .hero > .readout{order:2}
+  .hero-act{order:3}
   h1{font-size:40px} h2{font-size:28px}
   .three,.states{grid-template-columns:1fr;gap:20px}
   .eight{grid-template-columns:repeat(2,1fr)}
@@ -667,7 +726,7 @@ li+li{margin-top:.72em!important}
 h1,h2,h3,h4{max-width:34ch}
 h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 @media (max-width:520px){p,li,dd,blockquote{line-height:1.66!important}}
-</style></head>
+</style><!--ni:stage=live--></head>
 <body>
 
 <header>
@@ -685,7 +744,8 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 
 <!-- ═══ 1 · WHAT THIS IS ════════════════════════════════════════════════ -->
 <div class="wrap hero">
- <div>
+ <div class="hero-words">
+  <div class="hero-say">
   <div class="eyebrow">Underwriting · est. of record</div>
   <!-- ── THE FIRST SIX WORDS DECIDE WHETHER ANYBODY READS THE SEVENTH ──────
        This said "Know what to pay before you call." It is a good line and it
@@ -707,19 +767,28 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
        the site calls the eight exits, and this is the only place that has to
        say it in plain words. -->
   <h1>What should you pay for <em>this house</em>?</h1>
-  <p class="lede">Tell it four things about a property. It works out <b>the most you
-   can pay</b> under each of the <b>eight ways people make money on a house</b> —
-   flip it, rent it, sell the contract, five more — shows you every step of the
-   arithmetic, and refuses to guess at anything you have not told it.
-   <b>Know what to pay before you call.</b></p>
+  <!-- ── THE LEDE NAMED THE PRODUCT "IT" ──────────────────────────────────
+       Sixty-two words, and the only noun it ever offered for the thing being
+       sold was the pronoun "it". A stranger could not say what CATEGORY of
+       object they were looking at, let alone want one. Twenty words, and the
+       first two of them are what it is.
+
+       Two equal buttons also became one. "See how it works" and "Price your
+       own property" sat at identical weight, and a reader who cannot rank two
+       calls to action presses neither. -->
+  <p class="lede"><b>A free worksheet.</b> Type four numbers from any listing &mdash;
+   it shows the most you can pay, eight different ways.</p>
+  </div>
+  <div class="hero-act">
   <div class="cta">
-   <a class="btn p" href="demo.html">See how it works →</a>
-   <a class="btn" href="desk.html#new">Price your own property</a>
+   <a class="btn p" href="desk.html#new">Price your own property</a>
+   <a class="btn" href="demo.html">See one already done &rarr;</a>
   </div>
   <div class="trust">
    <div><b>No account</b> to start</div>
    <div><b>Nothing</b> leaves your browser</div>
    <div><b>Every number</b> shows its working</div>
+  </div>
   </div>
  </div>
 
@@ -751,161 +820,53 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    <div class="given"><div class="k">Monthly rent</div><div class="v">—<span class="tag t-n">Needed</span></div></div>
   </div>
   <div class="chipwrap">
-   <div class="chiph">The eight exits &mdash; tap one. <b>Three price. Two want a figure. Two say not this house.</b></div>
+   <!-- "Three price. Two want a figure. Two say not this house." is a riddle
+        printed where an instruction belongs. It is a fine sentence about the
+        panel and a useless one for somebody who has not pressed anything yet:
+        it describes the RESULT of the interaction it is supposed to start. -->
+   <div class="chiph">The eight exits &mdash; how you get paid.
+    <b>Tap one. The price changes.</b></div>
    <div class="chips" id="chips" role="tablist" aria-label="The eight exits"></div>
   </div>
   <div class="vpanel" id="vp" role="region" aria-live="polite"></div>
  </div>
 </div>
 
-<!-- ══ MOVED: A WAY IN, BEFORE 1,300 WORDS OF READING ═══════════════════
-     This was the LAST section on the page. The lowest-commitment things this
-     product has — a finished sheet you do not fill in, a blank one that needs
-     no account, and a free game — were offered after everything else had been
-     read, to the small number of people who got that far.
+<!-- ═══ 2 · THE ONE FACT A STRANGER NEEDS ═══════════════════════════════
+     THE WHOLE PAGE USED TO ARGUE. Six sections at identical visual volume,
+     1,471 words, and a stranger's own verdict on it was "no idea what to
+     look at." A page with six moments has none.
 
-     Claude Design moved it to first. The argument is not that the writing
-     below is bad; it is that a person who is ready to press something should
-     not have to earn the right to. Everything after this section is now for
-     the reader who wanted to know more before choosing, which is a different
-     and much smaller job than convincing somebody to stay. ══════════════ -->
-<section class="finish up">
- <div class="wrap">
-  <div class="eyebrow">Three ways in</div>
-  <h2>Pick a door.</h2>
-  <div class="ways">
-  <a class="way" href="demo.html">
-   <span class="wi"><svg viewBox="0 0 40 52" width="34" height="44" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="2" y="2" width="36" height="48" rx="3"/><path d="M8 12h14M8 18h20M8 24h17M8 30h20" stroke-width="1.7" opacity=".5"/><path d="M8 38h24" stroke-width="2.4"/><path d="M8 41.5h24" stroke-width="1.4"/><path d="M24 44.5h8" stroke-width="2.6" opacity=".85"/></svg></span>
-   <span class="wk">Ninety seconds</span>
-   <span class="wt">See one already done</span>
-   <span class="wd">A finished sheet on 1128 Marrow Lane &mdash; every exit priced or refused, every number showing its working. Nothing to fill in.</span>
-   <span class="wgo">Open the worked example <em>&rarr;</em></span>
-  </a>
-  <a class="way lead" href="desk.html#new">
-   <span class="wi"><svg viewBox="0 0 40 52" width="34" height="44" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="2" y="2" width="36" height="48" rx="3"/><rect x="8" y="11" width="24" height="7" rx="1.4" stroke-width="1.8"/><path d="M11.5 13v3" stroke-width="2"/><rect x="8" y="22" width="24" height="7" rx="1.4" stroke-width="1.5" opacity=".45"/><rect x="8" y="33" width="24" height="7" rx="1.4" stroke-width="1.5" opacity=".3"/></svg></span>
-   <span class="wk">Free &middot; no account &middot; no card</span>
-   <span class="wt">Price your own house</span>
-   <span class="wd">Your address and their asking price. Seven exits ranked against <b>this</b> seller, the repair estimate built line by line, and the words to say.</span>
-   <span class="wgo">Open a blank worksheet <em>&rarr;</em></span>
-  </a>
-  <!-- ── THE THIRD DOOR WAS A PRICE ────────────────────────────────────────
-       It sold the founding place. That was defensible when this block was the
-       LAST thing on the page and a reader had earned the pitch; at the top,
-       directly under the headline, it asks for money from somebody who has
-       not yet been told what the thing does.
+     This is the moment. Same house, same four numbers, two answers that are
+     both correct, and the money between them. Everything above it is the
+     product running; everything below it is a caption.
 
-       Claude Design put the arcade here instead, which answers the question
-       the founder actually asked: where does the free game go for the person
-       who is on the fence. It is the lowest-commitment thing on the site, it
-       needs no account, and it was in position seven of nine. The gold rule
-       across the top is the only paper in the software's world — a hint that
-       this door opens somewhere else, without dragging the whole tan seam
-       onto the front page the way revision 2 did. -->
-  <a class="way arc" href="arcade.html">
-   <span class="wi"><svg viewBox="0 0 40 52" width="34" height="44" aria-hidden="true" focusable="false" fill="currentColor" shape-rendering="crispEdges"><rect x="18" y="6" width="4" height="4"/><rect x="14" y="10" width="4" height="4"/><rect x="18" y="10" width="4" height="4"/><rect x="22" y="10" width="4" height="4"/><rect x="10" y="14" width="4" height="4"/><rect x="14" y="14" width="4" height="4" opacity=".4"/><rect x="18" y="14" width="4" height="4" opacity=".4"/><rect x="22" y="14" width="4" height="4" opacity=".4"/><rect x="26" y="14" width="4" height="4"/><rect x="6" y="18" width="4" height="4"/><rect x="30" y="18" width="4" height="4"/><rect x="10" y="18" width="20" height="4" opacity=".18"/><rect x="10" y="22" width="4" height="16"/><rect x="26" y="22" width="4" height="16"/><rect x="14" y="22" width="12" height="4" opacity=".18"/><rect x="14" y="26" width="5" height="5" opacity=".75"/><rect x="14" y="31" width="12" height="7" opacity=".18"/><rect x="20" y="30" width="6" height="8" opacity=".85"/><rect x="6" y="38" width="28" height="4" opacity=".45"/></svg></span>
-   <span class="wk">Ninety seconds &middot; another world</span>
-   <span class="wt">Train the instinct</span>
-   <span class="wd">Buy houses in eight historical eras and find out what the judgement feels like before you spend anything on it. Three cabinets, free, no account.</span>
-   <span class="wgo">Enter the arcade <em>&rarr;</em></span>
-  </a>
- </div>
- </div>
-</section>
-
-<!-- ══ MOVED: THE GLOSSARY NOW COMES BEFORE THE WORDS IT DEFINES ══════
-     This section was fifth. The section that used to be SECOND spent all
-     seven names in one sentence — "Wholesale, flip, wholetail, buy-and-hold,
-     BRRRR, subject-to, novation" — as though the reader already had them.
-     Anybody who did not bounced three screens before reaching the page that
-     explains what they mean.
-
-     Teaching the vocabulary is the second thing this page does now, because
-     the whole argument downstream is made OF that vocabulary. It is also the
-     most interesting thing on the page to somebody who has never done a deal:
-     eight ways to make money on one house, each in six words. ══════════ -->
-<!-- ═══ 4 · THE COURSE ══════════════════════════════════════════════════ -->
-<section class="band wash">
- <div class="wrap">
-  <div class="bandhead">
-   <div class="eyebrow">The eight exits</div>
-   <!-- The heading said "eight ways OUT of a property deal", which is the
-        trade's phrase and means nothing to anybody else — you cannot get out
-        of a thing you were never told you were in. It says what it means
-        first, then hands over the word, because every other section on this
-        page is built out of it and there is nowhere else it gets taught. -->
-   <h2>Eight ways to make money on one house.</h2>
-   <!-- This used to read "These are the only ones there are." It is an
-        absolute claim the argument never needed, and real estate has enough
-        variations — lease options, wraps, seller-finance hybrids — that it
-        invites a reply arguing about the list instead of reading it. What
-        actually matters is that these eight are the ones this desk PRICES,
-        and that the choice between them moves the number. Both survive
-        without the absolute. -->
-   <p>These are the eight this desk prices. The trade calls them <b>exits</b> — the way you get your
-      money back out — and <b>each one can pay a completely different price for the same house</b>,
-      often tens of thousands apart. Picking the wrong one is not a rounding error, it is the whole
-      deal. The desk prices the seven a house can take and tells you which fits the person you are
-      actually talking to; the eighth is for land and opens its own desk.</p>
-  </div>
-  <div class="eight">
-   <div class="ex8"><div class="r">I</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 17 L10 11 L17 17" /><path d="M5 17 v8 h10 v-8" /><rect x="24" y="9" width="12" height="15" rx="1" /><path d="M27 14h6M27 17.5h6M27 21h4" stroke-width="1.2" opacity=".55"/><path d="M37.5 16.5 h4.5 m-2 -2 l2 2 l-2 2" stroke-width="1.6"/></svg><div class="t">The wholesale</div><div class="d">Sell the contract, never the house.</div></div>
-   <div class="ex8"><div class="r">II</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 8 L16 23 L40 6" stroke-width="2.2" stroke-linecap="round"/><path d="M34.5 5.2 l6 .6 l-.7 6" stroke-width="1.7" stroke-linecap="round"/></svg><div class="t">The fix and flip</div><div class="d">The subtraction, taken seriously.</div></div>
-   <div class="ex8"><div class="r">III</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 25 h26 v-13" opacity=".42" stroke-dasharray="4 2.8" stroke-width="1.8" stroke-linecap="round"/><path d="M5 25 L37 6" stroke-width="2.2" stroke-linecap="round"/><path d="M32.6 5 l4.8 1 l-1 4.8" stroke-width="1.7" stroke-linecap="round"/></svg><div class="t">The wholetail</div><div class="d">The shortcut between the first two.</div></div>
-   <div class="ex8"><div class="r">IV</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 5 h38" stroke-width="1.4" opacity=".45"/><path d="M8 5.5 v13 M17.3 5.5 v13 M26.6 5.5 v13 M36 5.5 v13" stroke-width="2.4" stroke-linecap="round"/><path d="M3 23.5 h38" stroke-width="2.2"/><path d="M3 27 h38" stroke-width="1.3"/></svg><div class="t">The buy and hold</div><div class="d">The number the lender underlines.</div></div>
-   <div class="ex8"><div class="r">V</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M28.6 24 A12.5 12.5 0 1 1 28.6 8" stroke-linecap="round"/><path d="M28.6 8 l-.4 -5 M28.6 8 l-4.8 -1.3" stroke-width="1.7" stroke-linecap="round"/><path d="M13.8 17 L19 12.5 L24.2 17" stroke-width="1.6"/><path d="M15.6 16.7 v6.3 h6.8 v-6.3" stroke-width="1.6"/></svg><div class="t">The BRRRR</div><div class="d">The flip that refuses to sell.</div></div>
-   <div class="ex8"><div class="r">VI</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M11.5 3.5 H34 V15.5 H11.5 L5.5 9.5 Z" opacity=".45" stroke-width="1.7"/><circle cx="10.8" cy="9.5" r="1.1" fill="currentColor" stroke="none" opacity=".45"/><path d="M3.5 17.5 L36 1.5" stroke-width="2.2" stroke-linecap="round"/><path d="M4 25 h32 m-4.4 -3.4 l4.4 3.4 l-4.4 3.4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="t">The subject-to</div><div class="d">You bought the payment, not the price.</div></div>
-   <div class="ex8"><div class="r">VII</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 17 L12 11 L19 17" stroke-dasharray="3.6 2.4" stroke-linecap="round"/><path d="M7 17 v8 h10 v-8" stroke-dasharray="3.6 2.4" stroke-linecap="round"/><rect x="26" y="7" width="14" height="10" rx="1"/><path d="M33 17 v8.5" stroke-width="1.5"/><path d="M29.5 12 h7" stroke-width="1.4" opacity=".6"/></svg><div class="t">The novation</div><div class="d">The retail exit you never own.</div></div>
-   <div class="ex8"><div class="r">VIII</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 9 L34 7 L38 22 L8 25 Z" /><path d="M8 25 L38 22" stroke-width="2.6"/><path d="M3 28.5 h40" stroke-width="1.2" stroke-dasharray="5 4" opacity=".5"/></svg><div class="t">The land play</div><div class="d">The number nobody publishes.</div></div>
-  </div>
-  <div class="cta" style="margin-top:26px">
-   <a class="btn p" href="demo.html">See how it works →</a>
-   <a class="btn" href="desk.html#new">Price your own property</a>
-  </div>
- </div>
-</section>
-
-<!-- ═══ 2 · WHY IT IS DIFFERENT ═════════════════════════════════════════ -->
+     THE FIGURES ARE THE ENGINE'S, NOT THE DESIGN'S. The redesign arrived
+     with $14,140 and a $9,140 headline. The desk returns $14,000 on the
+     wholesale, so the gap is $9,280 and the headline says $9,280 — a front
+     door that rounds its own arithmetic to a prettier number has given up
+     the only thing it is selling. ═══════════════════════════════════════ -->
 <section class="band">
  <div class="wrap">
-  <div class="bandhead">
-   <div class="eyebrow">The difference</div>
-   <!-- "Most calculators give you one number" is an argument with a thing the
-        reader is assumed to have used. Somebody deciding whether this hobby is
-        for them has never opened a real-estate calculator and has no idea what
-        is being criticised, so the page's second-best line was spent on them
-        for nothing. The best line was already sitting in the paragraph
-        underneath doing nothing; it needs no prior knowledge at all. -->
-   <!-- This said "One number is a guess wearing a suit." It is the kind of line
-        that sounds written rather than meant, and the same construction was
-        already on this page eight hundred words later — "a flip wearing a
-        disguise" — which is what makes it read as a tic rather than a voice.
-        The plain sentence is also the truer one: the claim is not that other
-        people's numbers are dressed up, it is that there is no single number
-        to dress up in the first place. -->
-   <h2>There is no single right price.</h2>
-   <p>One house, priced under each way out of it. <b>The gap between the best way out and the
-      worst is the whole margin</b> — and four of the eight cannot be priced at all until the
-      sheet is given a figure it does not have.</p>
+  <div class="moment">
+   <div class="bandhead">
+    <div class="eyebrow">The same four numbers</div>
+    <h2>Two right answers, $9,280 apart.</h2>
+    <p>Pick the wrong way out and the margin is gone before you call.</p>
+   </div>
+
+   <div class="twoans">
+    <div class="ta-r"><span class="ta-k">Flip it yourself, you clear</span><span class="ta-v">$23,280</span></div>
+    <div class="ta-r"><span class="ta-k">Sell the contract, your fee is</span><span class="ta-v">$14,000</span></div>
+    <div class="ta-r ta-sum"><span class="ta-k">The difference</span><span class="ta-v">$9,280</span></div>
+   </div>
   </div>
 
-  <!-- ══ THE SPREAD ══════════════════════════════════════════════════════
-       199 words of argument became 61 and a drawing. Claude Design's answer
-       to "which sections earn a picture": the ones whose claim has a SHAPE.
-       This one's shape is a spread — three ceilings and an asking price on a
-       single scale — and no paragraph can do what one axis does.
-
-       EVERY FIGURE IS THE ENGINE'S. The design arrived with numbers from the
-       70% rule for the second time, and for the second time they could not be
-       used: on this sheet the rule says $162,400 and the desk says $191,140,
-       and the desk prints the difference as "your margin for being wrong".
-
-       The real numbers also tell a better story than the invented ones. The
-       flip can pay SIX THOUSAND MORE than the seller is asking, and the
-       wholesale is thirty thousand short — on the same house, on the same
-       afternoon. Pick the wrong way out and you walk away from a deal that
-       was there. That is the entire product in one picture. ═══════════ -->
   <div class="spread" aria-label="Three exits priced against the asking price, on one scale">
-   <div class="sp-k">The spread · 1128 Marrow Lane</div>
+   <!-- The band above prints $9,280 and this drawing prints $36,740, and for a
+        moment they read as rival answers to one question. They are answers to
+        two: what you KEEP, and the most you may PAY. The key says which. -->
+   <div class="sp-k">The spread &middot; the most you can <b>pay</b> under each exit</div>
    <div class="sp-plot">
     <div class="sp-mark hi" style="left:82.28%">
      <span class="sp-nm">Fix and flip</span><span class="sp-v">$191,140</span></div>
@@ -925,15 +886,14 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
     <div class="sp-end l">$150,000</div><div class="sp-end r">$200,000</div>
    </div>
    <div class="sp-note"><b>The flip clears the asking price by $6,640.</b> The wholesale is
-    $30,100 short of it. Same house, same afternoon, same four numbers typed in — and one of
-    those two is a deal you walk away from for no reason.</div>
+    $30,100 short of it. Same house, same afternoon, same four numbers.</div>
    <div class="sp-off">
     <div class="sp-offk">No position on this scale &mdash; four of the eight</div>
     <div class="sp-offg">
      <div><b>Buy and hold</b><span>Needs a monthly rent.</span></div>
      <div><b>Subject-to</b><span>Needs the payment on the existing loan.</span></div>
-     <div><b>Wholetail</b><span>Repairs are 14% of ARV. Not this house.</span></div>
-     <div><b>Novation</b><span>Same 14%. Not retail yet.</span></div>
+     <div><b>Wholetail</b><span>Repairs are 14% of what it sells for fixed up.</span></div>
+     <div><b>Novation</b><span>Same 14%. Not ready to list.</span></div>
     </div>
     <div class="sp-give">Give it any one of those figures and the exit takes its place on the
      scale. <a href="desk.html#new">Price your own &rarr;</a></div>
@@ -942,38 +902,18 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
  </div>
 </section>
 
-<!-- ═══ 3 · THE HONESTY GRAMMAR ═════════════════════════════════════════ -->
+<!-- ═══ 3 · HOW IT WORKS ════════════════════════════════════════════════
+     This section used to be titled "Seven screens, and every one of
+     them is live" with a paragraph defending the screenshots. The screenshots
+     do not need defending; they need a reason to be looked at. The heading is
+     the promise the product makes, and the count moved into the line that
+     labels the pictures — where it is a fact rather than a boast. ═══════ -->
 <section class="band wash">
  <div class="wrap">
   <div class="bandhead">
-   <div class="eyebrow">How it stays honest</div>
-   <h2>Three states, and the sheet never mixes them up.</h2>
-  </div>
-  <div class="states">
-   <div class="state"><span class="tag t-e" style="margin:0">Entered</span>
-    <p>A fact you typed. The sheet prices it as given and takes responsibility for nothing else.</p></div>
-   <div class="state"><span class="tag t-s" style="margin:0">Estimate</span>
-    <p>Counted in full — and it widens every range it touches, by an amount that depends on
-       where it came from. A rule of thumb widens less than a ZIP-level median.</p></div>
-   <div class="state"><span class="tag t-n" style="margin:0">Needed</span>
-    <p>Missing. Exits that depend on it refuse to price rather than invent it, and name the
-       figure they are waiting for.</p></div>
-  </div>
- </div>
-</section>
-
-<!-- ═══ 3b · THE PRODUCT, MOVING ═══════════════════════════════════════ -->
-<section class="band wash">
- <div class="wrap">
-  <div class="bandhead">
-   <div class="eyebrow">The product, actually running</div>
-   <!-- The count is written by the build from the frames that actually
-        shipped (see publish.mjs). It said six for a batch after the land desk
-        earned a seventh — a page whose entire argument is "we do not invent
-        figures" should not miscount the thing the reader can see. -->
-   <h2>Seven screens, and every one of them is live.</h2>
-   <p>These are screenshots taken from the running product by the build itself — not mock-ups.
-      Anything not built yet is on the <a href="plans.html">plans page</a>, marked as such.</p>
+   <div class="eyebrow">How it works</div>
+   <h2>Four numbers in, a decision out.</h2>
+   <p>Seven screenshots, photographed from the running product by the build itself.</p>
   </div>
   <div class="show" id="show">
    <div class="showstage" id="stage">
@@ -1009,129 +949,59 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
  </div>
 </section>
 
-
-
-<!-- ═══ 4b · WHO IT IS FOR ══════════════════════════════════════════════ -->
+<!-- ═══ 4 · WHO IT IS FOR ═══════════════════════════════════════════════
+     Four cards of 35 words became four of eight. The old ones taught the
+     reader DSCR, LTV and the 70% rule in a section whose only job is to let
+     somebody recognise themselves. ═══════════════════════════════════ -->
 <section class="band">
  <div class="wrap">
   <div class="bandhead">
-   <div class="eyebrow">Who it is for</div>
-   <h2>Four jobs, one sheet, four different answers.</h2>
-   <p>The exit you are already committed to is usually the one costing you the deal. The
-      same inputs answer all four questions at once.</p>
+   <h2>Four jobs, one sheet.</h2>
   </div>
   <div class="who">
-   <div><h3>Wholesaling</h3>
-    <p>Often there is no asking price at all — the seller wants your number first. Say so, and
-       the sheet ranks by what each exit lets you pay, then hands you an opening figure and
-       what your terms are worth against it.</p></div>
-   <div><h3>Flipping</h3>
-    <p>Your max buy, the 70% rule beside it, and a grid showing what happens to the profit when
-       the ARV is 10% light and the repairs run 40% over. The gap is your margin for being wrong.</p></div>
-   <div><h3>Holding</h3>
-    <p>The price a 1.25 DSCR actually allows at today's rate and LTV — the number the lender
-       underlines — with every assumption on a slider you can move.</p></div>
-   <div><h3>Creative</h3>
-    <p>Subject-to and novation priced properly, including the ones the sheet refuses: a retail
-       listing on a house that is not retail yet gets declined, with the reason.</p></div>
+   <div><h3>Wholesaling</h3><p>Know your number before you call.</p></div>
+   <div><h3>Flipping</h3><p>Your max buy, and what you clear if the bid holds.</p></div>
+   <div><h3>Renting out</h3><p>The price the rent can actually carry.</p></div>
+   <div><h3>Creative deals</h3><p>Priced, or refused with the reason.</p></div>
   </div>
  </div>
 </section>
 
-<!-- ═══ 4c · WHAT IT REPLACES ═══════════════════════════════════════════ -->
-<section class="band wash">
- <div class="wrap">
-  <div class="bandhead">
-   <div class="eyebrow">What it replaces</div>
-   <h2>The spreadsheet you rebuilt three times and still do not trust.</h2>
-  </div>
-  <!-- ══ CUT: THE CALCULATOR-vs-SPREADSHEET-vs-THIS TRIO ══════════════════
-       Three cards, 140 words, arguing against two tools by name. It made the
-       same point as "There is no single right price" further up, in a
-       different costume — and it made it to a reader who has, by assumption,
-       used a real-estate calculator and built their own model. The person this
-       page is now written for has done neither, so the section spent its
-       length telling them what is wrong with things they have never opened.
-
-       The heading survives, because "the spreadsheet you rebuilt three times
-       and still do not trust" needs no calculator to land, and everybody with
-       a spreadsheet knows exactly which one it means. ══════════════════ -->
-  <div class="addk">And what a plan adds</div>
-  <div class="adds">
-   <a href="plans.html#photos"><span class="t">The photos read</span><span class="d">Drop the walk-through. Seventeen lines come back filled in, each with the picture it came from.</span></a>
-   <!-- This card used to sell the reader an errand: it described the comps as
-        something they ran themselves with a credential they supplied. The
-        paid tiers come with forty lookups a month on OUR key, which is the
-        whole thing somebody is buying. Same mistake as the plans page's
-        address-level value bullet: a sentence written before the feature
-        existed and never re-read after it did.
-        (The retired phrasing is deliberately not quoted here — publish.mjs
-        greps the SHIPPED pages for it, and a comment that quotes the thing
-        being guarded against is a guard that fires on its own explanation.) -->
-   <a href="plans.html#comps"><span class="t">The comps pulled</span><span class="d">Type the address. Recent sales arrive on our key — the desk scores each against your house. Forty a month.</span></a>
-   <a href="plans.html#bid"><span class="t">Their bid checked</span><span class="d">Paste what the contractor sent. It shows you what is on your sheet that the bid never mentions.</span></a>
-   <!-- ── THREE THINGS THE PRODUCT DOES THAT THIS PAGE NEVER MENTIONED ─────
-        Found by listing every feature the plans page sells and searching this
-        one for it. The street brief in particular is among the most
-        persuasive things here — it is the only place the software leaves the
-        property and looks at the block — and a visitor could read all 1,300
-        words without learning it exists. -->
-   <a href="plans.html#street"><span class="t">The street read</span><span class="d">What the block is doing. Census income and vacancy, the flood zone at these exact coordinates, what has been permitted nearby — each carrying the page it came from.</span></a>
-   <a href="plans.html#compare"><span class="t">Two deals compared</span><span class="d">Both sheets, one engine, and the sentence that says which one wins and where the difference actually comes from.</span></a>
-   <a href="plans.html#rent"><span class="t">The rent for the address</span><span class="d">This address, not the ZIP median — with the range around it and the number of leases behind it.</span></a>
-   <a href="plans.html#objections"><span class="t">What they say back</span><span class="d">The four things this seller will say, and the reply that is true on your numbers.</span></a>
-   <a href="plans.html#packet"><span class="t">The packet written</span><span class="d">One PDF a lender reads, in your name, with the working still shown.</span></a>
-  </div>
-  <div class="cta" style="margin-top:26px">
-   <a class="btn p" href="demo.html">See how it works →</a>
-   <a class="btn" href="plans.html">See what a workspace adds</a>
-  </div>
-
- </div>
-</section>
-
-<!-- ═══ 5 · THE ARCADE — the only door into the other world ═════════════ -->
+<!-- ═══ 5 · THE ARCADE ══════════════════════════════════════════════════
+     Sixty-one words became sixteen. Naming all three cabinets on the front
+     door is a menu for a room nobody has walked into yet. ═══════════ -->
 <section class="arcade">
  <div class="wrap">
   <div class="eyebrow">The arcade · free, no account</div>
-  <h2>Or train the instinct the fun way.</h2>
-  <p>Three cabinets and counting. <b style="color:#e6ecf6">Comp Run</b> is the long game —
-     eight eras of ground, a phone that rings. <b style="color:#e6ecf6">The Daily Street</b> is
-     ninety seconds: five properties, one bid, the same street everybody gets today. Same read
-     the desk performs, with the clock and the money turned into a game.</p>
-  <div class="cta"><a class="btn p" href="arcade.html">Enter the arcade →</a></div>
+  <h2>The same arithmetic, turned into a game.</h2>
+  <p>Invented houses, 1890 to now. The sheet underneath is the real one.</p>
+  <div class="cta"><a class="btn p" href="arcade.html">Enter the arcade &rarr;</a></div>
   <div class="doors">
    <figure><a href="arcade.html"><img src="art/door-now.png" alt="A pixel-art suburban front door, present day" width="540" height="450" loading="lazy">
-    <figcaption>Now · a door that opens</figcaption></a></figure>
+    <figcaption>Now &middot; a door that opens</figcaption></a></figure>
    <figure><a href="arcade.html"><img src="art/door-old.png" alt="A pixel-art industrial-era door" width="540" height="450" loading="lazy">
-    <figcaption>1890 · the same question</figcaption></a></figure>
+    <figcaption>1890 &middot; the same question</figcaption></a></figure>
    <figure><a href="arcade.html"><img src="art/door-future.png" alt="A pixel-art door from a later era" width="540" height="450" loading="lazy">
-    <figcaption>Later · the rates are worse</figcaption></a></figure>
+    <figcaption>Later &middot; the rates are worse</figcaption></a></figure>
   </div>
  </div>
 </section>
 
-<!-- ═══ 6 · THE LAST WORD ═══════════════════════════════════════════════
-     The page ended on "enter the arcade", which sends the one visitor who
-     read all of it to go and play a game instead. Three doors, at the size
-     a decision deserves, in the order we would like them taken. ══════ -->
-
-
-<!-- The doors moved to the top, so the page now ENDS on the arcade — a game,
-     which is the wrong last word for a company. Two lines and the two actions
-     that matter, for the reader who went all the way down. -->
+<!-- ═══ 6 · THE PRICE, IN ONE LINE ══════════════════════════════════════
+     The front door's last word is the price, because a visitor who read this
+     far is deciding, and a page that ends on a game has told them the
+     company sells games. ═══════════════════════════════════════════════ -->
 <section class="band">
  <div class="wrap" style="text-align:center">
-  <h2 style="font-size:30px">Price one and see.</h2>
-  <p style="font-size:17px;color:var(--mid);margin-top:10px;max-width:52ch;margin-left:auto;margin-right:auto">
-   It is free, it needs no account, and nothing you type leaves your browser.
-   If it is not useful in ten minutes, nothing was spent.</p>
+  <h2 style="font-size:30px;max-width:20ch;margin-left:auto;margin-right:auto">Pricing is free forever. Plans from $39 remove the typing.</h2>
   <div class="cta" style="justify-content:center">
    <a class="btn p" href="desk.html#new">Price a property</a>
-   <a class="btn" href="demo.html">See one already done &rarr;</a>
+   <a class="btn" href="plans.html">See plans &rarr;</a>
   </div>
+
  </div>
 </section>
+
 
 <footer>
  <div class="wrap">
