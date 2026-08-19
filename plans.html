@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Plans · Negotiation Inc</title><script>window.NI_LIVE=true;</script>
+<title>Plans · Negotiation Inc — real estate investing, simplified</title><script>window.NI_LIVE=true;</script>
 <meta name="description" content="Free forever to price a deal. Solo $39 unlocks your whole model; Underwriter $129 adds the photo read, comps, the bid check and the letters; The Office $249 runs a shop.">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -49,7 +49,12 @@ header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba
    note on the arcade's `.top`. Vertical padding on its own axis. */
 .mast{display:flex;justify-content:space-between;align-items:center;gap:18px;
  padding-top:13px;padding-bottom:13px;flex-wrap:wrap}
-.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:inherit}
+.mark{display:inline-flex;flex-direction:column;gap:1px;text-decoration:none;color:inherit}
+.mark .mkrow{display:inline-flex;align-items:baseline;gap:8px}
+/* the page's own serif, sentence case, no tracking — the uppercase mono
+   label it replaced is the costume that reads as machine-written. */
+.mark .mkwhat{font-family:var(--serif);font-size:12.5px;font-weight:500;letter-spacing:0;color:#5c6572;white-space:nowrap}
+@media(max-width:560px){ .mark .mkwhat{font-size:11.5px} }
 .mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
 .mark .inc{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--blue)}
 .mark:hover .nm{color:var(--blue)}
@@ -472,7 +477,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 
 <header>
  <div class="wrap mast">
-  <a class="mark" href="index.html"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+  <a class="mark" href="index.html"><span class="mkrow"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></span><span class="mkwhat">Real estate investing, simplified</span></a>
   <nav class="masknav">
    <a href="desk.html">The desk</a>
    <a href="demo.html">See how it works</a>

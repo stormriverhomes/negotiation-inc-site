@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The Arcade · Negotiation Inc</title><script>window.NI_LIVE=true;</script>
+<title>The Arcade · Negotiation Inc — real estate investing games</title><script>window.NI_LIVE=true;</script>
 <meta name="description" content="Cabinets that train the read: Comp Run, the daily street, and the drills. Free, no account.">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -55,7 +55,12 @@ header{border-bottom:1px solid #223047;background:rgba(13,20,32,.9)}
    gutter goes with it. Same trap as `.top` below. */
 .mast{display:flex;justify-content:space-between;align-items:center;gap:14px 18px;
  padding-top:14px;padding-bottom:14px;flex-wrap:wrap}
-.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:#e8e2d4}
+.mark{display:inline-flex;flex-direction:column;gap:1px;text-decoration:none;color:#e8e2d4}
+.mark .mkrow{display:inline-flex;align-items:baseline;gap:8px}
+/* the page's own serif, sentence case, no tracking — the uppercase mono
+   label it replaced is the costume that reads as machine-written. */
+.mark .mkwhat{font-family:var(--serif);font-size:12.5px;font-weight:500;letter-spacing:0;color:#9aa2ae;white-space:nowrap}
+@media(max-width:560px){ .mark .mkwhat{font-size:11.5px} }
 .mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
 .mark .inc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--gold)}
 .mark:hover .nm{color:#fff}
@@ -262,7 +267,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 
 <header>
  <div class="wrap mast">
-  <a class="mark" href="index.html" title="Negotiation Inc"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+  <a class="mark" href="index.html" title="Negotiation Inc"><span class="mkrow"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></span><span class="mkwhat">Real estate investing, simplified</span></a>
   <!-- "The desk" and "Your desk" side by side was two links a reader had to
        guess between. One is the tool, the other is the account; naming them
        that way costs nothing and removes the guess. -->

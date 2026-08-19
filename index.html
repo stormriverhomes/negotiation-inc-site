@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Negotiation Inc — every exit priced, the working shown</title><script>window.NI_LIVE=true;</script>
+<title>Negotiation Inc — real estate investing, simplified</title><script>window.NI_LIVE=true;</script>
 <!-- This said SIX ways, which is the count from a version of this product that
      had fewer exits — and unlike the headings, nothing on the page displays it,
      so it survived every read-through. It is the sentence Google prints under
@@ -65,7 +65,16 @@ header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba
  backdrop-filter:blur(8px);z-index:20}
 .mast{display:flex;justify-content:space-between;align-items:center;gap:20px;
  padding:14px 0;flex-wrap:wrap}
-.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:inherit}
+/* the lockup is two lines now: the name, and what the name is FOR. It stacks
+   rather than sitting inline so it survives a 390px bar beside a Sign-in
+   button without either half wrapping. */
+.mark{display:inline-flex;flex-direction:column;gap:1px;text-decoration:none;color:inherit}
+.mark .mkrow{display:inline-flex;align-items:baseline;gap:8px}
+/* was 9.5px mono, uppercase, .13em tracked — a label, and labels in that
+   costume are exactly what "looks AI generated" means. It is the page's own
+   serif at a size a person reads, sentence case, no tracking. */
+.mark .mkwhat{font-family:var(--serif);font-size:12.5px;font-weight:500;letter-spacing:0;
+ color:var(--soft);white-space:nowrap}
 .mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
 .mark .inc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--blue)}
 .mark:hover .nm{color:var(--blue)}
@@ -86,7 +95,12 @@ header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba
    the trust strip and made the hero read as two unrelated things. */
 .hero{display:grid;grid-template-columns:1.02fr .98fr;gap:52px;align-items:center;
  padding:52px 0 44px}
-h1{font-size:56px;max-width:15ch}
+/* the kicker and the headline are one object: same family, same optical
+   left edge, leading tight enough that no other element can wander between
+   them. It carries the industry; the headline carries the question. */
+.kicker{font-family:var(--serif);font-size:30px;font-weight:600;line-height:1.06;
+ letter-spacing:-.015em;color:var(--mid);margin:0 0 4px}
+h1{font-size:56px;max-width:15ch;margin-top:0}
 h1 em{font-style:italic;color:var(--blue)}
 .lede{font-size:19px;line-height:1.5;color:var(--mid);margin-top:18px;max-width:46ch}
 .lede b{color:var(--ink);font-weight:650}
@@ -553,13 +567,13 @@ footer a:hover{color:var(--ink)}
   .hero-say{order:1}
   .hero > .readout{order:2}
   .hero-act{order:3}
-  h1{font-size:40px} h2{font-size:28px}
+  h1{font-size:40px} h2{font-size:28px} .kicker{font-size:23px}
   .three,.states{grid-template-columns:1fr;gap:20px}
   .eight{grid-template-columns:repeat(2,1fr)}
 }
 @media (max-width:560px){
   .wrap{padding:0 18px}
-  h1{font-size:33px} .lede{font-size:17px}
+  h1{font-size:33px} .lede{font-size:17px} .kicker{font-size:20px}
   .eight{grid-template-columns:1fr}
   .doors{grid-template-columns:1fr}
   .givens{grid-template-columns:1fr}
@@ -582,7 +596,7 @@ footer a:hover{color:var(--ink)}
   .masknav a{white-space:nowrap}
   .masknav .btn{padding:7px 12px;font-size:13px}
   .masknav .btn.p{display:none}                    /* the hero says this, better */
-  .mark .nm{font-size:17px} .mark .inc{font-size:9px}
+  .mark .nm{font-size:17px} .mark .inc{font-size:9px} .mark .mkwhat{font-size:11.5px}
   .hero{padding-top:26px;padding-bottom:34px}
   /* ── AND THE TRUST STRIP IS A RULE, NOT A BOX ────────────────────────────
      It is three claims under a hairline. The rounding block below gave it a
@@ -707,14 +721,14 @@ h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK'
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Negotiation Inc">
-<meta property="og:title" content="Negotiation Inc">
-<meta property="og:description" content="Price every exit on one property, ranked against the seller, with the arithmetic shown. No account, nothing leaves your browser.">
+<meta property="og:title" content="Negotiation Inc — real estate investing, simplified">
+<meta property="og:description" content="A free worksheet for property investors: type four numbers from any listing and see the most you can pay, eight different ways, with the arithmetic shown. No account, nothing leaves your browser.">
 <meta property="og:image" content="https://negotiationinc.com/og/page-site.png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Negotiation Inc">
+<meta property="og:image:alt" content="Negotiation Inc — real estate investing, simplified">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Negotiation Inc">
-<meta name="twitter:description" content="Price every exit on one property, ranked against the seller, with the arithmetic shown. No account, nothing leaves your browser.">
+<meta name="twitter:title" content="Negotiation Inc — real estate investing, simplified">
+<meta name="twitter:description" content="A free worksheet for property investors: type four numbers from any listing and see the most you can pay, eight different ways, with the arithmetic shown. No account, nothing leaves your browser.">
 <meta name="twitter:image" content="https://negotiationinc.com/og/page-site.png">
 <meta property="og:url" content="https://negotiationinc.com/">
 <link rel="canonical" href="https://negotiationinc.com/">
@@ -731,7 +745,9 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 
 <header>
  <div class="wrap mast">
-  <a class="mark" href="index.html" title="Negotiation Inc"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+  <a class="mark" href="index.html" title="Negotiation Inc">
+   <span class="mkrow"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></span>
+   <span class="mkwhat">Real estate investing, simplified</span></a>
   <nav class="masknav">
       <a href="desk.html">The desk</a>
    <a href="arcade.html">Arcade</a>
@@ -746,7 +762,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 <div class="wrap hero">
  <div class="hero-words">
   <div class="hero-say">
-  <div class="eyebrow">Underwriting · est. of record</div>
+  <div class="kicker">Real estate investing.</div>
   <!-- ── THE FIRST SIX WORDS DECIDE WHETHER ANYBODY READS THE SEVENTH ──────
        This said "Know what to pay before you call." It is a good line and it
        is now the last sentence of the paragraph below, where it earns its
