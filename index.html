@@ -65,16 +65,7 @@ header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba
  backdrop-filter:blur(8px);z-index:20}
 .mast{display:flex;justify-content:space-between;align-items:center;gap:20px;
  padding:14px 0;flex-wrap:wrap}
-/* the lockup is two lines now: the name, and what the name is FOR. It stacks
-   rather than sitting inline so it survives a 390px bar beside a Sign-in
-   button without either half wrapping. */
-.mark{display:inline-flex;flex-direction:column;gap:1px;text-decoration:none;color:inherit}
-.mark .mkrow{display:inline-flex;align-items:baseline;gap:8px}
-/* was 9.5px mono, uppercase, .13em tracked — a label, and labels in that
-   costume are exactly what "looks AI generated" means. It is the page's own
-   serif at a size a person reads, sentence case, no tracking. */
-.mark .mkwhat{font-family:var(--serif);font-size:12.5px;font-weight:500;letter-spacing:0;
- color:var(--soft);white-space:nowrap}
+.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:inherit}
 .mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
 .mark .inc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--blue)}
 .mark:hover .nm{color:var(--blue)}
@@ -132,7 +123,8 @@ h1 em{font-style:italic;color:var(--blue)}
 .ta-r{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
  padding:13px 0;border-top:1px solid var(--line-2)}
 .ta-r:last-child{border-bottom:1px solid var(--line-2)}
-.ta-k{font-size:16px;color:var(--mid)}
+.ta-k{font-size:16px;color:var(--ink);font-weight:600;display:block}
+.ta-k small{display:block;font-size:13.5px;font-weight:400;color:var(--soft);margin-top:2px}
 .ta-v{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--green);white-space:nowrap}
 .ta-sum .ta-k{font-weight:700;color:var(--ink)}
 .ta-sum .ta-v{font-size:32px;font-weight:800;color:var(--ink)}
@@ -168,6 +160,10 @@ h1 em{font-style:italic;color:var(--blue)}
 .chipwrap{padding:12px 14px 13px;background:var(--wash);border-bottom:1px solid var(--line);
  border-top:1px solid var(--line)}
 .chiph{font-size:11.5px;line-height:1.45;color:var(--soft);margin-bottom:9px}
+/* the word the trade uses, handed over AFTER the thing has been named in
+   English. It is deliberately quiet: a beginner does not need it to act, and
+   somebody who already knows it wants confirmation, not a lesson. */
+.vtr{font-size:11.5px;font-style:italic;color:var(--soft);margin:-2px 0 8px}
 .chiph b{color:var(--ink);font-weight:650}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips button{font-family:var(--sans);font-size:13px;font-weight:650;letter-spacing:0;
@@ -596,7 +592,7 @@ footer a:hover{color:var(--ink)}
   .masknav a{white-space:nowrap}
   .masknav .btn{padding:7px 12px;font-size:13px}
   .masknav .btn.p{display:none}                    /* the hero says this, better */
-  .mark .nm{font-size:17px} .mark .inc{font-size:9px} .mark .mkwhat{font-size:11.5px}
+  .mark .nm{font-size:17px} .mark .inc{font-size:9px}
   .hero{padding-top:26px;padding-bottom:34px}
   /* ── AND THE TRUST STRIP IS A RULE, NOT A BOX ────────────────────────────
      It is three claims under a hairline. The rounding block below gave it a
@@ -745,9 +741,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 
 <header>
  <div class="wrap mast">
-  <a class="mark" href="index.html" title="Negotiation Inc">
-   <span class="mkrow"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></span>
-   <span class="mkwhat">Real estate investing, simplified</span></a>
+  <a class="mark" href="index.html" title="Negotiation Inc"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
   <nav class="masknav">
       <a href="desk.html">The desk</a>
    <a href="arcade.html">Arcade</a>
@@ -762,7 +756,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 <div class="wrap hero">
  <div class="hero-words">
   <div class="hero-say">
-  <div class="kicker">Real estate investing.</div>
+  <div class="kicker">Real estate investing, simplified.</div>
   <!-- ── THE FIRST SIX WORDS DECIDE WHETHER ANYBODY READS THE SEVENTH ──────
        This said "Know what to pay before you call." It is a good line and it
        is now the last sentence of the paragraph below, where it earns its
@@ -828,10 +822,10 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   <div class="rh"><span>Form D-1 · 1128 Marrow Lane</span><span class="rlive">Live</span></div>
   <div class="givens">
    <div class="given"><div class="k">Asking price</div><div class="v">$184,500<span class="tag t-e">Entered</span></div></div>
-   <!-- ARV is the first acronym on the page and it appeared with no gloss, on
-        the one panel a beginner is actually looking at while they read the
-        paragraph beside it. Three words fix it. -->
-   <div class="given"><div class="k">ARV — sells for, fixed up</div><div class="v">$291,000<span class="tag t-e">Entered</span></div></div>
+   <!-- The gloss used to trail the acronym: "ARV — sells for, fixed up". Right
+        fix, wrong order. The English leads on the front door; the acronym is
+        taught inside the product, where a reader has asked for it. -->
+   <div class="given"><div class="k">Sells for, fixed up</div><div class="v">$291,000<span class="tag t-e">Entered</span></div></div>
    <div class="given"><div class="k">Repairs</div><div class="v">$41,300<span class="tag t-s">Estimate</span></div></div>
    <div class="given"><div class="k">Monthly rent</div><div class="v">—<span class="tag t-n">Needed</span></div></div>
   </div>
@@ -840,7 +834,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
         printed where an instruction belongs. It is a fine sentence about the
         panel and a useless one for somebody who has not pressed anything yet:
         it describes the RESULT of the interaction it is supposed to start. -->
-   <div class="chiph">The eight exits &mdash; how you get paid.
+   <div class="chiph">Eight ways to do a deal on this house.
     <b>Tap one. The price changes.</b></div>
    <div class="chips" id="chips" role="tablist" aria-label="The eight exits"></div>
   </div>
@@ -866,52 +860,55 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
  <div class="wrap">
   <div class="moment">
    <div class="bandhead">
-    <div class="eyebrow">The same four numbers</div>
-    <h2>Two right answers, $9,280 apart.</h2>
-    <p>Pick the wrong way out and the margin is gone before you call.</p>
+    <div class="eyebrow">One house, two kinds of deal</div>
+    <h2>Two ways to do the same deal. $9,280 apart.</h2>
+    <p>Both are real deals on the same house, and both work. Which kind you pick
+       is worth more than anything you say on the phone.</p>
    </div>
 
    <div class="twoans">
-    <div class="ta-r"><span class="ta-k">Flip it yourself, you clear</span><span class="ta-v">$23,280</span></div>
-    <div class="ta-r"><span class="ta-k">Sell the contract, your fee is</span><span class="ta-v">$14,000</span></div>
+    <div class="ta-r"><span class="ta-k">Fix it up and sell it
+     <small>You buy it, do the work, sell it on</small></span><span class="ta-v">$23,280</span></div>
+    <div class="ta-r"><span class="ta-k">Pass the deal to another buyer
+     <small>You never own the house</small></span><span class="ta-v">$14,000</span></div>
     <div class="ta-r ta-sum"><span class="ta-k">The difference</span><span class="ta-v">$9,280</span></div>
    </div>
   </div>
 
-  <div class="spread" aria-label="Three exits priced against the asking price, on one scale">
+  <div class="spread" aria-label="Three kinds of deal priced against the asking price, on one scale">
    <!-- The band above prints $9,280 and this drawing prints $36,740, and for a
         moment they read as rival answers to one question. They are answers to
         two: what you KEEP, and the most you may PAY. The key says which. -->
-   <div class="sp-k">The spread &middot; the most you can <b>pay</b> under each exit</div>
+   <div class="sp-k">The most you can <b>pay</b>, under each kind of deal</div>
    <div class="sp-plot">
     <div class="sp-mark hi" style="left:82.28%">
-     <span class="sp-nm">Fix and flip</span><span class="sp-v">$191,140</span></div>
+     <span class="sp-nm">Fix and sell</span><span class="sp-v">$191,140</span></div>
     <div class="sp-mark" style="left:39.90%">
-     <span class="sp-nm">BRRRR</span><span class="sp-v">$169,950</span></div>
+     <span class="sp-nm">Fix and rent</span><span class="sp-v">$169,950</span></div>
     <div class="sp-mark lo" style="left:8.80%">
-     <span class="sp-nm">Wholesale</span><span class="sp-v">$154,400</span></div>
+     <span class="sp-nm">Pass it on</span><span class="sp-v">$154,400</span></div>
     <div class="sp-ask" style="left:69.00%">
-     <span class="sp-nm">Asking</span><span class="sp-v">$184,500</span></div>
+     <span class="sp-nm">They are asking</span><span class="sp-v">$184,500</span></div>
     <div class="sp-axis"></div>
     <div class="sp-tick" style="left:8.80%"></div>
     <div class="sp-tick" style="left:39.90%"></div>
     <div class="sp-tick tall" style="left:82.28%"></div>
     <div class="sp-brace" style="left:8.80%;width:73.48%"></div>
     <div class="sp-gap" style="left:8.80%;width:73.48%">
-     <b>$36,740</b><span>between the best way out of this house and the worst</span></div>
+     <b>$36,740</b><span>between the most and least this house can carry</span></div>
     <div class="sp-end l">$150,000</div><div class="sp-end r">$200,000</div>
    </div>
-   <div class="sp-note"><b>The flip clears the asking price by $6,640.</b> The wholesale is
-    $30,100 short of it. Same house, same afternoon, same four numbers.</div>
+   <div class="sp-note"><b>Fixing it up and selling it can pay $6,640 more than they are
+    asking.</b> Passing it on stops $30,100 short. Same house, same numbers.</div>
    <div class="sp-off">
-    <div class="sp-offk">No position on this scale &mdash; four of the eight</div>
+    <div class="sp-offk">Four of the eight will not give a price here &mdash; and say why</div>
     <div class="sp-offg">
-     <div><b>Buy and hold</b><span>Needs a monthly rent.</span></div>
-     <div><b>Subject-to</b><span>Needs the payment on the existing loan.</span></div>
-     <div><b>Wholetail</b><span>Repairs are 14% of what it sells for fixed up.</span></div>
-     <div><b>Novation</b><span>Same 14%. Not ready to list.</span></div>
+     <div><b>Rent it out</b><span>It has not been told the monthly rent.</span></div>
+     <div><b>Take over the loan</b><span>It has not been told their current payment.</span></div>
+     <div><b>Clean and list</b><span>This one needs too much work to just tidy up.</span></div>
+     <div><b>Sell it for them</b><span>Same reason &mdash; it is not ready to list.</span></div>
     </div>
-    <div class="sp-give">Give it any one of those figures and the exit takes its place on the
+    <div class="sp-give">Give it the missing figure and that deal takes its place on the
      scale. <a href="desk.html#new">Price your own &rarr;</a></div>
    </div>
   </div>
@@ -975,10 +972,10 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    <h2>Four jobs, one sheet.</h2>
   </div>
   <div class="who">
-   <div><h3>Wholesaling</h3><p>Know your number before you call.</p></div>
-   <div><h3>Flipping</h3><p>Your max buy, and what you clear if the bid holds.</p></div>
+   <div><h3>Passing deals on</h3><p>Know your number before you call.</p></div>
+   <div><h3>Fixing and selling</h3><p>The most you can pay, and what you keep if the bid holds.</p></div>
    <div><h3>Renting out</h3><p>The price the rent can actually carry.</p></div>
-   <div><h3>Creative deals</h3><p>Priced, or refused with the reason.</p></div>
+   <div><h3>Taking over payments</h3><p>Priced, or turned down with the reason.</p></div>
   </div>
  </div>
 </section>
@@ -1105,7 +1102,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    product exists to beat, and it would have been the headline. */
 (function(){
  var EX = [
-  { id:'flip', n:'Fix and flip', k:'ok', lab:'The most you can pay', fig:'$191,140',
+  { id:'flip', n:'Fix and sell', tr:'a fix and flip', k:'ok', lab:'The most you can pay', fig:'$191,140',
     lines:[['What it is worth once it is done','$291,000'],
            ['Less what it needs','−$41,300'],
            ['Less selling it, holding it, and the profit you are doing this for','−$58,560']],
@@ -1115,29 +1112,29 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
        behind two separate button presses quietly retired it. It is back, and
        it now also teaches the control — a person who reads this knows there
        is something to press and what pressing it will do. */
-    say:'They are asking <b>$184,500</b>, and this exit can go to <b>$191,140</b> — so there is room, and at that price you clear <b>$23,280</b> if the repair bid holds. Press <b>Wholesale</b> and the same house pays <b>$14,000</b> on a deal you never own: two right answers, a nine-thousand-dollar difference between them.' },
-  { id:'brrrr', n:'BRRRR', k:'ok', lab:'The most you can pay', fig:'$169,950',
+    say:'They are asking <b>$184,500</b>, and this way of doing it can go to <b>$191,140</b> — so there is room, and at that price you keep <b>$23,280</b> if the repair bid holds. Press <b>Pass it on</b> and the same house pays <b>$14,000</b> on a deal you never own: two kinds of deal, a nine-thousand-dollar difference between them.' },
+  { id:'brrrr', n:'Fix and rent', tr:'a BRRRR', k:'ok', lab:'The most you can pay', fig:'$169,950',
     lines:[['What the bank lends against $291,000','$218,250'],
            ['Less what it needs','−$41,300'],
            ['Less carrying it while you do the work','−$7,000']],
     say:'Buy at or under this and the refinance hands every dollar back out — <b>$0 of yours left in the deal</b>. The appraiser has to agree, and the rent still has to cover the new payment.' },
-  { id:'wholesale', n:'Wholesale', k:'ok', lab:'The most you can pay', fig:'$154,400',
+  { id:'wholesale', n:'Pass it on', tr:'a wholesale', k:'ok', lab:'The most you can pay', fig:'$154,400',
     lines:[['What a cash buyer can pay for it','$162,400'],
            ['Less the fee you keep','−$8,000']],
     say:'Contract at or under <b>$154,400</b> and assign at $162,400. In the middle of the band your fee is <b>$14,000</b> — on a house you never own.' },
-  { id:'hold', n:'Buy and hold', k:'need', lab:'Wants a figure', head:'It needs a monthly rent.',
+  { id:'hold', n:'Rent it out', tr:'a buy and hold', k:'need', lab:'Wants a figure', head:'It needs a monthly rent.',
     why:'This exit prices off what the property rents for, and there is no rent on the sheet. The desk does not invent what you did not give it. It names the figure it wants instead.',
     foot:'Give it a rent and it prices in the same breath as the other three.' },
-  { id:'subto', n:'Subject-to', k:'need', lab:'Wants a figure', head:'It needs the payment on the existing loan.',
+  { id:'subto', n:'Take over the loan', tr:'a subject-to', k:'need', lab:'Wants a figure', head:'It needs the payment on the existing loan.',
     why:'Subject-to is a bet on the payment rather than on the price, so it wants the PITI and the rent. Neither is on this sheet, and without them there is nothing to take over.',
     foot:'Two figures, and this one prices too.' },
-  { id:'wholetail', n:'Wholetail', k:'no', lab:'Will not price', head:'Not this house.',
-    why:'Repairs are 14% of ARV — past the 8% where “light work” stops being light. A wholetail is clean it and list it. This is a renovation, and pricing it as a wholetail would hand you a number you would then go and offer.',
+  { id:'wholetail', n:'Clean and list', tr:'a wholetail', k:'no', lab:'Will not price', head:'Not this house.',
+    why:'The work here is 14% of what the house sells for once it is done — well past the point where “a clean and a tidy” stops covering it. This one needs a renovation, and pricing it as a tidy-up would hand you a number you would then go and offer.',
     foot:'Not a missing figure. There is no figure that makes this the right play here.' },
-  { id:'novation', n:'Novation', k:'no', lab:'Will not price', head:'Not this house either.',
+  { id:'novation', n:'Sell it for them', tr:'a novation', k:'no', lab:'Will not price', head:'Not this house either.',
     why:'Same 14%. You cannot run a retail listing on a house that is not retail yet — a novation is a light-work play, and this one is a renovation with paperwork.',
     foot:'Two of the eight say no on this sheet, and both say why.' },
-  { id:'land', n:'The land play', k:'else', lab:'Not this desk', head:'There is a house on it.',
+  { id:'land', n:'Land only', tr:'the land play', k:'else', lab:'Not this desk', head:'There is a house on it.',
     why:'The eighth exit prices dirt, and dirt is not a house with the house removed — frontage, slope, utilities and what finished lots actually sold for. It has its own desk.',
     foot:'<a href="land.html">Open the Land Desk →</a>' }
  ];
@@ -1154,6 +1151,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   var h;
   if (e.k === 'ok'){
    h = '<div class="vk">' + esc(e.lab) + ' · ' + esc(e.n) + '</div>'
+     + (e.tr ? '<div class="vtr">the trade calls this ' + esc(e.tr) + '</div>' : '')
      + '<div class="vfig">' + esc(e.fig) + '</div><div class="vlines">';
    for (i = 0; i < e.lines.length; i++)
     h += '<div class="vline"><span>' + esc(e.lines[i][0]) + '</span><b>' + esc(e.lines[i][1]) + '</b></div>';
@@ -1161,6 +1159,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    vp.className = 'vpanel';
   } else {
    h = '<div class="vk">' + esc(e.lab) + ' · ' + esc(e.n) + '</div>'
+     + (e.tr ? '<div class="vtr">the trade calls this ' + esc(e.tr) + '</div>' : '')
      + '<div class="vhead">' + esc(e.head) + '</div>'
      + '<div class="vwhy">' + e.why + '</div>'
      + '<div class="vfoot">' + e.foot + '</div>';
