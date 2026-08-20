@@ -391,7 +391,96 @@ h2{font-size:34px;margin-top:8px}
 .rc.on{border-color:var(--ink);box-shadow:0 1px 0 var(--ink)}
 .rc.on .rl{color:var(--blue)}
 .rc.on p{color:var(--ink)}
-.eight .ex8{background:#fff;padding:15px 16px 16px;color:inherit;display:block}
+/* ── A TILE THAT LOOKS PRESSABLE HAS TO BE PRESSABLE ──────────────────────
+   Eight cards with borders, icons and their own hover cursor are a promise
+   made eight times, and the promise was not kept: they did nothing. They are
+   buttons now, and they behave like objects — they lift under the pointer,
+   press down under the finger, and stay lit while their panel is open.
+
+   Everything here is transform and colour, which the compositor does on its
+   own thread; nothing animates a property that forces layout. And all of it
+   is off under prefers-reduced-motion, where the states still READ (border,
+   background, the caret) but nothing moves. */
+.eight .ex8{background:#fff;padding:15px 16px 16px;color:inherit;display:block;
+ width:100%;text-align:left;font:inherit;border:0;cursor:pointer;position:relative;
+ transition:transform .16s cubic-bezier(.2,.7,.3,1), box-shadow .16s ease, background .16s ease;
+ will-change:transform}
+.eight .ex8:hover{background:#fff;transform:translateY(-3px);
+ box-shadow:0 12px 26px -12px rgba(13,20,32,.28), 0 2px 0 0 var(--line)}
+.eight .ex8:active{transform:translateY(-1px) scale(.994);transition-duration:.06s}
+.eight .ex8:focus-visible{outline:2px solid var(--blue);outline-offset:-2px;z-index:2}
+.eight .ex8 .exm{transition:transform .18s cubic-bezier(.2,.7,.3,1), opacity .18s ease}
+.eight .ex8:hover .exm{transform:translateY(-1px) scale(1.09)}
+.eight .ex8:active .exm{transform:translateY(0) scale(1.02)}
+/* the open tile keeps its light on and grows a caret pointing at the panel */
+.eight .ex8[aria-expanded="true"]{background:var(--ink);transform:translateY(-3px)}
+.eight .ex8[aria-expanded="true"] .r,
+.eight .ex8[aria-expanded="true"] .p8{color:#9db4ff}
+.eight .ex8[aria-expanded="true"] .t{color:#fff}
+.eight .ex8[aria-expanded="true"] .d{color:#aab6c8}
+.eight .ex8[aria-expanded="true"] .exm{color:#9db4ff;transform:scale(1.09)}
+.eight .ex8[aria-expanded="true"]::after{content:"";position:absolute;left:50%;bottom:-1px;
+ width:14px;height:14px;background:var(--ink);transform:translate(-50%,50%) rotate(45deg);z-index:3}
+/* the press hint, so the promise is in words as well as in behaviour */
+.eight .ex8 .go8{display:block;margin-top:9px;font-size:11.5px;font-weight:700;
+ letter-spacing:.02em;color:var(--blue);opacity:0;transform:translateY(3px);
+ transition:opacity .16s ease, transform .16s ease}
+.eight .ex8:hover .go8,.eight .ex8:focus-visible .go8{opacity:1;transform:none}
+.eight .ex8[aria-expanded="true"] .go8{opacity:1;transform:none;color:#9db4ff}
+@media(hover:none){ .eight .ex8 .go8{opacity:1;transform:none} }
+@media(prefers-reduced-motion:reduce){
+  .eight .ex8,.eight .ex8 .exm,.eight .ex8 .go8{transition:none}
+  .eight .ex8:hover,.eight .ex8:active,.eight .ex8[aria-expanded="true"]{transform:none}
+  .eight .ex8:hover .exm,.eight .ex8:active .exm,.eight .ex8[aria-expanded="true"] .exm{transform:none}
+  .eight .ex8 .go8{opacity:1;transform:none}
+}
+
+/* ── THE PANEL ────────────────────────────────────────────────────────────
+   It expands where the reader already is. A tile that navigated would drop
+   somebody who has just met the word "novation" into a worked sheet they did
+   not ask for — which is the exact complaint this is built to answer. */
+.ex8panel{border:1px solid var(--line);border-top:0;background:var(--ink);color:#e8ecf4;
+ padding:26px 26px 24px;border-radius:0 0 var(--r-card) var(--r-card);overflow:hidden}
+.ex8panel[hidden]{display:none}
+.ex8panel.in{animation:panelIn .22s cubic-bezier(.2,.7,.3,1) both}
+@keyframes panelIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){ .ex8panel.in{animation:none} }
+.p-top{display:flex;align-items:flex-start;gap:16px;justify-content:space-between}
+.p-nm{font-family:var(--serif);font-size:26px;font-weight:700;line-height:1.1;color:#fff}
+.p-alt{font-size:13.5px;font-weight:650;color:#9db4ff;margin-top:3px}
+.p-x{flex:0 0 auto;background:transparent;border:1px solid #33405c;color:#c4cede;
+ border-radius:8px;width:34px;height:34px;font-size:17px;line-height:1;cursor:pointer;
+ transition:border-color .15s ease,color .15s ease}
+.p-x:hover{border-color:#7f8ea8;color:#fff}
+.p-what{font-size:15.5px;line-height:1.6;color:#c4cede;margin:14px 0 0;max-width:56ch}
+.p-k{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.16em;
+ text-transform:uppercase;color:#7f8ea8;margin:22px 0 8px}
+.p-lines{border-top:1px solid #26314a}
+.p-line{display:flex;justify-content:space-between;gap:16px;padding:9px 0;
+ border-bottom:1px solid #26314a;font-size:14.5px;color:#c4cede}
+.p-line b{color:#fff;font-family:var(--serif);font-size:16px;white-space:nowrap}
+.p-tot{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+ padding:14px 0 0}
+.p-tot span{font-size:14.5px;color:#c4cede}
+.p-tot b{font-family:var(--serif);font-size:32px;font-weight:800;color:#5ec98d}
+.p-no b{color:#ff9b8f;font-size:24px}
+.p-say{font-size:14px;line-height:1.6;color:#aab6c8;margin-top:14px;max-width:62ch}
+.p-say b{color:#fff}
+/* ── AND WHAT EACH DOOR OPENS, BEFORE IT IS PRESSED ─────────────────────── */
+.p-doors{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.p-door{display:block;background:#141d2f;border:1px solid #2b3854;border-radius:10px;
+ padding:14px 16px;text-decoration:none;color:inherit;
+ transition:border-color .15s ease, transform .15s cubic-bezier(.2,.7,.3,1)}
+.p-door:hover{border-color:#5b7ac0;transform:translateY(-2px)}
+.p-door:focus-visible{outline:2px solid #9db4ff;outline-offset:2px}
+.p-door .dt{font-size:14.5px;font-weight:700;color:#9db4ff}
+.p-door .dd{font-size:12.5px;line-height:1.5;color:#8b97ab;margin-top:4px}
+@media(prefers-reduced-motion:reduce){ .p-door:hover{transform:none} }
+@media(max-width:700px){
+  .ex8panel{padding:20px 18px}
+  .p-nm{font-size:22px} .p-tot b{font-size:26px}
+  .p-doors{grid-template-columns:1fr}
+}
 /* ── EIGHT BOXES OF TEXT WERE EIGHT BOXES OF TEXT ─────────────────────────
    This is the section that teaches, and it was eight identical rectangles
    with words in them — on a page whose three following sections are also
@@ -944,20 +1033,27 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    <p>The same house is worth a different amount under each one. That gap is the deal.</p>
   </div>
   <div class="eight">
-   <div class="ex8"><div class="r">I</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 17 L10 11 L17 17" /><path d="M5 17 v8 h10 v-8" /><rect x="24" y="9" width="12" height="15" rx="1" /><path d="M27 14h6M27 17.5h6M27 21h4" stroke-width="1.2" opacity=".55"/><path d="M37.5 16.5 h4.5 m-2 -2 l2 2 l-2 2" stroke-width="1.6"/></svg><div class="t">The wholesale</div><div class="p8">Pass it on</div><div class="d">Lock up the deal, then sell it to another buyer. You never own the house.</div></div>
-   <div class="ex8"><div class="r">II</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 8 L16 23 L40 6" stroke-width="2.2" stroke-linecap="round"/><path d="M34.5 5.2 l6 .6 l-.7 6" stroke-width="1.7" stroke-linecap="round"/></svg><div class="t">The fix and flip</div><div class="p8">Fix and sell</div><div class="d">Buy it, do the work, sell it at the finished price.</div></div>
-   <div class="ex8"><div class="r">III</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 25 h26 v-13" opacity=".42" stroke-dasharray="4 2.8" stroke-width="1.8" stroke-linecap="round"/><path d="M5 25 L37 6" stroke-width="2.2" stroke-linecap="round"/><path d="M32.6 5 l4.8 1 l-1 4.8" stroke-width="1.7" stroke-linecap="round"/></svg><div class="t">The wholetail</div><div class="p8">Clean and list</div><div class="d">Tidy it and list it. No renovation, so it sells sooner.</div></div>
-   <div class="ex8"><div class="r">IV</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 5 h38" stroke-width="1.4" opacity=".45"/><path d="M8 5.5 v13 M17.3 5.5 v13 M26.6 5.5 v13 M36 5.5 v13" stroke-width="2.4" stroke-linecap="round"/><path d="M3 23.5 h38" stroke-width="2.2"/><path d="M3 27 h38" stroke-width="1.3"/></svg><div class="t">The buy and hold</div><div class="p8">Rent it out</div><div class="d">Keep it. The rent has to carry the loan on its own.</div></div>
-   <div class="ex8"><div class="r">V</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M28.6 24 A12.5 12.5 0 1 1 28.6 8" stroke-linecap="round"/><path d="M28.6 8 l-.4 -5 M28.6 8 l-4.8 -1.3" stroke-width="1.7" stroke-linecap="round"/><path d="M13.8 17 L19 12.5 L24.2 17" stroke-width="1.6"/><path d="M15.6 16.7 v6.3 h6.8 v-6.3" stroke-width="1.6"/></svg><div class="t">BRRRR</div><div class="p8">Fix and rent</div><div class="d">Do the work, rent it, refinance, and keep the house.</div></div>
-   <div class="ex8"><div class="r">VI</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M11.5 3.5 H34 V15.5 H11.5 L5.5 9.5 Z" opacity=".45" stroke-width="1.7"/><circle cx="10.8" cy="9.5" r="1.1" fill="currentColor" stroke="none" opacity=".45"/><path d="M3.5 17.5 L36 1.5" stroke-width="2.2" stroke-linecap="round"/><path d="M4 25 h32 m-4.4 -3.4 l4.4 3.4 l-4.4 3.4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="t">The subject-to</div><div class="p8">Take over the loan</div><div class="d">You take over the payments they are already making.</div></div>
-   <div class="ex8"><div class="r">VII</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 17 L12 11 L19 17" stroke-dasharray="3.6 2.4" stroke-linecap="round"/><path d="M7 17 v8 h10 v-8" stroke-dasharray="3.6 2.4" stroke-linecap="round"/><rect x="26" y="7" width="14" height="10" rx="1"/><path d="M33 17 v8.5" stroke-width="1.5"/><path d="M29.5 12 h7" stroke-width="1.4" opacity=".6"/></svg><div class="t">The novation</div><div class="p8">Sell it for them</div><div class="d">You sell it at full price and keep what is over their number.</div></div>
-   <div class="ex8"><div class="r">VIII</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 9 L34 7 L38 22 L8 25 Z" /><path d="M8 25 L38 22" stroke-width="2.6"/><path d="M3 28.5 h40" stroke-width="1.2" stroke-dasharray="5 4" opacity=".5"/></svg><div class="t">The land play</div><div class="p8">Land only</div><div class="d">No house on it. What a finished lot sells for, less what it costs to get there.</div></div>
+   <button type="button" class="ex8" data-x="wholesale" aria-expanded="false" aria-controls="ex8p"><div class="r">I</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 17 L10 11 L17 17" /><path d="M5 17 v8 h10 v-8" /><rect x="24" y="9" width="12" height="15" rx="1" /><path d="M27 14h6M27 17.5h6M27 21h4" stroke-width="1.2" opacity=".55"/><path d="M37.5 16.5 h4.5 m-2 -2 l2 2 l-2 2" stroke-width="1.6"/></svg><div class="t">The wholesale</div><div class="p8">Pass it on</div><div class="d">Lock up the deal, then sell it to another buyer. You never own the house.</div><span class="go8">See it on this house &rarr;</span></button>
+   <button type="button" class="ex8" data-x="flip" aria-expanded="false" aria-controls="ex8p"><div class="r">II</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 8 L16 23 L40 6" stroke-width="2.2" stroke-linecap="round"/><path d="M34.5 5.2 l6 .6 l-.7 6" stroke-width="1.7" stroke-linecap="round"/></svg><div class="t">The fix and flip</div><div class="p8">Fix and sell</div><div class="d">Buy it, do the work, sell it at the finished price.</div><span class="go8">See it on this house &rarr;</span></button>
+   <button type="button" class="ex8" data-x="wholetail" aria-expanded="false" aria-controls="ex8p"><div class="r">III</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 25 h26 v-13" opacity=".42" stroke-dasharray="4 2.8" stroke-width="1.8" stroke-linecap="round"/><path d="M5 25 L37 6" stroke-width="2.2" stroke-linecap="round"/><path d="M32.6 5 l4.8 1 l-1 4.8" stroke-width="1.7" stroke-linecap="round"/></svg><div class="t">The wholetail</div><div class="p8">Clean and list</div><div class="d">Tidy it and list it. No renovation, so it sells sooner.</div><span class="go8">See it on this house &rarr;</span></button>
+   <button type="button" class="ex8" data-x="hold" aria-expanded="false" aria-controls="ex8p"><div class="r">IV</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 5 h38" stroke-width="1.4" opacity=".45"/><path d="M8 5.5 v13 M17.3 5.5 v13 M26.6 5.5 v13 M36 5.5 v13" stroke-width="2.4" stroke-linecap="round"/><path d="M3 23.5 h38" stroke-width="2.2"/><path d="M3 27 h38" stroke-width="1.3"/></svg><div class="t">The buy and hold</div><div class="p8">Rent it out</div><div class="d">Keep it. The rent has to carry the loan on its own.</div><span class="go8">See it on this house &rarr;</span></button>
+   <button type="button" class="ex8" data-x="brrrr" aria-expanded="false" aria-controls="ex8p"><div class="r">V</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M28.6 24 A12.5 12.5 0 1 1 28.6 8" stroke-linecap="round"/><path d="M28.6 8 l-.4 -5 M28.6 8 l-4.8 -1.3" stroke-width="1.7" stroke-linecap="round"/><path d="M13.8 17 L19 12.5 L24.2 17" stroke-width="1.6"/><path d="M15.6 16.7 v6.3 h6.8 v-6.3" stroke-width="1.6"/></svg><div class="t">BRRRR</div><div class="p8">Fix and rent</div><div class="d">Do the work, rent it, refinance, and keep the house.</div><span class="go8">See it on this house &rarr;</span></button>
+   <button type="button" class="ex8" data-x="subto" aria-expanded="false" aria-controls="ex8p"><div class="r">VI</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M11.5 3.5 H34 V15.5 H11.5 L5.5 9.5 Z" opacity=".45" stroke-width="1.7"/><circle cx="10.8" cy="9.5" r="1.1" fill="currentColor" stroke="none" opacity=".45"/><path d="M3.5 17.5 L36 1.5" stroke-width="2.2" stroke-linecap="round"/><path d="M4 25 h32 m-4.4 -3.4 l4.4 3.4 l-4.4 3.4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="t">The subject-to</div><div class="p8">Take over the loan</div><div class="d">You take over the payments they are already making.</div><span class="go8">See it on this house &rarr;</span></button>
+   <button type="button" class="ex8" data-x="novation" aria-expanded="false" aria-controls="ex8p"><div class="r">VII</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 17 L12 11 L19 17" stroke-dasharray="3.6 2.4" stroke-linecap="round"/><path d="M7 17 v8 h10 v-8" stroke-dasharray="3.6 2.4" stroke-linecap="round"/><rect x="26" y="7" width="14" height="10" rx="1"/><path d="M33 17 v8.5" stroke-width="1.5"/><path d="M29.5 12 h7" stroke-width="1.4" opacity=".6"/></svg><div class="t">The novation</div><div class="p8">Sell it for them</div><div class="d">You sell it at full price and keep what is over their number.</div><span class="go8">See it on this house &rarr;</span></button>
+   <button type="button" class="ex8" data-x="land" aria-expanded="false" aria-controls="ex8p"><div class="r">VIII</div><svg class="exm" viewBox="0 0 44 30" width="44" height="30" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M5 9 L34 7 L38 22 L8 25 Z" /><path d="M8 25 L38 22" stroke-width="2.6"/><path d="M3 28.5 h40" stroke-width="1.2" stroke-dasharray="5 4" opacity=".5"/></svg><div class="t">The land play</div><div class="p8">Land only</div><div class="d">No house on it. What a finished lot sells for, less what it costs to get there.</div><span class="go8">See it on this house &rarr;</span></button>
   </div>
-  <!-- The one place the walk-through is linked from the front door. It is at
-       the FOOT of the glossary, not in the hero: a company that leads with a
-       course looks like it sells courses, and that is still true. What was
-       never true is that somebody who has just met eight new words should
-       have nowhere to go. -->
+  <!-- ── THE OVERVIEW THAT HAS TO COME BEFORE THE DEMO ────────────────────
+       Elijah: "when you click on it there should be an expanded page showing
+       the demo deal overview beforehand so people actually know what's going
+       on and don't just think why did it just take me to a bunch of random
+       stuff I don't understand."
+
+       That is the whole design. A tile does NOT navigate. It expands, in
+       place, into this house priced under that one deal — the same figures
+       the readout at the top of the page produces, from the same table, so
+       the two can never drift — and only then offers the doors, each of which
+       says what is behind it before you press it. -->
+  <div class="ex8panel" id="ex8p" hidden></div>
   <div class="eightgo">New to these? <a href="exits.html">Walk through all eight, with the arithmetic &rarr;</a></div>
  </div>
 </section>
@@ -1149,7 +1245,7 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
    product exists to beat, and it would have been the headline. */
 (function(){
  var EX = [
-  { id:'flip', n:'Fix and sell', tr:'a fix and flip', k:'ok', lab:'The most you can pay', fig:'$191,140',
+  { id:'flip', tile:'The fix and flip', what:'Buy it, do the work, sell it at the finished price.', n:'Fix and sell', tr:'a fix and flip', k:'ok', lab:'The most you can pay', fig:'$191,140',
     lines:[['What it is worth once it is done','$291,000'],
            ['Less what it needs','−$41,300'],
            ['Less selling it, holding it, and the profit you are doing this for','−$58,560']],
@@ -1160,28 +1256,28 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
        it now also teaches the control — a person who reads this knows there
        is something to press and what pressing it will do. */
     say:'They are asking <b>$184,500</b>, and this way of doing it can go to <b>$191,140</b> — so there is room, and at that price you keep <b>$23,280</b> if the repair bid holds. Press <b>Pass it on</b> and the same house pays <b>$14,000</b> on a deal you never own: two kinds of deal, a nine-thousand-dollar difference between them.' },
-  { id:'brrrr', n:'Fix and rent', tr:'a BRRRR', k:'ok', lab:'The most you can pay', fig:'$169,950',
+  { id:'brrrr', tile:'BRRRR', what:'Do the work, rent it, refinance, and keep the house.', n:'Fix and rent', tr:'a BRRRR', k:'ok', lab:'The most you can pay', fig:'$169,950',
     lines:[['What the bank lends against $291,000','$218,250'],
            ['Less what it needs','−$41,300'],
            ['Less carrying it while you do the work','−$7,000']],
     say:'Buy at or under this and the refinance hands every dollar back out — <b>$0 of yours left in the deal</b>. The appraiser has to agree, and the rent still has to cover the new payment.' },
-  { id:'wholesale', n:'Pass it on', tr:'a wholesale', k:'ok', lab:'The most you can pay', fig:'$154,400',
+  { id:'wholesale', tile:'The wholesale', what:'Lock up the deal, then sell it to another buyer. You never own the house.', n:'Pass it on', tr:'a wholesale', k:'ok', lab:'The most you can pay', fig:'$154,400',
     lines:[['What a cash buyer can pay for it','$162,400'],
            ['Less the fee you keep','−$8,000']],
     say:'Contract at or under <b>$154,400</b> and assign at $162,400. In the middle of the band your fee is <b>$14,000</b> — on a house you never own.' },
-  { id:'hold', n:'Rent it out', tr:'a buy and hold', k:'need', lab:'Wants a figure', head:'It needs a monthly rent.',
+  { id:'hold', tile:'The buy and hold', what:'Keep it. The rent has to carry the loan on its own.', n:'Rent it out', tr:'a buy and hold', k:'need', lab:'Wants a figure', head:'It needs a monthly rent.',
     why:'This exit prices off what the property rents for, and there is no rent on the sheet. The desk does not invent what you did not give it. It names the figure it wants instead.',
     foot:'Give it a rent and it prices in the same breath as the other three.' },
-  { id:'subto', n:'Take over the loan', tr:'a subject-to', k:'need', lab:'Wants a figure', head:'It needs the payment on the existing loan.',
-    why:'Subject-to is a bet on the payment rather than on the price, so it wants the PITI and the rent. Neither is on this sheet, and without them there is nothing to take over.',
+  { id:'subto', tile:'The subject-to', what:'You take over the payments they are already making.', n:'Take over the loan', tr:'a subject-to', k:'need', lab:'Wants a figure', head:'It needs the payment on the existing loan.',
+    why:'This deal is a bet on the payment rather than on the price, so it wants their monthly loan payment and the rent. Neither is on this sheet, and without them there is nothing to take over.',
     foot:'Two figures, and this one prices too.' },
-  { id:'wholetail', n:'Clean and list', tr:'a wholetail', k:'no', lab:'Will not price', head:'Not this house.',
+  { id:'wholetail', tile:'The wholetail', what:'Tidy it and list it. No renovation, so it sells sooner.', n:'Clean and list', tr:'a wholetail', k:'no', lab:'Will not price', head:'Not this house.',
     why:'The work here is 14% of what the house sells for once it is done — well past the point where “a clean and a tidy” stops covering it. This one needs a renovation, and pricing it as a tidy-up would hand you a number you would then go and offer.',
     foot:'Not a missing figure. There is no figure that makes this the right play here.' },
-  { id:'novation', n:'Sell it for them', tr:'a novation', k:'no', lab:'Will not price', head:'Not this house either.',
+  { id:'novation', tile:'The novation', what:'You sell it at full price and keep what is over their number.', n:'Sell it for them', tr:'a novation', k:'no', lab:'Will not price', head:'Not this house either.',
     why:'Same 14%. You cannot run a retail listing on a house that is not retail yet — a novation is a light-work play, and this one is a renovation with paperwork.',
     foot:'Two of the eight say no on this sheet, and both say why.' },
-  { id:'land', n:'Land only', tr:'the land play', k:'else', lab:'Not this desk', head:'There is a house on it.',
+  { id:'land', tile:'The land play', what:'No house on it. What a finished lot sells for, less what it costs to get there.', n:'Land only', tr:'the land play', k:'else', lab:'Not this desk', head:'There is a house on it.',
     why:'The eighth exit prices dirt, and dirt is not a house with the house removed — frontage, slope, utilities and what finished lots actually sold for. It has its own desk.',
     foot:'<a href="land.html">Open the Land Desk →</a>' }
  ];
@@ -1214,6 +1310,97 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
   }
   vp.innerHTML = h;
  }
+ /* ══ THE TILES OPEN, THEY DO NOT NAVIGATE ═════════════════════════════
+    Same EX table the readout above runs on, so the glossary and the hero can
+    never print different numbers for the same deal on the same house.
+
+    A tile that jumped to a worked sheet would drop somebody who has just met
+    the word "novation" into a screen they did not ask for. It expands where
+    they are, prices THIS house under THAT deal, and then names what is behind
+    each door before they press it. */
+ /* the guide's address, named once: publish.mjs rewrites this const for the
+    shipped site, because an href built by string concatenation is invisible
+    to the href= rewrite — the arcade's cabinets 404'd this exact way once. */
+ var GUIDE = 'exits.html';
+ var tiles = document.querySelectorAll('.eight .ex8');
+ var panel = document.getElementById('ex8p');
+ var openId = null;
+
+ function money(e){
+  if (e.k === 'ok'){
+   var rows = e.lines.map(function(l){
+     return '<div class="p-line"><span>' + esc(l[0]) + '</span><b>' + esc(l[1]) + '</b></div>'; }).join('');
+   return '<div class="p-k">On this house \u00b7 1128 Marrow Lane</div>'
+     + '<div class="p-lines">' + rows + '</div>'
+     + '<div class="p-tot"><span>The most you can pay</span><b>' + esc(e.fig) + '</b></div>'
+     + '<div class="p-say">' + e.say + '</div>';
+  }
+  return '<div class="p-k">On this house \u00b7 1128 Marrow Lane</div>'
+    + '<div class="p-tot p-no"><span>' + esc(e.lab) + '</span><b>' + esc(e.head) + '</b></div>'
+    + '<div class="p-say">' + e.why + '</div>';
+ }
+
+ /* every door says what is on the other side of it, in its own words */
+ function doors(e){
+  var lesson = '<a class="p-door" href="' + GUIDE + '#' + e.id + '">'
+    + '<span class="dt">Walk through ' + esc(e.n.toLowerCase()) + ' \u2192</span>'
+    + '<span class="dd">One short lesson on this one deal, with the arithmetic '
+    + 'and a house to try it on. Free, no account.</span></a>';
+  var sheet = '<a class="p-door" href="demo.html">'
+    + '<span class="dt">See a finished sheet \u2192</span>'
+    + '<span class="dd">Six real properties, already priced \u2014 every deal ranked, '
+    + 'every number showing its working. Nothing to fill in.</span></a>';
+  var own = '<a class="p-door" href="desk.html#new">'
+    + '<span class="dt">Price your own house \u2192</span>'
+    + '<span class="dd">Four numbers off any listing and this same arithmetic runs '
+    + 'on your address. Nothing leaves your browser.</span></a>';
+  return '<div class="p-k">Where this goes next</div><div class="p-doors">'
+    + lesson + (e.id === 'land'
+        ? '<a class="p-door" href="land.html"><span class="dt">Open the Land Desk \u2192</span>'
+          + '<span class="dd">Dirt is priced differently: what a finished lot sells for, '
+          + 'less what it costs to get there.</span></a>'
+        : sheet) + own + '</div>';
+ }
+
+ function shut(){
+  openId = null;
+  panel.hidden = true; panel.classList.remove('in'); panel.innerHTML = '';
+  for (var i = 0; i < tiles.length; i++) tiles[i].setAttribute('aria-expanded', 'false');
+ }
+
+ function openTile(id, btn){
+  if (openId === id) { shut(); btn.focus(); return; }
+  var e = null;
+  for (var i = 0; i < EX.length; i++) if (EX[i].id === id) e = EX[i];
+  if (!e) return;
+  openId = id;
+  for (var j2 = 0; j2 < tiles.length; j2++)
+    tiles[j2].setAttribute('aria-expanded', String(tiles[j2].getAttribute('data-x') === id));
+  panel.innerHTML =
+    '<div class="p-top"><div>'
+    + '<div class="p-nm">' + esc(e.tile || e.n) + '</div>'
+    + '<div class="p-alt">' + esc(e.n) + '</div></div>'
+    + '<button type="button" class="p-x" id="p-x" aria-label="Close">\u00d7</button></div>'
+    + '<p class="p-what">' + esc(e.what || '') + '</p>'
+    + money(e) + doors(e);
+  panel.hidden = false;
+  panel.classList.remove('in'); void panel.offsetWidth; panel.classList.add('in');
+  var x = document.getElementById('p-x');
+  if (x) x.onclick = function(){ shut(); btn.focus(); };
+ }
+
+ for (var t = 0; t < tiles.length; t++){
+  (function(btn){
+    btn.addEventListener('click', function(){ openTile(btn.getAttribute('data-x'), btn); });
+  })(tiles[t]);
+ }
+ document.addEventListener('keydown', function(ev){
+   if (ev.key === 'Escape' && openId){
+     var cur = document.querySelector('.eight .ex8[aria-expanded="true"]');
+     shut(); if (cur) cur.focus();
+   }
+ });
+
  for (var j = 0; j < EX.length; j++){
   var b = document.createElement('button');
   b.type = 'button'; b.textContent = EX[j].n; b.setAttribute('data-x', EX[j].id);
