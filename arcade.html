@@ -325,6 +325,27 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
       path to the real desk, and the rail underneath points at the software.
       If those ever come out, this order becomes the wrong one. ═════════ -->
 
+ <!-- ═════════ CABINET 00 ═══════════════════════════════════════════════
+      The one that is a GAME rather than a drill. It goes first because it
+      is the only thing on this floor somebody would play if they had never
+      heard of us — everything below teaches, this one is played. It is also
+      four files that hand each other one save: an office you grind from, a
+      contract, a rehab, and the drive home. ═══════════════════════════ -->
+ <div class="cab">
+ <a class="shotlink" href="play/" title="Play The Office" aria-label="Play The Office"><img class="shot" src="art/game-office.png" alt="A pixel-art real-estate storefront at dusk, two staff at their desks" width="960" height="540" fetchpriority="high" decoding="sync"></a>
+  <div class="body">
+   <div class="marquee">Cabinet 00 &middot; the long one &middot; new</div>
+   <h2>The Office</h2>
+   <p>Start in a garage with a phone and $150,000. Work leads, tie up contracts, assign
+      them or rehab them, and drive home at the end of every day to find out what the
+      day actually paid. Earn the storefront. Earn the floor above it.</p>
+   <div class="trains"><b>Trains:</b> everything, slowly &mdash; because it charges you rent,
+     payroll and holding costs while you learn, which is the part a drill cannot teach.</div>
+  </div>
+  <div class="foot"><a class="btn p" href="play/">Play &rarr;</a>
+   <a class="btn sm" href="play/">Free &middot; no account &middot; saves in this browser</a></div>
+ </div>
+
  <div class="cab">
   <!-- The picture of a game is a door, not a poster. On a phone the art
       fills the first screen while the Play button sits under the fold — so
@@ -394,6 +415,17 @@ h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
 
 
 <script>
+/* ── THE ARCADE'S BANKROLL ────────────────────────────────────────────────
+   RECOVERED 2026-08-21. This module used to live at arcade/bank.mjs and was
+   overwritten by the standalone game's wallet, which wants that same name
+   and is a completely different thing: this one is the arcade's shared
+   currency across Comp Run, the Daily Street and the Exit Drill; that one is
+   one player's cash inside THE OFFICE. Two modules cannot share a filename,
+   so the site's bank moved here and publish.mjs reads it by this name.
+
+   The text below was lifted out of the deployed arcade.html — the same bytes
+   the site is serving — and its `export` keywords put back. publish strips
+   them again on the way in, so what ships is unchanged either way. */
 /* ══ THE BANKROLL ══════════════════════════════════════════════════════════
    One number, three cabinets, and it can go down.
 
@@ -454,9 +486,9 @@ const REP_TO_CASH = 50000;
 
 const GAMES = ['street', 'drill', 'comprun'];
 
-const num = (v, d = 0) =>
+const __bk_num = (v, d = 0) =>
   (typeof v === 'number' && Number.isFinite(v)) ? v : d;
-const int = (v, d = 0) => Math.round(num(v, d));
+const int = (v, d = 0) => Math.round(__bk_num(v, d));
 const str = (v, n) => typeof v === 'string' ? v.slice(0, n) : '';
 
 function fresh(){
@@ -559,7 +591,7 @@ const DRILL_FEE_MAX = 3000;
 const DRILL_MISS    = 400;
 
 function drillFee(room){
-  const r = num(room, 0);
+  const r = __bk_num(room, 0);
   if (!(r > 0)) return DRILL_FEE_MIN;
   return Math.round(Math.max(DRILL_FEE_MIN, Math.min(DRILL_FEE_MAX, r * DRILL_FEE_PC)) / 50) * 50;
 }
@@ -568,7 +600,7 @@ function drillFee(room){
  *  to the career figure, which is already what that cabinet counts as an era's
  *  work — so this converts rather than invents. */
 function prestigeValue(rep){
-  return Math.max(0, Math.round(num(rep, 0) * REP_TO_CASH));
+  return Math.max(0, Math.round(__bk_num(rep, 0) * REP_TO_CASH));
 }
 
 /* ── how the number reads ──────────────────────────────────────────────────
@@ -686,13 +718,14 @@ function today(){
 }
 
 function money(n){
-  const v = Math.round(Math.abs(num(n, 0)));
-  return (num(n,0) < 0 ? '−$' : '$') + v.toLocaleString('en-US');
+  const v = Math.round(Math.abs(__bk_num(n, 0)));
+  return (__bk_num(n,0) < 0 ? '−$' : '$') + v.toLocaleString('en-US');
 }
 function signed(n){
-  const v = num(n, 0);
+  const v = __bk_num(n, 0);
   return (v > 0 ? '+' : v < 0 ? '−' : '') + '$' + Math.round(Math.abs(v)).toLocaleString('en-US');
 }
+
 
 (function(){
   const box = document.getElementById('bankbox'), wrap = document.getElementById('bankwrap');
