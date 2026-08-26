@@ -163,7 +163,7 @@ h1 em{font-style:italic;color:var(--blue)}
 /* the word the trade uses, handed over AFTER the thing has been named in
    English. It is deliberately quiet: a beginner does not need it to act, and
    somebody who already knows it wants confirmation, not a lesson. */
-.vtr{font-size:11.5px;font-style:italic;color:var(--soft);margin:-2px 0 8px}
+.vtr{font-size:11.5px;font-style:italic;color:var(--soft);margin:0 0 8px}
 .chiph b{color:var(--ink);font-weight:650}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips button{font-family:var(--sans);font-size:13px;font-weight:650;letter-spacing:0;
@@ -173,8 +173,13 @@ h1 em{font-style:italic;color:var(--blue)}
 .chips button[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
 .chips button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .vpanel{padding:18px 16px 20px;min-height:238px}
+/* The caption under this label used to be pulled up 2px with a negative
+   margin. It looked right and it WAS right, but it made the two line boxes
+   physically overlap, which the spacing audit reported as a collision — and
+   an audit you learn to ignore is an audit you have already lost. Same
+   pixels, taken out of the label's own line box instead. */
 .vk{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.15em;
- text-transform:uppercase;color:var(--soft)}
+ text-transform:uppercase;color:var(--soft);line-height:1.35}
 .vfig{font-family:var(--serif);font-weight:700;font-size:46px;line-height:1;letter-spacing:-.03em;
  color:var(--green);font-variant-numeric:tabular-nums;margin-top:5px}
 .vlines{margin-top:14px;border-top:1px solid var(--line)}
