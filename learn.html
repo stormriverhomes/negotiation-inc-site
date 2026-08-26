@@ -1,0 +1,621 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Learn the trade · Negotiation Inc</title>
+<meta name="description" content="The seven things you have to be able to do, what trains each one, and what you have actually practised. Free, no account, nothing to watch.">
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   LEARN — the room where the loop becomes visible.
+
+   WHAT THIS IS NOT. It is not a course. There is no video, no module one of
+   twelve, no certificate. Every guru in this trade sells the same $2,000
+   product: somebody explaining the work to you. Explaining the work is the
+   cheapest part of it and the part that transfers least, which is why people
+   finish those courses and still cannot price a house.
+
+   WHAT THIS IS. The arcade already contains four things that make you DO the
+   work and tell you when you are wrong. Two of them are dailies with streaks.
+   And every one of them lives on its own page, keeping its own record, unable
+   to see the others — so the loop that would make somebody come back tomorrow
+   exists, in full, and nobody can see it. This page is the room where those
+   four records sit on one screen.
+
+   THE RULE THIS PAGE ENFORCES, and it is the same rule as the desk's:
+
+       NOTHING IS MARKED KNOWN BECAUSE YOU READ SOMETHING.
+
+   A skill moves because a drill measured you. Opening the eight-exits
+   walk-through and nodding at it is not evidence and this page will not treat
+   it as evidence. Where there is no measurement, the card says there is no
+   measurement — it does not draw an empty bar, because an empty bar reads as
+   zero and zero is a different claim from "nobody has asked you yet". That is
+   the same distinction the numbers console makes between "no calls yet" and
+   0%, and it was worth making there for the same reason.
+
+   AND RUST IS ELAPSED TIME, NOT A SCORE. This page will tell you a skill was
+   last measured nineteen days ago. It will not tell you that you are 46%
+   sharp, because it does not know that and neither does anybody selling you
+   a number like it.
+
+   Colours carry the desk's law across: gold means a figure you should not
+   lean on — here, one that has gone stale. Green means done, today, for real.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --ground:#0d1420; --raise:#141c2b; --edge:#223047; --well:#101825;
+  --ink:#e8e2d4; --ink-2:#aeb8c8; --ink-3:#8b98ac;
+  --gold:#a8873a; --pays:#3fa06a; --refuses:#d96a5a; --blue:#3a78e8;
+  --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html,body{background:#0d1420}
+body{font-family:var(--sans);color:var(--ink);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.02em;line-height:1.1}
+a{color:#8fb4ff}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1140px;margin:0 auto;padding:0 26px}
+.eyebrow{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.18em;
+ text-transform:uppercase;color:#6f7d94}
+
+header{border-bottom:1px solid var(--edge);background:rgba(13,20,32,.9)}
+.mast{display:flex;justify-content:space-between;align-items:center;gap:14px 18px;
+ padding-top:14px;padding-bottom:14px;flex-wrap:wrap}
+.mark{display:inline-flex;flex-direction:column;gap:1px;text-decoration:none;color:var(--ink)}
+.mark .mkrow{display:inline-flex;align-items:baseline;gap:8px}
+.mark .mkwhat{font-family:var(--serif);font-size:12.5px;font-weight:500;color:#9aa2ae;white-space:nowrap}
+@media(max-width:560px){ .mark .mkwhat{font-size:11.5px} }
+.mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
+.mark .inc{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--gold)}
+.mark:hover .nm{color:#fff}
+.masknav{display:flex;align-items:center;gap:18px;font-size:14px;flex-wrap:wrap}
+.masknav a{display:inline-flex;align-items:center;padding:6px 2px;line-height:1;
+ color:var(--ink-2);text-decoration:none}
+.masknav a:hover{color:#fff}
+
+/* ── the top ───────────────────────────────────────────────────────────── */
+.top{padding-top:46px;padding-bottom:8px}
+h1{font-size:clamp(30px,4.6vw,46px)}
+.sub{color:var(--ink-2);max-width:62ch;margin-top:13px;font-size:16.5px}
+.sub b{color:var(--ink);font-weight:600}
+
+/* ── TODAY: the loop, on one line, for the first time ──────────────────── */
+.today{margin-top:34px;background:var(--raise);border:1px solid var(--edge);
+ border-radius:14px;overflow:hidden}
+.todayhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+ padding:16px 20px 0}
+.todayhead h2{font-size:19px}
+.showed{margin-left:auto;font-size:12.5px;color:var(--ink-3)}
+.showed b{color:var(--gold);font-size:15px}
+.dailies{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+ gap:1px;background:var(--edge);margin-top:15px}
+.daily{background:var(--raise);padding:16px 20px 18px;min-width:0}
+.dname{font-family:var(--serif);font-size:16.5px;font-weight:700}
+.dstate{font-size:12.5px;margin-top:4px;color:var(--ink-3)}
+.daily.done .dstate{color:var(--pays)}
+.daily.todo .dstate{color:var(--gold)}
+.dfacts{display:flex;gap:16px;margin-top:11px;flex-wrap:wrap}
+.dfact{min-width:0}
+.dfv{font-family:var(--serif);font-size:20px;font-weight:700;line-height:1}
+.dfk{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#6f7d94;margin-top:4px}
+.dgo{display:inline-block;margin-top:13px;font-size:13px;text-decoration:none;
+ border:1px solid var(--edge);border-radius:8px;padding:7px 13px;color:var(--ink)}
+.daily.todo .dgo{background:var(--gold);border-color:var(--gold);color:#12100a;font-weight:600}
+.dgo:hover{border-color:var(--ink-3)}
+
+/* ── the one thing ─────────────────────────────────────────────────────── */
+.pick{margin-top:22px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;
+ background:var(--well);border:1px solid var(--edge);border-left:3px solid var(--gold);
+ border-radius:12px;padding:18px 20px}
+.pickbody{flex:1;min-width:min(100%,320px)}
+.pickwhat{font-family:var(--serif);font-size:18px;font-weight:700}
+.pickwhy{color:var(--ink-2);font-size:14px;margin-top:5px;max-width:64ch}
+.pickgo{background:var(--gold);color:#12100a;font-weight:600;border:0;border-radius:9px;
+ padding:11px 18px;font-size:14.5px;text-decoration:none;display:inline-block;white-space:nowrap}
+.pickgo:hover{filter:brightness(1.08)}
+
+/* ── the skills ────────────────────────────────────────────────────────── */
+.skills{margin-top:44px}
+.skills h2{font-size:23px}
+.skillsub{color:var(--ink-2);font-size:14.5px;margin-top:8px;max-width:70ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+ gap:16px;margin-top:22px}
+.sk{background:var(--raise);border:1px solid var(--edge);border-radius:13px;
+ padding:19px 20px 17px;display:flex;flex-direction:column;min-width:0}
+.sk.cold{border-color:#4a3c18}
+.skhead{display:flex;align-items:flex-start;gap:10px}
+.skname{font-family:var(--serif);font-size:17.5px;font-weight:700;line-height:1.2;min-width:0}
+.chip{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+ padding:4px 8px;border-radius:999px;white-space:nowrap;margin-left:auto;
+ border:1px solid var(--edge);color:var(--ink-3)}
+.chip.fresh{color:var(--pays);border-color:#1f4633;background:rgba(63,160,106,.09)}
+.chip.cold{color:var(--gold);border-color:#4a3c18;background:rgba(168,135,58,.09)}
+.chip.none{color:var(--ink-3)}
+.skcosts{color:var(--ink-2);font-size:13.5px;margin-top:9px;flex:1}
+.skmeasure{margin-top:13px;padding-top:12px;border-top:1px solid var(--edge);
+ display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end}
+.mv{font-family:var(--serif);font-size:19px;font-weight:700;line-height:1}
+.mv.gold{color:var(--gold)}
+.mk{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#6f7d94;margin-top:4px}
+.unmeasured{font-size:13px;color:var(--ink-3);margin-top:13px;padding-top:12px;
+ border-top:1px solid var(--edge)}
+/* a fact that is a sentence is set as a sentence — never as a label, which
+   is uppercase and letterspaced and unreadable past four words */
+.skline{font-size:13px;color:var(--ink-2);margin-top:13px;padding-top:12px;
+ border-top:1px solid var(--edge)}
+.skgo{margin-top:14px;display:flex;gap:9px;flex-wrap:wrap}
+.skgo a{font-size:12.5px;text-decoration:none;border:1px solid var(--edge);
+ border-radius:8px;padding:6px 12px;color:var(--ink)}
+.skgo a:hover{border-color:var(--ink-3)}
+.skgo a.on{background:var(--ink);color:#12100a;border-color:var(--ink);font-weight:600}
+.gap{border-style:dashed}
+.gapnote{font-size:12.5px;color:var(--gold);margin-top:13px;padding-top:12px;
+ border-top:1px dashed var(--edge)}
+
+/* ── the honesty note ──────────────────────────────────────────────────── */
+.honest{margin-top:40px;border-top:1px solid var(--edge);padding-top:22px;
+ color:var(--ink-3);font-size:13.5px;max-width:74ch}
+.honest b{color:var(--ink-2)}
+.honest p+p{margin-top:10px}
+
+footer.ftlegal{border-top:1px solid var(--edge);color:#8794aa;margin-top:44px;
+ padding:18px 0 44px;font-size:12.5px}
+/* Six links, not the five every other footer carries, and on a phone they
+   wrap to two rows — which put two rows of tap targets 19px apart, inside
+   the 24px WCAG 2.5.8 asks for. The site's own touch audit caught it. Given
+   room to be tapped rather than merely read: each link is its own block of
+   at least 24px, and the rows are far enough apart to aim at. */
+.ftlegal a{color:inherit;text-decoration:none;margin-right:15px;
+ display:inline-block;padding:5px 0;line-height:1.5;
+ border-bottom:1px solid transparent}
+.ftlegal a:hover{border-bottom-color:currentColor}
+</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23101a2c'/%3E%3Cpath%20fill='%23f4efe2'%20d='M15%2015h9.5l14%2021.5V15H47v2.6h-3.4v27.1h-7.9L20.3%2021.1v21h3.6V45H15v-2.6h3.5V17.6H15Z'/%3E%3C/svg%3E" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" sizes="16x16" href="art/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="art/favicon-32.png">
+<link rel="apple-touch-icon" href="art/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#101a2c">
+<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Fraunces ships its "wonk" letterforms on by default — the single-storey f
+   and its friends. They read as a novelty at body sizes and Elijah clipped
+   them immediately. WONK 0 keeps the face and drops the party trick. */
+@font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
+ font-weight:100 900;font-style:normal;font-display:swap;
+ font-variation-settings:'WONK' 0}
+:root{
+ --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
+ /* NO MONOSPACE ANYWHERE IN THE SOFTWARE. Small letterspaced caps set in a
+    monospace face is the single most recognisable "an AI made this" tell on
+    the internet right now, and it was on every label we shipped. The eyebrows
+    keep their letterspacing; they lose the typewriter. Tabular figures come
+    from font-feature-settings instead, which is what they were always for.
+    (The arcade keeps its own type. It is a different world on purpose.) */
+ --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif !important;
+}
+.mono,.num,[class*="fig"],[class*="num"]{font-variant-numeric:tabular-nums}
+h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Negotiation Inc">
+<meta property="og:title" content="Learn the trade · Negotiation Inc">
+<meta property="og:description" content="Seven things you have to be able to do, what trains each one, and what you have actually been measured on. Free, no account, nothing to watch.">
+<meta property="og:image" content="https://negotiationinc.com/og/page-learn.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Learn the trade · Negotiation Inc">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Learn the trade · Negotiation Inc">
+<meta name="twitter:description" content="Seven things you have to be able to do, what trains each one, and what you have actually been measured on. Free, no account, nothing to watch.">
+<meta name="twitter:image" content="https://negotiationinc.com/og/page-learn.png">
+<meta property="og:url" content="https://negotiationinc.com/learn">
+<link rel="canonical" href="https://negotiationinc.com/learn">
+<style>
+p,li,dd,blockquote,figcaption{max-width:68ch}
+p,li,dd,blockquote{line-height:1.62!important}
+p+p,p+ul,ul+p,p+ol,ol+p{margin-top:1.05em!important}
+li+li{margin-top:.72em!important}
+h1,h2,h3,h4{max-width:34ch}
+h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
+@media (max-width:520px){p,li,dd,blockquote{line-height:1.66!important}}
+</style><!--ni:stage=live--></head>
+<body class="on-dark">
+
+<header>
+ <div class="wrap mast">
+  <a class="mark" href="index.html" title="Negotiation Inc"><span class="mkrow"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></span><span class="mkwhat">Real estate investing, simplified</span></a>
+  <nav class="masknav">
+   <a href="arcade.html">The arcade</a>
+   <a href="desk.html">The desk</a>
+   <a href="plans.html">Plans</a>
+   <a href="office.html">Sign in</a>
+  </nav>
+ </div>
+</header>
+
+<main class="wrap">
+
+ <section class="top">
+  <div class="eyebrow">Learn the trade</div>
+  <h1>Seven things you have to be able to&nbsp;do.</h1>
+  <p class="sub">Not seven things to watch. This page holds the only record that
+   matters — <b>what you have actually been measured on</b>, and how long ago. Everything
+   here is free, needs no account, and nothing on it moves because you read something.</p>
+ </section>
+
+ <section class="today" id="today"></section>
+
+ <div id="pick"></div>
+
+ <section class="skills">
+  <h2>What each one costs you</h2>
+  <p class="skillsub">Being bad at any of these has a price, and the price is on the card.
+   Where something measures you, the last measurement is shown with its date. Where
+   nothing measures you yet, it says so rather than drawing a bar at zero.</p>
+  <div class="grid" id="grid"></div>
+ </section>
+
+ <section class="honest">
+  <p><b>Why there is no percentage on this page.</b> One number saying <i>this much
+   mastered</i> would be easier to look at and it would be invented. What is real is a
+   score, the day it was set, and how long it has been — so that is what is here. Two
+   facts, both measured, never averaged into one that means less than either. The
+   build refuses to ship this page if a percent sign appears anywhere in it, including
+   in a sentence like this one arguing against it, because the exception is how the
+   rule dies.</p>
+  <p><b>Why some cards say nothing trains this.</b> Because nothing does, yet. Naming the
+   gap is cheaper than filling it badly, and a curriculum that quietly omits the part
+   nobody built is how a course teaches you the easy half.</p>
+  <p><b>Where this is kept.</b> In this browser, on this device, same as the games
+   themselves. Nothing is uploaded, no account is required, and clearing your browser
+   data clears it — which is the honest trade for not asking who you are.</p>
+ </section>
+
+</main>
+
+<footer class="ftlegal"><div class="wrap" style="padding-top:18px;font-size:12.5px">
+ <a href="index.html">Home</a><a href="arcade.html">The arcade</a><a href="desk.html">The desk</a><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Billing</a>
+</div></footer>
+
+<script>
+(function(){
+'use strict';
+
+/* ── reading the records that already exist ───────────────────────────────
+   Four games, four save keys, written months apart. Two of them — the exit
+   drill and the daily street — deliberately share a shape, which is the only
+   reason a combined streak is possible at all. The other two are read for the
+   one honest fact each can give. Every read is defensive: a browser with
+   storage disabled, a save from an older version, a half-written record after
+   a crashed tab. A learning page that throws on a corrupt save has taught its
+   first lesson to nobody. */
+const read = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); }
+                    catch(e){ return null; } };
+
+const DAY = 86400000;
+const iso = d => { const t = new Date(d);
+  return t.getFullYear() + '-' + String(t.getMonth()+1).padStart(2,'0')
+       + '-' + String(t.getDate()).padStart(2,'0'); };
+const TODAY = iso(new Date());
+function daysSince(dayStr){
+  if (!dayStr) return null;
+  const [y,m,d] = String(dayStr).split('-').map(Number);
+  if (!y || !m || !d) return null;
+  const then = new Date(y, m-1, d), now = new Date();
+  return Math.max(0, Math.round(
+    (new Date(now.getFullYear(), now.getMonth(), now.getDate()) - then) / DAY));
+}
+const ago = n => n === null ? null : n === 0 ? 'today'
+  : n === 1 ? 'yesterday' : n + ' days ago';
+
+/* the drill and the street keep {days:{iso:{score,...}}, streak, best, last} */
+function daily(key){
+  const r = read(key);
+  const days = (r && r.days && typeof r.days === 'object') ? r.days : {};
+  const played = Object.keys(days);
+  /* [...played] — NOT played.sort().pop(). sort() sorts in place and pop()
+     REMOVES, so the first version of this handed back a dayKeys array missing
+     its most recent day, and the combined "days you turned up" came out one
+     short per game. The number the whole page is built around was quietly
+     wrong, and it looked completely plausible. */
+  const last = played.length ? [...played].sort().pop() : null;
+  return {
+    measured: played.length > 0,
+    doneToday: !!days[TODAY],
+    streak: (r && +r.streak) || 0,
+    best: (r && r.best != null && isFinite(r.best)) ? Math.round(r.best) : null,
+    last, since: daysSince(last), dayKeys: played,
+  };
+}
+
+/* THE DRILL HAS TWO MODES AND THEY ARE NOT THE SAME GAME. The Minute is
+   sixty seconds and as many houses as you can take; The Ten is ten houses at
+   twenty seconds each, the same ten everybody gets that day, and it is the
+   one with a daily record — which is why `ni.drill.v1` is The Ten and
+   `ni-drill-best` is, separately, the best Minute. The cabinet keeps them
+   apart on purpose ("two modes borrowing one number is how a scoreboard
+   starts lying") and the first draft of this page put them back together,
+   calling the daily "sixty seconds, ten sellers" — which is neither mode. */
+const DRILL  = daily('ni.drill.v1');
+const MINUTE_BEST = (() => { try {
+  const v = +localStorage.getItem('ni-drill-best'); return isFinite(v) && v > 0 ? v : null;
+} catch(e){ return null; } })();
+const STREET = daily('ni.street.v1');
+
+/* THE NUMBER THIS PAGE EXISTS TO SHOW. Two games each knew half of it and
+   neither could see the other, so nobody has ever been told how many days
+   they turned up — which is the single fact that makes a person turn up
+   again. The union, not the sum: playing both on one day is one day. */
+const SHOWED = new Set([...DRILL.dayKeys, ...STREET.dayKeys]).size;
+
+/* the office keeps a tier and a bank; land and comp run keep a save whose
+   shape is theirs, so they are read for existence only rather than for an
+   invented score */
+const office = read('ni.office.v1');
+const OFFICE = {
+  measured: !!(office && (office.tier > 0 || office.cash !== 150000)),
+  tier: office && +office.tier || 0,
+  cash: office && isFinite(office.cash) ? Math.round(office.cash) : null,
+};
+const played = k => { try { return localStorage.getItem(k) != null; } catch(e){ return false; } };
+const COMPS = { measured: played('ni-portfolio-v2') };
+const LAND  = { measured: played('ni-land-v1') };
+
+const money = n => '$' + Math.round(n).toLocaleString('en-US');
+const esc = s => String(s).replace(/[&<>"]/g, c =>
+  ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+/* ── TODAY ────────────────────────────────────────────────────────────── */
+function dailyCard(name, s, href, secs){
+  const cls = s.doneToday ? 'done' : 'todo';
+  const state = s.doneToday
+    ? 'Done today — the first run of the day is the one that counts'
+    : s.measured ? 'Not yet today' : 'Never played';
+  return '<div class="daily ' + cls + '">'
+    + '<div class="dname">' + esc(name) + '</div>'
+    + '<div class="dstate">' + esc(state) + '</div>'
+    + '<div class="dfacts">'
+      + '<div class="dfact"><div class="dfv num">' + (s.streak || 0) + '</div>'
+        + '<div class="dfk">day streak</div></div>'
+      + (s.best != null
+          ? '<div class="dfact"><div class="dfv num">' + s.best + '</div>'
+            + '<div class="dfk">best</div></div>'
+          : '')
+      + (s.measured && !s.doneToday && s.since != null
+          ? '<div class="dfact"><div class="dfv num">' + s.since + '</div>'
+            + '<div class="dfk">days since</div></div>'
+          : '')
+    + '</div>'
+    + '<a class="dgo" href="' + href + '">'
+      + (s.doneToday ? 'Play it again' : 'Play — ' + secs) + '</a>'
+    + '</div>';
+}
+
+document.getElementById('today').innerHTML =
+  '<div class="todayhead"><h2>Today</h2>'
+  + '<span class="showed">days you turned up <b class="num">' + SHOWED + '</b></span></div>'
+  + '<div class="dailies">'
+  + dailyCard('Exit Drill', DRILL, 'exit-drill.html', 'today’s ten')
+  + dailyCard('The Daily Street', STREET, 'daily-street.html', 'three minutes')
+  + '</div>';
+
+/* ── THE ONE THING NOW ────────────────────────────────────────────────────
+   Chosen by cost, exactly as the desk chooses the next call. A daily that is
+   not done outranks everything, because it is a minute and it is a streak
+   somebody is about to break. Below that, the coldest thing that has ever
+   been measured, because a cold skill is the one that will cost money next.
+   Below that, the cheapest first win. And when there is genuinely nothing to
+   recommend, this says so rather than manufacturing an errand. */
+function recommend(){
+  /* THE COLD BRANCH THIS FUNCTION USED TO HAVE COULD NEVER FIRE, and a test
+     found it by asserting that it did. Every skill on this page that carries
+     a DATE is backed by one of the two dailies — so a skill going cold means
+     a daily has not been played, which rule one already catches, every time.
+     A branch that cannot be reached is not a rule, it is scenery, and scenery
+     in a decision function is how you end up trusting a decision nobody has
+     ever made. Three rules now, and all three are reachable.
+
+     Rule one also picks the STALEST daily rather than always the first: if
+     the drill was played yesterday and the street has not been touched in
+     three weeks, the street is the one that matters this morning. */
+  const dailies = [
+    { s:DRILL,  name:'Exit Drill',       href:'exit-drill.html',   cost:'today’s ten',
+      intro:'Ten houses, twenty seconds each, the same ten everybody gets today: which '
+          + 'exit is this? It is the first cut of the trade and the one everything '
+          + 'else waits on.' },
+    { s:STREET, name:'The Daily Street', href:'daily-street.html', cost:'three minutes',
+      intro:'Three streets, three minutes. You get a limited look — the skill is '
+          + 'spending it where it actually changes the number.' },
+  ].filter(d => !d.s.doneToday);
+
+  if (dailies.length){
+    /* The order is an argument about what it costs to skip each one, not a
+       tidy sort by staleness — the first version put a never-played daily
+       above a live two-day streak, which gets the cost exactly backwards.
+       Breaking a streak costs something today. Not yet having tried a game
+       costs nothing today and will still be there tomorrow. */
+    const priority = d => {
+      if (!d.s.measured)      return 200;                 // never played: worth a nudge
+      if (d.s.since === 1 && d.s.streak >= 1) return 900 + d.s.streak;  // A LIVE STREAK, TODAY
+      if (d.s.since >= 21)    return 500 + Math.min(d.s.since, 365);    // gone quiet
+      return 100 + (d.s.since || 0);                       // merely not yet today
+    };
+    dailies.sort((a, b) => priority(b) - priority(a));
+    const d = dailies[0];
+    const why = !d.s.measured ? d.intro
+      : d.s.since >= 21
+        ? 'It has been ' + d.s.since + ' days. Nothing decays as quietly as this one, '
+          + 'because being slow at it still feels like being right.'
+      : d.s.streak > 1
+        ? 'A ' + d.s.streak + '-day streak is riding on ' + d.cost + '.'
+        : d.intro;
+    /* "Today’s The Daily Street" — the name already carries its article, and
+       gluing a possessive in front of it produced a line no person would say.
+       The article is dropped for the possessive and kept for the invitation. */
+    const bare = d.name.replace(/^The\s+/, '');
+    return { what: d.s.measured ? 'Today’s ' + bare : 'Start with ' + d.name,
+             why, href: d.href, cta:'Play it' };
+  }
+
+  const never = SKILLS.filter(s => s.state().kind === 'none' && s.href)[0];
+  if (never) return { what: never.name,
+    why: 'Nothing has measured this yet, and it is the cheapest thing here you have '
+      + 'not done.',
+    href: never.href, cta:'Try it' };
+
+  return { what:'Nothing is stale. Go and grind.',
+    why: 'Both dailies are done and everything else here has been played at least once. '
+      + 'The Office is the long one — it charges you rent, payroll and holding costs '
+      + 'while you learn, which is the part a drill cannot teach.',
+    href:'play/', cta:'The Office' };
+}
+
+/* ── the seven ────────────────────────────────────────────────────────────
+   Each names what being bad at it COSTS, because that is the only argument
+   for practising something. Each points at the real thing that trains it.
+   And each declares honestly how it is measured — including the one that is
+   not measured by anything, which says so in the open. */
+const SKILLS = [
+  { name:'Matching the exit to the seller',
+    costs:'Reach for the wrong exit and you spend an hour pricing a deal that was never '
+      + 'going to be that deal. It is the first cut, and it is made in the first two '
+      + 'minutes of a call.',
+    href:'exit-drill.html', go:[['Today’s ten','exit-drill.html',1],
+                                ['The eight exits, explained','exits.html',0]],
+    state: () => { const st = scored(DRILL);
+      /* the other mode's best, kept as its own figure and labelled as its
+         own figure, because the cabinet keeps them apart for a reason */
+      if (MINUTE_BEST != null) st.facts = [...st.facts,
+        [String(MINUTE_BEST), 'best minute']];
+      return st; } },
+
+  { name:'Reading a street',
+    costs:'The comp that kills you is the one two streets over that you never looked at. '
+      + 'A limited look spent in the wrong place is worse than no look at all, because '
+      + 'it makes you confident.',
+    href:'daily-street.html', go:[['The Daily Street','daily-street.html',1]],
+    state: () => scored(STREET) },
+
+  { name:'What each exit actually pays',
+    costs:'Eight ways out, and each dies for its own reason. Knowing only two of them '
+      + 'means walking away from six deals in ten because they did not look like the '
+      + 'ones you know.',
+    href:'exits.html', go:[['The walk-through','exits.html',1],
+                           ['Then drill it','exit-drill.html',0]],
+    /* measured by the drill, deliberately: reading the walk-through is not
+       evidence of anything and this page will not pretend otherwise */
+    state: () => scored(DRILL),
+    note:'Measured by today’s ten on the Exit Drill — reading the walk-through does '
+       + 'not count, because reading is not evidence.' },
+
+  { name:'Pricing from comps',
+    costs:'Every number downstream of the ARV inherits its error. Get this wrong by ten '
+      + 'per cent and the offer, the ceiling and the margin are all wrong by more.',
+    href:'comp-run.html', go:[['Comp Run','comp-run.html',1]],
+    /* `note` and not a fact pair: a value/label pair puts its label through
+       10.5px uppercase letterspacing, which turned "you have a portfolio
+       saved" into a line nobody could read. A fact that is a sentence is a
+       sentence. */
+    state: () => COMPS.measured
+      ? { kind:'played', since:null, facts:[],
+          line:'Played — you have a portfolio saved in this browser. Comp Run keeps a '
+             + 'score of its own; this page does not restate it, because restating a '
+             + 'number you cannot verify is how a scoreboard starts lying.' }
+      : { kind:'none', since:null, facts:[] } },
+
+  { name:'Money over time',
+    costs:'Rent, payroll, taxes, insurance and the money itself all keep charging you '
+      + 'while you learn. It is the cost no drill can teach, because a drill ends.',
+    href:'play/', go:[['The Office','play/',1]],
+    state: () => OFFICE.measured
+      ? { kind:'played', since:null,
+          facts:[[String(OFFICE.tier), 'tier reached'],
+                 [OFFICE.cash != null ? money(OFFICE.cash) : '—', 'in the bank']] }
+      : { kind:'none', since:null, facts:[] } },
+
+  { name:'Land, which is a different animal',
+    costs:'A lot has no roof to inspect and no comp on the same street. People who are '
+      + 'good at houses lose money on land by pricing it like a house.',
+    href:'land.html', go:[['The Land Desk','land.html',1]],
+    state: () => LAND.measured
+      ? { kind:'played', since:null, facts:[],
+          line:'Played — you have a saved plan on the Land Desk.' }
+      : { kind:'none', since:null, facts:[] } },
+
+  /* THE HONEST GAP. Nothing here trains it, and saying so is the point. */
+  { name:'What you may say, and when you may call',
+    costs:'This is the only one on the page that is not about money you failed to make. '
+      + 'It is about money you pay out: a call at the wrong hour, or a text to somebody '
+      + 'who said stop, is priced per message and it is not priced kindly.',
+    href:null, go:[['The rules, inside the desk','desk.html',0]],
+    state: () => ({ kind:'gap', since:null, facts:[] }),
+    gapnote:'Nothing on this site trains this yet. The desk enforces it for you — every '
+      + 'window, every zone, every opt-out — but enforcing it and teaching it are not the '
+      + 'same thing, and a drill for it is not built.' },
+];
+
+function scored(s){
+  if (!s.measured) return { kind:'none', since:null, facts:[] };
+  const facts = [];
+  if (s.best != null) facts.push([String(s.best), 'best score']);
+  facts.push([ago(s.since) || '—', 'last measured']);
+  if (s.streak) facts.push([String(s.streak), 'day streak']);
+  return { kind: s.since === null ? 'played' : s.since >= 21 ? 'cold'
+             : s.since <= 7 ? 'fresh' : 'played',
+           since: s.since, facts };
+}
+
+const CHIP = { fresh:['fresh','Sharp'], cold:['cold','Gone cold'],
+               played:['','Practised'], none:['none','Not measured'],
+               gap:['none','Nothing trains this'] };
+
+document.getElementById('grid').innerHTML = SKILLS.map(sk => {
+  const st = sk.state();
+  const [chipCls, chipTxt] = CHIP[st.kind] || CHIP.none;
+  const body = st.kind === 'gap'
+    ? '<div class="gapnote">' + esc(sk.gapnote) + '</div>'
+    : st.line
+      ? '<div class="skline">' + esc(st.line) + '</div>'
+    : st.facts.length
+      ? '<div class="skmeasure">' + st.facts.map(([v,k]) =>
+          '<div><div class="mv' + (st.kind === 'cold' ? ' gold' : '') + ' num">'
+          + esc(v) + '</div><div class="mk">' + esc(k) + '</div></div>').join('') + '</div>'
+      : '<div class="unmeasured">Nothing has measured this yet. There is no bar here '
+        + 'because a bar at zero would claim you scored nothing, and nobody has asked '
+        + 'you.</div>';
+  return '<article class="sk ' + (st.kind === 'cold' ? 'cold' : '')
+       + (st.kind === 'gap' ? ' gap' : '') + '">'
+    + '<div class="skhead"><h3 class="skname">' + esc(sk.name) + '</h3>'
+      + '<span class="chip ' + chipCls + '">' + esc(chipTxt) + '</span></div>'
+    + '<p class="skcosts">' + esc(sk.costs) + '</p>'
+    + body
+    + (sk.note ? '<div class="unmeasured" style="border:0;padding-top:9px">'
+        + esc(sk.note) + '</div>' : '')
+    + '<div class="skgo">' + sk.go.map(([label, href, primary]) =>
+        '<a class="' + (primary ? 'on' : '') + '" href="' + href + '">'
+        + esc(label) + '</a>').join('') + '</div>'
+    + '</article>';
+}).join('');
+
+const r = recommend();
+document.getElementById('pick').innerHTML =
+  '<div class="pick"><div class="pickbody">'
+  + '<div class="eyebrow">One thing, now</div>'
+  + '<div class="pickwhat">' + esc(r.what) + '</div>'
+  + '<div class="pickwhy">' + esc(r.why) + '</div></div>'
+  + '<a class="pickgo" href="' + r.href + '">' + esc(r.cta) + '</a></div>';
+
+})();
+</script>
+<script>(function(){try{
+var A=function(){try{var a=JSON.parse(localStorage.getItem('ni-account-v1')||'null');
+return a&&typeof a==='object'&&a.email?a:null;}catch(e){return null;}};
+document.addEventListener('click',function(ev){try{
+if(ev.defaultPrevented||ev.metaKey||ev.ctrlKey||ev.shiftKey||ev.altKey||ev.button)return;
+var t=ev.target;if(!t||!t.closest)return;
+var el=t.closest('a.marklink, a.mark, a.rn-mark');if(!el)return;
+var h=(el.getAttribute('href')||'').split('#')[0].split('?')[0];
+if(h!=='index.html'&&h!=='/index.html'&&h!=='/')return;
+if(!A())return;ev.preventDefault();location.href='office.html';
+}catch(e){}},true);}catch(e){}})();</script>
+</body></html>
