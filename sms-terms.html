@@ -1,0 +1,337 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SMS program terms · Negotiation Inc</title><script>window.NI_LIVE=true;</script>
+<meta name="description" content="What a text from Negotiation Inc is, how often they come, and the two words — STOP and HELP — that control all of it.">
+<style>
+:root{
+  --ink:#0d1420; --mid:#41495a; --soft:#6b7486; --faint:#6f7681;
+  --line:#e4e8ef; --line-2:#c9d0dc; --wash:#f6f8fb;
+  --blue:#1f5fd0; --blue-deep:#153872; --blue-soft:#eaf0fc; --blue-line:#c3d4f5;
+  --green:#177a4d; --green-soft:#eaf6f0; --green-line:#bfe0cd;
+  --gold:#8a6a1f; --gold-soft:#fbf6e9; --gold-line:#e8dcb8;
+  --red:#a8332a; --red-soft:#fcf0ee; --red-line:#f0cdc7;
+  --r-btn:12px; --r-card:18px; --r-in:12px; --r-pill:999px;
+  --serif:'Fraunces',Georgia,'Iowan Old Style',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+html,body{background:#fff}
+body{font-family:var(--sans);color:var(--ink);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:-.022em;line-height:1.15}
+a{color:var(--blue)}
+.wrap{max-width:1250px;margin:0 auto;padding:0 26px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+
+header{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(255,255,255,.94);
+ backdrop-filter:blur(8px);z-index:20}
+.mast{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:13px 0;flex-wrap:wrap}
+.mark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;color:inherit}
+.mark .nm{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.1em}
+.mark .inc{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--blue)}
+.mark:hover .nm{color:var(--blue)}
+.masknav{display:flex;align-items:center;gap:18px;font-size:14px;flex-wrap:wrap}
+.masknav a{display:inline-flex;align-items:center;padding:6px 2px;line-height:1;color:var(--mid);text-decoration:none}
+.masknav a:hover{color:var(--ink)}
+.masknav a.on{color:var(--ink);font-weight:650;box-shadow:inset 0 -2px 0 var(--blue)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:14.5px;font-weight:650;
+ padding:11px 18px;border:1.5px solid var(--ink);border-radius:var(--r-btn);background:#fff;color:var(--ink);
+ text-decoration:none;cursor:pointer;transition:border-color .13s,color .13s,background .13s,transform .13s}
+.btn:hover{transform:translateY(-1px)}
+.btn.p{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* ── the document ─────────────────────────────────────────────────────────
+   A legal page is read in two ways and only two: skimmed by somebody deciding
+   whether to trust you, and searched by somebody with one specific question.
+   So: a short version at the top for the first reader, and a sticky contents
+   list for the second. Measure capped near 68 characters because these are the
+   longest paragraphs in the product and the eye needs the returns. */
+.doc{display:grid;grid-template-columns:230px minmax(0,1fr);gap:52px;
+ max-width:1050px;margin:0 auto;padding:0 26px 90px}
+@media(max-width:900px){.doc{grid-template-columns:1fr;gap:0}}
+
+.hero{max-width:1050px;margin:0 auto;padding:52px 26px 30px}
+.hero h1{font-size:clamp(34px,5.2vw,50px);margin:8px 0 12px}
+.hero .sub{font-size:17.5px;color:var(--mid);max-width:60ch}
+.stamp{margin-top:18px;display:inline-flex;align-items:center;gap:9px;font-size:13px;color:var(--soft);
+ border:1px solid var(--line);border-radius:var(--r-pill);padding:6px 14px;background:var(--wash)}
+.stamp b{color:var(--ink);font-weight:650}
+
+.toc{position:sticky;top:84px;align-self:start;font-size:13.5px;padding-top:6px}
+@media(max-width:900px){.toc{position:static;border:1px solid var(--line);border-radius:var(--r-card);
+ padding:16px 18px;margin-bottom:34px;background:var(--wash)}}
+.toc .lab{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
+ margin-bottom:10px}
+.toc ol{list-style:none;padding:0;margin:0;counter-reset:t}
+.toc li{counter-increment:t;margin:0 0 4px}
+.toc a{display:block;padding:6px 9px;border-radius:9px;color:var(--mid);text-decoration:none;line-height:1.35}
+/* Ten links two pixels apart, each 28px tall, is a list you scroll past rather
+   than use — and on a phone it is a list you cannot hit. Give them room. */
+@media(max-width:900px){.toc li{margin:0 0 2px}
+ .toc a{padding:11px 10px;min-height:44px;display:flex;align-items:center}}
+.toc a::before{content:counter(t) ".";color:var(--faint);margin-right:7px;font-variant-numeric:tabular-nums}
+.toc a:hover{background:var(--wash);color:var(--ink)}
+
+.body{max-width:68ch}
+section{scroll-margin-top:88px;padding:0 0 8px}
+section+section{margin-top:38px}
+section h2{font-size:24px;margin:0 0 12px;display:flex;gap:11px;align-items:baseline}
+section h2 .n{font-family:var(--sans);font-size:12px;font-weight:700;color:var(--faint);
+ font-variant-numeric:tabular-nums;letter-spacing:.06em;flex:none;padding-top:3px}
+.body p{margin:0 0 13px;color:var(--mid)}
+.body p strong,.body li strong{color:var(--ink);font-weight:650}
+.body h3{font-size:16.5px;margin:20px 0 8px;font-family:var(--sans);font-weight:700;letter-spacing:-.005em}
+.body ul{margin:0 0 14px;padding-left:0;list-style:none}
+.body ul li{position:relative;padding-left:19px;margin:0 0 8px;color:var(--mid)}
+.body ul li::before{content:"";position:absolute;left:2px;top:10px;width:5px;height:5px;border-radius:50%;
+ background:var(--line-2)}
+.body ol{margin:0 0 14px;padding-left:20px}
+.body ol li{margin:0 0 8px;color:var(--mid)}
+
+.short{border:1.5px solid var(--blue-line);background:var(--blue-soft);border-radius:var(--r-card);
+ padding:22px 24px;margin:0 0 40px}
+.short .lab{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+ color:var(--blue-deep);margin-bottom:10px}
+.short p{color:var(--blue-deep);margin:0 0 10px}
+.short p:last-child{margin:0}
+.short ul li{color:var(--blue-deep)}
+.short ul li::before{background:var(--blue-line)}
+.short ul{margin-bottom:0}
+
+.note{border:1px solid var(--line);background:var(--wash);border-radius:var(--r-card);padding:17px 20px;margin:0 0 16px}
+.note p:last-child{margin:0}
+.warn{border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:var(--r-card);
+ padding:19px 22px;margin:0 0 16px}
+.warn .lab{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);
+ margin-bottom:8px}
+.warn p{color:#5c4712}
+.warn p:last-child{margin:0}
+
+table{width:100%;border-collapse:collapse;font-size:14px;margin:4px 0 18px;
+ border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
+th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+ color:var(--soft);padding:11px 14px;background:var(--wash);border-bottom:1px solid var(--line)}
+td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--mid);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td b{color:var(--ink);font-weight:650}
+
+.contact{border:1.5px solid var(--line-2);border-radius:var(--r-card);padding:22px 24px;margin-top:30px}
+.contact h3{margin-top:0;font-family:var(--serif);font-size:19px;font-weight:700}
+.crumb{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.crumb a{font-size:13px;padding:7px 13px;border:1px solid var(--line);border-radius:var(--r-pill);
+ color:var(--mid);text-decoration:none;background:#fff}
+.crumb a:hover{border-color:var(--line-2);color:var(--ink)}
+.crumb a.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+footer{border-top:1px solid var(--line);padding:26px 0 46px;font-size:13.5px;color:var(--soft)}
+/* inline links with no vertical padding: at 360px this row wraps to three
+   lines about five pixels apart, and a thumb aimed at Privacy lands on Terms.
+   inline-block plus padding makes each one a 27px target and costs nothing on
+   a wide screen, where the row does not wrap at all. */
+footer a{display:inline-block;padding:5px 0;color:var(--mid);text-decoration:none;margin-right:18px}
+footer a:hover{color:var(--ink)}
+</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23101a2c'/%3E%3Cpath%20fill='%23f4efe2'%20d='M15%2015h9.5l14%2021.5V15H47v2.6h-3.4v27.1h-7.9L20.3%2021.1v21h3.6V45H15v-2.6h3.5V17.6H15Z'/%3E%3C/svg%3E" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" sizes="16x16" href="art/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="art/favicon-32.png">
+<link rel="apple-touch-icon" href="art/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta name="theme-color" content="#101a2c">
+<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Fraunces ships its "wonk" letterforms on by default — the single-storey f
+   and its friends. They read as a novelty at body sizes and Elijah clipped
+   them immediately. WONK 0 keeps the face and drops the party trick. */
+@font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2-variations');
+ font-weight:100 900;font-style:normal;font-display:swap;
+ font-variation-settings:'WONK' 0}
+:root{
+ --serif:'Fraunces',Georgia,'Iowan Old Style',serif !important;
+ /* NO MONOSPACE ANYWHERE IN THE SOFTWARE. Small letterspaced caps set in a
+    monospace face is the single most recognisable "an AI made this" tell on
+    the internet right now, and it was on every label we shipped. The eyebrows
+    keep their letterspacing; they lose the typewriter. Tabular figures come
+    from font-feature-settings instead, which is what they were always for.
+    (The arcade keeps its own type. It is a different world on purpose.) */
+ --mono:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif !important;
+}
+.mono,.num,[class*="fig"],[class*="num"]{font-variant-numeric:tabular-nums}
+h1,h2,h3,.app h1,.app h2{font-family:var(--serif);font-variation-settings:'WONK' 0}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Negotiation Inc">
+<meta property="og:title" content="Privacy · Negotiation Inc">
+<meta property="og:description" content="Use the desk without an account and we collect nothing. With one we hold your email and your sheets. No analytics, no ad pixels, no data sold, no model trained on your deals.">
+<meta property="og:image" content="https://negotiationinc.com/og/page-site.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Privacy · Negotiation Inc">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Privacy · Negotiation Inc">
+<meta name="twitter:description" content="Use the desk without an account and we collect nothing. With one we hold your email and your sheets. No analytics, no ad pixels, no data sold, no model trained on your deals.">
+<meta name="twitter:image" content="https://negotiationinc.com/og/page-site.png">
+<meta property="og:url" content="https://negotiationinc.com/privacy">
+<link rel="canonical" href="https://negotiationinc.com/sms-terms">
+<style>
+p,li,dd,blockquote,figcaption{max-width:68ch}
+p,li,dd,blockquote{line-height:1.62!important}
+p+p,p+ul,ul+p,p+ol,ol+p{margin-top:1.05em!important}
+li+li{margin-top:.72em!important}
+h1,h2,h3,h4{max-width:34ch}
+h1+p,h2+p,h3+p,h4+p{margin-top:.7em!important}
+@media (max-width:520px){p,li,dd,blockquote{line-height:1.66!important}}
+</style><!--ni:stage=live--></head>
+<body>
+
+<header><div class="wrap"><div class="mast">
+ <a class="mark" href="index.html"><span class="nm">NEGOTIATION</span><span class="inc">INC</span></a>
+ <nav class="masknav">
+  <a href="desk.html">The desk</a>
+  <a href="demo.html">See how it works</a>
+  <a href="exits.html">The eight exits</a>
+  <a href="arcade.html">The arcade</a>
+  <a href="plans.html">Plans</a>
+  <a class="btn p" href="desk.html#new">Price a property →</a>
+ </nav>
+</div></div></header>
+
+<div class="hero">
+ <div class="eyebrow">SMS program terms</div>
+ <h1>The texting, in writing</h1>
+ <p class="sub">What a text from this desk is, how often they come, and the two words that control all of it. Short enough to actually read.</p>
+ <div class="stamp">Effective <b>27 August 2026</b></div>
+ <div class="crumb"><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="sms-terms.html" class="on">SMS terms</a></div>
+</div>
+
+<div class="doc">
+ <aside class="toc"><div class="lab">On this page</div><ol><li><a href="#what">The program</a></li><li><a href="#consent">How numbers get here</a></li><li><a href="#freq">Frequency and rates</a></li><li><a href="#stop">STOP, and it stays stopped</a></li><li><a href="#help">HELP</a></li><li><a href="#carriers">Carriers</a></li><li><a href="#privacy">Your data</a></li><li><a href="#contact">Contact</a></li></ol></aside>
+ <main>
+
+<section id="what">
+<h2><span class="n">01</span>The program</h2>
+<p>Negotiation Inc is real-estate software. Operators use it to reach property owners about possibly buying their property &mdash; a first contact after a call went unanswered, a written copy of an offer already discussed, a follow-up somebody asked for. Conversational, person-to-person messages about one specific property. No blasts, no marketing lists, no &ldquo;deals in your area&rdquo;.</p>
+</section>
+
+<section id="consent">
+<h2><span class="n">02</span>How numbers get here</h2>
+<p>A number gets texted for one of two reasons: the owner of a property gave it to the operator (on a call, on a form, in person), or it appears on public or licensed property records for a property the operator is genuinely trying to buy. The first text identifies who is writing and why, and every commercial message carries an opt-out. Nobody buys their way onto a list here, because there is no list &mdash; there are individual properties and the people who own them.</p>
+</section>
+
+<section id="freq">
+<h2><span class="n">03</span>Frequency and rates</h2>
+<p>Message frequency varies with the conversation &mdash; typically one to four messages over a few weeks about one property, and it stops the moment you reply or ask it to. Message and data rates may apply; those are your carrier&rsquo;s charges, not ours.</p>
+</section>
+
+<section id="stop">
+<h2><span class="n">04</span>STOP, and it stays stopped</h2>
+<p>Reply <b>STOP</b> (or STOPALL, UNSUBSCRIBE, CANCEL, END, QUIT) and you get one confirmation &mdash; &ldquo;You will not receive further messages from this number.&rdquo; &mdash; and then silence. The number lands on a suppression list that nothing in the software overrides: not a scheduled follow-up, not a new import, not an operator having a determined afternoon. Plain-English refusals work too: &ldquo;stop texting me&rdquo; and &ldquo;take me off&rdquo; are read exactly like STOP, because they mean exactly the same thing.</p>
+<p>The suppression also silences the dialler for that number. Asking not to be texted should not earn you a phone call.</p>
+</section>
+
+<section id="help">
+<h2><span class="n">05</span>HELP</h2>
+<p>Reply <b>HELP</b> and you get: &ldquo;Negotiation Inc. Reply STOP to opt out. Msg &amp; data rates may apply.&rdquo; Or just write the question &mdash; a person reads the replies, and replying pauses any scheduled messages while a human sorts it out.</p>
+</section>
+
+<section id="carriers">
+<h2><span class="n">06</span>Carriers</h2>
+<p>Messages travel over the major U.S. carriers and their regional partners. Carriers are not liable for delayed or undelivered messages. If a message never reaches you, nothing bad happens &mdash; the software never treats silence as a yes.</p>
+</section>
+
+<section id="privacy">
+<h2><span class="n">07</span>Your data</h2>
+<p>No mobile information will be shared with third parties or affiliates for marketing or promotional purposes. Text messaging originator opt-in data and consent will not be shared with any third parties. The rest of the data story &mdash; every company that touches a byte, named &mdash; is in the <a href="privacy.html">privacy policy</a>, section 7 of which covers this program.</p>
+</section>
+
+<section id="contact">
+<h2><span class="n">08</span>Contact</h2>
+<div class="contact"><h3>Contact</h3>
+<p>About a text you received &mdash; reply to it, or write to <a href="mailto:support@negotiationinc.com">support@negotiationinc.com</a>.<br>
+Privacy questions &mdash; <a href="mailto:privacy@negotiationinc.com">privacy@negotiationinc.com</a>.</p>
+<p style="margin-top:10px">Related: the <a href="privacy.html">privacy policy</a> and the <a href="terms.html">terms</a>.</p></div>
+</section>
+ </main>
+</div>
+
+<footer><div class="wrap">
+ <a href="index.html">Home</a><a href="desk.html">The desk</a><a href="plans.html">Plans</a>
+ <a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refunds.html">Billing &amp; refunds</a>
+ <span style="display:block;margin-top:10px">Negotiation Inc — the sheet shows its working.</span>
+</div></footer>
+
+<style>
+.whoami{border:1px solid currentColor!important;border-radius:999px;padding:5px 12px!important;
+ font-weight:650;opacity:.75;transition:opacity .13s;white-space:nowrap}
+.whoami:hover{opacity:1}
+</style>
+<script>
+(function(){
+ var a=null; try{ a=JSON.parse(localStorage.getItem('ni-account-v1')); }catch(e){}
+ if(!a || typeof a.name!=='string' || !a.name.trim()) return;
+ try{
+ var first=a.name.trim().split(/\s+/)[0]||'You';
+ document.body.classList.add('signedin');
+ var hdr=document.querySelector('header')||document.body;
+
+ var m=hdr.querySelector('a.mark,a.marklink');
+ if(m){ m.setAttribute('href','office.html'); m.setAttribute('title','Your desk'); }
+
+ /* "Sign in" is not a thing you do twice */
+ var got=false, ls=hdr.querySelectorAll('a[href="office.html"]');
+ for(var i=0;i<ls.length;i++){
+  var t=(ls[i].textContent||'').trim().toLowerCase().replace(/[\s\u2192]+$/,'');
+  if(t==='sign in'||t==='your desk'||t==='open a workspace'){
+   ls[i].textContent=first+' \u2192'; ls[i].className+=' whoami'; got=true; }
+ }
+ /* ── UNLESS THE PAGE ALREADY KNOWS YOUR NAME ────────────────────────────
+    This block is appended to EVERY page, and its fallback branch adds a
+    "Elijah \u2192" pill when it cannot find a "Sign in" link to rewrite. The
+    office masthead has no such link — it carries its own chip, with the
+    avatar, the name and Sign out — so the fallback fired and the phone
+    header read "E  Elijah  (Elijah \u2192)  Sign out": the name three times
+    in four controls, on the one page where the account is the whole point.
+    A page that already introduces you does not need introducing. */
+ if(!got && !hdr.querySelector('#who,.who')){
+  var nav=hdr.querySelector('.masknav')||hdr.querySelector('nav');
+  if(nav){ var l=document.createElement('a'); l.href='office.html';
+   l.className='whoami'; l.textContent=first+' \u2192';
+   /* insertBefore wants a CHILD, and querySelector returns a descendant — on a
+      masthead whose primary button is wrapped in a div that is a TypeError and
+      the whole page's script dies with it. Anchor to the button's own parent. */
+   var p=nav.querySelector('.btn');
+   if(p && p.parentNode) p.parentNode.insertBefore(l,p); else nav.appendChild(l); }
+ }
+
+ /* the arcade floor, once it has met you */
+ var eye=document.getElementById('ark-eye');
+ if(eye){
+  var best=0; try{ best=+(localStorage.getItem('ni-drill-best')||0)||0; }catch(e){}
+  var R=[[0,'Door-knocker'],[450,'Bird dog'],[900,'Apprentice'],
+         [1500,'Underwriter'],[2300,'Closer'],[3200,'The Desk']], nm='';
+  for(var j=0;j<R.length;j++) if(best>=R[j][0]) nm=R[j][1];
+  eye.textContent = best
+    ? first+'\u2019s floor \u00b7 '+nm+' \u00b7 best '+best.toLocaleString('en-US')
+    : first+'\u2019s floor \u00b7 nothing played yet';
+ }
+ var out=document.getElementById('ark-out');
+ if(out && out.parentNode){
+  var b=document.createElement('a');
+  b.href='office.html'; b.className='btn p'; b.textContent='Back to your desk \u2192';
+  out.parentNode.insertBefore(b,out);
+  out.textContent='Price a property'; out.href='desk.html#new';
+ }
+ }catch(e){ try{ console.warn('account chrome', e); }catch(_){}}
+})();
+</script>
+<script>(function(){try{
+var A=function(){try{var a=JSON.parse(localStorage.getItem('ni-account-v1')||'null');
+return a&&typeof a==='object'&&a.email?a:null;}catch(e){return null;}};
+document.addEventListener('click',function(ev){try{
+if(ev.defaultPrevented||ev.metaKey||ev.ctrlKey||ev.shiftKey||ev.altKey||ev.button)return;
+var t=ev.target;if(!t||!t.closest)return;
+var el=t.closest('a.marklink, a.mark, a.rn-mark');if(!el)return;
+var h=(el.getAttribute('href')||'').split('#')[0].split('?')[0];
+if(h!=='index.html'&&h!=='/index.html'&&h!=='/')return;
+if(!A())return;ev.preventDefault();location.href='office.html';
+}catch(e){}},true);}catch(e){}})();</script>
+</body></html>
