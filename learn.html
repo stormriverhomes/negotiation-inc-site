@@ -168,6 +168,15 @@ footer.ftlegal{border-top:1px solid var(--edge);color:#8794aa;margin-top:44px;
  display:inline-block;padding:5px 0;line-height:1.5;
  border-bottom:1px solid transparent}
 .ftlegal a:hover{border-bottom-color:currentColor}
+
+/* 13 — the pass's furniture: numbered cards, the cold sentence, the honest
+   attendance, and the line under everything */
+.sknum{font-size:10.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+ color:var(--ink3,#7f8798);margin-bottom:6px}
+.coldnote{font-size:12px;color:var(--gold,#d3a343);margin-top:10px;line-height:1.5}
+.missedout{font-style:normal;font-size:12px;color:var(--ink3,#7f8798)}
+.noreading{grid-column:1/-1;font-size:12px;color:var(--ink3,#7f8798);
+ margin:2px 0 0;padding:4px 2px}
 </style>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%23101a2c'/%3E%3Cpath%20fill='%23f4efe2'%20d='M15%2015h9.5l14%2021.5V15H47v2.6h-3.4v27.1h-7.9L20.3%2021.1v21h3.6V45H15v-2.6h3.5V17.6H15Z'/%3E%3C/svg%3E" type="image/svg+xml">
 <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
@@ -391,9 +400,18 @@ function dailyCard(name, s, href, secs){
     + '</div>';
 }
 
+/* the other half of the attendance figure: days since the FIRST day, so the
+   page can say how many you did not turn up. Pride and shame are both
+   arithmetic here, and both are shown or neither is. */
+const FIRST_DAY = [...new Set([...DRILL.dayKeys, ...STREET.dayKeys])].sort()[0] || null;
+const SPAN = FIRST_DAY ? (daysSince(FIRST_DAY) + 1) : 0;
 document.getElementById('today').innerHTML =
   '<div class="todayhead"><h2>Today</h2>'
-  + '<span class="showed">days you turned up <b class="num">' + SHOWED + '</b></span></div>'
+  + '<span class="showed">days you turned up <b class="num">' + SHOWED + '</b>'
+  + (SHOWED > 0 && SPAN > SHOWED
+      ? ' <i class="missedout">· ' + SPAN + ' days since the first, so '
+        + (SPAN - SHOWED) + ' you did not</i>' : '')
+  + '</span></div>'
   + '<div class="dailies">'
   + dailyCard('Exit Drill', DRILL, 'exit-drill.html', 'today’s ten')
   + dailyCard('The Daily Street', STREET, 'daily-street.html', 'three minutes')
@@ -569,22 +587,35 @@ const CHIP = { fresh:['fresh','Sharp'], cold:['cold','Gone cold'],
                played:['','Practised'], none:['none','Not measured'],
                gap:['none','Nothing trains this'] };
 
-document.getElementById('grid').innerHTML = SKILLS.map(sk => {
+const ORDINAL = ['One','Two','Three','Four','Five','Six','Seven'];
+document.getElementById('grid').innerHTML = SKILLS.map((sk, idx) => {
   const st = sk.state();
   const [chipCls, chipTxt] = CHIP[st.kind] || CHIP.none;
   const body = st.kind === 'gap'
-    ? '<div class="gapnote">' + esc(sk.gapnote) + '</div>'
+    ? '<div class="gapnote">' + esc(sk.gapnote)
+      + ' The desk holds the rules whether you understand them or not, and being '
+      + 'protected is not the same as being able. Until something measures it, '
+      + 'this card stays empty on purpose.</div>'
     : st.line
       ? '<div class="skline">' + esc(st.line) + '</div>'
     : st.facts.length
       ? '<div class="skmeasure">' + st.facts.map(([v,k]) =>
           '<div><div class="mv' + (st.kind === 'cold' ? ' gold' : '') + ' num">'
           + esc(v) + '</div><div class="mk">' + esc(k) + '</div></div>').join('') + '</div>'
+        + (st.kind === 'cold'
+          ? '<div class="coldnote">' + (st.since != null ? st.since + ' days old. ' : '')
+            + 'The figure above is still true, and it is no longer news.</div>' : '')
       : '<div class="unmeasured">Nothing has measured this yet. There is no bar here '
         + 'because a bar at zero would claim you scored nothing, and nobody has asked '
-        + 'you.</div>';
+        + 'you.'
+        + (SHOWED > 0
+          ? ' ' + SHOWED + (SHOWED === 1 ? ' day' : ' days') + ' of turning up, and '
+            + 'never this one — it stays empty rather than borrowing a figure from '
+            + 'the others.' : '')
+        + '</div>';
   return '<article class="sk ' + (st.kind === 'cold' ? 'cold' : '')
        + (st.kind === 'gap' ? ' gap' : '') + '">'
+    + '<div class="sknum">' + (ORDINAL[idx] || '') + '</div>'
     + '<div class="skhead"><h3 class="skname">' + esc(sk.name) + '</h3>'
       + '<span class="chip ' + chipCls + '">' + esc(chipTxt) + '</span></div>'
     + '<p class="skcosts">' + esc(sk.costs) + '</p>'
@@ -595,7 +626,8 @@ document.getElementById('grid').innerHTML = SKILLS.map(sk => {
         '<a class="' + (primary ? 'on' : '') + '" href="' + href + '">'
         + esc(label) + '</a>').join('') + '</div>'
     + '</article>';
-}).join('');
+}).join('')
+  + '<p class="noreading">Nothing on this page can be marked done by reading it.</p>';
 
 const r = recommend();
 document.getElementById('pick').innerHTML =
